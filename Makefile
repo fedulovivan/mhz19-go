@@ -12,6 +12,10 @@ build: lint test
 run:
 	go run .
 
+.PHONY: tidy
+tidy:
+	go mod tidy	
+
 .PHONY: lint
 lint:
 	golangci-lint run

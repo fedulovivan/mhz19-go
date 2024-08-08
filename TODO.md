@@ -1,0 +1,6 @@
+- No new messages after mqtt disconnect/autoreconnect (`Connection lost error="pingresp not received, disconnecting"` and later `Connected broker=tcp://macmini:1883`) + no reconnection if network was not available on app startup and returned online later
+- Mappings could be built-in (system) and loaded from db (user)
+- create test service for sonoff wifi devices (poll them periodically to receive status updates)
+- (+) wrap internal/mqtt/client.go and internal/tbot/tbot.go into structs
+- (+) for mqtt client, rather than hardocding in defaultMessageHandler, define rules/adapters for transforming topic and payload into final message per device class
+- (+) consider replacing adapters with mqttClient.AddRoute(), also add warning for messages captured by defaultMessageHandler (assuming all topics we subscribe should have own handlers and default one should not be reached)

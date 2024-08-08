@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        ".env*": "env",
+    },
+	"go.lintTool": "golangci-lint",
+}
