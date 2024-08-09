@@ -6,15 +6,15 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/fedulovivan/mhz19-go/internal/app"
 	"github.com/fedulovivan/mhz19-go/internal/engine"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/mqtt"
-	"github.com/fedulovivan/mhz19-go/internal/registry"
 	"github.com/fedulovivan/mhz19-go/internal/tbot"
 )
 
 func init() {
-	registry.RecordStartTime()
+	app.RecordStartTime()
 }
 
 var withTag = logger.MakeTag("MAIN")
@@ -25,7 +25,7 @@ func main() {
 	engine.Start(mqtt.Service, tbot.Service)
 
 	// notify we are in the development mode
-	if registry.Config.IsDev {
+	if app.Config.IsDev {
 		slog.Debug(withTag("Running in developlment mode"))
 	}
 

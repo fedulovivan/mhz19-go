@@ -5,22 +5,22 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/fedulovivan/mhz19-go/internal/registry"
+	"github.com/fedulovivan/mhz19-go/internal/app"
 	"github.com/lmittmann/tint"
 )
 
 func init() {
-	if registry.Config.IsDev {
+	if app.Config.IsDev {
 		w := os.Stderr
 		slog.SetDefault(slog.New(
 			tint.NewHandler(w, &tint.Options{
-				Level:      registry.Config.LogLevel,
+				Level:      app.Config.LogLevel,
 				TimeFormat: "15:04:05.000",
 				// TimeFormat: time.TimeOnly,
 			}),
 		))
 	} else {
-		slog.SetLogLoggerLevel(registry.Config.LogLevel)
+		slog.SetLogLoggerLevel(app.Config.LogLevel)
 		log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
 	}
 }

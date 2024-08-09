@@ -1,16 +1,16 @@
 CONF ?= .env
-NAME ?= mhz19go
+NAME ?= backend
 GIT_REV ?= $(shell git rev-parse --short HEAD)
 
-default: build
+default: build-backend
 
-.PHONY: build
-build: lint test
-	CGO_ENABLED=0 go build -o $(NAME)
+.PHONY: build-backend
+build-backend: lint test
+	CGO_ENABLED=0 go build -o ./bin/$(NAME) ./cmd/$(NAME)
 
 .PHONY: run
 run:
-	go run .
+	go run ./cmd/$(NAME)
 
 .PHONY: tidy
 tidy:

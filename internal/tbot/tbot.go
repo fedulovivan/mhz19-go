@@ -4,9 +4,9 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/fedulovivan/mhz19-go/internal/app"
 	"github.com/fedulovivan/mhz19-go/internal/engine"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
-	"github.com/fedulovivan/mhz19-go/internal/registry"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
@@ -36,7 +36,7 @@ func (s *service) Stop() {
 
 func (s *service) SendNewMessage(text string, chatID int64) {
 	if chatID == 0 {
-		chatID = registry.Config.TelegramChatId
+		chatID = app.Config.TelegramChatId
 	}
 	msg := tgbotapi.NewMessage(chatID, text)
 	// msg.ReplyToMessageID = update.Message.MessageID
@@ -51,12 +51,12 @@ func (s *service) Init() {
 	s.out = make(engine.MessageChan, 100)
 
 	var err error
-	s.bot, err = tgbotapi.NewBotAPI(registry.Config.TelegramToken)
+	s.bot, err = tgbotapi.NewBotAPI(app.Config.TelegramToken)
 	if err != nil {
 		slog.Error(withTag("NewBotAPI()"), "err", err.Error())
 		return
 	}
-	s.bot.Debug = true
+	s.bot.Debug = app.Config.TelegramDebug
 	slog.Debug(withTag("Authorized"), "UserName", s.bot.Self.UserName)
 	s.botStarted = true
 	u := tgbotapi.NewUpdate(0)
@@ -71,17 +71,22 @@ func (s *service) Init() {
 	go func() {
 		for update := range updates {
 			if update.Message != nil {
+
 				// log received update
+				// fmt.Println(update.Message.Chat.ID)
+
 				slog.Debug(withTag("Got a message"), "UserName", update.Message.From.UserName, "Text", update.Message.Text)
 				if update.Message.IsCommand() {
 					slog.Debug(withTag("IsCommand() == true"), "command", update.Message.Command())
 				}
 				p := map[string]any{
-					"Text": update.Message.Text,
-					"From": update.Message.From,
+					"Command": update.Message.Command(),
+					"Text":    update.Message.Text,
+					"From":    update.Message.From,
 				}
 				outMsg := engine.Message{
 					ChannelType: s.Type(),
+					DeviceClass: engine.DEVICE_CLASS_BOT,
 					Timestamp:   time.Now(),
 					Payload:     p,
 				}

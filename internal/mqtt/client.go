@@ -7,9 +7,9 @@ import (
 	"time"
 
 	MqttLib "github.com/eclipse/paho.mqtt.golang"
+	"github.com/fedulovivan/mhz19-go/internal/app"
 	"github.com/fedulovivan/mhz19-go/internal/engine"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
-	"github.com/fedulovivan/mhz19-go/internal/registry"
 )
 
 var withTag = logger.MakeTag("MQTT")
@@ -92,11 +92,11 @@ func (s *service) Init() {
 	}
 
 	var connectHandler = func(client MqttLib.Client) {
-		slog.Info(withTag("Connected"), "broker", registry.GetMqttBroker())
+		slog.Info(withTag("Connected"), "broker", app.GetMqttBroker())
 	}
 
 	var reconnectHandler = func(client MqttLib.Client, opts *MqttLib.ClientOptions) {
-		slog.Info(withTag("Reconnecting..."), "broker", registry.GetMqttBroker())
+		slog.Info(withTag("Reconnecting..."), "broker", app.GetMqttBroker())
 	}
 
 	var connectLostHandler = func(client MqttLib.Client, err error) {
@@ -104,10 +104,10 @@ func (s *service) Init() {
 	}
 
 	opts := MqttLib.NewClientOptions()
-	opts.AddBroker(registry.GetMqttBroker())
-	opts.SetClientID(registry.Config.MqttClientId)
-	opts.SetUsername(registry.Config.MqttUsername)
-	opts.SetPassword(registry.Config.MqttPassword)
+	opts.AddBroker(app.GetMqttBroker())
+	opts.SetClientID(app.Config.MqttClientId)
+	opts.SetUsername(app.Config.MqttUsername)
+	opts.SetPassword(app.Config.MqttPassword)
 	opts.SetDefaultPublishHandler(defaultMessageHandler)
 	opts.SetAutoReconnect(true)
 	opts.OnConnect = connectHandler
@@ -144,7 +144,7 @@ func subscribe(client MqttLib.Client, topic string) {
 // s.client.AddRoute("zigbee2mqtt/+", zigbeeDeviceHandler)
 // s.client.AddRoute("device-pinger/+/status", devicePingerHandler)
 // s.client.AddRoute("/VALVE/#", valveManipulatorHandler)
-// subscribe_all(s.client, registry.Config.MqttTopics)
+// subscribe_all(s.client, app.Config.MqttTopics)
 // var zigbeeDeviceHandler =
 // var devicePingerHandler = func(client MqttLib.Client, msg MqttLib.Message) {
 // 	slog.Debug("zigbeeDeviceHandler", "topic", msg.Topic())
