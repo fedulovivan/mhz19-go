@@ -7,7 +7,7 @@ import (
 
 type slogAdapter struct{}
 
-func (l slogAdapter) Println(v ...interface{}) {
+func (l slogAdapter) Println(v ...any) {
 	switch v0 := v[0].(type) {
 	case string:
 		slog.Debug(withTag(v0), "more", len(v)-1)
@@ -20,7 +20,7 @@ func (l slogAdapter) Println(v ...interface{}) {
 		)))
 	}
 }
-func (l slogAdapter) Printf(format string, v ...interface{}) {
+func (l slogAdapter) Printf(format string, v ...any) {
 	last := format[len(format)-1]
 	var nl byte = 10 /* \n */
 	if last == nl {

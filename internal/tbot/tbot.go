@@ -24,9 +24,9 @@ func (s *service) Receive() engine.MessageChan {
 	return s.out
 }
 
-func (s *service) Type() engine.ChannelType {
-	return engine.CHANNEL_TELEGRAM
-}
+// func (s *service) Type() engine.ChannelType {
+// 	return engine.CHANNEL_TELEGRAM
+// }
 
 func (s *service) Stop() {
 	if s.botStarted {
@@ -85,7 +85,7 @@ func (s *service) Init() {
 					"From":    update.Message.From,
 				}
 				outMsg := engine.Message{
-					ChannelType: s.Type(),
+					ChannelType: engine.CHANNEL_TELEGRAM,
 					DeviceClass: engine.DEVICE_CLASS_BOT,
 					Timestamp:   time.Now(),
 					Payload:     p,

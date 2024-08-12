@@ -25,9 +25,9 @@ func (s *service) Receive() engine.MessageChan {
 	return s.out
 }
 
-func (s *service) Type() engine.ChannelType {
-	return engine.CHANNEL_MQTT
-}
+// func (s *service) Type() engine.ChannelType {
+// 	return engine.CHANNEL_MQTT
+// }
 
 func (p *parserBase) parse_base() (engine.Message, bool) {
 
