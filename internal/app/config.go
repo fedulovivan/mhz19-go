@@ -19,7 +19,6 @@ var Config ConfigStorage
 type ConfigStorage struct {
 	TelegramToken  string     `env:"TELEGRAM_TOKEN"`
 	TelegramChatId int64      `env:"TELEGRAM_CHATID"`
-	TelegramDebug  bool       `env:"TELEGRAM_DEBUG,default=false"`
 	MqttHost       string     `env:"MQTT_HOST,default=mosquitto"`
 	MqttPort       int        `env:"MQTT_PORT,default=1883"`
 	MqttUsername   string     `env:"MQTT_USERNAME"`

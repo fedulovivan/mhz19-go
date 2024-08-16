@@ -12,7 +12,7 @@ type EngineSuite struct {
 }
 
 func (s *EngineSuite) Test10() {
-	actual := matchesCondition(MessageTuple{}, Condition{})
+	actual := matchesCondition(MessageTuple{}, Condition{}, Rule{}, "Test10")
 	s.False(actual)
 }
 
@@ -20,71 +20,71 @@ func (s *EngineSuite) Test11() {
 	actual := matchesCondition(MessageTuple{}, Condition{
 		Or: true,
 		List: []Condition{
-			{Fn: Equal, Args: NamedArgs{"Left": true, "Right": false}},
-			{Fn: Equal, Args: NamedArgs{"Left": 1.11, "Right": 1.11}},
+			{Fn: COND_EQUAL, Args: Args{"Left": true, "Right": false}},
+			{Fn: COND_EQUAL, Args: Args{"Left": 1.11, "Right": 1.11}},
 		},
-	})
+	}, Rule{}, "Test11")
 	s.True(actual)
 }
 
 func (s *EngineSuite) Test12() {
 	actual := matchesCondition(MessageTuple{}, Condition{
 		List: []Condition{
-			{Fn: Equal, Args: NamedArgs{"Left": true, "Right": false}},
-			{Fn: Equal, Args: NamedArgs{"Left": 1.11, "Right": 1.11}},
+			{Fn: COND_EQUAL, Args: Args{"Left": true, "Right": false}},
+			{Fn: COND_EQUAL, Args: Args{"Left": 1.11, "Right": 1.11}},
 		},
-	})
+	}, Rule{}, "Test12")
 	s.False(actual)
 }
 
 func (s *EngineSuite) Test20() {
-	defer func() { _ = recover() }()
-	matchFunction(MessageTuple{}, "foo1", nil)
-	s.Fail("expected to panic")
+	// defer func() { _ = recover() }()
+	s.False(invokeConditionFunc(MessageTuple{}, 0, nil, Rule{}, "Test20"))
+	// s.Fail("expected to panic")
 }
 
 func (s *EngineSuite) Test30() {
-	actual := listSome(MessageTuple{}, []Condition{})
+	actual := matchesListSome(MessageTuple{}, []Condition{}, Rule{}, "Test30")
 	s.False(actual)
 }
 
 func (s *EngineSuite) Test31() {
-	actual := listSome(MessageTuple{}, []Condition{
-		{Fn: Equal, Args: NamedArgs{"Left": 1, "Right": 1}},
-		{Fn: Equal, Args: NamedArgs{"Left": "foo", "Right": "bar"}},
-	})
+	actual := matchesListSome(MessageTuple{}, []Condition{
+		{Fn: COND_EQUAL, Args: Args{"Left": 1, "Right": 1}},
+		{Fn: COND_EQUAL, Args: Args{"Left": "foo", "Right": "bar"}},
+	}, Rule{}, "Test31")
 	s.True(actual)
 }
 
 func (s *EngineSuite) Test40() {
-	actual := listEvery(MessageTuple{}, []Condition{})
+	actual := matchesListEvery(MessageTuple{}, []Condition{}, Rule{}, "Test40")
 	s.False(actual)
 }
 
 func (s *EngineSuite) Test41() {
-	actual := listEvery(MessageTuple{}, []Condition{
-		{Fn: Equal, Args: NamedArgs{"Left": 1, "Right": 1}},
-		{Fn: Equal, Args: NamedArgs{"Left": "foo", "Right": "foo"}},
-	})
+	actual := matchesListEvery(MessageTuple{}, []Condition{
+		{Fn: COND_EQUAL, Args: Args{"Left": 1, "Right": 1}},
+		{Fn: COND_EQUAL, Args: Args{"Left": "foo", "Right": "foo"}},
+	}, Rule{}, "Test41")
 	s.True(actual)
 }
 
 func (s *EngineSuite) Test50() {
-	actual, err := arg(Message{}, NamedArgs{"foo": 1}, "foo")
+	actual, err := arg_value(Message{}, Args{"foo": 1}, "foo")
 	expected := 1
 	s.Equal(expected, actual)
 	s.Nil(err)
 }
 
 func (s *EngineSuite) Test51() {
-	actual, err := arg(Message{DeviceId: "foo2"}, NamedArgs{"Lorem": "$message.DeviceId"}, "Lorem")
+	actual, err := arg_value(Message{DeviceId: "foo2"}, Args{"Lorem": "$message.DeviceId"}, "Lorem")
 	expected := DeviceId("foo2")
 	s.Equal(expected, actual)
 	s.Nil(err)
 }
 
 func (s *EngineSuite) Test52() {
-	actual, err := arg(Message{DeviceId: "foo3"}, NamedArgs{"Lorem1": "$deviceId"}, "Lorem1")
+	actual, err := arg_value(Message{DeviceId: "foo3"}, Args{"Lorem1": "$deviceId"}, "Lorem1")
 	expected := DeviceId("foo3")
 	s.Equal(expected, actual)
 	s.Nil(err)
@@ -96,10 +96,10 @@ func (s *EngineSuite) Test53() {
 			"action": "my_action",
 		},
 	}
-	args := NamedArgs{
+	args := Args{
 		"Lorem3": "$message.action",
 	}
-	actual, err := arg(m, args, "Lorem3")
+	actual, err := arg_value(m, args, "Lorem3")
 	expected := "my_action"
 	s.Equal(expected, actual)
 	s.Nil(err)
@@ -111,10 +111,10 @@ func (s *EngineSuite) Test54() {
 			"voltage": 3.33,
 		},
 	}
-	args := NamedArgs{
+	args := Args{
 		"Lorem3": "$message.voltage",
 	}
-	actual, err := arg(m, args, "Lorem3")
+	actual, err := arg_value(m, args, "Lorem3")
 	expected := 3.33
 	s.Equal(expected, actual)
 	s.Nil(err)
@@ -126,22 +126,22 @@ func (s *EngineSuite) Test55() {
 			"foo": false,
 		},
 	}
-	args := NamedArgs{
+	args := Args{
 		"Lorem3": "$message.bar",
 	}
-	actual, err := arg(m, args, "Lorem3")
+	actual, err := arg_value(m, args, "Lorem3")
 	s.Nil(actual)
 	s.NotEmpty(err)
 }
 
 func (s *EngineSuite) Test56() {
-	actual, err := arg(Message{DeviceClass: DEVICE_CLASS_ZIGBEE_BRIDGE}, NamedArgs{"Lorem1": "$deviceClass"}, "Lorem1")
+	actual, err := arg_value(Message{DeviceClass: DEVICE_CLASS_ZIGBEE_BRIDGE}, Args{"Lorem1": "$deviceClass"}, "Lorem1")
 	s.Equal(DEVICE_CLASS_ZIGBEE_BRIDGE, actual)
 	s.Nil(err)
 }
 
 func (s *EngineSuite) Test60() {
-	executeActions([]Action{})
+	executeActions([]Message{}, []Action{}, Rule{}, "Test60")
 }
 
 func (s *EngineSuite) Test70() {
@@ -156,8 +156,8 @@ func (s *EngineSuite) Test72() {
 	handleMessage(Message{}, []Rule{
 		{
 			Condition: Condition{
-				Fn:   Equal,
-				Args: NamedArgs{"Left": true, "Right": true},
+				Fn:   COND_EQUAL,
+				Args: Args{"Left": true, "Right": true},
 			},
 		},
 	})
@@ -168,8 +168,8 @@ func (s *EngineSuite) Test73() {
 	handleMessage(Message{}, []Rule{
 		{
 			Condition: Condition{
-				Fn:   Equal,
-				Args: NamedArgs{"Left": true, "Right": true},
+				Fn:   COND_EQUAL,
+				Args: Args{"Left": true, "Right": true},
 			},
 			Throttle: time.Minute,
 		},
@@ -178,22 +178,22 @@ func (s *EngineSuite) Test73() {
 }
 
 func (s *EngineSuite) Test80() {
-	actual := EqualFn(MessageTuple{}, NamedArgs{})
+	actual := Equal(MessageTuple{}, Args{})
 	s.False(actual)
 }
 
 func (s *EngineSuite) Test81() {
-	actual := EqualFn(MessageTuple{}, NamedArgs{"Left": 1, "Right": 1})
+	actual := Equal(MessageTuple{}, Args{"Left": 1, "Right": 1})
 	s.True(actual)
 }
 
 func (s *EngineSuite) Test82() {
-	actual := EqualFn(MessageTuple{}, NamedArgs{"Left": "one", "Right": "one"})
+	actual := Equal(MessageTuple{}, Args{"Left": "one", "Right": "one"})
 	s.True(actual)
 }
 
 func (s *EngineSuite) Test83() {
-	actual := EqualFn(
+	actual := Equal(
 		MessageTuple{
 			Message{
 				Payload: map[string]any{
@@ -201,23 +201,37 @@ func (s *EngineSuite) Test83() {
 				},
 			},
 		},
-		NamedArgs{"Left": "$message.action", "Right": "my_action"},
+		Args{"Left": "$message.action", "Right": "my_action"},
 	)
 	s.True(actual)
 }
 
+func (s *EngineSuite) Test84() {
+	mt := MessageTuple{
+		Message{
+			DeviceId: "0x00158d0004244bda",
+		},
+	}
+	args := Args{
+		"Left":  "$deviceId",
+		"Right": DeviceId("0x00158d0004244bda"),
+	}
+	actual := Equal(mt, args)
+	s.True(actual)
+}
+
 func (s *EngineSuite) Test90() {
-	actual := NotEqualFn(MessageTuple{}, NamedArgs{})
+	actual := NotEqual(MessageTuple{}, Args{})
 	s.False(actual)
 }
 
 func (s *EngineSuite) Test91() {
-	actual := NotEqualFn(MessageTuple{}, NamedArgs{"Left": 1, "Right": 1})
+	actual := NotEqual(MessageTuple{}, Args{"Left": 1, "Right": 1})
 	s.False(actual)
 }
 
 func (s *EngineSuite) Test92() {
-	actual := NotEqualFn(MessageTuple{}, NamedArgs{"Left": "one", "Right": "one"})
+	actual := NotEqual(MessageTuple{}, Args{"Left": "one", "Right": "one"})
 	s.False(actual)
 }
 
@@ -229,8 +243,8 @@ func (s *EngineSuite) Test93() {
 			},
 		},
 	}
-	args := NamedArgs{"Left": "$message.action", "Right": "my_action"}
-	actual := NotEqualFn(
+	args := Args{"Left": "$message.action", "Right": "my_action"}
+	actual := NotEqual(
 		mt,
 		args,
 	)
@@ -238,7 +252,7 @@ func (s *EngineSuite) Test93() {
 }
 
 func (s *EngineSuite) Test100() {
-	actual := InListFn(MessageTuple{}, NamedArgs{})
+	actual := InList(MessageTuple{}, Args{})
 	s.False(actual)
 }
 
@@ -250,14 +264,14 @@ func (s *EngineSuite) Test101() {
 			},
 		},
 	}
-	args := NamedArgs{
+	args := Args{
 		"Value": "$message.action",
 		"List": []any{
 			"foo1",
 			"my_action",
 		},
 	}
-	actual := InListFn(mt, args)
+	actual := InList(mt, args)
 	s.True(actual)
 }
 
@@ -269,7 +283,7 @@ func (s *EngineSuite) Test102() {
 			},
 		},
 	}
-	args := NamedArgs{
+	args := Args{
 		"Value": "$message.voltage",
 		"List": []any{
 			1,
@@ -277,53 +291,64 @@ func (s *EngineSuite) Test102() {
 			2.0,
 		},
 	}
-	actual := InListFn(mt, args)
+	actual := InList(mt, args)
 	s.True(actual)
 }
 
 func (s *EngineSuite) Test103() {
 	mt := MessageTuple{
-		Message{},
+		// Message{},
 	}
-	args := NamedArgs{
+	args := Args{
 		"Value": "some1",
 		"List":  []any{"some2", "some3"},
 	}
-	actual := InListFn(mt, args)
+	actual := InList(mt, args)
 	s.False(actual)
 }
 
 func (s *EngineSuite) Test104() {
-	args := NamedArgs{
+	defer func() { _ = recover() }()
+	args := Args{
 		"Value": "some1",
 		"List":  "some2",
 	}
-	actual := InListFn(MessageTuple{}, args)
-	s.False(actual)
+	InList(MessageTuple{}, args)
+	s.Fail("expected to panic")
+}
+
+func (s *EngineSuite) Test105() {
+	mt := MessageTuple{}
+	args := Args{
+		"List":  []any{DeviceId("0x00158d0004244bda")},
+		"Value": DeviceId("0x00158d0004244bda"),
+	}
+	actual := InList(mt, args)
+	s.True(actual)
 }
 
 func (s *EngineSuite) Test110() {
-	actual := NotNilFn(MessageTuple{}, NamedArgs{})
+	actual := NotNil(MessageTuple{}, Args{})
 	s.False(actual)
 }
 
 func (s *EngineSuite) Test111() {
-	actual := NotNilFn(MessageTuple{}, NamedArgs{"Value": "foo"})
+	actual := NotNil(MessageTuple{}, Args{"Value": "foo"})
 	s.True(actual)
 }
 
 func (s *EngineSuite) Test112() {
-	actual := NotNilFn(MessageTuple{}, NamedArgs{"Value": false})
+	actual := NotNil(MessageTuple{}, Args{"Value": false})
 	s.True(actual)
 }
 
 func (s *EngineSuite) Test113() {
-	actual := NotNilFn(MessageTuple{}, NamedArgs{"Value": 0})
+	actual := NotNil(MessageTuple{}, Args{"Value": 0})
 	s.True(actual)
 }
 
 func (s *EngineSuite) Test114() {
-	actual := NotNilFn(MessageTuple{}, NamedArgs{"Value": 100500})
+	actual := NotNil(MessageTuple{}, Args{"Value": 100500})
 	s.True(actual)
 }
 
@@ -339,26 +364,26 @@ func (s *EngineSuite) Test115() {
 			},
 		},
 	}
-	s.True(NotNilFn(mt, NamedArgs{"Value": "$message.action"}))
-	s.True(NotNilFn(mt, NamedArgs{"Value": "$message.double"}))
-	s.True(NotNilFn(mt, NamedArgs{"Value": "$message.int"}))
-	s.True(NotNilFn(mt, NamedArgs{"Value": "$message.boolean"}))
-	s.False(NotNilFn(mt, NamedArgs{"Value": "$message.voltage"}))
-	s.False(NotNilFn(mt, NamedArgs{"Value": "$message.nonexisting"}))
+	s.True(NotNil(mt, Args{"Value": "$message.action"}))
+	s.True(NotNil(mt, Args{"Value": "$message.double"}))
+	s.True(NotNil(mt, Args{"Value": "$message.int"}))
+	s.True(NotNil(mt, Args{"Value": "$message.boolean"}))
+	s.False(NotNil(mt, Args{"Value": "$message.voltage"}))
+	s.False(NotNil(mt, Args{"Value": "$message.nonexisting"}))
 }
 
 func (s *EngineSuite) Test120() {
-	actual := ChangedFn(MessageTuple{}, NamedArgs{})
+	actual := Changed(MessageTuple{}, Args{})
 	s.False(actual)
 }
 
 func (s *EngineSuite) Test121() {
-	actual := ChangedFn(
+	actual := Changed(
 		MessageTuple{
 			Message{DeviceId: "foo1"},
 			Message{DeviceId: "foo2"},
 		},
-		NamedArgs{"Value": "$deviceId"},
+		Args{"Value": "$deviceId"},
 	)
 	s.True(actual)
 }
@@ -375,9 +400,9 @@ func (s *EngineSuite) Test130() {
 	v, _ = m.Get("RawPayload")
 	s.Nil(v)
 
-	v, _ = m.Get("ChannelMeta")
-	s.NotNil(v)
-	s.IsType(ChannelMeta{}, v)
+	// v, _ = m.Get("ChannelMeta")
+	// s.NotNil(v)
+	// s.IsType(ChannelMeta{}, v)
 
 	v, _ = m.Get("ChannelType")
 	s.Equal(CHANNEL_UNKNOWN, v)
@@ -415,8 +440,8 @@ func (s *EngineSuite) Test131() {
 	v, _ = m.Get("RawPayload")
 	s.Nil(v)
 
-	v, _ = m.Get("ChannelMeta")
-	s.NotNil(v)
+	// v, _ = m.Get("ChannelMeta")
+	// s.NotNil(v)
 
 	v, _ = m.Get("action")
 	s.Equal("single_left", v)
@@ -439,11 +464,29 @@ func (s *EngineSuite) Test131() {
 }
 
 func (s *EngineSuite) Test140() {
-	Start(&dummyservice{})
+	opts := NewOptions()
+	opts.SetServices(&service{})
+	Start(opts)
 }
 
 func (s *EngineSuite) Test141() {
 	Stop()
+}
+
+func (s *EngineSuite) Test142() {
+	opts := NewOptions()
+	opts.SetLogTag(func(m string) string { return " " })
+}
+
+func (s *EngineSuite) Test150() {
+	actual := ZigbeeDevice(MessageTuple{}, Args{})
+	s.False(actual)
+}
+
+func (s *EngineSuite) Test151() {
+	mt := MessageTuple{Message{DeviceId: "0x00158d0004244bda", DeviceClass: DEVICE_CLASS_ZIGBEE_DEVICE}}
+	actual := ZigbeeDevice(mt, Args{"List": []any{DeviceId("0x00158d0004244bda")}})
+	s.True(actual)
 }
 
 func TestEngine(t *testing.T) {

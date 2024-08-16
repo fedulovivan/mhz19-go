@@ -20,7 +20,6 @@ type Message struct {
 	Timestamp time.Time `json:"timestamp"`
 	// parsed message payload json
 	Payload JsonPayload `json:"payload"`
-
 	// filled only if failed to parse into json
 	RawPayload []byte
 	// additional metadata specific for the current channel
@@ -33,8 +32,6 @@ type MessageTuple = [2]Message
 // get message primitive field or message payload field
 func (m *Message) Get(field string) (any, error) {
 	switch field {
-	case "ChannelMeta":
-		return m.ChannelMeta, nil
 	case "ChannelType":
 		return m.ChannelType, nil
 	case "DeviceClass":
@@ -46,14 +43,16 @@ func (m *Message) Get(field string) (any, error) {
 	default:
 		p, ok := m.Payload.(map[string]any)
 		if !ok {
-			return nil, fmt.Errorf("Message.Payload is not a map[string]any, reading field [%v]", field)
+			return nil, fmt.Errorf("Message.Get(): Payload expected to be map[string]any instead of '%T', reading field '%v'", m.Payload, field)
 		}
 		v, ok := p[field]
 		if !ok {
-			return nil, fmt.Errorf("Message.Payload has no field [%v]", field)
+			return nil, fmt.Errorf("Message.Get(): Payload '%T' has no field '%v'", m.Payload, field)
 		}
 		return v, nil
 	}
+	// case "ChannelMeta":
+	// 	return m.ChannelMeta, nil
 	// fmt.Printf("%+v, %T", m.Payload, m.Payload)
 	// case "Payload":
 	// 	return m.Payload, nil

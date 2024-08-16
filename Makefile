@@ -20,6 +20,16 @@ tidy:
 lint:
 	golangci-lint run
 
+.PHONY: migrate
+migrate:
+	sqlite3 ./database.bin < docs/schema.sql
+
+.PHONY: dump
+dump:
+	sqlite3 ./database.bin .dump > docs/dump.sql
+
 .PHONY: test
 test:
 	go test -cover -race -count 1 ./...	
+
+

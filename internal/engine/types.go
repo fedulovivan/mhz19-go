@@ -10,35 +10,32 @@ type DeviceId string
 
 type Service interface {
 	Receive() MessageChan
-	// Type() ChannelType
+	Send(...any)
+	Channel() ChannelType
 	Init()
 	Stop()
 }
 
-type NamedArgs map[string]any
-
 type Rule struct {
+	Id        int
+	Disabled  bool
+	Comments  string
 	Condition Condition
 	Actions   []Action
 	Throttle  time.Duration
 }
 
 type Condition struct {
-	Fn   CondFnName
-	Args NamedArgs
+	Id   int
+	Fn   CondFn
+	Args Args
 	List []Condition
 	Or   bool
 }
 
 type Action struct {
-	Fn   ActionFnName
-	Args NamedArgs
-	Mapping
+	Id      int
+	Fn      ActionFn
+	Args    Args
+	Mapping Mapping
 }
-
-// {
-// 	Fn: ZigbeeDevice,
-// 	Args: NamedArgs{
-// 		"DeviceId": []string{"0x00158d0004244bda"},
-// 	},
-// },

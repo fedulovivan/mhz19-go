@@ -1,4 +1,4 @@
-package mqtt
+package mqtt_service
 
 import (
 	"encoding/json"
@@ -12,22 +12,18 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/logger"
 )
 
-var withTag = logger.MakeTag("MQTT")
+var logTag = logger.MakeTag("MQTT")
 
 type service struct {
-	out    engine.MessageChan
+	engine.ServiceBase
 	client MqttLib.Client
 }
 
 var Service engine.Service = &service{}
 
-func (s *service) Receive() engine.MessageChan {
-	return s.out
+func (s *service) Channel() engine.ChannelType {
+	return engine.CHANNEL_MQTT
 }
-
-// func (s *service) Type() engine.ChannelType {
-// 	return engine.CHANNEL_MQTT
-// }
 
 func (p *parserBase) parse_base() (engine.Message, bool) {
 
@@ -49,7 +45,7 @@ func (p *parserBase) parse_base() (engine.Message, bool) {
 	}
 
 	if err := json.Unmarshal(payload, &outMsg.Payload); err != nil {
-		slog.Warn(withTag("Failed to parse payload as json"), "payload", string(payload[:]), "err", err)
+		slog.Warn(logTag("Failed to parse payload as json"), "payload", string(payload[:]), "err", err)
 		outMsg.RawPayload = payload
 	}
 
@@ -58,49 +54,49 @@ func (p *parserBase) parse_base() (engine.Message, bool) {
 
 func (s *service) Init() {
 
-	s.out = make(engine.MessageChan, 100)
+	s.Out = make(engine.MessageChan, 100)
 
 	var handlers = TopicHandlers{
 		"zigbee2mqtt/+": func(client MqttLib.Client, msg MqttLib.Message) {
 			outMsg, ok := NewZigbeeDevice(msg).Parse()
 			if ok {
-				s.out <- outMsg
+				s.Out <- outMsg
 			}
 		},
 		"device-pinger/+/status": func(c MqttLib.Client, msg MqttLib.Message) {
 			outMsg, ok := NewDevicePinger(msg).Parse()
 			if ok {
-				s.out <- outMsg
+				s.Out <- outMsg
 			}
 		},
 		"/VALVE/#": func(c MqttLib.Client, msg MqttLib.Message) {
 			outMsg, ok := NewValveManipulator(msg).Parse()
 			if ok {
-				s.out <- outMsg
+				s.Out <- outMsg
 			}
 		},
 		"zigbee2mqtt/bridge/devices": func(c MqttLib.Client, msg MqttLib.Message) {
 			outMsg, ok := NewZigbeeBridge(msg).Parse()
 			if ok {
-				s.out <- outMsg
+				s.Out <- outMsg
 			}
 		},
 	}
 
 	var defaultMessageHandler = func(client MqttLib.Client, msg MqttLib.Message) {
-		slog.Error(withTag("defaultMessageHandler is not expected to be reached"), "topic", msg.Topic())
+		slog.Error(logTag("defaultMessageHandler is not expected to be reached"), "topic", msg.Topic())
 	}
 
 	var connectHandler = func(client MqttLib.Client) {
-		slog.Info(withTag("Connected"), "broker", app.GetMqttBroker())
+		slog.Info(logTag("Connected"), "broker", app.GetMqttBroker())
 	}
 
 	var reconnectHandler = func(client MqttLib.Client, opts *MqttLib.ClientOptions) {
-		slog.Info(withTag("Reconnecting..."), "broker", app.GetMqttBroker())
+		slog.Info(logTag("Reconnecting..."), "broker", app.GetMqttBroker())
 	}
 
 	var connectLostHandler = func(client MqttLib.Client, err error) {
-		slog.Error(withTag("Connection lost"), "error", err)
+		slog.Error(logTag("Connection lost"), "error", err)
 	}
 
 	opts := MqttLib.NewClientOptions()
@@ -114,9 +110,9 @@ func (s *service) Init() {
 	opts.OnReconnecting = reconnectHandler
 	opts.OnConnectionLost = connectLostHandler
 	s.client = MqttLib.NewClient(opts)
-	slog.Debug(withTag("Connecting..."))
+	slog.Debug(logTag("Connecting..."))
 	if token := s.client.Connect(); token.Wait() && token.Error() != nil {
-		slog.Error(withTag(""), "error", token.Error())
+		slog.Error(logTag(""), "error", token.Error())
 		return
 	}
 
@@ -124,20 +120,20 @@ func (s *service) Init() {
 		s.client.AddRoute(t, h)
 		subscribe(s.client, t)
 	}
-	slog.Debug(withTag("All subscribtions are settled"))
+	slog.Debug(logTag("All subscribtions are settled"))
 
 }
 
 func (s *service) Stop() {
-	slog.Debug(withTag("Disconnecting..."))
+	slog.Debug(logTag("Disconnecting..."))
 	s.client.Disconnect(250)
 }
 
 func subscribe(client MqttLib.Client, topic string) {
 	if token := client.Subscribe(topic, 0, nil); token.Wait() && token.Error() != nil {
-		slog.Error(withTag("client.Subscribe()"), "error", token.Error())
+		slog.Error(logTag("client.Subscribe()"), "error", token.Error())
 	}
-	slog.Info(withTag("Subscribed to"), "topic", topic)
+	slog.Info(logTag("Subscribed to"), "topic", topic)
 }
 
 // var wg sync.WaitGroup

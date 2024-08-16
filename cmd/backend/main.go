@@ -9,24 +9,31 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/app"
 	"github.com/fedulovivan/mhz19-go/internal/engine"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
-	"github.com/fedulovivan/mhz19-go/internal/mqtt"
-	"github.com/fedulovivan/mhz19-go/internal/tbot"
+	mqtt "github.com/fedulovivan/mhz19-go/internal/service/mqtt"
+	tbot "github.com/fedulovivan/mhz19-go/internal/service/tbot"
 )
 
 func init() {
 	app.RecordStartTime()
 }
 
-var withTag = logger.MakeTag("MAIN")
+var logTag = logger.MakeTag("MAIN")
 
 func main() {
 
+	// var l []any = []any{"111", "222"}
+	// var v any = "11"
+	// fmt.Println(slices.Contains(l, v))
+
 	// start engine with list of connected services
-	engine.Start(mqtt.Service, tbot.Service)
+	eopts := engine.NewOptions()
+	eopts.SetLogTag(logger.MakeTag("ENGN"))
+	eopts.SetServices(mqtt.Service, tbot.Service)
+	engine.Start(eopts)
 
 	// notify we are in the development mode
 	if app.Config.IsDev {
-		slog.Debug(withTag("Running in developlment mode"))
+		slog.Debug(logTag("Running in developlment mode"))
 	}
 
 	// handle shutdown
@@ -39,10 +46,10 @@ func main() {
 		}
 	}()
 	<-stopped
-	slog.Debug(withTag("App termination signal received"))
+	slog.Debug(logTag("App termination signal received"))
 
 	// stop engine and all underlying services
 	engine.Stop()
 
-	slog.Info(withTag("All done, bye-bye"))
+	slog.Info(logTag("All done, bye-bye"))
 }
