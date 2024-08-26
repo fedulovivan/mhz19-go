@@ -1,21 +1,38 @@
 
-### Bugs
-
 ### Prio 0
-- no new messages after mqtt disconnect/autoreconnect (`Connection lost error="pingresp not received, disconnecting"` and later `Connected broker=tcp://macmini:1883`) + no reconnection if network was not available on app startup and returned online later + same behavior for device-pinger which impacts the service
-- implement rest(?) or grpc API to create/update rules in DB, try some framework
+- "FOREIGN KEY (device_id) REFERENCES devices(native_id)" requires sole UNIQUE index for column devices.native_id
+- implement REST API to read/create/update rules (use https://github.com/go-ozzo/ozzo-routing or https://github.com/gin-gonic/gin)
+- finish handling of "Mapping" in invokeActionFunc
 
 ### Prio 1
-- create meta which descibes expected args for conditions and actions
-- get rid of any in Send(...any)
 - implement log tag with meta, so we can add attrs to function
+- get rid of full path in SQLITE_FILENAME to run tests
+- no mqtt (re)connection if network was not available on app startup and returned online later
+- create meta which descibes expected args for conditions and actions and validate
+- get rid of any in Send(...any)
 - create tests for recursive conditions
 - mappings rules could be pre-defined (system) and loaded from db (user-level)
 - create test service for sonoff wifi devices (poll them periodically to receive status updates)
-- Find out why cli command "make test" and "vscode" ui report different coverage statistics: 86.9% vs 100% `Running tool: /opt/homebrew/bin/go test -timeout 30s -coverprofile=/var/folders/5v/0wjs9g1948ddpdqkgf1h31q80000gn/T/vscode-go7lC7ip/go-code-cover github.com/fedulovivan/mhz19-go/internal/engine`
+- find out why cli command "make test" and "vscode" report different coverage statistics: 86.9% vs 100%. vscode syntax - `Running tool: /opt/homebrew/bin/go test -timeout 30s -coverprofile=/var/folders/5v/0wjs9g1948ddpdqkgf1h31q80000gn/T/vscode-go7lC7ip/go-code-cover github.com/fedulovivan/mhz19-go/internal/engine`
+- try https://pkg.go.dev/go.uber.org/fx
+- try opentelemetry - https://opentelemetry.io/docs/languages/go/getting-started/   
+- try prometheus
+- try grpc
+- try openapi https://en.wikipedia.org/wiki/OpenAPI_Specification
+- try https://github.com/go-ozzo/ozzo-routing
 
 ### Completed
 
+- (+) create readme and license
+- (+) reorganise code to conform service repository pattern (https://medium.com/@ankitpal181/service-repository-pattern-802540254019); internal/rest/rest.go > rules/api; internal/rest/service.go > rules/service; internal/db/model.go > rules/repository; move engine.BuildMappingRules, engine.FlattenConditions to service layer
+- (+) finish BuildRules (BuildConditions etc)
+- (+) implement Rule from/to Json layer
+- (+) ON DELETE CASCADE is not working - for sqlite requires "PRAGMA foreign_keys=ON" to work
+- (+) get rid of three "func init()" (use DI?) - for now just manuall call of Init(s) in main
+- (+) "transaction has already been committed or rolled back" on load test - refuse from using BeginTx with ctx from errgroup
+- (+) refactor FetchAll to concurrent call, use contexts
+- (+) try https://github.com/jmoiron/sqlx, https://jmoiron.github.io/sqlx/ - library has lots of issues (300 open, 370 closed) and , for now using own lightweight wrappers
+- (+) no new mqtt messages after mqtt disconnect/autoreconnect (`Connection lost error="pingresp not received, disconnecting"` and later `Connected broker=tcp://macmini:1883`) + same issue for device-pinger which impacts its service - subscribtions should be settled in connect handler
 - (+) schema, use same approach to check fk for device_classes and function_name (either CHECK constraint of FK to separate table)
 - (+) add transaction id to handleMessage log records
 - (+) execute actions asyncronously in goroutine

@@ -465,7 +465,7 @@ func (s *EngineSuite) Test131() {
 
 func (s *EngineSuite) Test140() {
 	opts := NewOptions()
-	opts.SetServices(&service{})
+	opts.SetProviders(&provider{})
 	Start(opts)
 }
 

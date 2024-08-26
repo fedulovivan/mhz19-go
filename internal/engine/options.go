@@ -2,7 +2,7 @@ package engine
 
 type Options struct {
 	logTag   func(m string) string
-	services []Service
+	services []Provider
 }
 
 func NewOptions() Options {
@@ -14,7 +14,7 @@ func NewOptions() Options {
 func (o *Options) SetLogTag(f func(m string) string) {
 	o.logTag = f
 }
-func (o *Options) SetServices(s ...Service) {
+func (o *Options) SetProviders(s ...Provider) {
 	o.services = s
 }
 

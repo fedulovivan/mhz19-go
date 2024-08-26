@@ -1,0 +1,11 @@
+{
+    "comments":"test mapping",
+    "disabled":false,
+    "throttle":0,
+    "condition":{
+        "list":[
+            {"fn":1,"args":{"Left":"left value","Right":"right val"}},
+            {"fn":2,"args":{"One":1,"Two":2}}
+        ]
+    }
+}

@@ -3,23 +3,11 @@ package engine
 import (
 	"fmt"
 	"log/slog"
-	"sync"
+
+	"github.com/fedulovivan/mhz19-go/pkg/utils"
 )
 
-type autoInc struct {
-	sync.Mutex
-	id int
-}
-
-func (a *autoInc) Next() (id int) {
-	a.Lock()
-	defer a.Unlock()
-	a.id++
-	id = a.id
-	return
-}
-
-var ai autoInc
+var tidSeq = utils.NewSeq()
 
 func Start(o Options) {
 	opts = o
@@ -28,7 +16,7 @@ func Start(o Options) {
 
 func start() {
 	for _, service := range opts.services {
-		go func(s Service) {
+		go func(s Provider) {
 			s.Init()
 			for m := range s.Receive() {
 				handleMessage(m, Rules)
@@ -37,7 +25,7 @@ func start() {
 	}
 }
 
-func getService(ct ChannelType) Service {
+func getService(ct ChannelType) Provider {
 	for _, service := range opts.services {
 		if service.Channel() == ct {
 			return service
@@ -118,7 +106,7 @@ func executeActions(mm []Message, aa []Action, r Rule, tid string) {
 }
 
 func handleMessage(m Message, rules []Rule) {
-	tid := fmt.Sprintf("Tid #%v ", ai.Next())
+	tid := fmt.Sprintf("Tid #%v ", tidSeq.Next())
 	p := m.Payload
 	if m.DeviceClass == DEVICE_CLASS_ZIGBEE_BRIDGE {
 		p = "<too big to render>"

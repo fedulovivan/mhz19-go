@@ -7,9 +7,7 @@ import (
 
 type ActionFn byte
 
-type Mapping map[string](map[string]string)
-
-type GetService func(ch ChannelType) Service
+type GetService func(ch ChannelType) Provider
 
 type ActionImpl func(mm []Message, a Action, gs GetService)
 
@@ -35,6 +33,10 @@ func (s ActionFn) String() string {
 	return fmt.Sprintf("%v (id=%d)", ACTION_NAMES[s], s)
 }
 
+// func (s *ActionFn) MarshalJSON() ([]byte, error) {
+// 	return []byte(fmt.Sprintf(`"%s"`, s.String())), nil
+// }
+
 var PostSonoffSwitchMessage ActionImpl = func(mm []Message, a Action, gs GetService) {
 	panic("not yet implemented")
 }
@@ -44,6 +46,8 @@ var YeelightDeviceSetPower ActionImpl = func(mm []Message, a Action, gs GetServi
 }
 
 var Zigbee2MqttSetState ActionImpl = func(mm []Message, a Action, gs GetService) {
+	// s := gs(CHANNEL_MQTT)
+	// s.Send("foo1")
 	panic("not yet implemented")
 }
 

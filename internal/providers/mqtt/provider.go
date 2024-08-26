@@ -12,16 +12,17 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/logger"
 )
 
-var logTag = logger.MakeTag("MQTT")
+var logTag = logger.MakeTag(logger.MQTT)
 
-type service struct {
-	engine.ServiceBase
+// implements [engine.Provider]
+type provider struct {
+	engine.ProviderBase
 	client MqttLib.Client
 }
 
-var Service engine.Service = &service{}
+var Provider engine.Provider = &provider{}
 
-func (s *service) Channel() engine.ChannelType {
+func (s *provider) Channel() engine.ChannelType {
 	return engine.CHANNEL_MQTT
 }
 
@@ -52,7 +53,7 @@ func (p *parserBase) parse_base() (engine.Message, bool) {
 	return outMsg, true
 }
 
-func (s *service) Init() {
+func (s *provider) Init() {
 
 	s.Out = make(engine.MessageChan, 100)
 
@@ -89,44 +90,65 @@ func (s *service) Init() {
 
 	var connectHandler = func(client MqttLib.Client) {
 		slog.Info(logTag("Connected"), "broker", app.GetMqttBroker())
+		for t := range handlers {
+			subscribe(client, t)
+		}
+		slog.Debug(logTag("All subscribtions are settled"))
 	}
 
 	var reconnectHandler = func(client MqttLib.Client, opts *MqttLib.ClientOptions) {
-		slog.Info(logTag("Reconnecting..."), "broker", app.GetMqttBroker())
+		slog.Warn(logTag("Reconnecting..."), "broker", app.GetMqttBroker())
 	}
 
 	var connectLostHandler = func(client MqttLib.Client, err error) {
 		slog.Error(logTag("Connection lost"), "error", err)
 	}
 
+	// build opts
 	opts := MqttLib.NewClientOptions()
 	opts.AddBroker(app.GetMqttBroker())
 	opts.SetClientID(app.Config.MqttClientId)
 	opts.SetUsername(app.Config.MqttUsername)
 	opts.SetPassword(app.Config.MqttPassword)
-	opts.SetDefaultPublishHandler(defaultMessageHandler)
 	opts.SetAutoReconnect(true)
-	opts.OnConnect = connectHandler
-	opts.OnReconnecting = reconnectHandler
-	opts.OnConnectionLost = connectLostHandler
-	s.client = MqttLib.NewClient(opts)
-	slog.Debug(logTag("Connecting..."))
-	if token := s.client.Connect(); token.Wait() && token.Error() != nil {
-		slog.Error(logTag(""), "error", token.Error())
-		return
+	opts.SetDefaultPublishHandler(defaultMessageHandler)
+	opts.SetOnConnectHandler(connectHandler)
+	opts.SetReconnectingHandler(reconnectHandler)
+	opts.SetConnectionLostHandler(connectLostHandler)
+
+	// attach logger
+	if app.Config.MqttDebug {
+		sloghandler := slog.Default().Handler()
+		// fmt.Printf("%T", sloghandler)
+		MqttLib.ERROR = slog.NewLogLogger(sloghandler, slog.LevelError)
+		MqttLib.CRITICAL = slog.NewLogLogger(sloghandler, slog.LevelError)
+		MqttLib.WARN = slog.NewLogLogger(sloghandler, slog.LevelWarn)
+		MqttLib.DEBUG = slog.NewLogLogger(sloghandler, slog.LevelDebug)
 	}
 
+	// create client
+	s.client = MqttLib.NewClient(opts)
+
+	// register routes
 	for t, h := range handlers {
 		s.client.AddRoute(t, h)
-		subscribe(s.client, t)
 	}
-	slog.Debug(logTag("All subscribtions are settled"))
+
+	// connect
+	slog.Debug(logTag("Connecting..."))
+	if token := s.client.Connect(); token.Wait() && token.Error() != nil {
+		slog.Error(logTag("Initial connect"), "error", token.Error())
+	}
 
 }
 
-func (s *service) Stop() {
+func (s *provider) Stop() {
 	slog.Debug(logTag("Disconnecting..."))
-	s.client.Disconnect(250)
+	if s.client.IsConnected() {
+		s.client.Disconnect(250)
+	} else {
+		slog.Warn(logTag("Not connected"))
+	}
 }
 
 func subscribe(client MqttLib.Client, topic string) {

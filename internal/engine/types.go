@@ -4,11 +4,13 @@ import (
 	"time"
 )
 
-type JsonPayload any
-
 type DeviceId string
 
-type Service interface {
+type Args map[string]any
+
+type Mapping map[string](map[string]string)
+
+type Provider interface {
 	Receive() MessageChan
 	Send(...any)
 	Channel() ChannelType
@@ -17,25 +19,25 @@ type Service interface {
 }
 
 type Rule struct {
-	Id        int
-	Disabled  bool
-	Comments  string
-	Condition Condition
-	Actions   []Action
-	Throttle  time.Duration
+	Id        int32         `json:"id"`
+	Disabled  bool          `json:"disabled"`
+	Comments  string        `json:"comments"`
+	Condition Condition     `json:"condition"`
+	Actions   []Action      `json:"actions"`
+	Throttle  time.Duration `json:"throttle"`
 }
 
 type Condition struct {
-	Id   int
-	Fn   CondFn
-	Args Args
-	List []Condition
-	Or   bool
+	Id   int         `json:"-"`
+	Fn   CondFn      `json:"fn,omitempty"`
+	Args Args        `json:"args,omitempty"`
+	List []Condition `json:"list,omitempty"`
+	Or   bool        `json:"or,omitempty"`
 }
 
 type Action struct {
-	Id      int
-	Fn      ActionFn
-	Args    Args
-	Mapping Mapping
+	Id      int      `json:"-"`
+	Fn      ActionFn `json:"fn"`
+	Args    Args     `json:"args"`
+	Mapping Mapping  `json:"mapping"`
 }

@@ -12,21 +12,22 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-var logTag = logger.MakeTag("TBOT")
+var logTag = logger.MakeTag(logger.TBOT)
 
-type service struct {
-	engine.ServiceBase
+// implements [engine.Provider]
+type provider struct {
+	engine.ProviderBase
 	bot        *tgbotapi.BotAPI
 	botStarted bool
 }
 
-var Service engine.Service = &service{}
+var Provider engine.Provider = &provider{}
 
-func (s *service) Channel() engine.ChannelType {
+func (s *provider) Channel() engine.ChannelType {
 	return engine.CHANNEL_TELEGRAM
 }
 
-func (s *service) Send(a ...any) {
+func (s *provider) Send(a ...any) {
 	first := a[0]
 	switch fTyped := first.(type) {
 	case string:
@@ -38,14 +39,16 @@ func (s *service) Send(a ...any) {
 	}
 }
 
-func (s *service) Stop() {
+func (s *provider) Stop() {
+	slog.Debug(logTag("Stopping bot..."))
 	if s.botStarted {
-		slog.Debug(logTag("Stopping bot..."))
 		s.bot.StopReceivingUpdates()
+	} else {
+		slog.Warn(logTag("Not started"))
 	}
 }
 
-func (s *service) SendNewMessage(text string, chatId int64) {
+func (s *provider) SendNewMessage(text string, chatId int64) {
 	// msg.ReplyToMessageID = update.Message.MessageID
 	slog.Debug(logTag("SendNewMessage()"), "text", text, "chatId", chatId)
 	if chatId == 0 {
@@ -58,7 +61,7 @@ func (s *service) SendNewMessage(text string, chatId int64) {
 	}
 }
 
-func (s *service) Init() {
+func (s *provider) Init() {
 
 	s.Out = make(engine.MessageChan, 100)
 
@@ -68,8 +71,7 @@ func (s *service) Init() {
 		slog.Error(logTag("NewBotAPI()"), "err", err.Error())
 		return
 	}
-	s.bot.Debug = false
-	// s.bot.Debug = app.Config.TelegramDebug
+	s.bot.Debug = app.Config.TelegramDebug
 	slog.Debug(logTag("Authorized"), "UserName", s.bot.Self.UserName)
 	s.botStarted = true
 	u := tgbotapi.NewUpdate(0)

@@ -23,7 +23,7 @@ var Rules = []Rule{
 	// Comments: "test mapping for composite condition function",
 	{
 		Id:       2,
-		Disabled: false,
+		Disabled: true,
 		Comments: "test mapping for composite condition function",
 		Condition: Condition{
 			List: []Condition{
@@ -49,7 +49,7 @@ var Rules = []Rule{
 	// 23:44:12.197 DBG [ENGN] New message ChannelType="mqtt (id=1)" ChannelMeta={MqttTopic:zigbee2mqtt/0x00158d0004244bda} DeviceClass="zigbee-device (id=1)" DeviceId=0x00158d0004244bda Payload="map[action:single_right battery:100 device_temperature:30 linkquality:69 power_outage_count:24 voltage:3025]"
 	{
 		Id:       3,
-		Disabled: false,
+		Disabled: true,
 		Comments: "balcony ceiling light on/off",
 		Condition: Condition{
 			List: []Condition{
@@ -96,7 +96,7 @@ var Rules = []Rule{
 	// Comments: "echo bot",
 	{
 		Id:       4,
-		Disabled: false,
+		Disabled: true,
 		Comments: "echo bot",
 		Condition: Condition{
 			Fn: COND_EQUAL,
@@ -114,4 +114,53 @@ var Rules = []Rule{
 	},
 }
 
+// wtf, can we do it more elegant in go? like int(withFn) + int(withList) == 1
+// if withList && withFn || (!withList && !withFn) {
+// 	panic("unexpected conditions")
+// }
 // OutChannel: CHANNEL_TELEGRAM,
+// nested []model.DbRuleCondition,
+// args []model.DbRuleConditionOrActionArgument,
+// var nested []model.DbRuleCondition
+// var current model.DbRuleCondition
+// slices.IndexFunc(conditions);
+// if len(ruleall) == 0 {
+// 	return
+// }
+// find root (with null ParentConditionId)
+// root, found := lo.Find(conditions, func(c model.DbRuleCondition) bool {
+// 	return !c.ParentConditionId.Valid
+// })
+// children := lo.Filter(conditions, func(c model.DbRuleCondition, i int) bool {
+// 	return c.ParentConditionId.Valid && c.ParentConditionId.Int32 == root.Id
+// })
+// for _, child := range children {
+// 	list = append(list, BuildConditions())
+// }
+// panic("FunctionType for root should not be null")
+// nested := lo.Filter(conditions, func(c model.DbRuleCondition, i int) bool {
+// 	return c.ParentConditionId.Valid
+// })
+// for _, c := range conditions {
+// 	if c.RuleId == ruleId {
+// 	}
+// }
+// return c_level()
+// List := make([]Condition, 0)
+// // if con
+// for _, c := range conditions {
+// 	if c.RuleId != ruleId {
+// 		continue
+// 	}
+// 	if c.FunctionType.Valid {
+// 		return Condition{
+// 			Fn: CondFn(c.FunctionType.Int32),
+// 		}
+// 	} else {
+// 		// TBD
+// 		// list = append(list, Condition{})
+// 	}
+// }
+// return Condition{
+// 	List: List,
+// }

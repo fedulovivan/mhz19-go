@@ -43,7 +43,7 @@ CREATE TABLE rules (
 	is_disabled INTEGER,
 	throttle INTEGER
 );
-INSERT INTO rules VALUES(1,'test mapping 1','',NULL);
+INSERT INTO rules VALUES(1,'test mapping 1',NULL,NULL);
 CREATE TABLE rule_conditions (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	rule_id INTEGER NOT NULL,
@@ -59,10 +59,10 @@ CREATE TABLE rule_actions (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	rule_id INTEGER NOT NULL,
 	function_type INTEGER,
-    device_id INTEGER,
+    device_id TEXT,
     CONSTRAINT rule_actions_fk_rules FOREIGN KEY (rule_id) REFERENCES rules(id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT rule_actions_fk_function FOREIGN KEY (function_type) REFERENCES action_functions(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT rule_actions_fk_devices FOREIGN KEY (device_id) REFERENCES devices(id) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT rule_actions_fk_devices FOREIGN KEY (device_id) REFERENCES devices(native_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 INSERT INTO rule_actions VALUES(1,1,2,NULL);
 CREATE TABLE rule_condition_or_action_arguments (
@@ -72,11 +72,11 @@ CREATE TABLE rule_condition_or_action_arguments (
     argument_name TEXT NOT NULL,
     is_list INTEGER,
     value TEXT,
-    device_id INTEGER,
+    device_id TEXT,
     device_class_id INTEGER,
     CONSTRAINT rule_ca_arguments_fk_conditions FOREIGN KEY (condition_id) REFERENCES rule_conditions(id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT rule_ca_arguments_fk_actions FOREIGN KEY (action_id) REFERENCES rule_actions(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT rule_ca_arguments_fk_devices FOREIGN KEY (device_id) REFERENCES devices(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT rule_ca_arguments_fk_devices FOREIGN KEY (device_id) REFERENCES devices(native_id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT rule_ca_arguments_fk_dc FOREIGN KEY (device_class_id) REFERENCES device_classes(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 INSERT INTO rule_condition_or_action_arguments VALUES(1,1,NULL,'Left',NULL,'$deviceClass',NULL,NULL);

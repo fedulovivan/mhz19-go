@@ -9,7 +9,7 @@ import (
 	"github.com/lmittmann/tint"
 )
 
-func init() {
+func Init() {
 	if app.Config.IsDev {
 		w := os.Stderr
 		slog.SetDefault(slog.New(
@@ -25,8 +25,27 @@ func init() {
 	}
 }
 
-func MakeTag(tag string) func(m string) string {
+type TagName string
+
+const (
+	MAIN   TagName = "[main]   "
+	ENGINE TagName = "[engine] "
+	MQTT   TagName = "[mqtt]   "
+	TBOT   TagName = "[tbot]   "
+	MODEL  TagName = "[model]  "
+	REST   TagName = "[rest]   "
+	RULES  TagName = "[rules]  "
+)
+
+func MakeTag(tag TagName) func(m string) string {
 	return func(message string) string {
-		return "[" + tag + "]" + " " + message
+		return string(tag) + " " + message
 	}
 }
+
+// if app.Config.IsDev {
+// 	// in development pad tag with spaces for extra nice output
+// 	return func(message string) string {
+// 		return fmt.Sprintf("%-10s", "["+tag+"]") + " " + message
+// 	}
+// }

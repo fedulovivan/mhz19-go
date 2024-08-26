@@ -1,12 +1,29 @@
 CONF ?= .env
 NAME ?= backend
 GIT_REV ?= $(shell git rev-parse --short HEAD)
+DATE ?= $(shell date +%FT%T)
+MIGRATION = 00
+API_URL = http://localhost:8888/rules
+API_LOAD_COUNT = 1000
+API_LOAD_THREADS = 10
 
-default: build-backend
+default: lint test build
 
-.PHONY: build-backend
-build-backend: lint test
-	CGO_ENABLED=0 go build -o ./bin/$(NAME) ./cmd/$(NAME)
+.PHONY: build
+build:
+	CGO_ENABLED=1 go build -o ./bin/$(NAME) ./cmd/$(NAME)
+
+.PHONY: clean
+clean:
+	rm ./bin/$(NAME)
+
+.PHONY: api-load-read
+api-load-read:
+	ab -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(API_URL)
+
+.PHONY: api-load-create
+api-load-create:
+	ab -T application/json -u ./assets/create.json -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(API_URL)
 
 .PHONY: run
 run:
@@ -20,16 +37,23 @@ tidy:
 lint:
 	golangci-lint run
 
-.PHONY: migrate
-migrate:
-	sqlite3 ./database.bin < docs/schema.sql
+.PHONY: migrate-reset
+migrate-reset: migrate-down migrate-up
 
-.PHONY: dump
-dump:
-	sqlite3 ./database.bin .dump > docs/dump.sql
+.PHONY: migrate-up
+migrate-up:
+	sqlite3 ./database.bin < ./migrations/$(MIGRATION)-up.sql
+
+.PHONY: migrate-down
+migrate-down:
+	sqlite3 ./database.bin < ./migrations/$(MIGRATION)-down.sql
+
+.PHONY: migrate-dump
+migrate-dump:
+	sqlite3 ./database.bin .dump > ./migrations/$(DATE)-dump.sql
 
 .PHONY: test
 test:
-	go test -cover -race -count 1 ./...	
+	SQLITE_FILENAME=$(PWD)/database_ut.bin go test -cover -race -count 1 ./...
 
 

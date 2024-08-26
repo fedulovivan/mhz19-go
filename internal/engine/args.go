@@ -7,8 +7,6 @@ import (
 	"strings"
 )
 
-type Args map[string]any
-
 type ArgReader struct {
 	fn     CondFn
 	m      Message

@@ -12,6 +12,7 @@ type CondImpl func(mt MessageTuple, args Args) bool
 type CondImpls map[CondFn]CondImpl
 
 const (
+	COND_UNKNOWN       CondFn = 0
 	COND_CHANGED       CondFn = 1
 	COND_EQUAL         CondFn = 2
 	COND_IN_LIST       CondFn = 3
@@ -21,6 +22,7 @@ const (
 )
 
 var CONDITION_NAMES = map[CondFn]string{
+	COND_UNKNOWN:       "<unknown>",
 	COND_CHANGED:       "Changed",
 	COND_EQUAL:         "Equal",
 	COND_IN_LIST:       "InList",
@@ -32,6 +34,10 @@ var CONDITION_NAMES = map[CondFn]string{
 func (s CondFn) String() string {
 	return fmt.Sprintf("%v (id=%d)", CONDITION_NAMES[s], s)
 }
+
+// func (s *CondFn) MarshalJSON() ([]byte, error) {
+// 	return []byte(fmt.Sprintf(`"%s"`, s.String())), nil
+// }
 
 var Equal CondImpl = func(mt MessageTuple, args Args) bool {
 	c := NewArgReader(COND_EQUAL, mt[0], args)
