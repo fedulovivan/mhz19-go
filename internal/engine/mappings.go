@@ -96,7 +96,7 @@ var Rules = []Rule{
 	// Comments: "echo bot",
 	{
 		Id:       4,
-		Disabled: true,
+		Disabled: false,
 		Comments: "echo bot",
 		Condition: Condition{
 			Fn: COND_EQUAL,

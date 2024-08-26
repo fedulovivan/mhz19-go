@@ -23,7 +23,9 @@ This project is backend for the home automation server, written on golang. Evolu
 - Actions executor which executes one or more actions in respond to received message
 - REST API service to manage application: create rules, read device messages history, read registered devices catalogue
 - Telegram as a channel for delivery various notifications and alerts and remote management
-- Docker compose to deploy entire server, which consists of this [backend](https://github.com/fedulovivan/mhz19-go), frontend (TBD), [device-pinger](https://github.com/fedulovivan/device-pinger) service, [eclipse mosquitto](https://mosquitto.org/) message broker, [zigbee2mqtt](https://www.zigbee2mqtt.io/) zigbee bridge 
+- Docker compose to deploy entire server, which consists of this [backend](https://github.com/fedulovivan/mhz19-go), frontend (TBD), [device-pinger](https://github.com/fedulovivan/device-pinger) service, [eclipse mosquitto](https://mosquitto.org/) message broker, [zigbee2mqtt](https://www.zigbee2mqtt.io/) zigbee bridge
+- unit and coverate tests, load tests for then rest API
+- basic data migrations support
 
 ### Unified message structure
 
@@ -45,3 +47,7 @@ No matter which channel was used to receive a message, or which certain device h
 - [docker](https://www.docker.com/) for containerization
 - [Makefile](./blob/main/Makefile) for developer routine automation
 - [telegram bot api](https://core.telegram.org/bots/api) with [client](https://github.com/go-telegram-bot-api/telegram-bot-api) for the notifications and remote management
+
+### Demo
+
+![console.png](assets/demo-01.png)
