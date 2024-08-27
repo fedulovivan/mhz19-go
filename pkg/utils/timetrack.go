@@ -6,8 +6,23 @@ import (
 	"time"
 )
 
-// from https://coderwall.com/p/cp5fya/measuring-execution-time-in-go
+// inially from https://coderwall.com/p/cp5fya/measuring-execution-time-in-go
+// + extra goodies
 func TimeTrack(logTag func(m string) string, start time.Time, name string) {
 	elapsed := time.Since(start)
-	slog.Debug(logTag(fmt.Sprintf("%s took %s", name, elapsed)))
+	wayFast := elapsed < time.Millisecond*5
+	badlyLong := elapsed > time.Second*1
+	badge := ""
+	if wayFast {
+		badge = "✨ "
+	} else if badlyLong {
+		badge = "🧨 "
+	}
+	m := logTag(fmt.Sprintf("%v%s took %s", badge, name, elapsed))
+	slog.Debug(m)
+	if badlyLong {
+		slog.Warn(m)
+	} else {
+		slog.Debug(m)
+	}
 }

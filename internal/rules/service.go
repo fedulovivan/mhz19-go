@@ -1,6 +1,7 @@
 package rules
 
 import (
+	"database/sql"
 	"fmt"
 
 	"github.com/fedulovivan/mhz19-go/internal/db"
@@ -25,14 +26,16 @@ func NewService(r RulesRepository) RulesService {
 }
 
 func (s rulesService) Create(rule engine.Rule) error {
-	dbRule, dbConditions, dbArguments, err := ToDb(rule, utils.NewSeq())
-	if err != nil {
-		return err
-	}
+	dbRule, dbConditions, dbActions, dbArguments, dbMappings := ToDb(
+		rule,
+		utils.NewSeq(),
+	)
 	return s.repository.Create(
 		dbRule,
 		dbConditions,
+		dbActions,
 		dbArguments,
+		dbMappings,
 	)
 }
 
@@ -55,6 +58,8 @@ func (s rulesService) Get() ([]engine.Rule, error) {
 	), nil
 }
 
+// takes flat db representaion of buils hierarchic [engine.Rule]
+// (opposite to ToDb)
 func Build(
 	allRules []DbRule,
 	allConditions []DbRuleCondition,
@@ -75,7 +80,7 @@ func Build(
 			Comments:  r.Comments,
 			Disabled:  r.IsDisabled.Int32 == 1,
 			Condition: cond,
-			Actions:   BuildActions(r.Id, allRuleActions, allArgs),
+			Actions:   BuildActions(r.Id, allRuleActions, allArgs, allMappings),
 		}
 		result = append(result, rule)
 	}
@@ -129,6 +134,7 @@ func BuildActions(
 	ruleId int32,
 	allRuleActions []DbRuleAction,
 	allArgs []DbRuleConditionOrActionArgument,
+	allMappings []DbRuleActionArgumentMapping,
 ) (result []engine.Action) {
 	actions := lo.Filter(allRuleActions, func(a DbRuleAction, i int) bool {
 		return a.RuleId == ruleId
@@ -137,12 +143,36 @@ func BuildActions(
 		args := lo.Filter(allArgs, func(arg DbRuleConditionOrActionArgument, i int) bool {
 			return arg.ActionId.Valid && arg.ActionId.Int32 == a.Id
 		})
-		result = append(result, engine.Action{
-			Id:      int(a.Id),
-			Fn:      engine.ActionFn(a.FunctionType.Int32),
-			Args:    BuildArguments(args),
-			Mapping: engine.Mapping{},
+		mappings := lo.Filter(allMappings, func(mapping DbRuleActionArgumentMapping, i int) bool {
+			return lo.SomeBy(args, func(arg DbRuleConditionOrActionArgument) bool {
+				return arg.Id == mapping.ArgumentId
+			})
 		})
+		result = append(result, engine.Action{
+			Id:       int(a.Id),
+			Fn:       engine.ActionFn(a.FunctionType.Int32),
+			Args:     BuildArguments(args),
+			DeviceId: engine.DeviceId(a.DeviceId.String),
+			Mapping:  BuildMappings(mappings, args),
+		})
+	}
+	return
+}
+
+func BuildMappings(
+	mappings []DbRuleActionArgumentMapping,
+	args []DbRuleConditionOrActionArgument,
+) (result engine.Mapping) {
+	result = engine.Mapping{}
+	for _, mapping := range mappings {
+		arg, _ := lo.Find(args, func(arg DbRuleConditionOrActionArgument) bool {
+			return arg.Id == mapping.ArgumentId
+		})
+		_, exist := result[arg.ArgumentName]
+		if !exist {
+			result[arg.ArgumentName] = make(map[string]string)
+		}
+		result[arg.ArgumentName][mapping.Key] = mapping.Value
 	}
 	return
 }
@@ -174,16 +204,21 @@ func BuildArguments(args []DbRuleConditionOrActionArgument) (result engine.Args)
 	return
 }
 
+// transforms [engine.Rule] to flat representtion for db
+// (opposite to Build)
 func ToDb(inrule engine.Rule, seq utils.Seq) (
 	DbRule,
 	[]DbRuleCondition,
+	[]DbRuleAction,
 	[]DbRuleConditionOrActionArgument,
-	error,
+	[]DbRuleActionArgumentMapping,
 ) {
 	outrule := ToDbRule(inrule, seq)
 	args := make([]DbRuleConditionOrActionArgument, 0)
+	mappings := make([]DbRuleActionArgumentMapping, 0)
 	outconds := ToDbConditions(outrule.Id, nil, inrule.Condition, seq, &args)
-	return outrule, outconds, args, nil
+	outactions := ToDbActions(outrule.Id, inrule.Actions, seq, &args, &mappings)
+	return outrule, outconds, outactions, args, mappings
 }
 
 func ToDbRule(rule engine.Rule, seq utils.Seq) DbRule {
@@ -193,6 +228,54 @@ func ToDbRule(rule engine.Rule, seq utils.Seq) DbRule {
 		IsDisabled: db.NewNullInt32FromBool(rule.Disabled),
 		Throttle:   db.NewNullInt32(int32(rule.Throttle.Seconds())),
 	}
+}
+
+func ToDbActions(
+	ruleId int32,
+	actions []engine.Action,
+	seq utils.Seq,
+	args *[]DbRuleConditionOrActionArgument,
+	mappings *[]DbRuleActionArgumentMapping,
+) (res []DbRuleAction) {
+	for _, action := range actions {
+		deviceId := sql.NullString{
+			String: string(action.DeviceId),
+			Valid:  len(action.DeviceId) > 0,
+		}
+		node := DbRuleAction{
+			Id:           int32(seq.Next()),
+			RuleId:       ruleId,
+			FunctionType: db.NewNullInt32(int32(action.Fn)),
+			DeviceId:     deviceId,
+		}
+		res = append(res, node)
+		argNameToId := make(map[string]int32, len(action.Args))
+		for key, value := range action.Args {
+			newargs := ToDbArguments(
+				nil,
+				&node,
+				key,
+				value,
+				seq,
+				false,
+			)
+			for _, arg := range newargs {
+				argNameToId[arg.ArgumentName] = arg.Id
+			}
+			*args = append(*args, newargs...)
+		}
+		for argName, argMapping := range action.Mapping {
+			for key, value := range argMapping {
+				*mappings = append(*mappings, DbRuleActionArgumentMapping{
+					Id:         int32(seq.Next()),
+					ArgumentId: argNameToId[argName],
+					Key:        key,
+					Value:      value,
+				})
+			}
+		}
+	}
+	return
 }
 
 func ToDbConditions(
@@ -234,23 +317,56 @@ func ToDbConditions(
 		}
 		res = append(res, node)
 		for key, value := range condition.Args {
-			*args = append(*args, ToDbArgument(
-				node.Id,
+			newargs := ToDbArguments(
+				&node,
+				nil,
 				key,
 				value,
 				seq,
-			))
+				false,
+			)
+			*args = append(*args, newargs...)
 		}
 	}
 	return
 }
 
-// TODO handle all fields
-func ToDbArgument(condId int32, key string, value any, seq utils.Seq) DbRuleConditionOrActionArgument {
-	return DbRuleConditionOrActionArgument{
-		Id:           int32(seq.Next()),
-		ConditionId:  db.NewNullInt32(condId),
-		ArgumentName: key,
-		Value:        db.NewNullString(fmt.Sprintf("%v", value)),
+func ToDbArguments(
+	condition *DbRuleCondition,
+	action *DbRuleAction,
+	key string,
+	value any,
+	seq utils.Seq,
+	islist bool,
+) (res []DbRuleConditionOrActionArgument) {
+	fmt.Printf("%v, %v, %T\n", key, value, value)
+	if listArg, ok := value.([]any); ok {
+		for _, vi := range listArg {
+			args := ToDbArguments(condition, action, key, vi, seq, true)
+			res = append(res, args...)
+		}
+	} else {
+		arg := DbRuleConditionOrActionArgument{
+			Id:           int32(seq.Next()),
+			ArgumentName: key,
+			IsList:       db.NewNullInt32FromBool(islist),
+		}
+		if condition != nil {
+			arg.ConditionId = db.NewNullInt32(condition.Id)
+		}
+		if action != nil {
+			arg.ActionId = db.NewNullInt32(action.Id)
+		}
+		if deviceId, ok := value.(engine.DeviceId); ok {
+			arg.DeviceId = db.NewNullString(string(deviceId))
+		} else if deviceClass, ok := value.(engine.DeviceClass); ok {
+			arg.DeviceClassId = db.NewNullInt32(int32(deviceClass))
+		} else {
+			arg.Value = db.NewNullString(fmt.Sprintf("%v", value))
+		}
+		res = append(res, arg)
 	}
+	return
 }
+
+//

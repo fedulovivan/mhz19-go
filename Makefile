@@ -2,10 +2,10 @@ CONF ?= .env
 NAME ?= backend
 GIT_REV ?= $(shell git rev-parse --short HEAD)
 DATE ?= $(shell date +%FT%T)
-MIGRATION = 00
-API_URL = http://localhost:8888/rules
-API_LOAD_COUNT = 1000
-API_LOAD_THREADS = 10
+MIGRATION ?= 00
+API_URL ?= http://localhost:8888/rules
+API_LOAD_COUNT ?= 1000
+API_LOAD_THREADS ?= 10
 
 default: lint test build
 
@@ -21,8 +21,8 @@ clean:
 api-load-read:
 	ab -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(API_URL)
 
-.PHONY: api-load-create
-api-load-create:
+.PHONY: api-load-write
+api-load-write:
 	ab -T application/json -u ./assets/create.json -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(API_URL)
 
 .PHONY: run

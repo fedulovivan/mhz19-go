@@ -1,6 +1,8 @@
 package engine
 
 import (
+	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 
@@ -487,6 +489,74 @@ func (s *EngineSuite) Test151() {
 	mt := MessageTuple{Message{DeviceId: "0x00158d0004244bda", DeviceClass: DEVICE_CLASS_ZIGBEE_DEVICE}}
 	actual := ZigbeeDevice(mt, Args{"List": []any{DeviceId("0x00158d0004244bda")}})
 	s.True(actual)
+}
+
+func (s *EngineSuite) Test160() {
+	input := []byte(`{"Foo":1}`)
+	args := Args{}
+	err := json.Unmarshal(input, &args)
+	s.Nil(err)
+	s.Contains(args, "Foo")
+}
+
+func (s *EngineSuite) Test161() {
+	input := []byte(`{"Foo":"bar"}`)
+	args := Args{}
+	err := json.Unmarshal(input, &args)
+	s.Nil(err)
+	s.Contains(args, "Foo")
+	s.Equal(args["Foo"], "bar")
+}
+
+func (s *EngineSuite) Test162() {
+	input := []byte(`{"Lorem":"DeviceId(bar-111)"}`)
+	args := Args{}
+	err := json.Unmarshal(input, &args)
+	s.Nil(err)
+	s.Contains(args, "Lorem")
+	s.Equal(args["Lorem"], DeviceId("bar-111"))
+	s.IsType(args["Lorem"], DeviceId(""))
+	fmt.Println(args)
+}
+
+func (s *EngineSuite) Test163() {
+	input := []byte(`{"ClassesList":["DeviceClass(1)","DeviceClass(2)"]}`)
+	args := Args{}
+	err := json.Unmarshal(input, &args)
+	s.Nil(err)
+	s.Contains(args, "ClassesList")
+	s.Len(args["ClassesList"], 2)
+	s.Equal("map[ClassesList:[zigbee-device (id=1) device-pinger (id=2)]]", fmt.Sprintf("%v", args))
+}
+
+func (s *EngineSuite) Test164() {
+	input := []byte(`{foo}`)
+	args := Args{}
+	err := json.Unmarshal(input, &args)
+	fmt.Println(args)
+	s.NotNil(err)
+}
+
+func (s *EngineSuite) Test165() {
+	input := []byte(`{"foo":"DeviceId"}`)
+	args := Args{}
+	err := json.Unmarshal(input, &args)
+	s.Nil(err)
+	s.Equal("DeviceId", args["foo"])
+}
+
+func (s *EngineSuite) Test170() {
+	args := Args{"Foo1": DEVICE_CLASS_BOT}
+	argsjson, err := json.Marshal(args)
+	s.Nil(err)
+	s.Equal(`{"Foo1":"DeviceClass(5)"}`, string(argsjson))
+}
+
+func (s *EngineSuite) Test171() {
+	args := Args{"Foo2": DeviceId("some-111")}
+	argsjson, err := json.Marshal(args)
+	s.Nil(err)
+	s.Equal(`{"Foo2":"DeviceId(some-111)"}`, string(argsjson))
 }
 
 func TestEngine(t *testing.T) {

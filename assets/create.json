@@ -1,11 +1,26 @@
 {
     "comments":"test mapping",
-    "disabled":false,
+    "disabled":true,
     "throttle":0,
     "condition":{
         "list":[
             {"fn":1,"args":{"Left":"left value","Right":"right val"}},
-            {"fn":2,"args":{"One":1,"Two":2}}
+            {"fn":2,"args":{"One":1,"Two":[2, 3]}},
+            {"fn":3,"args":{"Left":"DeviceClass(1)"}},
+            {"fn":6,"args":{"List":[456, "0x00158d0004244bda","0x00158d00042446ec", "DeviceId(0x00158d00042446ec)"]}}
         ]
-    }
+    },
+    "actions":[
+        {
+            "fn":1,
+            "args":{"Four":4,"Five":5},
+            "mapping": {
+                "Four": {
+                    "lorem": "ipsum",
+                    "dolor": "sit amet"
+                }
+            },
+            "deviceId": "192.168.88.188"
+        }
+    ]
 }

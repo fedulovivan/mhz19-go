@@ -1,11 +1,16 @@
 
 ### Prio 0
 - "FOREIGN KEY (device_id) REFERENCES devices(native_id)" requires sole UNIQUE index for column devices.native_id
-- implement REST API to read/create/update rules (use https://github.com/go-ozzo/ozzo-routing or https://github.com/gin-gonic/gin)
+- "http: superfluous response.WriteHeader call from github.com/go-ozzo/ozzo-routing/v2.(*Router).handleError (router.go:131)"
+- find why UnmarshalJSON is not called in Test164
 - finish handling of "Mapping" in invokeActionFunc
 
 ### Prio 1
+- implement /stats endpoint
 - implement log tag with meta, so we can add attrs to function
+- ? split rest api and engine into separate microservices
+- ? make logger and logTag a dependencies for service, api and repository
+- ? consider switching to postgres from sqlite3
 - get rid of full path in SQLITE_FILENAME to run tests
 - no mqtt (re)connection if network was not available on app startup and returned online later
 - create meta which descibes expected args for conditions and actions and validate
@@ -23,6 +28,10 @@
 
 ### Completed
 
+- (+) develop an approach of passing device id "0x00158d00042446ec" via json (unmarshalling)
+- (+) finish ToDbArguments
+- (+) implement REST API to read/create/update rules (use https://github.com/go-ozzo/ozzo-routing or https://github.com/gin-gonic/gin)
+- (+) handle DbRuleConditionOrActionArgument.IsList and create tests
 - (+) create readme and license
 - (+) reorganise code to conform service repository pattern (https://medium.com/@ankitpal181/service-repository-pattern-802540254019); internal/rest/rest.go > rules/api; internal/rest/service.go > rules/service; internal/db/model.go > rules/repository; move engine.BuildMappingRules, engine.FlattenConditions to service layer
 - (+) finish BuildRules (BuildConditions etc)

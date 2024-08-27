@@ -13,7 +13,7 @@ import (
 
 type RulesRepository interface {
 	Get() (rules []DbRule, conditions []DbRuleCondition, ruleActions []DbRuleAction, args []DbRuleConditionOrActionArgument, mappings []DbRuleActionArgumentMapping, err error)
-	Create(rule DbRule, conditions []DbRuleCondition, arguments []DbRuleConditionOrActionArgument) error
+	Create(rule DbRule, conditions []DbRuleCondition, actions []DbRuleAction, arguments []DbRuleConditionOrActionArgument, mappings []DbRuleActionArgumentMapping) error
 }
 
 type rulesRepository struct {
@@ -84,6 +84,19 @@ func conditionsSelect(ctx context.Context, tx *sql.Tx) ([]DbRuleCondition, error
 	)
 }
 
+func actionInsert(
+	act DbRuleAction,
+	ctx context.Context,
+	tx *sql.Tx,
+) (sql.Result, error) {
+	return db.Insert(
+		tx,
+		ctx,
+		`INSERT INTO rule_actions(rule_id, function_type, device_id) VALUES(?,?,?)`,
+		act.RuleId, act.FunctionType, act.DeviceId,
+	)
+}
+
 func conditionInsert(
 	cond DbRuleCondition,
 	ctx context.Context,
@@ -94,6 +107,19 @@ func conditionInsert(
 		ctx,
 		`INSERT INTO rule_conditions(rule_id, function_type, logic_or, parent_condition_id) VALUES(?,?,?,?)`,
 		cond.RuleId, cond.FunctionType, cond.LogicOr, cond.ParentConditionId,
+	)
+}
+
+func mappingInsert(
+	mapping DbRuleActionArgumentMapping,
+	ctx context.Context,
+	tx *sql.Tx,
+) (sql.Result, error) {
+	return db.Insert(
+		tx,
+		ctx,
+		`INSERT INTO rule_action_argument_mappings(argument_id, key, value) VALUES(?,?,?)`,
+		mapping.ArgumentId, mapping.Key, mapping.Value,
 	)
 }
 
@@ -196,14 +222,16 @@ func mappingsSelect(ctx context.Context, tx *sql.Tx) ([]DbRuleActionArgumentMapp
 func (repo rulesRepository) Create(
 	rule DbRule,
 	conditions []DbRuleCondition,
+	actions []DbRuleAction,
 	arguments []DbRuleConditionOrActionArgument,
+	mappings []DbRuleActionArgumentMapping,
 ) (err error) {
-	defer utils.TimeTrack(logTag, time.Now(), "RuleCreate")
+	defer utils.TimeTrack(logTag, time.Now(), "repo:Create")
+	var realCondIdsMap = make(map[int32]int32, len(conditions))
+	var realActionIdsMap = make(map[int32]int32, len(actions))
+	var realArgIdsMap = make(map[int32]int32, len(arguments))
 	ctx := context.Background()
 	tx, err := repo.database.Begin()
-	if err != nil {
-		return
-	}
 	if err != nil {
 		return
 	}
@@ -219,7 +247,6 @@ func (repo rulesRepository) Create(
 	slices.SortFunc(conditions, func(a, b DbRuleCondition) int {
 		return int(a.ParentConditionId.Int32 - b.ParentConditionId.Int32)
 	})
-	var realCondIdsMap = make(map[int32]int32, len(conditions))
 	// conditions
 	for _, cond := range conditions {
 		cond.RuleId = int32(ruleId)
@@ -238,11 +265,45 @@ func (repo rulesRepository) Create(
 		}
 		realCondIdsMap[cond.Id] = int32(condId)
 	}
+	// actions
+	for _, act := range actions {
+		act.RuleId = int32(ruleId)
+		result, err = actionInsert(act, ctx, tx)
+		if err != nil {
+			return
+		}
+		var actId int64
+		actId, err = result.LastInsertId()
+		if err != nil {
+			return
+		}
+		realActionIdsMap[act.Id] = int32(actId)
+	}
 	// arguments
 	for _, arg := range arguments {
-		realCondId := realCondIdsMap[arg.ConditionId.Int32]
-		arg.ConditionId = db.NewNullInt32(realCondId)
-		_, err = argumentInsert(arg, ctx, tx)
+		if arg.ConditionId.Valid {
+			realCondId := realCondIdsMap[arg.ConditionId.Int32]
+			arg.ConditionId = db.NewNullInt32(realCondId)
+		}
+		if arg.ActionId.Valid {
+			realActId := realActionIdsMap[arg.ActionId.Int32]
+			arg.ActionId = db.NewNullInt32(realActId)
+		}
+		result, err = argumentInsert(arg, ctx, tx)
+		if err != nil {
+			return
+		}
+		var argId int64
+		argId, err = result.LastInsertId()
+		if err != nil {
+			return
+		}
+		realArgIdsMap[arg.Id] = int32(argId)
+	}
+	// mappings
+	for _, mapping := range mappings {
+		mapping.ArgumentId = realArgIdsMap[mapping.ArgumentId]
+		_, err = mappingInsert(mapping, ctx, tx)
 		if err != nil {
 			return
 		}
@@ -261,7 +322,7 @@ func (repo rulesRepository) Get() (
 	mappings []DbRuleActionArgumentMapping,
 	err error,
 ) {
-	defer utils.TimeTrack(logTag, time.Now(), "RuleFetchAll")
+	defer utils.TimeTrack(logTag, time.Now(), "repo:Get")
 	g, ctx := errgroup.WithContext(context.Background())
 	tx, err := repo.database.Begin()
 	if err != nil {

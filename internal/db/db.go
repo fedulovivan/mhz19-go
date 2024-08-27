@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -77,8 +78,14 @@ func Insert(
 	case <-ctx.Done():
 		return
 	default:
-		return tx.ExecContext(ctx, query, values...)
-
+		res, err = tx.ExecContext(ctx, query, values...)
+		if err != nil {
+			err = fmt.Errorf(
+				"got an error \"%v\" executing %v with values %v",
+				err, query, values,
+			)
+		}
+		return
 	}
 }
 
@@ -95,6 +102,10 @@ func Select[T any](
 		var rows *sql.Rows
 		rows, err = tx.QueryContext(ctx, query)
 		if err != nil {
+			err = fmt.Errorf(
+				"got an error \"%v\" for query %v",
+				err, query,
+			)
 			return
 		}
 		defer rows.Close()

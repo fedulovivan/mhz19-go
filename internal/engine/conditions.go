@@ -106,6 +106,7 @@ var Changed CondImpl = func(mt MessageTuple, args Args) bool {
 	return false
 }
 
+// args: List
 var ZigbeeDevice CondImpl = func(mt MessageTuple, args Args) bool {
 	return Equal(
 		mt,

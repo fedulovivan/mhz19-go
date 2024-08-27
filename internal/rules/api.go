@@ -27,12 +27,13 @@ func NewApi(router *routing.Router, service RulesService) {
 }
 
 func (api rulesApi) create(c *routing.Context) error {
-	defer utils.TimeTrack(logTag, time.Now(), "CreateRule")
+	defer utils.TimeTrack(logTag, time.Now(), "api:create")
 	rule := engine.Rule{}
 	err := c.Read(&rule)
 	if err != nil {
 		return err
 	}
+	fmt.Println(rule)
 	err = api.service.Create(rule)
 	if err != nil {
 		return err
@@ -41,15 +42,15 @@ func (api rulesApi) create(c *routing.Context) error {
 }
 
 func (api rulesApi) getOne(c *routing.Context) error {
-	defer utils.TimeTrack(logTag, time.Now(), "GetRule")
+	defer utils.TimeTrack(logTag, time.Now(), "api:getOne")
 	return fmt.Errorf(
-		"not yet implemented /rules/%v",
+		"handler for \"/rules/%v\" not yet implemented",
 		c.Param("id"),
 	)
 }
 
 func (api rulesApi) getAll(c *routing.Context) error {
-	defer utils.TimeTrack(logTag, time.Now(), "GetRules")
+	defer utils.TimeTrack(logTag, time.Now(), "api:getAll")
 	rules, err := api.service.Get()
 	if err != nil {
 		return err

@@ -93,6 +93,9 @@ INSERT INTO condition_functions VALUES(4,'NotEqual');
 INSERT INTO condition_functions VALUES(5,'NotNil');
 INSERT INTO condition_functions VALUES(6,'ZigbeeDevice');
 
+INSERT INTO devices VALUES(1, '0x00158d00042446ec', 1, 'test device name', 'some comments 1');
+INSERT INTO devices VALUES(2, '192.168.88.188', 2, 'test pinger device', 'some comments 2');
+
 -- INSERT INTO rules VALUES(1,'test mapping 1',NULL,NULL);
 -- INSERT INTO rule_conditions VALUES(1,1,2,NULL,NULL);
 -- INSERT INTO rule_actions VALUES(1,1,2,NULL);
