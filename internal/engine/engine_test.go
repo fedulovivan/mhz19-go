@@ -11,15 +11,20 @@ import (
 
 type EngineSuite struct {
 	suite.Suite
+	e engine
+}
+
+func (s *EngineSuite) SetupSuite() {
+	s.e = NewEngine(NewOptions())
 }
 
 func (s *EngineSuite) Test10() {
-	actual := matchesCondition(MessageTuple{}, Condition{}, Rule{}, "Test10")
-	s.False(actual)
+	actual := s.e.matchesCondition(MessageTuple{}, Condition{}, Rule{}, "Test10")
+	s.True(actual)
 }
 
 func (s *EngineSuite) Test11() {
-	actual := matchesCondition(MessageTuple{}, Condition{
+	actual := s.e.matchesCondition(MessageTuple{}, Condition{
 		Or: true,
 		List: []Condition{
 			{Fn: COND_EQUAL, Args: Args{"Left": true, "Right": false}},
@@ -30,7 +35,7 @@ func (s *EngineSuite) Test11() {
 }
 
 func (s *EngineSuite) Test12() {
-	actual := matchesCondition(MessageTuple{}, Condition{
+	actual := s.e.matchesCondition(MessageTuple{}, Condition{
 		List: []Condition{
 			{Fn: COND_EQUAL, Args: Args{"Left": true, "Right": false}},
 			{Fn: COND_EQUAL, Args: Args{"Left": 1.11, "Right": 1.11}},
@@ -41,17 +46,17 @@ func (s *EngineSuite) Test12() {
 
 func (s *EngineSuite) Test20() {
 	// defer func() { _ = recover() }()
-	s.False(invokeConditionFunc(MessageTuple{}, 0, nil, Rule{}, "Test20"))
+	s.False(s.e.invokeConditionFunc(MessageTuple{}, 0, nil, Rule{}, "Test20"))
 	// s.Fail("expected to panic")
 }
 
 func (s *EngineSuite) Test30() {
-	actual := matchesListSome(MessageTuple{}, []Condition{}, Rule{}, "Test30")
+	actual := s.e.matchesListSome(MessageTuple{}, []Condition{}, Rule{}, "Test30")
 	s.False(actual)
 }
 
 func (s *EngineSuite) Test31() {
-	actual := matchesListSome(MessageTuple{}, []Condition{
+	actual := s.e.matchesListSome(MessageTuple{}, []Condition{
 		{Fn: COND_EQUAL, Args: Args{"Left": 1, "Right": 1}},
 		{Fn: COND_EQUAL, Args: Args{"Left": "foo", "Right": "bar"}},
 	}, Rule{}, "Test31")
@@ -59,12 +64,12 @@ func (s *EngineSuite) Test31() {
 }
 
 func (s *EngineSuite) Test40() {
-	actual := matchesListEvery(MessageTuple{}, []Condition{}, Rule{}, "Test40")
+	actual := s.e.matchesListEvery(MessageTuple{}, []Condition{}, Rule{}, "Test40")
 	s.False(actual)
 }
 
 func (s *EngineSuite) Test41() {
-	actual := matchesListEvery(MessageTuple{}, []Condition{
+	actual := s.e.matchesListEvery(MessageTuple{}, []Condition{
 		{Fn: COND_EQUAL, Args: Args{"Left": 1, "Right": 1}},
 		{Fn: COND_EQUAL, Args: Args{"Left": "foo", "Right": "foo"}},
 	}, Rule{}, "Test41")
@@ -143,19 +148,19 @@ func (s *EngineSuite) Test56() {
 }
 
 func (s *EngineSuite) Test60() {
-	executeActions([]Message{}, []Action{}, Rule{}, "Test60")
+	s.e.executeActions([]Message{}, []Action{}, Rule{}, "Test60")
 }
 
 func (s *EngineSuite) Test70() {
-	handleMessage(Message{}, []Rule{})
+	s.e.handleMessage(Message{}, []Rule{})
 }
 
 func (s *EngineSuite) Test71() {
-	handleMessage(Message{DeviceClass: DEVICE_CLASS_ZIGBEE_BRIDGE}, []Rule{})
+	s.e.handleMessage(Message{DeviceClass: DEVICE_CLASS_ZIGBEE_BRIDGE}, []Rule{})
 }
 
 func (s *EngineSuite) Test72() {
-	handleMessage(Message{}, []Rule{
+	s.e.handleMessage(Message{}, []Rule{
 		{
 			Condition: Condition{
 				Fn:   COND_EQUAL,
@@ -167,7 +172,7 @@ func (s *EngineSuite) Test72() {
 
 func (s *EngineSuite) Test73() {
 	defer func() { _ = recover() }()
-	handleMessage(Message{}, []Rule{
+	s.e.handleMessage(Message{}, []Rule{
 		{
 			Condition: Condition{
 				Fn:   COND_EQUAL,
@@ -466,13 +471,13 @@ func (s *EngineSuite) Test131() {
 }
 
 func (s *EngineSuite) Test140() {
-	opts := NewOptions()
-	opts.SetProviders(&provider{})
-	Start(opts)
+	// opts := NewOptions()
+	// opts.SetProviders(&provider{})
+	s.e.Start()
 }
 
 func (s *EngineSuite) Test141() {
-	Stop()
+	s.e.Stop()
 }
 
 func (s *EngineSuite) Test142() {

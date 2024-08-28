@@ -11,6 +11,7 @@ import (
 )
 
 type RulesService interface {
+	GetOne(ruleId int32) (engine.Rule, error)
 	Get() ([]engine.Rule, error)
 	Create(rule engine.Rule) error
 }
@@ -39,13 +40,37 @@ func (s rulesService) Create(rule engine.Rule) error {
 	)
 }
 
+func (s rulesService) GetOne(ruleId int32) (res engine.Rule, err error) {
+	rules,
+		conditions,
+		ruleActions,
+		ruleConditionOrActionArguments,
+		ruleActionArgumentMappings,
+		err := s.repository.Get(db.NewNullInt32(ruleId))
+	if err != nil {
+		return
+	}
+	erules, err := Build(
+		rules,
+		conditions,
+		ruleActions,
+		ruleConditionOrActionArguments,
+		ruleActionArgumentMappings,
+	), nil
+	if err != nil {
+		return
+	}
+	res = erules[0]
+	return
+}
+
 func (s rulesService) Get() ([]engine.Rule, error) {
 	rules,
 		conditions,
 		ruleActions,
 		ruleConditionOrActionArguments,
 		ruleActionArgumentMappings,
-		err := s.repository.Get()
+		err := s.repository.Get(sql.NullInt32{})
 	if err != nil {
 		return nil, err
 	}
@@ -252,6 +277,7 @@ func ToDbActions(
 		argNameToId := make(map[string]int32, len(action.Args))
 		for key, value := range action.Args {
 			newargs := ToDbArguments(
+				ruleId,
 				nil,
 				&node,
 				key,
@@ -268,6 +294,7 @@ func ToDbActions(
 			for key, value := range argMapping {
 				*mappings = append(*mappings, DbRuleActionArgumentMapping{
 					Id:         int32(seq.Next()),
+					RuleId:     ruleId,
 					ArgumentId: argNameToId[argName],
 					Key:        key,
 					Value:      value,
@@ -318,6 +345,7 @@ func ToDbConditions(
 		res = append(res, node)
 		for key, value := range condition.Args {
 			newargs := ToDbArguments(
+				ruleId,
 				&node,
 				nil,
 				key,
@@ -332,6 +360,7 @@ func ToDbConditions(
 }
 
 func ToDbArguments(
+	ruleId int32,
 	condition *DbRuleCondition,
 	action *DbRuleAction,
 	key string,
@@ -339,15 +368,16 @@ func ToDbArguments(
 	seq utils.Seq,
 	islist bool,
 ) (res []DbRuleConditionOrActionArgument) {
-	fmt.Printf("%v, %v, %T\n", key, value, value)
+	// fmt.Printf("%v, %v, %T\n", key, value, value)
 	if listArg, ok := value.([]any); ok {
 		for _, vi := range listArg {
-			args := ToDbArguments(condition, action, key, vi, seq, true)
+			args := ToDbArguments(ruleId, condition, action, key, vi, seq, true)
 			res = append(res, args...)
 		}
 	} else {
 		arg := DbRuleConditionOrActionArgument{
 			Id:           int32(seq.Next()),
+			RuleId:       ruleId,
 			ArgumentName: key,
 			IsList:       db.NewNullInt32FromBool(islist),
 		}

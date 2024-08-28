@@ -4,15 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"slices"
-	"time"
 
 	"github.com/fedulovivan/mhz19-go/internal/db"
-	"github.com/fedulovivan/mhz19-go/pkg/utils"
 	"golang.org/x/sync/errgroup"
 )
 
 type RulesRepository interface {
-	Get() (rules []DbRule, conditions []DbRuleCondition, ruleActions []DbRuleAction, args []DbRuleConditionOrActionArgument, mappings []DbRuleActionArgumentMapping, err error)
+	Get(ruleId sql.NullInt32) (rules []DbRule, conditions []DbRuleCondition, ruleActions []DbRuleAction, args []DbRuleConditionOrActionArgument, mappings []DbRuleActionArgumentMapping, err error)
 	Create(rule DbRule, conditions []DbRuleCondition, actions []DbRuleAction, arguments []DbRuleConditionOrActionArgument, mappings []DbRuleActionArgumentMapping) error
 }
 
@@ -50,6 +48,7 @@ type DbRuleAction struct {
 
 type DbRuleConditionOrActionArgument struct {
 	Id            int32
+	RuleId        int32
 	ConditionId   sql.NullInt32
 	ActionId      sql.NullInt32
 	ArgumentName  string
@@ -61,27 +60,10 @@ type DbRuleConditionOrActionArgument struct {
 
 type DbRuleActionArgumentMapping struct {
 	Id         int32
+	RuleId     int32
 	ArgumentId int32
 	Key        string
 	Value      string
-}
-
-func conditionsSelect(ctx context.Context, tx *sql.Tx) ([]DbRuleCondition, error) {
-	return db.Select(
-		tx,
-		ctx,
-		`SELECT
-			id,
-			rule_id,
-			function_type,
-			logic_or,
-			parent_condition_id
-		FROM
-			rule_conditions`,
-		func(rows *sql.Rows, m *DbRuleCondition) error {
-			return rows.Scan(&m.Id, &m.RuleId, &m.FunctionType, &m.LogicOr, &m.ParentConditionId)
-		},
-	)
 }
 
 func actionInsert(
@@ -118,8 +100,8 @@ func mappingInsert(
 	return db.Insert(
 		tx,
 		ctx,
-		`INSERT INTO rule_action_argument_mappings(argument_id, key, value) VALUES(?,?,?)`,
-		mapping.ArgumentId, mapping.Key, mapping.Value,
+		`INSERT INTO rule_action_argument_mappings(rule_id, argument_id, key, value) VALUES(?,?,?,?)`,
+		mapping.RuleId, mapping.ArgumentId, mapping.Key, mapping.Value,
 	)
 }
 
@@ -131,8 +113,8 @@ func argumentInsert(
 	return db.Insert(
 		tx,
 		ctx,
-		`INSERT INTO rule_condition_or_action_arguments(condition_id, action_id, argument_name, is_list, value, device_id, device_class_id) VALUES(?,?,?,?,?,?,?)`,
-		arg.ConditionId, arg.ActionId, arg.ArgumentName, arg.IsList, arg.Value, arg.DeviceId, arg.DeviceClassId,
+		`INSERT INTO rule_condition_or_action_arguments(rule_id, condition_id, action_id, argument_name, is_list, value, device_id, device_class_id) VALUES(?,?,?,?,?,?,?,?)`,
+		arg.RuleId, arg.ConditionId, arg.ActionId, arg.ArgumentName, arg.IsList, arg.Value, arg.DeviceId, arg.DeviceClassId,
 	)
 }
 
@@ -149,7 +131,7 @@ func ruleInsert(
 	)
 }
 
-func rulesSelect(ctx context.Context, tx *sql.Tx) ([]DbRule, error) {
+func rulesSelect(ctx context.Context, tx *sql.Tx, ruleId sql.NullInt32) ([]DbRule, error) {
 	return db.Select(
 		tx,
 		ctx,
@@ -163,10 +145,34 @@ func rulesSelect(ctx context.Context, tx *sql.Tx) ([]DbRule, error) {
 		func(rows *sql.Rows, m *DbRule) error {
 			return rows.Scan(&m.Id, &m.Comments, &m.IsDisabled, &m.Throttle)
 		},
+		db.Where{
+			"id": ruleId,
+		},
 	)
 }
 
-func ruleActionsSelect(ctx context.Context, tx *sql.Tx) ([]DbRuleAction, error) {
+func conditionsSelect(ctx context.Context, tx *sql.Tx, ruleId sql.NullInt32) ([]DbRuleCondition, error) {
+	return db.Select(
+		tx,
+		ctx,
+		`SELECT
+			id,
+			rule_id,
+			function_type,
+			logic_or,
+			parent_condition_id
+		FROM
+			rule_conditions`,
+		func(rows *sql.Rows, m *DbRuleCondition) error {
+			return rows.Scan(&m.Id, &m.RuleId, &m.FunctionType, &m.LogicOr, &m.ParentConditionId)
+		},
+		db.Where{
+			"rule_id": ruleId,
+		},
+	)
+}
+
+func ruleActionsSelect(ctx context.Context, tx *sql.Tx, ruleId sql.NullInt32) ([]DbRuleAction, error) {
 	return db.Select(
 		tx,
 		ctx,
@@ -180,10 +186,13 @@ func ruleActionsSelect(ctx context.Context, tx *sql.Tx) ([]DbRuleAction, error) 
 		func(rows *sql.Rows, m *DbRuleAction) error {
 			return rows.Scan(&m.Id, &m.RuleId, &m.FunctionType, &m.DeviceId)
 		},
+		db.Where{
+			"rule_id": ruleId,
+		},
 	)
 }
 
-func argsSelect(ctx context.Context, tx *sql.Tx) ([]DbRuleConditionOrActionArgument, error) {
+func argsSelect(ctx context.Context, tx *sql.Tx, ruleId sql.NullInt32) ([]DbRuleConditionOrActionArgument, error) {
 	return db.Select(
 		tx,
 		ctx,
@@ -203,10 +212,13 @@ func argsSelect(ctx context.Context, tx *sql.Tx) ([]DbRuleConditionOrActionArgum
 				&m.Id, &m.ConditionId, &m.ActionId, &m.ArgumentName, &m.IsList, &m.Value, &m.DeviceId, &m.DeviceClassId,
 			)
 		},
+		db.Where{
+			"rule_id": ruleId,
+		},
 	)
 }
 
-func mappingsSelect(ctx context.Context, tx *sql.Tx) ([]DbRuleActionArgumentMapping, error) {
+func mappingsSelect(ctx context.Context, tx *sql.Tx, ruleId sql.NullInt32) ([]DbRuleActionArgumentMapping, error) {
 	return db.Select(
 		tx,
 		ctx,
@@ -215,6 +227,9 @@ func mappingsSelect(ctx context.Context, tx *sql.Tx) ([]DbRuleActionArgumentMapp
 			return rows.Scan(
 				&m.Id, &m.ArgumentId, &m.Key, &m.Value,
 			)
+		},
+		db.Where{
+			"rule_id": ruleId,
 		},
 	)
 }
@@ -226,7 +241,7 @@ func (repo rulesRepository) Create(
 	arguments []DbRuleConditionOrActionArgument,
 	mappings []DbRuleActionArgumentMapping,
 ) (err error) {
-	defer utils.TimeTrack(logTag, time.Now(), "repo:Create")
+	// defer utils.TimeTrack(logTag, time.Now(), "repo:Create")
 	var realCondIdsMap = make(map[int32]int32, len(conditions))
 	var realActionIdsMap = make(map[int32]int32, len(actions))
 	var realArgIdsMap = make(map[int32]int32, len(arguments))
@@ -281,6 +296,7 @@ func (repo rulesRepository) Create(
 	}
 	// arguments
 	for _, arg := range arguments {
+		arg.RuleId = int32(ruleId)
 		if arg.ConditionId.Valid {
 			realCondId := realCondIdsMap[arg.ConditionId.Int32]
 			arg.ConditionId = db.NewNullInt32(realCondId)
@@ -302,6 +318,7 @@ func (repo rulesRepository) Create(
 	}
 	// mappings
 	for _, mapping := range mappings {
+		mapping.RuleId = int32(ruleId)
 		mapping.ArgumentId = realArgIdsMap[mapping.ArgumentId]
 		_, err = mappingInsert(mapping, ctx, tx)
 		if err != nil {
@@ -314,7 +331,7 @@ func (repo rulesRepository) Create(
 	return
 }
 
-func (repo rulesRepository) Get() (
+func (repo rulesRepository) Get(ruleId sql.NullInt32) (
 	rules []DbRule,
 	conditions []DbRuleCondition,
 	ruleActions []DbRuleAction,
@@ -322,32 +339,17 @@ func (repo rulesRepository) Get() (
 	mappings []DbRuleActionArgumentMapping,
 	err error,
 ) {
-	defer utils.TimeTrack(logTag, time.Now(), "repo:Get")
+	// defer utils.TimeTrack(logTag, time.Now(), "repo:Get")
 	g, ctx := errgroup.WithContext(context.Background())
 	tx, err := repo.database.Begin()
 	if err != nil {
 		return
 	}
-	g.Go(func() (e error) {
-		rules, e = rulesSelect(ctx, tx)
-		return
-	})
-	g.Go(func() (e error) {
-		conditions, e = conditionsSelect(ctx, tx)
-		return
-	})
-	g.Go(func() (e error) {
-		ruleActions, e = ruleActionsSelect(ctx, tx)
-		return
-	})
-	g.Go(func() (e error) {
-		args, e = argsSelect(ctx, tx)
-		return
-	})
-	g.Go(func() (e error) {
-		mappings, e = mappingsSelect(ctx, tx)
-		return
-	})
+	g.Go(func() (e error) { rules, e = rulesSelect(ctx, tx, ruleId); return })
+	g.Go(func() (e error) { conditions, e = conditionsSelect(ctx, tx, ruleId); return })
+	g.Go(func() (e error) { ruleActions, e = ruleActionsSelect(ctx, tx, ruleId); return })
+	g.Go(func() (e error) { args, e = argsSelect(ctx, tx, ruleId); return })
+	g.Go(func() (e error) { mappings, e = mappingsSelect(ctx, tx, ruleId); return })
 	err = g.Wait()
 	if err == nil {
 		err = db.Commit(tx)

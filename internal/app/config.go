@@ -19,6 +19,7 @@ var Config ConfigStorage
 type ConfigStorage struct {
 	TelegramDebug bool `env:"TELEGRAM_DEBUG,default=false"`
 	MqttDebug     bool `env:"MQTT_DEBUG,default=false"`
+	DbDebug       bool `env:"DB_DEBUG,default=false"`
 	RestApiPort   int  `env:"REST_API_PORT,default=8888"`
 	// SqliteFilename string `env:"SQLITE_FILENAME,default=/Users/ivanf/Desktop/Projects/go/mhz19-go/database.bin"`
 	SqliteFilename string     `env:"SQLITE_FILENAME,default=database.bin"`

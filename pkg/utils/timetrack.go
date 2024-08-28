@@ -19,7 +19,6 @@ func TimeTrack(logTag func(m string) string, start time.Time, name string) {
 		badge = "🧨 "
 	}
 	m := logTag(fmt.Sprintf("%v%s took %s", badge, name, elapsed))
-	slog.Debug(m)
 	if badlyLong {
 		slog.Warn(m)
 	} else {

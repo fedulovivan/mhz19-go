@@ -9,110 +9,117 @@ import (
 
 var tidSeq = utils.NewSeq()
 
-func Start(o Options) {
-	opts = o
-	start()
+type engine struct {
+	options Options
 }
 
-func start() {
-	for _, service := range opts.services {
-		go func(s Provider) {
-			s.Init()
-			for m := range s.Receive() {
-				handleMessage(m, Rules)
-			}
-		}(service)
+func NewEngine(
+	options Options,
+) engine {
+	return engine{
+		options: options,
 	}
 }
 
-func getService(ct ChannelType) Provider {
-	for _, service := range opts.services {
-		if service.Channel() == ct {
-			return service
+func (e engine) Start() {
+	for _, provider := range e.options.providers {
+		go func(s Provider) {
+			s.Init()
+			for m := range s.Receive() {
+				e.handleMessage(m, e.options.rules)
+			}
+		}(provider)
+	}
+}
+
+func (e engine) getPrivider(ct ChannelType) Provider {
+	for _, provider := range e.options.providers {
+		if provider.Channel() == ct {
+			return provider
 		}
 	}
 	return nil
 }
 
-func Stop() {
-	for _, s := range opts.services {
+func (e engine) Stop() {
+	for _, s := range e.options.providers {
 		s.Stop()
 	}
 }
 
-func invokeConditionFunc(mt MessageTuple, fn CondFn, args Args, r Rule, tid string) bool {
+func (e engine) invokeConditionFunc(mt MessageTuple, fn CondFn, args Args, r Rule, tid string) bool {
 	impl, ok := conditionImplementations[fn]
 	if !ok {
 		slog.Error(fmt.Sprintf("Condition function [%v] not yet implemented", fn))
 		return false
 	}
 	res := impl(mt, args)
-	slog.Debug(opts.logTag(tid+fmt.Sprintf("Rule #%v condition exec", r.Id)), "fn", fn, "args", args, "res", res)
+	slog.Debug(e.options.logTag(tid+fmt.Sprintf("Rule #%v condition exec", r.Id)), "fn", fn, "args", args, "res", res)
 	return res
 }
 
-func invokeActionFunc(mm []Message, a Action, r Rule, tid string) {
+func (e engine) invokeActionFunc(mm []Message, a Action, r Rule, tid string) {
 	impl, ok := actions[a.Fn]
 	if !ok {
 		slog.Error(fmt.Sprintf("Action function [%v] not yet implemented", a.Fn))
 		return
 	}
-	slog.Debug(opts.logTag(tid+fmt.Sprintf("Rule #%v action exec", r.Id)), "fn", a.Fn, "args", a.Args)
-	go impl(mm, a, getService)
+	slog.Debug(e.options.logTag(tid+fmt.Sprintf("Rule #%v action exec", r.Id)), "fn", a.Fn, "args", a.Args)
+	go impl(mm, a, e.getPrivider, &e)
 }
 
-func matchesListSome(mt MessageTuple, cc []Condition, r Rule, tid string) bool {
+func (e engine) matchesListSome(mt MessageTuple, cc []Condition, r Rule, tid string) bool {
 	for _, c := range cc {
-		if matchesCondition(mt, c, r, tid) {
+		if e.matchesCondition(mt, c, r, tid) {
 			return true
 		}
 	}
 	return false
 }
 
-func matchesListEvery(mt MessageTuple, cc []Condition, r Rule, tid string) bool {
+func (e engine) matchesListEvery(mt MessageTuple, cc []Condition, r Rule, tid string) bool {
 	if len(cc) == 0 {
 		return false
 	}
 	for _, c := range cc {
-		if !matchesCondition(mt, c, r, tid) {
+		if !e.matchesCondition(mt, c, r, tid) {
 			return false
 		}
 	}
 	return true
 }
 
-func matchesCondition(mt MessageTuple, c Condition, r Rule, tid string) bool {
+func (e engine) matchesCondition(mt MessageTuple, c Condition, r Rule, tid string) bool {
 	withFn := c.Fn != 0
 	withList := len(c.List) > 0
 	if withFn && !withList {
-		return invokeConditionFunc(mt, c.Fn, c.Args, r, tid)
+		return e.invokeConditionFunc(mt, c.Fn, c.Args, r, tid)
 	} else if withList && !withFn {
 		if c.Or {
-			return matchesListSome(mt, c.List, r, tid)
+			return e.matchesListSome(mt, c.List, r, tid)
 		} else {
-			return matchesListEvery(mt, c.List, r, tid)
+			return e.matchesListEvery(mt, c.List, r, tid)
 		}
 	} else {
-		return false
+		return true
 	}
 }
 
-func executeActions(mm []Message, aa []Action, r Rule, tid string) {
-	slog.Debug(opts.logTag(tid + fmt.Sprintf("Rule #%v going to execute %v actions", r.Id, len(aa))))
+func (e engine) executeActions(mm []Message, aa []Action, r Rule, tid string) {
+	slog.Debug(e.options.logTag(tid + fmt.Sprintf("Rule #%v going to execute %v actions", r.Id, len(aa))))
 	for _, a := range aa {
-		invokeActionFunc(mm, a, r, tid)
+		e.invokeActionFunc(mm, a, r, tid)
 	}
 }
 
-func handleMessage(m Message, rules []Rule) {
+func (e engine) handleMessage(m Message, rules []Rule) {
 	tid := fmt.Sprintf("Tid #%v ", tidSeq.Next())
 	p := m.Payload
 	if m.DeviceClass == DEVICE_CLASS_ZIGBEE_BRIDGE {
 		p = "<too big to render>"
 	}
 	slog.Debug(
-		opts.logTag(tid+"New message"),
+		e.options.logTag(tid+"New message"),
 		"ChannelType", m.ChannelType,
 		"ChannelMeta", m.ChannelMeta,
 		"DeviceClass", m.DeviceClass,
@@ -122,27 +129,27 @@ func handleMessage(m Message, rules []Rule) {
 	mkey := makeMessageKey(m.DeviceClass, m.DeviceId)
 	prevm := PrevMessageGet(mkey)
 	mt := MessageTuple{m, prevm}
-	slog.Debug(opts.logTag(tid + fmt.Sprintf("Matching against %v rules", len(rules))))
+	slog.Debug(e.options.logTag(tid + fmt.Sprintf("Matching against %v rules", len(rules))))
 	matches := 0
 	for _, r := range rules {
 		if r.Disabled {
-			slog.Debug(opts.logTag(tid + fmt.Sprintf("Rule #%v is disabled, skipping", r.Id)))
+			slog.Debug(e.options.logTag(tid + fmt.Sprintf("Rule #%v is disabled, skipping", r.Id)))
 			continue
 		}
-		if matchesCondition(mt, r.Condition, r, tid) {
-			slog.Debug(opts.logTag(tid+fmt.Sprintf("Rule #%v matches", r.Id)), "comments", r.Comments)
+		if e.matchesCondition(mt, r.Condition, r, tid) {
+			slog.Debug(e.options.logTag(tid+fmt.Sprintf("Rule #%v matches", r.Id)), "comments", r.Comments)
 			matches++
 			if r.Throttle == 0 {
-				executeActions(mt[:], r.Actions, r, tid)
+				e.executeActions(mt[:], r.Actions, r, tid)
 			} else {
 				panic("handleMessage: not yet implemented: Throttle")
 			}
 		}
 	}
 	if matches == 0 {
-		slog.Warn(opts.logTag(tid + "No one matching rule found"))
+		slog.Warn(e.options.logTag(tid + "No one matching rule found"))
 	} else {
-		slog.Debug(opts.logTag(tid + fmt.Sprintf("%v out of %v rules were matched", matches, len(rules))))
+		slog.Debug(e.options.logTag(tid + fmt.Sprintf("%v out of %v rules were matched", matches, len(rules))))
 	}
 	if prevMessages == nil {
 		prevMessages = make(map[string]Message)

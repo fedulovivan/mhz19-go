@@ -1,6 +1,7 @@
 package rules
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -388,7 +389,7 @@ type mockrepo struct {
 	err error
 }
 
-func (r mockrepo) Get() (
+func (r mockrepo) Get(ruleId sql.NullInt32) (
 	rules []DbRule,
 	conditions []DbRuleCondition,
 	ruleActions []DbRuleAction,
@@ -437,6 +438,7 @@ func (s *ServiceSuite) Test72() {
 
 func (s *ServiceSuite) Test80() {
 	aa := ToDbArguments(
+		1,
 		&DbRuleCondition{},
 		nil,
 		"key",
@@ -445,11 +447,12 @@ func (s *ServiceSuite) Test80() {
 		false,
 	)
 	data, _ := json.Marshal(aa)
-	s.Equal(`[{"Id":1,"ConditionId":{"Int32":0,"Valid":true},"ActionId":{"Int32":0,"Valid":false},"ArgumentName":"key","IsList":{"Int32":0,"Valid":true},"Value":{"String":"111","Valid":true},"DeviceId":{"String":"","Valid":false},"DeviceClassId":{"Int32":0,"Valid":false}}]`, string(data))
+	s.Equal(`[{"Id":1,"RuleId":1,"ConditionId":{"Int32":0,"Valid":true},"ActionId":{"Int32":0,"Valid":false},"ArgumentName":"key","IsList":{"Int32":0,"Valid":true},"Value":{"String":"111","Valid":true},"DeviceId":{"String":"","Valid":false},"DeviceClassId":{"Int32":0,"Valid":false}}]`, string(data))
 }
 
 func (s *ServiceSuite) Test81() {
 	aa := ToDbArguments(
+		1,
 		&DbRuleCondition{},
 		nil,
 		"key2",
@@ -458,12 +461,13 @@ func (s *ServiceSuite) Test81() {
 		false,
 	)
 	data, _ := json.Marshal(aa)
-	expected := `[{"Id":1,"ConditionId":{"Int32":0,"Valid":true},"ActionId":{"Int32":0,"Valid":false},"ArgumentName":"key2","IsList":{"Int32":1,"Valid":true},"Value":{"String":"222","Valid":true},"DeviceId":{"String":"","Valid":false},"DeviceClassId":{"Int32":0,"Valid":false}},{"Id":2,"ConditionId":{"Int32":0,"Valid":true},"ActionId":{"Int32":0,"Valid":false},"ArgumentName":"key2","IsList":{"Int32":1,"Valid":true},"Value":{"String":"333","Valid":true},"DeviceId":{"String":"","Valid":false},"DeviceClassId":{"Int32":0,"Valid":false}}]`
+	expected := `[{"Id":1,"RuleId":1,"ConditionId":{"Int32":0,"Valid":true},"ActionId":{"Int32":0,"Valid":false},"ArgumentName":"key2","IsList":{"Int32":1,"Valid":true},"Value":{"String":"222","Valid":true},"DeviceId":{"String":"","Valid":false},"DeviceClassId":{"Int32":0,"Valid":false}},{"Id":2,"RuleId":1,"ConditionId":{"Int32":0,"Valid":true},"ActionId":{"Int32":0,"Valid":false},"ArgumentName":"key2","IsList":{"Int32":1,"Valid":true},"Value":{"String":"333","Valid":true},"DeviceId":{"String":"","Valid":false},"DeviceClassId":{"Int32":0,"Valid":false}}]`
 	s.Equal(expected, string(data))
 }
 
 func (s *ServiceSuite) Test82() {
 	aa := ToDbArguments(
+		1,
 		&DbRuleCondition{},
 		nil,
 		"key3",
@@ -472,12 +476,13 @@ func (s *ServiceSuite) Test82() {
 		false,
 	)
 	data, _ := json.Marshal(aa)
-	expected := `[{"Id":1,"ConditionId":{"Int32":0,"Valid":true},"ActionId":{"Int32":0,"Valid":false},"ArgumentName":"key3","IsList":{"Int32":0,"Valid":true},"Value":{"String":"","Valid":false},"DeviceId":{"String":"0xqwe111111","Valid":true},"DeviceClassId":{"Int32":0,"Valid":false}}]`
+	expected := `[{"Id":1,"RuleId":1,"ConditionId":{"Int32":0,"Valid":true},"ActionId":{"Int32":0,"Valid":false},"ArgumentName":"key3","IsList":{"Int32":0,"Valid":true},"Value":{"String":"","Valid":false},"DeviceId":{"String":"0xqwe111111","Valid":true},"DeviceClassId":{"Int32":0,"Valid":false}}]`
 	s.Equal(expected, string(data))
 }
 
 func (s *ServiceSuite) Test83() {
 	aa := ToDbArguments(
+		1,
 		&DbRuleCondition{},
 		nil,
 		"key4",
@@ -486,7 +491,7 @@ func (s *ServiceSuite) Test83() {
 		false,
 	)
 	data, _ := json.Marshal(aa)
-	expected := `[{"Id":1,"ConditionId":{"Int32":0,"Valid":true},"ActionId":{"Int32":0,"Valid":false},"ArgumentName":"key4","IsList":{"Int32":0,"Valid":true},"Value":{"String":"","Valid":false},"DeviceId":{"String":"","Valid":false},"DeviceClassId":{"Int32":1,"Valid":true}}]`
+	expected := `[{"Id":1,"RuleId":1,"ConditionId":{"Int32":0,"Valid":true},"ActionId":{"Int32":0,"Valid":false},"ArgumentName":"key4","IsList":{"Int32":0,"Valid":true},"Value":{"String":"","Valid":false},"DeviceId":{"String":"","Valid":false},"DeviceClassId":{"Int32":1,"Valid":true}}]`
 	s.Equal(expected, string(data))
 }
 

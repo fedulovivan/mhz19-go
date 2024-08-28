@@ -7,6 +7,7 @@ import (
 	"syscall"
 
 	"github.com/fedulovivan/mhz19-go/internal/app"
+	"github.com/fedulovivan/mhz19-go/internal/db"
 	"github.com/fedulovivan/mhz19-go/internal/engine"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/rest"
@@ -24,11 +25,20 @@ func main() {
 	logger.Init()
 	rest.Init()
 
-	// start engine with list of providers
-	eopts := engine.NewOptions()
-	eopts.SetLogTag(logger.MakeTag(logger.ENGINE))
-	eopts.SetProviders(mqtt.Provider, tbot.Provider)
-	engine.Start(eopts)
+	// start engine
+	engineOptions := engine.NewOptions()
+	engineOptions.SetLogTag(logger.MakeTag(logger.ENGINE))
+	engineOptions.SetProviders(mqtt.Provider, tbot.Provider)
+	engineOptions.SetMessagesService(
+		engine.NewService(
+			engine.NewRepository(
+				db.Init(),
+			),
+		),
+	)
+	engineOptions.SetRules(engine.GetTestStaticRules())
+	engineInstance := engine.NewEngine(engineOptions)
+	engineInstance.Start()
 
 	// notify we are in the development mode
 	if app.Config.IsDev {
@@ -48,7 +58,7 @@ func main() {
 	slog.Debug(logTag("App termination signal received"))
 
 	// stop engine and all underlying providers
-	engine.Stop()
+	engineInstance.Stop()
 
 	// stop rest
 	rest.Stop()

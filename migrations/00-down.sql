@@ -1,10 +1,15 @@
 
-DROP TABLE device_classes;
-DROP TABLE condition_functions;
-DROP TABLE action_functions;
-DROP TABLE devices;
-DROP TABLE rules;
-DROP TABLE rule_conditions;
-DROP TABLE rule_actions;
-DROP TABLE rule_condition_or_action_arguments;
-DROP TABLE rule_action_argument_mappings;
+PRAGMA foreign_keys=OFF;
+BEGIN TRANSACTION;
+DROP TABLE IF EXISTS device_classes;
+DROP TABLE IF EXISTS messages;
+DROP TABLE IF EXISTS channel_types;
+DROP TABLE IF EXISTS condition_functions;
+DROP TABLE IF EXISTS action_functions;
+DROP TABLE IF EXISTS devices;
+DROP TABLE IF EXISTS rules;
+DROP TABLE IF EXISTS rule_conditions;
+DROP TABLE IF EXISTS rule_actions;
+DROP TABLE IF EXISTS rule_condition_or_action_arguments;
+DROP TABLE IF EXISTS rule_action_argument_mappings;
+COMMIT;

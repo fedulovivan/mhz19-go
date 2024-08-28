@@ -123,6 +123,22 @@ var ZigbeeDevice CondImpl = func(mt MessageTuple, args Args) bool {
 	)
 }
 
+// var DeviceClassCond CondImpl = func(mt MessageTuple, args Args) bool {
+// 	return Equal(
+// 		mt,
+// 		Args{
+// 			"Left":  "$deviceClass",
+// 			"Right": DEVICE_CLASS_ZIGBEE_DEVICE,
+// 		},
+// 	) && InList(
+// 		mt,
+// 		Args{
+// 			"Value": "$deviceId",
+// 			"List":  args["List"],
+// 		},
+// 	)
+// }
+
 var conditionImplementations = CondImpls{
 	COND_CHANGED:       Changed,
 	COND_EQUAL:         Equal,

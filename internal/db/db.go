@@ -5,16 +5,26 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
+	"strings"
+
+	"github.com/fedulovivan/mhz19-go/internal/logger"
 
 	"github.com/fedulovivan/mhz19-go/internal/app"
+	"github.com/fedulovivan/mhz19-go/pkg/utils"
 	_ "github.com/mattn/go-sqlite3"
 )
 
-// var dbh *sql.DB
+var logTag = logger.MakeTag(logger.DB)
+
+var dbh *sql.DB
 
 func Init() *sql.DB {
+	if dbh != nil {
+		return dbh
+	}
 	var err error
 	dbabspath, err := filepath.Abs(app.Config.SqliteFilename)
 	if err != nil {
@@ -23,15 +33,15 @@ func Init() *sql.DB {
 	if _, err := os.Stat(dbabspath); errors.Is(err, os.ErrNotExist) {
 		Panic(err)
 	}
-	database, err := sql.Open("sqlite3", dbabspath)
+	dbh, err = sql.Open("sqlite3", dbabspath)
 	if err != nil {
 		Panic(err)
 	}
-	_, err = database.Exec("PRAGMA foreign_keys=ON")
+	_, err = dbh.Exec("PRAGMA foreign_keys=ON")
 	if err != nil {
 		Panic(err)
 	}
-	return database
+	return dbh
 }
 
 func Panic(err error) {
@@ -78,15 +88,87 @@ func Insert(
 	case <-ctx.Done():
 		return
 	default:
+		lquery := utils.OneLineTrim(query)
+		logQuery(lquery, values)
 		res, err = tx.ExecContext(ctx, query, values...)
 		if err != nil {
 			err = fmt.Errorf(
-				"got an error \"%v\" executing %v with values %v",
-				err, query, values,
+				"got an error \"%v\" executing %v, values %v",
+				err, lquery, values,
 			)
 		}
 		return
 	}
+}
+
+type DbCount struct {
+	Value int32
+}
+
+type Where = map[string]sql.NullInt32
+
+func AddWhere(in string, where Where) (out string) {
+	var entries []string
+	out = in
+	for key, value := range where {
+		if value.Valid {
+			entries = append(entries, fmt.Sprintf("%v = ?", key))
+		}
+		// if vtyped, ok := value.(sql.NullInt32); ok && vtyped.Valid {
+		// 	entries = append(entries, fmt.Sprintf("%v = ?", key))
+		// }
+	}
+	if len(entries) > 0 {
+		out = fmt.Sprintf("%v WHERE %v", in, strings.Join(entries, " AND "))
+	}
+	return
+}
+
+func PickWhereValues(where Where) (out []any) {
+	for _, value := range where {
+		if value.Valid {
+			out = append(out, value.Int32)
+		}
+		// if vtyped, ok := value.(sql.NullInt32); ok && vtyped.Valid {
+		// 	out = append(out, vtyped.Int32)
+		// }
+	}
+	return
+}
+
+func Count(
+	tx *sql.Tx,
+	ctx context.Context,
+	query string,
+) (res int32, err error) {
+	rows, err := Select(
+		tx,
+		ctx,
+		query,
+		func(rows *sql.Rows, m *DbCount) error {
+			return rows.Scan(&m.Value)
+		},
+		Where{},
+	)
+	if len(rows) == 1 {
+		res = rows[0].Value
+	} else if len(rows) > 1 {
+		err = fmt.Errorf("%v query is expected to return at the most one row", query)
+	}
+	return
+}
+
+func logQuery(query string, values ...any) {
+	if !app.Config.DbDebug {
+		return
+	}
+	slog.Debug(logTag(
+		fmt.Sprintf(
+			"executing query %v, values %v",
+			query,
+			values,
+		),
+	))
 }
 
 func Select[T any](
@@ -94,17 +176,26 @@ func Select[T any](
 	ctx context.Context,
 	query string,
 	scan func(rows *sql.Rows, model *T) error,
+	where Where,
 ) (result []T, err error) {
 	select {
 	case <-ctx.Done():
 		return
 	default:
 		var rows *sql.Rows
-		rows, err = tx.QueryContext(ctx, query)
+		wquery := AddWhere(query, where)
+		values := PickWhereValues(where)
+		lquery := utils.OneLineTrim(wquery)
+		logQuery(lquery, values)
+		rows, err = tx.QueryContext(
+			ctx,
+			wquery,
+			values...,
+		)
 		if err != nil {
 			err = fmt.Errorf(
-				"got an error \"%v\" for query %v",
-				err, query,
+				"got an error \"%v\" for query %v, values %v",
+				err, lquery, values,
 			)
 			return
 		}

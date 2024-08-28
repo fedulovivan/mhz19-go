@@ -32,9 +32,10 @@ const (
 	ENGINE TagName = "[engine] "
 	MQTT   TagName = "[mqtt]   "
 	TBOT   TagName = "[tbot]   "
-	MODEL  TagName = "[model]  "
+	DB     TagName = "[db]     "
 	REST   TagName = "[rest]   "
 	RULES  TagName = "[rules]  "
+	STATS  TagName = "[stats]  "
 )
 
 func MakeTag(tag TagName) func(m string) string {

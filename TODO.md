@@ -6,12 +6,13 @@
 - finish handling of "Mapping" in invokeActionFunc
 
 ### Prio 1
-- implement /stats endpoint
+- think how to move messages_repository outside of engine package
+- insert unknown devices automatically
 - implement log tag with meta, so we can add attrs to function
 - ? split rest api and engine into separate microservices
 - ? make logger and logTag a dependencies for service, api and repository
 - ? consider switching to postgres from sqlite3
-- get rid of full path in SQLITE_FILENAME to run tests
+- ? get rid of full path in SQLITE_FILENAME to run tests - no more actual after introducing di
 - no mqtt (re)connection if network was not available on app startup and returned online later
 - create meta which descibes expected args for conditions and actions and validate
 - get rid of any in Send(...any)
@@ -28,6 +29,12 @@
 
 ### Completed
 
+- (+) implement "record message" action
+- (+) create messages service and make it depency of engine
+- (+) implement /rules/1 endpoint and where querying
+- (+) implement /stats endpoint
+- (+) double logging for "DBG [stats]   ✨ repo:Get took 755.584µs" - just forgotten extra call of slog in TimeTrack
+- (+) create table messages
 - (+) develop an approach of passing device id "0x00158d00042446ec" via json (unmarshalling)
 - (+) finish ToDbArguments
 - (+) implement REST API to read/create/update rules (use https://github.com/go-ozzo/ozzo-routing or https://github.com/gin-gonic/gin)
