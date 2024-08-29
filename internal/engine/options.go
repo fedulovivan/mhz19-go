@@ -1,10 +1,13 @@
 package engine
 
+import "github.com/fedulovivan/mhz19-go/internal/logger"
+
 type Options struct {
-	logTag         func(m string) string
+	logTag         logger.LogTagFn
 	providers      []Provider
 	rules          []Rule
 	messageService MessagesService
+	devicesService DevicesService
 }
 
 func NewOptions() Options {
@@ -22,6 +25,9 @@ func (o *Options) SetProviders(s ...Provider) {
 func (o *Options) SetMessagesService(s MessagesService) {
 	o.messageService = s
 }
-func (o *Options) SetRules(rr []Rule) {
-	o.rules = rr
+func (o *Options) SetDevicesService(s DevicesService) {
+	o.devicesService = s
+}
+func (o *Options) SetRules(rules ...Rule) {
+	o.rules = rules
 }

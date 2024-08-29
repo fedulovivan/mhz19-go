@@ -1,18 +1,18 @@
 
 ### Prio 0
-- "FOREIGN KEY (device_id) REFERENCES devices(native_id)" requires sole UNIQUE index for column devices.native_id
-- "http: superfluous response.WriteHeader call from github.com/go-ozzo/ozzo-routing/v2.(*Router).handleError (router.go:131)"
+- "FOREIGN KEY (device_id) REFERENCES devices(native_id)" requires sole UNIQUE index for column devices.native_id, while we actually need UNIQUE(device_class_id, native_id) since its unreasonable to contraint native_id across devices off all classes
+- "http: superfluous response.WriteHeader call from github.com/go-ozzo/ozzo-routing/v2.(*Router).handleError (router.go:131)" - appears after intterruptin apache bench
 - find why UnmarshalJSON is not called in Test164
 - finish handling of "Mapping" in invokeActionFunc
+- load real mapping rules on engine startup
+- log errors captured by router error handler, also change default handler to render error as a json
+- "apr_socket_recv: Operation timed out (60)" - https://stackoverflow.com/questions/30352725/why-is-my-hello-world-go-server-getting-crushed-by-apachebench
+- db file stuck on 6.5mb as with 12k even after migrate-reset
+- "🧨 api:getAll took 3.451973917s" when reading 1k rules 1k times - need postgres? 
 
 ### Prio 1
-- think how to move messages_repository outside of engine package
-- insert unknown devices automatically
+- think how to move messages_* and devices_* outside of engine package to their own
 - implement log tag with meta, so we can add attrs to function
-- ? split rest api and engine into separate microservices
-- ? make logger and logTag a dependencies for service, api and repository
-- ? consider switching to postgres from sqlite3
-- ? get rid of full path in SQLITE_FILENAME to run tests - no more actual after introducing di
 - no mqtt (re)connection if network was not available on app startup and returned online later
 - create meta which descibes expected args for conditions and actions and validate
 - get rid of any in Send(...any)
@@ -20,15 +20,26 @@
 - mappings rules could be pre-defined (system) and loaded from db (user-level)
 - create test service for sonoff wifi devices (poll them periodically to receive status updates)
 - find out why cli command "make test" and "vscode" report different coverage statistics: 86.9% vs 100%. vscode syntax - `Running tool: /opt/homebrew/bin/go test -timeout 30s -coverprofile=/var/folders/5v/0wjs9g1948ddpdqkgf1h31q80000gn/T/vscode-go7lC7ip/go-code-cover github.com/fedulovivan/mhz19-go/internal/engine`
+- try postgres instead of sqlite3
 - try https://pkg.go.dev/go.uber.org/fx
 - try opentelemetry - https://opentelemetry.io/docs/languages/go/getting-started/   
 - try prometheus
 - try grpc
 - try openapi https://en.wikipedia.org/wiki/OpenAPI_Specification
 - try https://github.com/go-ozzo/ozzo-routing
+- (?) make logger and logTag a dependencies for service, api and repository
+- (?) get rid of full path in SQLITE_FILENAME to run tests - no more actual after introducing di
+- (?) internal/devices/repository.go::UpsertDevices should not stop on error
 
 ### Completed
 
+- (+) got an error "database is locked" executing INSERT INTO messages... - looks we need explicit tx.Rollback()
+- (+) finish implementation of device.upsert
+- (+) create devices api
+- (+) create messages api
+- (+) create action UpsertZigbeeDevices
+- (+) delete internal/engine/dummy_provider.go - https://go.dev/blog/deadcode
+- (+) insert unknown devices automatically
 - (+) implement "record message" action
 - (+) create messages service and make it depency of engine
 - (+) implement /rules/1 endpoint and where querying
@@ -63,7 +74,9 @@
 - (+) for mqtt client, rather than hardocding in defaultMessageHandler, define rules/adapters for transforming topic and payload into final message per device class
 - (+) consider replacing hand-written adapters with mqttClient.AddRoute() API, also add warning for messages captured by defaultMessageHandler (assuming all topics we subscribe should have own handlers and default one should not be reached)
 - (?) introduce intermediate layer between named args and function implementation using regular args (more robust, simplify things like ZigbeeDeviceFn)
-- (?) think about "first match" strategy in handleMessage
+- (?) think about "first match" strategy in handleMessage - we do not need this, since we to execute RecordMessage and some other action
+- (?) split rest api and engine into separate microservices - does no look much reasonable, since both are heavily rely on db layer
+
 
 ### new mapping rule structure
 ```golang

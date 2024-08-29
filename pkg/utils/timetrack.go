@@ -10,16 +10,16 @@ import (
 // + extra goodies
 func TimeTrack(logTag func(m string) string, start time.Time, name string) {
 	elapsed := time.Since(start)
-	wayFast := elapsed < time.Millisecond*5
-	badlyLong := elapsed > time.Second*1
+	wayFast := elapsed < time.Millisecond*10
+	badlySlow := elapsed > time.Second*1
 	badge := ""
 	if wayFast {
 		badge = "✨ "
-	} else if badlyLong {
+	} else if badlySlow {
 		badge = "🧨 "
 	}
 	m := logTag(fmt.Sprintf("%v%s took %s", badge, name, elapsed))
-	if badlyLong {
+	if badlySlow {
 		slog.Warn(m)
 	} else {
 		slog.Debug(m)

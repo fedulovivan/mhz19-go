@@ -2,7 +2,6 @@ package engine
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -10,9 +9,9 @@ import (
 
 type DeviceId string
 
-func (d DeviceId) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf(`"DeviceId(%s)"`, d)), nil
-}
+// func (d DeviceId) MarshalJSON() ([]byte, error) {
+// 	return []byte(fmt.Sprintf(`"DeviceId(%s)"`, d)), nil
+// }
 
 type Args map[string]any
 

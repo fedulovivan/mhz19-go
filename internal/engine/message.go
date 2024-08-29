@@ -9,8 +9,6 @@ type ChannelMeta struct {
 	MqttTopic string
 }
 
-// type JsonPayload any
-
 type Message struct {
 	// channel, which was used to receive message
 	ChannelType ChannelType `json:"channelType"`
@@ -21,11 +19,11 @@ type Message struct {
 	// time when message was received by backend
 	Timestamp time.Time `json:"timestamp"`
 	// parsed message payload json
-	Payload any `json:"payload"`
+	Payload any `json:"payload,omitempty"`
 	// filled only if failed to parse into json
-	RawPayload []byte
+	RawPayload []byte `json:"-"`
 	// additional metadata specific for the current channel
-	ChannelMeta ChannelMeta
+	ChannelMeta ChannelMeta `json:"-"`
 }
 
 // tuple of current and previous messages

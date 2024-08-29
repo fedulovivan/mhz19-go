@@ -234,6 +234,14 @@ func mappingsSelect(ctx context.Context, tx *sql.Tx, ruleId sql.NullInt32) ([]Db
 	)
 }
 
+func Count(ctx context.Context, tx *sql.Tx) (int32, error) {
+	return db.Count(
+		tx,
+		ctx,
+		`SELECT COUNT(*) FROM rules`,
+	)
+}
+
 func (repo rulesRepository) Create(
 	rule DbRule,
 	conditions []DbRuleCondition,
@@ -241,12 +249,12 @@ func (repo rulesRepository) Create(
 	arguments []DbRuleConditionOrActionArgument,
 	mappings []DbRuleActionArgumentMapping,
 ) (err error) {
-	// defer utils.TimeTrack(logTag, time.Now(), "repo:Create")
 	var realCondIdsMap = make(map[int32]int32, len(conditions))
 	var realActionIdsMap = make(map[int32]int32, len(actions))
 	var realArgIdsMap = make(map[int32]int32, len(arguments))
 	ctx := context.Background()
 	tx, err := repo.database.Begin()
+	defer db.Rollback(tx)
 	if err != nil {
 		return
 	}
@@ -339,9 +347,9 @@ func (repo rulesRepository) Get(ruleId sql.NullInt32) (
 	mappings []DbRuleActionArgumentMapping,
 	err error,
 ) {
-	// defer utils.TimeTrack(logTag, time.Now(), "repo:Get")
 	g, ctx := errgroup.WithContext(context.Background())
 	tx, err := repo.database.Begin()
+	defer db.Rollback(tx)
 	if err != nil {
 		return
 	}

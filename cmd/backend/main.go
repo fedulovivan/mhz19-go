@@ -8,8 +8,10 @@ import (
 
 	"github.com/fedulovivan/mhz19-go/internal/app"
 	"github.com/fedulovivan/mhz19-go/internal/db"
+	"github.com/fedulovivan/mhz19-go/internal/devices"
 	"github.com/fedulovivan/mhz19-go/internal/engine"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
+	"github.com/fedulovivan/mhz19-go/internal/messages"
 	"github.com/fedulovivan/mhz19-go/internal/rest"
 
 	mqtt "github.com/fedulovivan/mhz19-go/internal/providers/mqtt"
@@ -30,13 +32,22 @@ func main() {
 	engineOptions.SetLogTag(logger.MakeTag(logger.ENGINE))
 	engineOptions.SetProviders(mqtt.Provider, tbot.Provider)
 	engineOptions.SetMessagesService(
-		engine.NewService(
-			engine.NewRepository(
-				db.Init(),
+		engine.NewMessagesService(
+			messages.NewRepository(
+				db.Instance(),
 			),
 		),
 	)
-	engineOptions.SetRules(engine.GetTestStaticRules())
+	engineOptions.SetDevicesService(
+		engine.NewDevicesService(
+			devices.NewRepository(
+				db.Instance(),
+			),
+		),
+	)
+	engineOptions.SetRules(
+		engine.GetStaticRules()...,
+	)
 	engineInstance := engine.NewEngine(engineOptions)
 	engineInstance.Start()
 

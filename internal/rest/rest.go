@@ -7,7 +7,10 @@ import (
 
 	"github.com/fedulovivan/mhz19-go/internal/app"
 	"github.com/fedulovivan/mhz19-go/internal/db"
+	"github.com/fedulovivan/mhz19-go/internal/devices"
+	"github.com/fedulovivan/mhz19-go/internal/engine"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
+	"github.com/fedulovivan/mhz19-go/internal/messages"
 	"github.com/fedulovivan/mhz19-go/internal/rules"
 	"github.com/fedulovivan/mhz19-go/internal/stats"
 	routing "github.com/go-ozzo/ozzo-routing/v2"
@@ -20,27 +23,48 @@ var logTag = logger.MakeTag(logger.REST)
 func Init() {
 
 	router := routing.New()
-	database := db.Init()
 
 	router.Use(
 		slash.Remover(http.StatusMovedPermanently),
 		content.TypeNegotiator(content.JSON),
 	)
 
+	// rules
 	rules.NewApi(
 		router,
 		rules.NewService(
 			rules.NewRepository(
-				database,
+				db.Instance(),
 			),
 		),
 	)
 
+	// stats
 	stats.NewApi(
 		router,
 		stats.NewService(
 			stats.NewRepository(
-				database,
+				db.Instance(),
+			),
+		),
+	)
+
+	// devices
+	engine.NewDevicesApi(
+		router,
+		engine.NewDevicesService(
+			devices.NewRepository(
+				db.Instance(),
+			),
+		),
+	)
+
+	// messages
+	engine.NewMessagesApi(
+		router,
+		engine.NewMessagesService(
+			messages.NewRepository(
+				db.Instance(),
 			),
 		),
 	)

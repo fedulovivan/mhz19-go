@@ -7,7 +7,7 @@ import (
 
 type CondFn byte
 
-type CondImpl func(mt MessageTuple, args Args) bool
+type CondImpl func(mt MessageTuple, args Args, e *engine) bool
 
 type CondImpls map[CondFn]CondImpl
 
@@ -39,8 +39,8 @@ func (s CondFn) String() string {
 // 	return []byte(fmt.Sprintf(`"%s"`, s.String())), nil
 // }
 
-var Equal CondImpl = func(mt MessageTuple, args Args) bool {
-	c := NewArgReader(COND_EQUAL, mt[0], args)
+var Equal CondImpl = func(mt MessageTuple, args Args, e *engine) bool {
+	c := NewArgReader(COND_EQUAL, mt[0], args, e.options.logTag)
 	left := c.Get("Left")
 	right := c.Get("Right")
 	// left := Get[int](c, "Left")
@@ -51,8 +51,8 @@ var Equal CondImpl = func(mt MessageTuple, args Args) bool {
 	return false
 }
 
-var NotEqual CondImpl = func(mt MessageTuple, args Args) bool {
-	c := NewArgReader(COND_NOT_EQUAL, mt[0], args)
+var NotEqual CondImpl = func(mt MessageTuple, args Args, e *engine) bool {
+	c := NewArgReader(COND_NOT_EQUAL, mt[0], args, e.options.logTag)
 	left := c.Get("Left")
 	right := c.Get("Right")
 	if c.Ok() {
@@ -61,8 +61,8 @@ var NotEqual CondImpl = func(mt MessageTuple, args Args) bool {
 	return false
 }
 
-var InList CondImpl = func(mt MessageTuple, args Args) bool {
-	c := NewArgReader(COND_IN_LIST, mt[0], args)
+var InList CondImpl = func(mt MessageTuple, args Args, e *engine) bool {
+	c := NewArgReader(COND_IN_LIST, mt[0], args, e.options.logTag)
 	v := c.Get("Value")
 	list := c.Get("List")
 	if !c.Ok() {
@@ -79,8 +79,8 @@ var InList CondImpl = func(mt MessageTuple, args Args) bool {
 
 // return false for nil and empty strings
 // return true for the rest
-var NotNil CondImpl = func(mt MessageTuple, args Args) bool {
-	c := NewArgReader(COND_NOT_NIL, mt[0], args)
+var NotNil CondImpl = func(mt MessageTuple, args Args, e *engine) bool {
+	c := NewArgReader(COND_NOT_NIL, mt[0], args, e.options.logTag)
 	v := c.Get("Value")
 	if !c.Ok() {
 		return false
@@ -95,9 +95,9 @@ var NotNil CondImpl = func(mt MessageTuple, args Args) bool {
 	}
 }
 
-var Changed CondImpl = func(mt MessageTuple, args Args) bool {
-	leftr := NewArgReader(COND_CHANGED, mt[0], args)
-	rightr := NewArgReader(COND_CHANGED, mt[1], args)
+var Changed CondImpl = func(mt MessageTuple, args Args, e *engine) bool {
+	leftr := NewArgReader(COND_CHANGED, mt[0], args, e.options.logTag)
+	rightr := NewArgReader(COND_CHANGED, mt[1], args, e.options.logTag)
 	left := leftr.Get("Value")
 	right := rightr.Get("Value")
 	if leftr.Ok() && rightr.Ok() {
@@ -107,37 +107,23 @@ var Changed CondImpl = func(mt MessageTuple, args Args) bool {
 }
 
 // args: List
-var ZigbeeDevice CondImpl = func(mt MessageTuple, args Args) bool {
+var ZigbeeDevice CondImpl = func(mt MessageTuple, args Args, e *engine) bool {
 	return Equal(
 		mt,
 		Args{
 			"Left":  "$deviceClass",
 			"Right": DEVICE_CLASS_ZIGBEE_DEVICE,
 		},
+		e,
 	) && InList(
 		mt,
 		Args{
 			"Value": "$deviceId",
 			"List":  args["List"],
 		},
+		e,
 	)
 }
-
-// var DeviceClassCond CondImpl = func(mt MessageTuple, args Args) bool {
-// 	return Equal(
-// 		mt,
-// 		Args{
-// 			"Left":  "$deviceClass",
-// 			"Right": DEVICE_CLASS_ZIGBEE_DEVICE,
-// 		},
-// 	) && InList(
-// 		mt,
-// 		Args{
-// 			"Value": "$deviceId",
-// 			"List":  args["List"],
-// 		},
-// 	)
-// }
 
 var conditionImplementations = CondImpls{
 	COND_CHANGED:       Changed,
@@ -147,20 +133,3 @@ var conditionImplementations = CondImpls{
 	COND_NOT_NIL:       NotNil,
 	COND_ZIGBEE_DEVICE: ZigbeeDevice,
 }
-
-// func GEqual[T comparable](a T, b T) bool {
-// 	return a == b
-// }
-// func GInList[T comparable](list []T, v T) bool {
-// 	return slices.Contains(list, v)
-// }
-// func GNotNil(v any) bool {
-// 	switch vTyped := v.(type) {
-// 	case string:
-// 		return len(vTyped) > 0
-// 	case nil:
-// 		return false
-// 	default:
-// 		return true
-// 	}
-// }

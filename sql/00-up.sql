@@ -25,7 +25,7 @@ CREATE TABLE devices (
    	id INTEGER PRIMARY KEY AUTOINCREMENT,
     native_id TEXT NOT NULL UNIQUE,
     device_class_id INTEGER NOT NULL,
-	name TEXT NOT NULL,
+	name TEXT,
 	comments TEXT,
     origin TEXT,
     json TEXT,
@@ -94,7 +94,7 @@ CREATE TABLE messages (
     device_id TEXT,
 	timestamp DATETIME NOT NULL,
 	json TEXT NOT NULL,
-    -- CONSTRAINT messages_fk_device FOREIGN KEY (device_id) REFERENCES devices(native_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT messages_fk_device FOREIGN KEY (device_id) REFERENCES devices(native_id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT messages_fk_dc FOREIGN KEY (device_class_id) REFERENCES device_classes(id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT messages_fk_channel FOREIGN KEY (channel_type_id) REFERENCES channel_types(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -127,6 +127,7 @@ INSERT INTO devices VALUES(1, '0x00158d00042446ec', 1, 'test zigbee device', NUL
 INSERT INTO devices VALUES(2, '192.168.88.188', 2, 'test pinger device', NULL, NULL, NULL);
 
 COMMIT;
+
 -- INSERT INTO rules VALUES(1,'test mapping 1',NULL,NULL);
 -- INSERT INTO rule_conditions VALUES(1,1,2,NULL,NULL);
 -- INSERT INTO rule_actions VALUES(1,1,2,NULL);

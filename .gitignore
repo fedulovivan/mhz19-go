@@ -2,4 +2,4 @@
 bin/
 .env
 database*.bin
-migrations/*dump.sql
+sql/*dump.sql

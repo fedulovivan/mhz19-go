@@ -1,6 +1,6 @@
 package engine
 
-func GetTestStaticRules() []Rule {
+func GetStaticRules() []Rule {
 	return []Rule{
 
 		// Comments: "test mapping 1",
@@ -126,6 +126,20 @@ func GetTestStaticRules() []Rule {
 				},
 			},
 			Actions: []Action{{Fn: ACTION_RECORD_MESSAGE}},
+		},
+
+		{
+			Id:       6,
+			Disabled: false,
+			Comments: "system rule to create devices upon receiving message from bridge",
+			Condition: Condition{
+				Fn: COND_EQUAL,
+				Args: Args{
+					"Left":  "$deviceClass",
+					"Right": DEVICE_CLASS_ZIGBEE_BRIDGE,
+				},
+			},
+			Actions: []Action{{Fn: ACTION_UPSERT_ZIGBEE_DEVICES}},
 		},
 	}
 }

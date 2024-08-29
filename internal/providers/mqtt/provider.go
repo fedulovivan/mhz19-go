@@ -157,39 +157,3 @@ func subscribe(client MqttLib.Client, topic string) {
 	}
 	slog.Info(logTag("Subscribed to"), "topic", topic)
 }
-
-// var wg sync.WaitGroup
-// s.client.AddRoute("zigbee2mqtt/+", zigbeeDeviceHandler)
-// s.client.AddRoute("device-pinger/+/status", devicePingerHandler)
-// s.client.AddRoute("/VALVE/#", valveManipulatorHandler)
-// subscribe_all(s.client, app.Config.MqttTopics)
-// var zigbeeDeviceHandler =
-// var devicePingerHandler = func(client MqttLib.Client, msg MqttLib.Message) {
-// 	slog.Debug("zigbeeDeviceHandler", "topic", msg.Topic())
-// }
-// var valveManipulatorHandler = func(client MqttLib.Client, msg MqttLib.Message) {
-// 	slog.Debug("zigbeeDeviceHandler", "topic", msg.Topic())
-// }
-// a, err := AdapterFactory(
-// 	msg.Topic(),
-// 	msg.Payload(),
-// )
-// if err != nil {
-// 	slog.Error(withTag(err.Error()))
-// 	return
-// }
-// m, err := a.Message()
-// if err != nil {
-// 	slog.Error(withTag(err.Error()))
-// 	return
-// }
-// s.ch <- m
-// func subscribe_all(client MqttLib.Client, topics []string) {
-// 	var wg sync.WaitGroup
-// 	for _, topic := range topics {
-// 		wg.Add(1)
-// 		go subscribe(client, topic, &wg)
-// 	}
-// 	wg.Wait()
-// 	slog.Debug(withTag("All subscribtions are settled"))
-// }

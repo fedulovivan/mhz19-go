@@ -125,7 +125,8 @@ var testDataTable = []TableRow{
 			},
 		},
 		expectedLen:  1,
-		expectedJson: `[{"id":1,"comments":"case 2","condition":{"fn":1,"args":{"Fifth":"DeviceId(0x00158d0004244bda)","Fourth":"DeviceClass(1)","Left":"foo","Right":"bar","Third":"baz"}},"actions":[{"fn":1,"args":{"ListIds":["DeviceId(10011cec96)","DeviceId(78345aaa67)"],"Value":"$message.action"},"mapping":{"Value":{"lorem-3":"dolor-4","sit-5":"amet-6"}},"deviceId":"DeviceId(0x00158d0004244bda)"}]}]`,
+		expectedJson: `[{"id":1,"comments":"case 2","condition":{"fn":1,"args":{"Fifth":"0x00158d0004244bda","Fourth":1,"Left":"foo","Right":"bar","Third":"baz"}},"actions":[{"fn":1,"args":{"ListIds":["10011cec96","78345aaa67"],"Value":"$message.action"},"mapping":{"Value":{"lorem-3":"dolor-4","sit-5":"amet-6"}},"deviceId":"0x00158d0004244bda"}]}]`,
+		// expectedJson: `[{"id":1,"comments":"case 2","condition":{"fn":1,"args":{"Fifth":"DeviceId(0x00158d0004244bda)","Fourth":"DeviceClass(1)","Left":"foo","Right":"bar","Third":"baz"}},"actions":[{"fn":1,"args":{"ListIds":["DeviceId(10011cec96)","DeviceId(78345aaa67)"],"Value":"$message.action"},"mapping":{"Value":{"lorem-3":"dolor-4","sit-5":"amet-6"}},"deviceId":"DeviceId(0x00158d0004244bda)"}]}]`,
 	},
 	// case 02
 	{

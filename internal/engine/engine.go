@@ -50,10 +50,10 @@ func (e engine) Stop() {
 func (e engine) invokeConditionFunc(mt MessageTuple, fn CondFn, args Args, r Rule, tid string) bool {
 	impl, ok := conditionImplementations[fn]
 	if !ok {
-		slog.Error(fmt.Sprintf("Condition function [%v] not yet implemented", fn))
+		slog.Error(e.options.logTag(fmt.Sprintf("Condition function [%v] not yet implemented", fn)))
 		return false
 	}
-	res := impl(mt, args)
+	res := impl(mt, args, &e)
 	slog.Debug(e.options.logTag(tid+fmt.Sprintf("Rule #%v condition exec", r.Id)), "fn", fn, "args", args, "res", res)
 	return res
 }
@@ -61,7 +61,7 @@ func (e engine) invokeConditionFunc(mt MessageTuple, fn CondFn, args Args, r Rul
 func (e engine) invokeActionFunc(mm []Message, a Action, r Rule, tid string) {
 	impl, ok := actions[a.Fn]
 	if !ok {
-		slog.Error(fmt.Sprintf("Action function [%v] not yet implemented", a.Fn))
+		slog.Error(e.options.logTag(fmt.Sprintf("Action function [%v] not yet implemented", a.Fn)))
 		return
 	}
 	slog.Debug(e.options.logTag(tid+fmt.Sprintf("Rule #%v action exec", r.Id)), "fn", a.Fn, "args", a.Args)

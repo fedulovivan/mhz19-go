@@ -5,6 +5,9 @@ import (
 	"database/sql"
 
 	"github.com/fedulovivan/mhz19-go/internal/db"
+	"github.com/fedulovivan/mhz19-go/internal/devices"
+	"github.com/fedulovivan/mhz19-go/internal/messages"
+	"github.com/fedulovivan/mhz19-go/internal/rules"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -22,43 +25,19 @@ func NewRepository(database *sql.DB) StatsRepository {
 	}
 }
 
-func rulesCount(ctx context.Context, tx *sql.Tx) (int32, error) {
-	return db.Count(
-		tx,
-		ctx,
-		`SELECT COUNT(*) FROM rules`,
-	)
-}
-
-func devicesCount(ctx context.Context, tx *sql.Tx) (int32, error) {
-	return db.Count(
-		tx,
-		ctx,
-		`SELECT COUNT(*) FROM devices`,
-	)
-}
-
-func messagesCount(ctx context.Context, tx *sql.Tx) (int32, error) {
-	return db.Count(
-		tx,
-		ctx,
-		`SELECT COUNT(*) FROM messages`,
-	)
-}
-
 func (repo statsRepository) Get() (
 	res GetResult,
 	err error,
 ) {
-	// defer utils.TimeTrack(logTag, time.Now(), "repo:Get")
 	g, ctx := errgroup.WithContext(context.Background())
 	tx, err := repo.database.Begin()
+	defer db.Rollback(tx)
 	if err != nil {
 		return
 	}
-	g.Go(func() (e error) { res.Rules, e = rulesCount(ctx, tx); return })
-	g.Go(func() (e error) { res.Devices, e = devicesCount(ctx, tx); return })
-	g.Go(func() (e error) { res.Messages, e = messagesCount(ctx, tx); return })
+	g.Go(func() (e error) { res.Rules, e = rules.Count(ctx, tx); return })
+	g.Go(func() (e error) { res.Devices, e = devices.Count(ctx, tx); return })
+	g.Go(func() (e error) { res.Messages, e = messages.Count(ctx, tx); return })
 	err = g.Wait()
 	if err == nil {
 		err = db.Commit(tx)

@@ -19,11 +19,11 @@ import (
 
 var logTag = logger.MakeTag(logger.DB)
 
-var dbh *sql.DB
+var instance *sql.DB
 
-func Init() *sql.DB {
-	if dbh != nil {
-		return dbh
+func Instance() *sql.DB {
+	if instance != nil {
+		return instance
 	}
 	var err error
 	dbabspath, err := filepath.Abs(app.Config.SqliteFilename)
@@ -33,15 +33,15 @@ func Init() *sql.DB {
 	if _, err := os.Stat(dbabspath); errors.Is(err, os.ErrNotExist) {
 		Panic(err)
 	}
-	dbh, err = sql.Open("sqlite3", dbabspath)
+	instance, err = sql.Open("sqlite3", dbabspath)
 	if err != nil {
 		Panic(err)
 	}
-	_, err = dbh.Exec("PRAGMA foreign_keys=ON")
+	_, err = instance.Exec("PRAGMA foreign_keys=ON")
 	if err != nil {
 		Panic(err)
 	}
-	return dbh
+	return instance
 }
 
 func Panic(err error) {
@@ -66,6 +66,13 @@ func NewNullString(v string) sql.NullString {
 // func Begin() (*sql.Tx, error) {
 // 	return dbh.Begin()
 // }
+
+func Rollback(tx *sql.Tx) {
+	if tx == nil {
+		return
+	}
+	_ = tx.Rollback()
+}
 
 // https://github.com/golang/go/issues/43507
 // note(!) we should swallow "context canceled" on commit
@@ -105,18 +112,23 @@ type DbCount struct {
 	Value int32
 }
 
-type Where = map[string]sql.NullInt32
+// type WhereVal interface {
+// 	sql.NullInt32 | sql.NullString
+// }
+
+type Where = map[string]any
 
 func AddWhere(in string, where Where) (out string) {
 	var entries []string
 	out = in
 	for key, value := range where {
-		if value.Valid {
-			entries = append(entries, fmt.Sprintf("%v = ?", key))
+		switch vtyped := value.(type) {
+		case sql.NullInt32:
+		case sql.NullString:
+			if vtyped.Valid {
+				entries = append(entries, fmt.Sprintf("%v = ?", key))
+			}
 		}
-		// if vtyped, ok := value.(sql.NullInt32); ok && vtyped.Valid {
-		// 	entries = append(entries, fmt.Sprintf("%v = ?", key))
-		// }
 	}
 	if len(entries) > 0 {
 		out = fmt.Sprintf("%v WHERE %v", in, strings.Join(entries, " AND "))
@@ -126,12 +138,16 @@ func AddWhere(in string, where Where) (out string) {
 
 func PickWhereValues(where Where) (out []any) {
 	for _, value := range where {
-		if value.Valid {
-			out = append(out, value.Int32)
+		switch vtyped := value.(type) {
+		case sql.NullInt32:
+			if vtyped.Valid {
+				out = append(out, vtyped.Int32)
+			}
+		case sql.NullString:
+			if vtyped.Valid {
+				out = append(out, vtyped.String)
+			}
 		}
-		// if vtyped, ok := value.(sql.NullInt32); ok && vtyped.Valid {
-		// 	out = append(out, vtyped.Int32)
-		// }
 	}
 	return
 }

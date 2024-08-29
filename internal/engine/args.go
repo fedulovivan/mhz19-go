@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log/slog"
 	"strings"
+
+	"github.com/fedulovivan/mhz19-go/internal/logger"
 )
 
 type ArgReader struct {
@@ -12,14 +14,15 @@ type ArgReader struct {
 	m      Message
 	args   Args
 	errors []error
+	logTag logger.LogTagFn
 }
 
-func (r *ArgReader) Ok() bool {
-	valid := len(r.errors) == 0
+func (r *ArgReader) Ok() (valid bool) {
+	valid = len(r.errors) == 0
 	if !valid {
-		slog.Error(string(r.fn) + ": " + errors.Join(r.errors...).Error())
+		slog.Error(r.logTag(string(r.fn) + ": " + errors.Join(r.errors...).Error()))
 	}
-	return valid
+	return
 }
 
 func (r *ArgReader) Get(field string) any {
@@ -42,12 +45,13 @@ func (r *ArgReader) Get(field string) any {
 // 	return vt
 // }
 
-func NewArgReader(fn CondFn, m Message, args Args) ArgReader {
+func NewArgReader(fn CondFn, m Message, args Args, logTag logger.LogTagFn) ArgReader {
 	return ArgReader{
 		fn,
 		m,
 		args,
 		make([]error, 0),
+		logTag,
 	}
 }
 

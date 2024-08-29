@@ -27,26 +27,29 @@ func Init() {
 
 type TagName string
 
+type LogTagFn = func(m string) string
+
 const (
-	MAIN   TagName = "[main]   "
-	ENGINE TagName = "[engine] "
-	MQTT   TagName = "[mqtt]   "
-	TBOT   TagName = "[tbot]   "
-	DB     TagName = "[db]     "
-	REST   TagName = "[rest]   "
-	RULES  TagName = "[rules]  "
-	STATS  TagName = "[stats]  "
+	MAIN     TagName = "[main]     "
+	ENGINE   TagName = "[engine]   "
+	MQTT     TagName = "[mqtt]     "
+	TBOT     TagName = "[tbot]     "
+	DB       TagName = "[db]       "
+	REST     TagName = "[rest]     "
+	RULES    TagName = "[rules]    "
+	STATS    TagName = "[stats]    "
+	MESSAGES TagName = "[messages] "
+	DEVICES  TagName = "[devices]  "
 )
 
-func MakeTag(tag TagName) func(m string) string {
+func MakeTag(tag TagName) LogTagFn {
 	return func(message string) string {
 		return string(tag) + " " + message
 	}
+	// if app.Config.IsDev {
+	// 	// in development pad tag with spaces for extra nice output
+	// 	return func(message string) string {
+	// 		return fmt.Sprintf("%-10s", "["+tag+"]") + " " + message
+	// 	}
+	// }
 }
-
-// if app.Config.IsDev {
-// 	// in development pad tag with spaces for extra nice output
-// 	return func(message string) string {
-// 		return fmt.Sprintf("%-10s", "["+tag+"]") + " " + message
-// 	}
-// }
