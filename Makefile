@@ -58,6 +58,12 @@ migrate-dump:
 
 .PHONY: test
 test:
-	SQLITE_FILENAME=$(PWD)/database_ut.bin go test -cover -race -count 1 ./...
+	go test -cover -race -count 1 ./...
+
+.PHONY: test-one
+test-one:
+	go test -v github.com/fedulovivan/mhz19-go/internal/engine -run "TestMappings"
+	
+# go test -cover -race -count 1 -v github.com/fedulovivan/mhz19-go/internal/engine -run "TestMappings"
 
 

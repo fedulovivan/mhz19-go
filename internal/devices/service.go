@@ -1,39 +1,41 @@
-package engine
+package devices
 
 import (
 	"database/sql"
 	"encoding/json"
 
-	"github.com/fedulovivan/mhz19-go/internal/devices"
+	// "github.com/fedulovivan/mhz19-go/internal/devices"
+	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
 type Device struct {
-	Id            int         `json:"id,omitempty"`
-	DeviceId      DeviceId    `json:"deviceId,omitempty"`
-	DeviceClassId DeviceClass `json:"deviceClassId,omitempty"`
-	Name          string      `json:"name,omitempty"`
-	Comments      string      `json:"comments,omitempty"`
-	Origin        string      `json:"origin,omitempty"`
-	Json          any         `json:"json,omitempty"`
+	Id            int               `json:"id,omitempty"`
+	DeviceId      types.DeviceId    `json:"deviceId,omitempty"`
+	DeviceClassId types.DeviceClass `json:"deviceClassId,omitempty"`
+	Name          string            `json:"name,omitempty"`
+	Comments      string            `json:"comments,omitempty"`
+	Origin        string            `json:"origin,omitempty"`
+	Json          any               `json:"json,omitempty"`
 }
 
 type DevicesService interface {
 	Get() ([]Device, error)
+	GetOne(id types.DeviceId) (Device, error)
 	Upsert(devices []Device) error
 }
 
 type devicesService struct {
-	repository devices.DevicesRepository
+	repository DevicesRepository
 }
 
 func (s devicesService) Upsert(devices []Device) (err error) {
 	return s.repository.UpsertDevices(ToDb(devices))
 }
 
-func ToDb(in []Device) (out []devices.DbDevice) {
+func ToDb(in []Device) (out []DbDevice) {
 	for _, d := range in {
 		mjson, err := json.Marshal(d.Json)
-		out = append(out, devices.DbDevice{
+		out = append(out, DbDevice{
 			NativeId:      string(d.DeviceId),
 			DeviceClassId: int32(d.DeviceClassId),
 			Name:          sql.NullString{String: d.Name, Valid: len(d.Name) > 0},
@@ -45,7 +47,7 @@ func ToDb(in []Device) (out []devices.DbDevice) {
 	return
 }
 
-func BuildDevices(in []devices.DbDevice) (out []Device) {
+func BuildDevices(in []DbDevice) (out []Device) {
 	for _, d := range in {
 		var payload any
 		if d.Json.Valid {
@@ -53,8 +55,8 @@ func BuildDevices(in []devices.DbDevice) (out []Device) {
 		}
 		out = append(out, Device{
 			Id:            int(d.Id),
-			DeviceId:      DeviceId(d.NativeId),
-			DeviceClassId: DeviceClass(d.DeviceClassId),
+			DeviceId:      types.DeviceId(d.NativeId),
+			DeviceClassId: types.DeviceClass(d.DeviceClassId),
 			Name:          d.Name.String,
 			Comments:      d.Comments.String,
 			Origin:        d.Origin.String,
@@ -72,7 +74,11 @@ func (s devicesService) Get() (devices []Device, err error) {
 	return BuildDevices(dbdev), nil
 }
 
-func NewDevicesService(r devices.DevicesRepository) DevicesService {
+func (s devicesService) GetOne(id types.DeviceId) (res Device, err error) {
+	return
+}
+
+func NewService(r DevicesRepository) DevicesService {
 	return devicesService{
 		repository: r,
 	}

@@ -1,8 +1,8 @@
-package mqtt_service
+package mqtt_provider
 
 import (
 	MqttLib "github.com/eclipse/paho.mqtt.golang"
-	"github.com/fedulovivan/mhz19-go/internal/engine"
+	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
 type valveManipulator struct {
@@ -10,10 +10,10 @@ type valveManipulator struct {
 }
 
 func NewValveManipulator(m MqttLib.Message) *valveManipulator {
-	return &valveManipulator{parserBase{m, engine.DEVICE_CLASS_VALVE}}
+	return &valveManipulator{parserBase{m, types.DEVICE_CLASS_VALVE}}
 }
 
-func (p *valveManipulator) Parse() (engine.Message, bool) {
+func (p *valveManipulator) Parse() (types.Message, bool) {
 	// no customization, just call parse_base
 	return p.parse_base()
 }

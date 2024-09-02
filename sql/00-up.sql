@@ -54,10 +54,11 @@ CREATE TABLE rule_actions (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	rule_id INTEGER NOT NULL,
 	function_type INTEGER,
-    device_id TEXT,
+    -- device_id TEXT,
     CONSTRAINT rule_actions_fk_rules FOREIGN KEY (rule_id) REFERENCES rules(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT rule_actions_fk_function FOREIGN KEY (function_type) REFERENCES action_functions(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT rule_actions_fk_devices FOREIGN KEY (device_id) REFERENCES devices(native_id) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT rule_actions_fk_function FOREIGN KEY (function_type) REFERENCES action_functions(id) ON DELETE CASCADE ON UPDATE CASCADE
+    -- ,
+    -- CONSTRAINT rule_actions_fk_devices FOREIGN KEY (device_id) REFERENCES devices(native_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE rule_condition_or_action_arguments (

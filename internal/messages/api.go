@@ -1,4 +1,4 @@
-package engine
+package messages
 
 import (
 	"time"
@@ -13,7 +13,7 @@ type messagesApi struct {
 	logTag  logger.LogTagFn
 }
 
-func NewMessagesApi(router *routing.Router, service MessagesService) {
+func NewApi(router *routing.Router, service MessagesService) {
 	logTag := logger.MakeTag(logger.MESSAGES)
 	api := messagesApi{
 		service,

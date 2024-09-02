@@ -1,4 +1,4 @@
-package tbot_service
+package tbot_provider
 
 import (
 	"fmt"
@@ -8,23 +8,23 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/app"
 	"github.com/fedulovivan/mhz19-go/internal/engine"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
+	"github.com/fedulovivan/mhz19-go/internal/types"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 var logTag = logger.MakeTag(logger.TBOT)
 
-// implements [engine.Provider]
 type provider struct {
 	engine.ProviderBase
 	bot        *tgbotapi.BotAPI
 	botStarted bool
 }
 
-var Provider engine.Provider = &provider{}
+var Provider engine.ChannelProvider = &provider{}
 
-func (s *provider) Channel() engine.ChannelType {
-	return engine.CHANNEL_TELEGRAM
+func (s *provider) Channel() types.ChannelType {
+	return types.CHANNEL_TELEGRAM
 }
 
 func (s *provider) Send(a ...any) {
@@ -63,7 +63,7 @@ func (s *provider) SendNewMessage(text string, chatId int64) {
 
 func (s *provider) Init() {
 
-	s.Out = make(engine.MessageChan, 100)
+	s.Out = make(types.MessageChan, 100)
 
 	var err error
 	s.bot, err = tgbotapi.NewBotAPI(app.Config.TelegramToken)
@@ -86,28 +86,23 @@ func (s *provider) Init() {
 	go func() {
 		for update := range updates {
 			if update.Message != nil {
-
-				// log received update
-				// fmt.Println(update.Message.Chat.ID)
-
 				slog.Debug(logTag("Got a message"), "UserName", update.Message.From.UserName, "Text", update.Message.Text)
 				if update.Message.IsCommand() {
 					slog.Debug(logTag("IsCommand() == true"), "command", update.Message.Command())
 				}
 				p := map[string]any{
-					// "Command": update.Message.Command(),
 					"Text":   update.Message.Text,
 					"From":   update.Message.From,
 					"ChatId": update.Message.Chat.ID,
 				}
-				outMsg := engine.Message{
-					ChannelType: engine.CHANNEL_TELEGRAM,
-					DeviceClass: engine.DEVICE_CLASS_BOT,
+				outMsg := types.Message{
+					DeviceId:    types.DeviceId(s.bot.Self.UserName),
+					ChannelType: types.CHANNEL_TELEGRAM,
+					DeviceClass: types.DEVICE_CLASS_BOT,
 					Timestamp:   time.Now(),
 					Payload:     p,
 				}
 				s.Out <- outMsg
-				// test echo reply
 				// s.SendNewMessage(update.Message.Text, update.Message.Chat.ID)
 			}
 		}

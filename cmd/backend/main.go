@@ -22,6 +22,28 @@ var logTag = logger.MakeTag(logger.MAIN)
 
 func main() {
 
+	// Make a channel for results and start listening
+	// mdns.DefaultParams()
+	// entriesCh := make(chan *mdns.ServiceEntry, 4)
+	// go func() {
+	// 	for entry := range entriesCh {
+	// 		fmt.Printf("Got new entry: %v\n", entry)
+	// 	}
+	// }()
+	// err := mdns.Query(&mdns.QueryParam{
+	// 	Service:     "_ewelink",
+	// 	DisableIPv6: true,
+	// 	Entries:     entriesCh,
+	// })
+	// if err != nil {
+	// 	slog.Error(err.Error())
+	// }
+	// err :=
+	// err := mdns.Lookup("_ewelink._tcp.local", entriesCh)
+	// 	fmt.Println(err)
+	// }
+	// close(entriesCh)
+
 	// bootstrap
 	app.Init()
 	logger.Init()
@@ -32,14 +54,14 @@ func main() {
 	engineOptions.SetLogTag(logger.MakeTag(logger.ENGINE))
 	engineOptions.SetProviders(mqtt.Provider, tbot.Provider)
 	engineOptions.SetMessagesService(
-		engine.NewMessagesService(
+		messages.NewService(
 			messages.NewRepository(
 				db.Instance(),
 			),
 		),
 	)
 	engineOptions.SetDevicesService(
-		engine.NewDevicesService(
+		devices.NewService(
 			devices.NewRepository(
 				db.Instance(),
 			),

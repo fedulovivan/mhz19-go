@@ -1,38 +1,48 @@
 
 ### Prio 0
-- "FOREIGN KEY (device_id) REFERENCES devices(native_id)" requires sole UNIQUE index for column devices.native_id, while we actually need UNIQUE(device_class_id, native_id) since its unreasonable to contraint native_id across devices off all classes
-- "http: superfluous response.WriteHeader call from github.com/go-ozzo/ozzo-routing/v2.(*Router).handleError (router.go:131)" - appears after intterruptin apache bench
-- find why UnmarshalJSON is not called in Test164
-- finish handling of "Mapping" in invokeActionFunc
-- load real mapping rules on engine startup
-- log errors captured by router error handler, also change default handler to render error as a json
-- "apr_socket_recv: Operation timed out (60)" - https://stackoverflow.com/questions/30352725/why-is-my-hello-world-go-server-getting-crushed-by-apachebench
-- db file stuck on 6.5mb as with 12k even after migrate-reset
-- "🧨 api:getAll took 3.451973917s" when reading 1k rules 1k times - need postgres? 
+- feat: think how to implement calback-based mappings
+- feat: finish implementation of all actions
+- feat: load real mapping rules on engine startup
+- feat: api: log errors captured by router error handler, also change default handler to render error as a json
+- feat: mdns client for sonoff devices https://github.com/hashicorp/mdns
 
 ### Prio 1
-- think how to move messages_* and devices_* outside of engine package to their own
-- implement log tag with meta, so we can add attrs to function
-- no mqtt (re)connection if network was not available on app startup and returned online later
-- create meta which descibes expected args for conditions and actions and validate
-- get rid of any in Send(...any)
-- create tests for recursive conditions
-- mappings rules could be pre-defined (system) and loaded from db (user-level)
-- create test service for sonoff wifi devices (poll them periodically to receive status updates)
-- find out why cli command "make test" and "vscode" report different coverage statistics: 86.9% vs 100%. vscode syntax - `Running tool: /opt/homebrew/bin/go test -timeout 30s -coverprofile=/var/folders/5v/0wjs9g1948ddpdqkgf1h31q80000gn/T/vscode-go7lC7ip/go-code-cover github.com/fedulovivan/mhz19-go/internal/engine`
-- try postgres instead of sqlite3
-- try https://pkg.go.dev/go.uber.org/fx
-- try opentelemetry - https://opentelemetry.io/docs/languages/go/getting-started/   
-- try prometheus
-- try grpc
-- try openapi https://en.wikipedia.org/wiki/OpenAPI_Specification
-- try https://github.com/go-ozzo/ozzo-routing
-- (?) make logger and logTag a dependencies for service, api and repository
-- (?) get rid of full path in SQLITE_FILENAME to run tests - no more actual after introducing di
-- (?) internal/devices/repository.go::UpsertDevices should not stop on error
+- figure out how to test engine in ut end to end - internal/engine/mappings_test.go::Test10
+- bug: "http: superfluous response.WriteHeader call from github.com/go-ozzo/ozzo-routing/v2.(*Router).handleError (router.go:131)" - appears after intterruptin apache bench
+- bug: find why UnmarshalJSON is not called in Test164
+- bug: "apr_socket_recv: Operation timed out (60)" - https://stackoverflow.com/questions/30352725/why-is-my-hello-world-go-server-getting-crushed-by-apachebench
+- bug: "🧨 api:getAll took 3.451973917s" when reading 1k rules 1k times - need postgres? 
+- arch: "FOREIGN KEY (device_id) REFERENCES devices(native_id)" requires sole UNIQUE index for column devices.native_id, while we actually need UNIQUE(device_class_id, native_id) since its unreasonable to contraint native_id across devices off all classes
+
+### Prio 2
+- arch: think how to move messages_* and devices_* outside of engine package to their own
+- feat: implement log tag with meta, so we can add attrs to function
+- bug: no mqtt (re)connection if network was not available on app startup and returned online later
+- feat: create meta which descibes expected args for conditions and actions and validate
+- arch: get rid of any in Send(...any)
+- ut: create tests for recursive conditions
+- arch: mappings rules could be pre-defined (system) and loaded from db (user-level) - think we need to store everything in db, even system
+- feat: create test service for sonoff wifi devices (poll them periodically to receive status updates)
+- try: find out why cli command "make test" and "vscode" report different coverage statistics: 86.9% vs 100%. vscode syntax - `Running tool: /opt/homebrew/bin/go test -timeout 30s -coverprofile=/var/folders/5v/0wjs9g1948ddpdqkgf1h31q80000gn/T/vscode-go7lC7ip/go-code-cover github.com/fedulovivan/mhz19-go/internal/engine`
+- try: validation https://github.com/asaskevich/govalidator
+- try: postgres instead of sqlite3
+- try: https://pkg.go.dev/go.uber.org/fx
+- try: opentelemetry - https://opentelemetry.io/docs/languages/go/getting-started/   
+- try: prometheus
+- try: grpc
+- try: openapi https://en.wikipedia.org/wiki/OpenAPI_Specification
+- try: https://github.com/go-ozzo/ozzo-routing
+- arch: make logger and logTag a dependencies for service, api and repository
 
 ### Completed
 
+- (+) feat: implement throttle
+- (+) feat: finish handling of "Mapping" in invokeActionFunc (NewArgReader)
+- (+) feat: add action.PayloadData property - PayloadData was replaced by action args in new design
+- (+) bug: "s.repository.Get(db.NewNullInt32(ruleId))" returns wrong data - bug in db.AddWhere
+- (+) internal/devices/repository.go::UpsertDevices should not stop on error - was actual for plain insert only
+- (+) arch: get rid of full path in SQLITE_FILENAME to run tests - no more actual after introducing di
+- (+) db file stuck on 6.5mb as with 12k even after migrate-reset - need a VACUUM after dropping tables
 - (+) got an error "database is locked" executing INSERT INTO messages... - looks we need explicit tx.Rollback()
 - (+) finish implementation of device.upsert
 - (+) create devices api
@@ -68,7 +78,7 @@
 - (+) add more debug
 - (+) think how to revive Service.Type() which is looking redundant now
 - (+) add support of hi-level composite functions like ZigbeeDevice under the hood composed of "standart" Equal and InList
-- (+) sService.Receive() schould be placed in "base" struct - the only one working idea is to introduce separate folder service/base and corresponding separate package base_service with public base struct and public fields within. then import it to mqtt and tbot and embed.
+- (+) Service.Receive() schould be placed in "base" struct - the only one working idea is to introduce separate folder service/base and corresponding separate package base_service with public base struct and public fields within. then import it to mqtt and tbot and embed.
 - (+) refactor to avoid "startup messages" in unit tests - logger initialisation moved to options
 - (+) wrap internal/mqtt/client.go and internal/tbot/tbot.go into structs
 - (+) for mqtt client, rather than hardocding in defaultMessageHandler, define rules/adapters for transforming topic and payload into final message per device class

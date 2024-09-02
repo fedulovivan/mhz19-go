@@ -6,6 +6,7 @@ import (
 
 	"github.com/fedulovivan/mhz19-go/internal/db"
 	"github.com/fedulovivan/mhz19-go/internal/engine"
+	"github.com/fedulovivan/mhz19-go/internal/types"
 	"github.com/fedulovivan/mhz19-go/pkg/utils"
 	"github.com/samber/lo"
 )
@@ -13,7 +14,7 @@ import (
 type RulesService interface {
 	GetOne(ruleId int32) (engine.Rule, error)
 	Get() ([]engine.Rule, error)
-	Create(rule engine.Rule) error
+	Create(rule engine.Rule) (int64, error)
 }
 
 type rulesService struct {
@@ -26,7 +27,7 @@ func NewService(r RulesRepository) RulesService {
 	}
 }
 
-func (s rulesService) Create(rule engine.Rule) error {
+func (s rulesService) Create(rule engine.Rule) (int64, error) {
 	dbRule, dbConditions, dbActions, dbArguments, dbMappings := ToDb(
 		rule,
 		utils.NewSeq(),
@@ -50,16 +51,17 @@ func (s rulesService) GetOne(ruleId int32) (res engine.Rule, err error) {
 	if err != nil {
 		return
 	}
-	erules, err := Build(
+	if len(rules) == 0 {
+		err = fmt.Errorf("no such rule")
+		return
+	}
+	erules := Build(
 		rules,
 		conditions,
 		ruleActions,
 		ruleConditionOrActionArguments,
 		ruleActionArgumentMappings,
-	), nil
-	if err != nil {
-		return
-	}
+	)
 	res = erules[0]
 	return
 }
@@ -174,11 +176,11 @@ func BuildActions(
 			})
 		})
 		result = append(result, engine.Action{
-			Id:       int(a.Id),
-			Fn:       engine.ActionFn(a.FunctionType.Int32),
-			Args:     BuildArguments(args),
-			DeviceId: engine.DeviceId(a.DeviceId.String),
-			Mapping:  BuildMappings(mappings, args),
+			Id:   int(a.Id),
+			Fn:   engine.ActionFn(a.FunctionType.Int32),
+			Args: BuildArguments(args),
+			// DeviceId: engine.DeviceId(a.DeviceId.String),
+			Mapping: BuildMappings(mappings, args),
 		})
 	}
 	return
@@ -211,9 +213,9 @@ func BuildArguments(args []DbRuleConditionOrActionArgument) (result engine.Args)
 		if a.Value.Valid {
 			value = a.Value.String
 		} else if a.DeviceId.Valid {
-			value = engine.DeviceId(a.DeviceId.String)
+			value = types.DeviceId(a.DeviceId.String)
 		} else if a.DeviceClassId.Valid {
-			value = engine.DeviceClass(a.DeviceClassId.Int32)
+			value = types.DeviceClass(a.DeviceClassId.Int32)
 		} else {
 			panic("unexpected conditions")
 		}
@@ -263,15 +265,15 @@ func ToDbActions(
 	mappings *[]DbRuleActionArgumentMapping,
 ) (res []DbRuleAction) {
 	for _, action := range actions {
-		deviceId := sql.NullString{
-			String: string(action.DeviceId),
-			Valid:  len(action.DeviceId) > 0,
-		}
+		// deviceId := sql.NullString{
+		// 	String: string(action.DeviceId),
+		// 	Valid:  len(action.DeviceId) > 0,
+		// }
 		node := DbRuleAction{
 			Id:           int32(seq.Next()),
 			RuleId:       ruleId,
 			FunctionType: db.NewNullInt32(int32(action.Fn)),
-			DeviceId:     deviceId,
+			// DeviceId:     deviceId,
 		}
 		res = append(res, node)
 		argNameToId := make(map[string]int32, len(action.Args))
@@ -387,9 +389,9 @@ func ToDbArguments(
 		if action != nil {
 			arg.ActionId = db.NewNullInt32(action.Id)
 		}
-		if deviceId, ok := value.(engine.DeviceId); ok {
+		if deviceId, ok := value.(types.DeviceId); ok {
 			arg.DeviceId = db.NewNullString(string(deviceId))
-		} else if deviceClass, ok := value.(engine.DeviceClass); ok {
+		} else if deviceClass, ok := value.(types.DeviceClass); ok {
 			arg.DeviceClassId = db.NewNullInt32(int32(deviceClass))
 		} else {
 			arg.Value = db.NewNullString(fmt.Sprintf("%v", value))

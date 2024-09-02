@@ -1,5 +1,11 @@
 package engine
 
+import (
+	"time"
+
+	"github.com/fedulovivan/mhz19-go/internal/types"
+)
+
 func GetStaticRules() []Rule {
 	return []Rule{
 
@@ -12,7 +18,7 @@ func GetStaticRules() []Rule {
 				Fn: COND_EQUAL,
 				Args: Args{
 					"Left":  "$deviceClass",
-					"Right": DEVICE_CLASS_PINGER,
+					"Right": types.DEVICE_CLASS_PINGER,
 				},
 			},
 			Actions: []Action{{
@@ -31,7 +37,7 @@ func GetStaticRules() []Rule {
 					{
 						Fn: COND_ZIGBEE_DEVICE,
 						Args: Args{
-							"List": []any{DeviceId("0x00158d0004244bda")},
+							"List": []any{types.DeviceId("0x00158d0004244bda")},
 						},
 					},
 					{
@@ -55,17 +61,9 @@ func GetStaticRules() []Rule {
 			Condition: Condition{
 				List: []Condition{
 					{
-						Fn: COND_EQUAL,
+						Fn: COND_ZIGBEE_DEVICE,
 						Args: Args{
-							"Left":  "$deviceClass",
-							"Right": DEVICE_CLASS_ZIGBEE_DEVICE,
-						},
-					},
-					{
-						Fn: COND_IN_LIST,
-						Args: Args{
-							"Value": "$deviceId",
-							"List":  []any{DeviceId("0x00158d0004244bda")},
+							"List": []any{types.DeviceId("0x00158d0004244bda")},
 						},
 					},
 					{
@@ -81,8 +79,8 @@ func GetStaticRules() []Rule {
 				{
 					Fn: ACTION_POST_SONOFF_SWITCH_MESSAGE,
 					Args: Args{
-						"Value":    "$message.action",
-						"DeviceId": "10011cec96",
+						"Command":  "$message.action",
+						"DeviceId": types.DeviceId("10011cec96"),
 					},
 					Mapping: Mapping{
 						"Value": {
@@ -96,14 +94,15 @@ func GetStaticRules() []Rule {
 
 		// Comments: "echo bot",
 		{
-			Id:       4,
-			Disabled: true,
+			Id: 4,
+			// Disabled: false,
 			Comments: "echo bot",
+			Throttle: time.Second,
 			Condition: Condition{
 				Fn: COND_EQUAL,
 				Args: Args{
 					"Left":  "$deviceClass",
-					"Right": DEVICE_CLASS_BOT,
+					"Right": types.DEVICE_CLASS_BOT,
 				},
 			},
 			Actions: []Action{
@@ -122,7 +121,7 @@ func GetStaticRules() []Rule {
 				Fn: COND_NOT_EQUAL,
 				Args: Args{
 					"Left":  "$deviceClass",
-					"Right": DEVICE_CLASS_ZIGBEE_BRIDGE,
+					"Right": types.DEVICE_CLASS_ZIGBEE_BRIDGE,
 				},
 			},
 			Actions: []Action{{Fn: ACTION_RECORD_MESSAGE}},
@@ -136,7 +135,7 @@ func GetStaticRules() []Rule {
 				Fn: COND_EQUAL,
 				Args: Args{
 					"Left":  "$deviceClass",
-					"Right": DEVICE_CLASS_ZIGBEE_BRIDGE,
+					"Right": types.DEVICE_CLASS_ZIGBEE_BRIDGE,
 				},
 			},
 			Actions: []Action{{Fn: ACTION_UPSERT_ZIGBEE_DEVICES}},

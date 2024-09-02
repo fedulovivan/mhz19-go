@@ -1,8 +1,8 @@
-package mqtt_service
+package mqtt_provider
 
 import (
 	MqttLib "github.com/eclipse/paho.mqtt.golang"
-	"github.com/fedulovivan/mhz19-go/internal/engine"
+	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
 type zigbeeBridge struct {
@@ -10,10 +10,10 @@ type zigbeeBridge struct {
 }
 
 func NewZigbeeBridge(m MqttLib.Message) *zigbeeBridge {
-	return &zigbeeBridge{parserBase{m, engine.DEVICE_CLASS_ZIGBEE_BRIDGE}}
+	return &zigbeeBridge{parserBase{m, types.DEVICE_CLASS_ZIGBEE_BRIDGE}}
 }
 
-func (p *zigbeeBridge) Parse() (engine.Message, bool) {
+func (p *zigbeeBridge) Parse() (types.Message, bool) {
 	// no customization, just call parse_base
 	return p.parse_base()
 }

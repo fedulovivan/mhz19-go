@@ -33,11 +33,11 @@ func (api rulesApi) create(c *routing.Context) error {
 	if err != nil {
 		return err
 	}
-	err = api.service.Create(rule)
+	ruleId, err := api.service.Create(rule)
 	if err != nil {
 		return err
 	}
-	return c.Write(map[string]bool{"ok": true})
+	return c.Write(map[string]any{"ok": true, "ruleId": ruleId})
 }
 
 func (api rulesApi) getOne(c *routing.Context) error {

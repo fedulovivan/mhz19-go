@@ -1,4 +1,4 @@
-package mqtt_service
+package mqtt_provider
 
 import (
 	"encoding/json"
@@ -10,30 +10,31 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/app"
 	"github.com/fedulovivan/mhz19-go/internal/engine"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
+	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
 var logTag = logger.MakeTag(logger.MQTT)
 
-// implements [engine.Provider]
+// implements [engine.ChannelProvider]
 type provider struct {
 	engine.ProviderBase
 	client MqttLib.Client
 }
 
-var Provider engine.Provider = &provider{}
+var Provider engine.ChannelProvider = &provider{}
 
-func (s *provider) Channel() engine.ChannelType {
-	return engine.CHANNEL_MQTT
+func (s *provider) Channel() types.ChannelType {
+	return types.CHANNEL_MQTT
 }
 
-func (p *parserBase) parse_base() (engine.Message, bool) {
+func (p *parserBase) parse_base() (types.Message, bool) {
 
 	payload := p.m.Payload()
 	topic := p.m.Topic()
-	meta := engine.ChannelMeta{MqttTopic: topic}
+	meta := types.ChannelMeta{MqttTopic: topic}
 
-	outMsg := engine.Message{
-		ChannelType: engine.CHANNEL_MQTT,
+	outMsg := types.Message{
+		ChannelType: types.CHANNEL_MQTT,
 		ChannelMeta: meta,
 		DeviceClass: p.dc,
 		Timestamp:   time.Now(),
@@ -41,8 +42,8 @@ func (p *parserBase) parse_base() (engine.Message, bool) {
 
 	tt := strings.Split(strings.TrimLeft(topic, "/"), "/")
 
-	if deviceId := tt[1]; len(tt) >= 2 && p.dc != engine.DEVICE_CLASS_ZIGBEE_BRIDGE {
-		outMsg.DeviceId = engine.DeviceId(deviceId)
+	if deviceId := tt[1]; len(tt) >= 2 && p.dc != types.DEVICE_CLASS_ZIGBEE_BRIDGE {
+		outMsg.DeviceId = types.DeviceId(deviceId)
 	}
 
 	if err := json.Unmarshal(payload, &outMsg.Payload); err != nil {
@@ -55,7 +56,7 @@ func (p *parserBase) parse_base() (engine.Message, bool) {
 
 func (s *provider) Init() {
 
-	s.Out = make(engine.MessageChan, 100)
+	s.Out = make(types.MessageChan, 100)
 
 	var handlers = TopicHandlers{
 		"zigbee2mqtt/+": func(client MqttLib.Client, msg MqttLib.Message) {

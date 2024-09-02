@@ -1,4 +1,4 @@
-package tbot_service
+package tbot_provider
 
 import (
 	"fmt"

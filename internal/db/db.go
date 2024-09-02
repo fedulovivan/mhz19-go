@@ -122,8 +122,12 @@ func AddWhere(in string, where Where) (out string) {
 	var entries []string
 	out = in
 	for key, value := range where {
+		// (!) note we cannot use "fallthrough" in type switch
 		switch vtyped := value.(type) {
 		case sql.NullInt32:
+			if vtyped.Valid {
+				entries = append(entries, fmt.Sprintf("%v = ?", key))
+			}
 		case sql.NullString:
 			if vtyped.Valid {
 				entries = append(entries, fmt.Sprintf("%v = ?", key))

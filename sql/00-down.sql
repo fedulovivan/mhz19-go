@@ -13,3 +13,4 @@ DROP TABLE IF EXISTS rule_actions;
 DROP TABLE IF EXISTS rule_condition_or_action_arguments;
 DROP TABLE IF EXISTS rule_action_argument_mappings;
 COMMIT;
+VACUUM;

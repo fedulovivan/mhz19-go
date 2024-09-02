@@ -74,7 +74,7 @@ func (s *RepoSuite) Test30() {
 	mock.ExpectExec("rules").WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
 	r := NewRepository(mdatabase)
-	err = r.Create(
+	_, err = r.Create(
 		DbRule{},
 		[]DbRuleCondition{},
 		[]DbRuleAction{},
@@ -96,7 +96,7 @@ func (s *RepoSuite) Test40() {
 	mock.ExpectExec("rule_action_argument_mappings").WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
 	r := NewRepository(mdatabase)
-	err = r.Create(
+	_, err = r.Create(
 		DbRule{},
 		[]DbRuleCondition{{}},
 		[]DbRuleAction{{}},

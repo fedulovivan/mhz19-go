@@ -9,6 +9,7 @@ import (
 
 	"github.com/fedulovivan/mhz19-go/internal/db"
 	"github.com/fedulovivan/mhz19-go/internal/engine"
+	"github.com/fedulovivan/mhz19-go/internal/types"
 	"github.com/fedulovivan/mhz19-go/pkg/utils"
 	"github.com/stretchr/testify/suite"
 )
@@ -107,7 +108,7 @@ var testDataTable = []TableRow{
 				Id:           1,
 				RuleId:       1,
 				FunctionType: db.NewNullInt32(1),
-				DeviceId:     db.NewNullString("0x00158d0004244bda"),
+				// DeviceId:     db.NewNullString("0x00158d0004244bda"),
 			},
 		},
 		ruleActionArgumentMappings: []DbRuleActionArgumentMapping{
@@ -125,7 +126,7 @@ var testDataTable = []TableRow{
 			},
 		},
 		expectedLen:  1,
-		expectedJson: `[{"id":1,"comments":"case 2","condition":{"fn":1,"args":{"Fifth":"0x00158d0004244bda","Fourth":1,"Left":"foo","Right":"bar","Third":"baz"}},"actions":[{"fn":1,"args":{"ListIds":["10011cec96","78345aaa67"],"Value":"$message.action"},"mapping":{"Value":{"lorem-3":"dolor-4","sit-5":"amet-6"}},"deviceId":"0x00158d0004244bda"}]}]`,
+		expectedJson: `[{"id":1,"comments":"case 2","condition":{"fn":"Changed","args":{"Fifth":"0x00158d0004244bda","Fourth":1,"Left":"foo","Right":"bar","Third":"baz"}},"actions":[{"fn":"PostSonoffSwitchMessage","args":{"ListIds":["10011cec96","78345aaa67"],"Value":"$message.action"},"mapping":{"Value":{"lorem-3":"dolor-4","sit-5":"amet-6"}}}]}]`,
 		// expectedJson: `[{"id":1,"comments":"case 2","condition":{"fn":1,"args":{"Fifth":"DeviceId(0x00158d0004244bda)","Fourth":"DeviceClass(1)","Left":"foo","Right":"bar","Third":"baz"}},"actions":[{"fn":1,"args":{"ListIds":["DeviceId(10011cec96)","DeviceId(78345aaa67)"],"Value":"$message.action"},"mapping":{"Value":{"lorem-3":"dolor-4","sit-5":"amet-6"}},"deviceId":"DeviceId(0x00158d0004244bda)"}]}]`,
 	},
 	// case 02
@@ -174,7 +175,7 @@ var testDataTable = []TableRow{
 				ParentConditionId: db.NewNullInt32(25),
 			},
 		},
-		expectedJson: `[{"id":2,"comments":"case 3","condition":{"list":[{"fn":1},{"fn":2},{"list":[{"fn":3},{"fn":4}],"or":true}]}}]`,
+		expectedJson: `[{"id":2,"comments":"case 3","condition":{"list":[{"fn":"Changed"},{"fn":"Equal"},{"list":[{"fn":"InList"},{"fn":"NotEqual"}],"or":true}]}}]`,
 	},
 }
 
@@ -254,8 +255,6 @@ func (s *ServiceSuite) Test40() {
 
 func (s *ServiceSuite) Test50() {
 	ToDbConditions(1, nil, engine.Condition{}, nil, nil)
-	// defer func() { _ = recover() }()
-	// s.Fail("expected to panic")
 }
 
 func (s *ServiceSuite) Test51() {
@@ -341,9 +340,9 @@ func (s *ServiceSuite) Test63() {
 		},
 		Actions: []engine.Action{
 			{
-				Fn:       engine.ACTION_ZIGBEE2_MQTT_SET_STATE,
-				DeviceId: "0x00158d0004244bda",
-				Args:     engine.Args{"Lorem": 100, "Ipsum": "200"},
+				Fn: engine.ACTION_ZIGBEE2_MQTT_SET_STATE,
+				// DeviceId: "0x00158d0004244bda",
+				Args: engine.Args{"Lorem": 100, "Ipsum": "200"},
 				Mapping: engine.Mapping{
 					"Lorem": {"Ipsum": "112233", "Bar": "Baz"},
 				},
@@ -360,7 +359,7 @@ func (s *ServiceSuite) Test63() {
 	s.Len(outconds, 1)
 	s.Equal(expectedConds, fmt.Sprintf("%v", outconds))
 
-	expectedActs := "[{7 1 {5 true} {0x00158d0004244bda true}}]"
+	expectedActs := "[{7 1 {5 true}}]"
 	s.Len(outactions, 1)
 	s.Equal(expectedActs, fmt.Sprintf("%v", outactions))
 
@@ -407,7 +406,7 @@ func (r mockrepo) Create(
 	actions []DbRuleAction,
 	arguments []DbRuleConditionOrActionArgument,
 	mappings []DbRuleActionArgumentMapping,
-) (err error) {
+) (ruleId int64, err error) {
 	err = r.err
 	return
 }
@@ -423,7 +422,7 @@ func (s *ServiceSuite) Test70() {
 func (s *ServiceSuite) Test71() {
 	repo := mockrepo{}
 	service := NewService(repo)
-	err := service.Create(engine.Rule{})
+	_, err := service.Create(engine.Rule{})
 	s.Nil(err)
 }
 
@@ -433,7 +432,7 @@ func (s *ServiceSuite) Test72() {
 	rr, err := service.Get()
 	s.Len(rr, 0)
 	s.NotNil(err)
-	err = service.Create(engine.Rule{})
+	_, err = service.Create(engine.Rule{})
 	s.NotNil(err)
 }
 
@@ -472,7 +471,7 @@ func (s *ServiceSuite) Test82() {
 		&DbRuleCondition{},
 		nil,
 		"key3",
-		engine.DeviceId("0xqwe111111"),
+		types.DeviceId("0xqwe111111"),
 		utils.NewSeq(),
 		false,
 	)
@@ -487,7 +486,7 @@ func (s *ServiceSuite) Test83() {
 		&DbRuleCondition{},
 		nil,
 		"key4",
-		engine.DEVICE_CLASS_ZIGBEE_DEVICE,
+		types.DEVICE_CLASS_ZIGBEE_DEVICE,
 		utils.NewSeq(),
 		false,
 	)

@@ -5,24 +5,20 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/fedulovivan/mhz19-go/internal/types"
 )
-
-type DeviceId string
-
-// func (d DeviceId) MarshalJSON() ([]byte, error) {
-// 	return []byte(fmt.Sprintf(`"DeviceId(%s)"`, d)), nil
-// }
 
 type Args map[string]any
 
 func parseDeviceIdOrClass(in string) any {
 	if strings.HasPrefix(in, "DeviceId(") {
 		deviceId := in[9 : len(in)-1]
-		return DeviceId(deviceId)
+		return types.DeviceId(deviceId)
 	} else if strings.HasPrefix(in, "DeviceClass(") {
 		deviceClass := in[12 : len(in)-1]
 		i, _ := strconv.Atoi(deviceClass)
-		return DeviceClass(i)
+		return types.DeviceClass(i)
 	}
 	return in
 }
@@ -55,14 +51,6 @@ func (a *Args) UnmarshalJSON(data []byte) (err error) {
 
 type Mapping map[string](map[string]string)
 
-type Provider interface {
-	Receive() MessageChan
-	Send(...any)
-	Channel() ChannelType
-	Init()
-	Stop()
-}
-
 type Rule struct {
 	Id        int32         `json:"id"`
 	Disabled  bool          `json:"disabled,omitempty"`
@@ -81,9 +69,9 @@ type Condition struct {
 }
 
 type Action struct {
-	Id       int      `json:"-"`
-	Fn       ActionFn `json:"fn,omitempty"`
-	Args     Args     `json:"args,omitempty"`
-	Mapping  Mapping  `json:"mapping,omitempty"`
-	DeviceId DeviceId `json:"deviceId,omitempty"`
+	Id      int      `json:"-"`
+	Fn      ActionFn `json:"fn,omitempty"`
+	Args    Args     `json:"args,omitempty"`
+	Mapping Mapping  `json:"mapping,omitempty"`
+	// DeviceId DeviceId `json:"deviceId,omitempty"`
 }

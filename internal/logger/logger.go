@@ -40,6 +40,7 @@ const (
 	STATS    TagName = "[stats]    "
 	MESSAGES TagName = "[messages] "
 	DEVICES  TagName = "[devices]  "
+	SONOFF   TagName = "[sonoff]   "
 )
 
 func MakeTag(tag TagName) LogTagFn {

@@ -8,7 +8,6 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/app"
 	"github.com/fedulovivan/mhz19-go/internal/db"
 	"github.com/fedulovivan/mhz19-go/internal/devices"
-	"github.com/fedulovivan/mhz19-go/internal/engine"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/messages"
 	"github.com/fedulovivan/mhz19-go/internal/rules"
@@ -50,9 +49,9 @@ func Init() {
 	)
 
 	// devices
-	engine.NewDevicesApi(
+	devices.NewApi(
 		router,
-		engine.NewDevicesService(
+		devices.NewService(
 			devices.NewRepository(
 				db.Instance(),
 			),
@@ -60,9 +59,9 @@ func Init() {
 	)
 
 	// messages
-	engine.NewMessagesApi(
+	messages.NewApi(
 		router,
-		engine.NewMessagesService(
+		messages.NewService(
 			messages.NewRepository(
 				db.Instance(),
 			),

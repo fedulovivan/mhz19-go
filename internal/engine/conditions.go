@@ -2,12 +2,15 @@ package engine
 
 import (
 	"fmt"
+	"log/slog"
 	"slices"
+
+	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
 type CondFn byte
 
-type CondImpl func(mt MessageTuple, args Args, e *engine) bool
+type CondImpl func(mt types.MessageTuple, args Args, e *engine) bool
 
 type CondImpls map[CondFn]CondImpl
 
@@ -35,37 +38,38 @@ func (s CondFn) String() string {
 	return fmt.Sprintf("%v (id=%d)", CONDITION_NAMES[s], s)
 }
 
-// func (s *CondFn) MarshalJSON() ([]byte, error) {
-// 	return []byte(fmt.Sprintf(`"%s"`, s.String())), nil
-// }
+func (s *CondFn) MarshalJSON() ([]byte, error) {
+	return []byte(fmt.Sprintf(`"%v"`, CONDITION_NAMES[*s])), nil
+}
 
-var Equal CondImpl = func(mt MessageTuple, args Args, e *engine) bool {
-	c := NewArgReader(COND_EQUAL, mt[0], args, e.options.logTag)
+var Equal CondImpl = func(mt types.MessageTuple, args Args, e *engine) bool {
+	c := NewArgReader(mt[0], args, nil)
 	left := c.Get("Left")
 	right := c.Get("Right")
-	// left := Get[int](c, "Left")
-	// right := Get[int](c, "Right")
 	if c.Ok() {
 		return left == right
 	}
+	slog.Error(fmt.Sprintf("Equal: %v", c.Error()))
 	return false
 }
 
-var NotEqual CondImpl = func(mt MessageTuple, args Args, e *engine) bool {
-	c := NewArgReader(COND_NOT_EQUAL, mt[0], args, e.options.logTag)
+var NotEqual CondImpl = func(mt types.MessageTuple, args Args, e *engine) bool {
+	c := NewArgReader(mt[0], args, nil)
 	left := c.Get("Left")
 	right := c.Get("Right")
 	if c.Ok() {
 		return left != right
 	}
+	slog.Error(fmt.Sprintf("NotEqual: %v", c.Error()))
 	return false
 }
 
-var InList CondImpl = func(mt MessageTuple, args Args, e *engine) bool {
-	c := NewArgReader(COND_IN_LIST, mt[0], args, e.options.logTag)
+var InList CondImpl = func(mt types.MessageTuple, args Args, e *engine) bool {
+	c := NewArgReader(mt[0], args, nil)
 	v := c.Get("Value")
 	list := c.Get("List")
 	if !c.Ok() {
+		slog.Error(fmt.Sprintf("InList: %v", c.Error()))
 		return false
 	}
 	lslice, ok := list.([]any)
@@ -73,16 +77,16 @@ var InList CondImpl = func(mt MessageTuple, args Args, e *engine) bool {
 		panic("[]any is expected")
 	}
 	res := slices.Contains(lslice, v)
-	// fmt.Printf("InList: %v: %T in %T, %v and %v\n", res, v, lslice, v, lslice)
 	return res
 }
 
 // return false for nil and empty strings
 // return true for the rest
-var NotNil CondImpl = func(mt MessageTuple, args Args, e *engine) bool {
-	c := NewArgReader(COND_NOT_NIL, mt[0], args, e.options.logTag)
+var NotNil CondImpl = func(mt types.MessageTuple, args Args, e *engine) bool {
+	c := NewArgReader(mt[0], args, nil)
 	v := c.Get("Value")
 	if !c.Ok() {
+		slog.Error(fmt.Sprintf("NotNil: %v", c.Error()))
 		return false
 	}
 	switch vTyped := v.(type) {
@@ -95,24 +99,25 @@ var NotNil CondImpl = func(mt MessageTuple, args Args, e *engine) bool {
 	}
 }
 
-var Changed CondImpl = func(mt MessageTuple, args Args, e *engine) bool {
-	leftr := NewArgReader(COND_CHANGED, mt[0], args, e.options.logTag)
-	rightr := NewArgReader(COND_CHANGED, mt[1], args, e.options.logTag)
+var Changed CondImpl = func(mt types.MessageTuple, args Args, e *engine) bool {
+	leftr := NewArgReader(mt[0], args, nil)
+	rightr := NewArgReader(mt[1], args, nil)
 	left := leftr.Get("Value")
 	right := rightr.Get("Value")
 	if leftr.Ok() && rightr.Ok() {
 		return left != right
 	}
+	slog.Error(fmt.Sprintf("Changed: %v, %v", leftr.Error(), rightr.Error()))
 	return false
 }
 
 // args: List
-var ZigbeeDevice CondImpl = func(mt MessageTuple, args Args, e *engine) bool {
+var ZigbeeDevice CondImpl = func(mt types.MessageTuple, args Args, e *engine) bool {
 	return Equal(
 		mt,
 		Args{
 			"Left":  "$deviceClass",
-			"Right": DEVICE_CLASS_ZIGBEE_DEVICE,
+			"Right": types.DEVICE_CLASS_ZIGBEE_DEVICE,
 		},
 		e,
 	) && InList(

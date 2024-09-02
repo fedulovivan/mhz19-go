@@ -1,4 +1,4 @@
-package engine
+package devices
 
 import (
 	"time"
@@ -13,7 +13,7 @@ type devicesApi struct {
 	logTag  logger.LogTagFn
 }
 
-func NewDevicesApi(router *routing.Router, service DevicesService) {
+func NewApi(router *routing.Router, service DevicesService) {
 	logTag := logger.MakeTag(logger.DEVICES)
 	api := devicesApi{
 		service,

@@ -11,7 +11,7 @@ import (
 
 type RulesRepository interface {
 	Get(ruleId sql.NullInt32) (rules []DbRule, conditions []DbRuleCondition, ruleActions []DbRuleAction, args []DbRuleConditionOrActionArgument, mappings []DbRuleActionArgumentMapping, err error)
-	Create(rule DbRule, conditions []DbRuleCondition, actions []DbRuleAction, arguments []DbRuleConditionOrActionArgument, mappings []DbRuleActionArgumentMapping) error
+	Create(rule DbRule, conditions []DbRuleCondition, actions []DbRuleAction, arguments []DbRuleConditionOrActionArgument, mappings []DbRuleActionArgumentMapping) (int64, error)
 }
 
 type rulesRepository struct {
@@ -43,7 +43,7 @@ type DbRuleAction struct {
 	Id           int32
 	RuleId       int32
 	FunctionType sql.NullInt32
-	DeviceId     sql.NullString
+	// DeviceId     sql.NullString
 }
 
 type DbRuleConditionOrActionArgument struct {
@@ -74,8 +74,8 @@ func actionInsert(
 	return db.Insert(
 		tx,
 		ctx,
-		`INSERT INTO rule_actions(rule_id, function_type, device_id) VALUES(?,?,?)`,
-		act.RuleId, act.FunctionType, act.DeviceId,
+		`INSERT INTO rule_actions(rule_id, function_type) VALUES(?,?)`,
+		act.RuleId, act.FunctionType,
 	)
 }
 
@@ -179,12 +179,11 @@ func ruleActionsSelect(ctx context.Context, tx *sql.Tx, ruleId sql.NullInt32) ([
 		`SELECT
 			id,
 			rule_id,
-			function_type,
-			device_id
+			function_type
 		FROM
 			rule_actions`,
 		func(rows *sql.Rows, m *DbRuleAction) error {
-			return rows.Scan(&m.Id, &m.RuleId, &m.FunctionType, &m.DeviceId)
+			return rows.Scan(&m.Id, &m.RuleId, &m.FunctionType)
 		},
 		db.Where{
 			"rule_id": ruleId,
@@ -248,7 +247,7 @@ func (repo rulesRepository) Create(
 	actions []DbRuleAction,
 	arguments []DbRuleConditionOrActionArgument,
 	mappings []DbRuleActionArgumentMapping,
-) (err error) {
+) (ruleId int64, err error) {
 	var realCondIdsMap = make(map[int32]int32, len(conditions))
 	var realActionIdsMap = make(map[int32]int32, len(actions))
 	var realArgIdsMap = make(map[int32]int32, len(arguments))
@@ -263,7 +262,7 @@ func (repo rulesRepository) Create(
 	if err != nil {
 		return
 	}
-	ruleId, err := result.LastInsertId()
+	ruleId, err = result.LastInsertId()
 	if err != nil {
 		return
 	}
