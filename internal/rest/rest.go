@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -8,6 +9,7 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/app"
 	"github.com/fedulovivan/mhz19-go/internal/db"
 	"github.com/fedulovivan/mhz19-go/internal/devices"
+	ldm "github.com/fedulovivan/mhz19-go/internal/last_device_message"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/messages"
 	"github.com/fedulovivan/mhz19-go/internal/rules"
@@ -18,6 +20,8 @@ import (
 )
 
 var logTag = logger.MakeTag(logger.REST)
+
+var server http.Server
 
 func Init() {
 
@@ -68,16 +72,28 @@ func Init() {
 		),
 	)
 
+	// last device message
+	ldm.NewApi(
+		router,
+		ldm.NewService(
+			ldm.RepositoryInstance(),
+		),
+	)
+
 	http.Handle("/", router)
 	go func() {
 		addr := fmt.Sprintf(":%v", app.Config.RestApiPort)
 		slog.Debug(logTag("server is running at " + addr))
-		err := http.ListenAndServe(addr, nil)
-		slog.Error(err.Error())
+		server = http.Server{Addr: addr}
+		err := server.ListenAndServe()
+		slog.Warn(logTag(err.Error()))
 	}()
 }
 
 func Stop() {
-	// TODO see "go routing.GracefulShutdown"
-	slog.Debug(logTag("Stopping rest... (for now is no op)"))
+	slog.Debug(logTag("Stopping rest..."))
+	err := server.Shutdown(context.Background())
+	if err != nil {
+		slog.Error(logTag(err.Error()))
+	}
 }

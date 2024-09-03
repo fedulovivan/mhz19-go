@@ -21,7 +21,7 @@ type provider struct {
 	botStarted bool
 }
 
-var Provider engine.ChannelProvider = &provider{}
+var Provider types.ChannelProvider = &provider{}
 
 func (s *provider) Channel() types.ChannelType {
 	return types.CHANNEL_TELEGRAM
@@ -103,7 +103,6 @@ func (s *provider) Init() {
 					Payload:     p,
 				}
 				s.Out <- outMsg
-				// s.SendNewMessage(update.Message.Text, update.Message.Chat.ID)
 			}
 		}
 	}()

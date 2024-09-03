@@ -15,13 +15,12 @@ import (
 
 var logTag = logger.MakeTag(logger.MQTT)
 
-// implements [engine.ChannelProvider]
 type provider struct {
 	engine.ProviderBase
 	client MqttLib.Client
 }
 
-var Provider engine.ChannelProvider = &provider{}
+var Provider types.ChannelProvider = &provider{}
 
 func (s *provider) Channel() types.ChannelType {
 	return types.CHANNEL_MQTT
@@ -42,7 +41,7 @@ func (p *parserBase) parse_base() (types.Message, bool) {
 
 	tt := strings.Split(strings.TrimLeft(topic, "/"), "/")
 
-	if deviceId := tt[1]; len(tt) >= 2 && p.dc != types.DEVICE_CLASS_ZIGBEE_BRIDGE {
+	if deviceId := tt[1]; len(tt) >= 2 {
 		outMsg.DeviceId = types.DeviceId(deviceId)
 	}
 
@@ -120,7 +119,6 @@ func (s *provider) Init() {
 	// attach logger
 	if app.Config.MqttDebug {
 		sloghandler := slog.Default().Handler()
-		// fmt.Printf("%T", sloghandler)
 		MqttLib.ERROR = slog.NewLogLogger(sloghandler, slog.LevelError)
 		MqttLib.CRITICAL = slog.NewLogLogger(sloghandler, slog.LevelError)
 		MqttLib.WARN = slog.NewLogLogger(sloghandler, slog.LevelWarn)

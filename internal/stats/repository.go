@@ -8,11 +8,12 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/devices"
 	"github.com/fedulovivan/mhz19-go/internal/messages"
 	"github.com/fedulovivan/mhz19-go/internal/rules"
+	"github.com/fedulovivan/mhz19-go/internal/types"
 	"golang.org/x/sync/errgroup"
 )
 
 type StatsRepository interface {
-	Get() (res GetResult, err error)
+	Get() (res types.StatsGetResult, err error)
 }
 
 type statsRepository struct {
@@ -26,7 +27,7 @@ func NewRepository(database *sql.DB) StatsRepository {
 }
 
 func (repo statsRepository) Get() (
-	res GetResult,
+	res types.StatsGetResult,
 	err error,
 ) {
 	g, ctx := errgroup.WithContext(context.Background())

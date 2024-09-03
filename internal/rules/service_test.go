@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/fedulovivan/mhz19-go/internal/db"
-	"github.com/fedulovivan/mhz19-go/internal/engine"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 	"github.com/fedulovivan/mhz19-go/pkg/utils"
 	"github.com/stretchr/testify/suite"
@@ -39,7 +38,7 @@ var testDataTable = []TableRow{
 		rules: []DbRule{
 			{
 				Id:         1,
-				Comments:   "case 2",
+				Name:       "case 2",
 				IsDisabled: db.NewNullInt32(0),
 				Throttle:   db.NewNullInt32(0),
 			},
@@ -126,7 +125,7 @@ var testDataTable = []TableRow{
 			},
 		},
 		expectedLen:  1,
-		expectedJson: `[{"id":1,"comments":"case 2","condition":{"fn":"Changed","args":{"Fifth":"0x00158d0004244bda","Fourth":1,"Left":"foo","Right":"bar","Third":"baz"}},"actions":[{"fn":"PostSonoffSwitchMessage","args":{"ListIds":["10011cec96","78345aaa67"],"Value":"$message.action"},"mapping":{"Value":{"lorem-3":"dolor-4","sit-5":"amet-6"}}}]}]`,
+		expectedJson: `[{"id":1,"name":"case 2","condition":{"fn":"Changed","args":{"Fifth":"0x00158d0004244bda","Fourth":1,"Left":"foo","Right":"bar","Third":"baz"}},"actions":[{"fn":"PostSonoffSwitchMessage","args":{"ListIds":["10011cec96","78345aaa67"],"Value":"$message.action"},"mapping":{"Value":{"lorem-3":"dolor-4","sit-5":"amet-6"}}}]}]`,
 		// expectedJson: `[{"id":1,"comments":"case 2","condition":{"fn":1,"args":{"Fifth":"DeviceId(0x00158d0004244bda)","Fourth":"DeviceClass(1)","Left":"foo","Right":"bar","Third":"baz"}},"actions":[{"fn":1,"args":{"ListIds":["DeviceId(10011cec96)","DeviceId(78345aaa67)"],"Value":"$message.action"},"mapping":{"Value":{"lorem-3":"dolor-4","sit-5":"amet-6"}},"deviceId":"DeviceId(0x00158d0004244bda)"}]}]`,
 	},
 	// case 02
@@ -134,7 +133,7 @@ var testDataTable = []TableRow{
 		rules: []DbRule{
 			{
 				Id:         2,
-				Comments:   "case 3",
+				Name:       "case 3",
 				IsDisabled: db.NewNullInt32(0),
 				Throttle:   db.NewNullInt32(0),
 			},
@@ -175,7 +174,7 @@ var testDataTable = []TableRow{
 				ParentConditionId: db.NewNullInt32(25),
 			},
 		},
-		expectedJson: `[{"id":2,"comments":"case 3","condition":{"list":[{"fn":"Changed"},{"fn":"Equal"},{"list":[{"fn":"InList"},{"fn":"NotEqual"}],"or":true}]}}]`,
+		expectedJson: `[{"id":2,"name":"case 3","condition":{"list":[{"fn":"Changed"},{"fn":"Equal"},{"list":[{"fn":"InList"},{"fn":"NotEqual"}],"or":true}]}}]`,
 	},
 }
 
@@ -220,17 +219,6 @@ func (s *ServiceSuite) Test12() {
 	fmt.Println(string(data))
 }
 
-// fmt.printf("row: %+v\n", row)
-// fmt.printf("result: %+v\n", result)
-// fmt.println("data", string(data))
-// data2, _ := json.marshal(row)
-// fmt.println("data2", string(data2))
-// json, _ = json.marshal(row)
-// s.jsoneq(string(json), row.expectedjson)
-// fmt.Println(string(json))
-// json, _ := json.MarshalIndent(result, "", "  ")
-// s.Len(result, row.expectedLen)
-
 func (s *ServiceSuite) Test20() {
 	defer func() { _ = recover() }()
 	BuildArguments([]DbRuleConditionOrActionArgument{
@@ -254,25 +242,25 @@ func (s *ServiceSuite) Test40() {
 }
 
 func (s *ServiceSuite) Test50() {
-	ToDbConditions(1, nil, engine.Condition{}, nil, nil)
+	ToDbConditions(1, nil, types.Condition{}, nil, nil)
 }
 
 func (s *ServiceSuite) Test51() {
 	defer func() { _ = recover() }()
-	ToDbConditions(1, nil, engine.Condition{
-		Fn:   engine.COND_CHANGED,
-		List: []engine.Condition{{Fn: engine.COND_EQUAL}},
+	ToDbConditions(1, nil, types.Condition{
+		Fn:   types.COND_CHANGED,
+		List: []types.Condition{{Fn: types.COND_EQUAL}},
 	}, nil, nil)
 	s.Fail("expected to panic")
 }
 
 func (s *ServiceSuite) Test52() {
 	actualArgs := []DbRuleConditionOrActionArgument{}
-	actualConds := ToDbConditions(1, nil, engine.Condition{
+	actualConds := ToDbConditions(1, nil, types.Condition{
 		Or: true,
-		List: []engine.Condition{
-			{Fn: engine.COND_EQUAL, Args: engine.Args{"Left": 1, "Right": 2}},
-			{Fn: engine.COND_IN_LIST},
+		List: []types.Condition{
+			{Fn: types.COND_EQUAL, Args: types.Args{"Left": 1, "Right": 2}},
+			{Fn: types.COND_IN_LIST},
 		},
 	}, utils.NewSeq(), &actualArgs)
 	s.Len(actualArgs, 2)
@@ -286,13 +274,13 @@ func (s *ServiceSuite) Test52() {
 }
 
 func (s *ServiceSuite) Test53() {
-	actual := ToDbConditions(1, nil, engine.Condition{
+	actual := ToDbConditions(1, nil, types.Condition{
 		Or: true,
-		List: []engine.Condition{
-			{Fn: engine.COND_EQUAL},
-			{List: []engine.Condition{
-				{Fn: engine.COND_NOT_EQUAL},
-				{Fn: engine.COND_IN_LIST},
+		List: []types.Condition{
+			{Fn: types.COND_EQUAL},
+			{List: []types.Condition{
+				{Fn: types.COND_NOT_EQUAL},
+				{Fn: types.COND_IN_LIST},
 			}},
 		},
 	}, utils.NewSeq(), nil)
@@ -303,20 +291,20 @@ func (s *ServiceSuite) Test53() {
 
 func (s *ServiceSuite) Test60() {
 	defer func() { _ = recover() }()
-	ToDb(engine.Rule{}, nil)
+	ToDb(types.Rule{}, nil)
 	s.Fail("expected to panic")
 	/* _, _, _, _, err :=  */
 	// s.Nil(err)
 }
 
 // func (s *MappingsSuite) Test61() {
-// 	ToDb(engine.Rule{}, utils.NewSeq())
+// 	ToDb(types.Rule{}, utils.NewSeq())
 // 	/* _, _, _, _, err :=  */
 // 	// s.Nil(err)
 // }
 
 func (s *ServiceSuite) Test62() {
-	inrule := engine.Rule{}
+	inrule := types.Rule{}
 	outrule, outconds, outactions, outargs, mappings := ToDb(inrule, utils.NewSeq())
 	expected := "{1  {0 true} {0 true}}"
 	s.Equal(expected, fmt.Sprintf("%v", outrule))
@@ -332,18 +320,18 @@ func (s *ServiceSuite) Test62() {
 }
 
 func (s *ServiceSuite) Test63() {
-	inrule := engine.Rule{
-		Comments: "unit test",
+	inrule := types.Rule{
+		Name:     "unit test",
 		Disabled: true,
-		Condition: engine.Condition{
-			Fn: engine.COND_EQUAL, Args: engine.Args{"One": 1, "Two": 2, "Three": []any{3, 4}},
+		Condition: types.Condition{
+			Fn: types.COND_EQUAL, Args: types.Args{"One": 1, "Two": 2, "Three": []any{3, 4}},
 		},
-		Actions: []engine.Action{
+		Actions: []types.Action{
 			{
-				Fn: engine.ACTION_ZIGBEE2_MQTT_SET_STATE,
+				Fn: types.ACTION_ZIGBEE2_MQTT_SET_STATE,
 				// DeviceId: "0x00158d0004244bda",
-				Args: engine.Args{"Lorem": 100, "Ipsum": "200"},
-				Mapping: engine.Mapping{
+				Args: types.Args{"Lorem": 100, "Ipsum": "200"},
+				Mapping: types.Mapping{
 					"Lorem": {"Ipsum": "112233", "Bar": "Baz"},
 				},
 			},
@@ -422,7 +410,7 @@ func (s *ServiceSuite) Test70() {
 func (s *ServiceSuite) Test71() {
 	repo := mockrepo{}
 	service := NewService(repo)
-	_, err := service.Create(engine.Rule{})
+	_, err := service.Create(types.Rule{})
 	s.Nil(err)
 }
 
@@ -432,7 +420,7 @@ func (s *ServiceSuite) Test72() {
 	rr, err := service.Get()
 	s.Len(rr, 0)
 	s.NotNil(err)
-	_, err = service.Create(engine.Rule{})
+	_, err = service.Create(types.Rule{})
 	s.NotNil(err)
 }
 

@@ -21,3 +21,22 @@ var CHANNEL_NAMES = map[ChannelType]string{
 func (s ChannelType) String() string {
 	return fmt.Sprintf("%v (id=%d)", CHANNEL_NAMES[s], s)
 }
+
+type ChannelMeta struct {
+	MqttTopic string
+}
+
+type ChannelProvider interface {
+	// getter for the provider's messages channel used in engine.Start
+	MessageChan() MessageChan
+	// api to invoke provider outbound action, eg:
+	// - call tgbotapi.NewMessage for telegram bot provider
+	// - post to mqtt topic for mqtt provider
+	// - call sonoff http api
+	Send(...any)
+	// TODO, api for the unit tests
+	Write(m Message)
+	Channel() ChannelType
+	Init()
+	Stop()
+}

@@ -112,10 +112,6 @@ type DbCount struct {
 	Value int32
 }
 
-// type WhereVal interface {
-// 	sql.NullInt32 | sql.NullString
-// }
-
 type Where = map[string]any
 
 func AddWhere(in string, where Where) (out string) {

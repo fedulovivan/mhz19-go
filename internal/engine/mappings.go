@@ -6,24 +6,24 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
-func GetStaticRules() []Rule {
-	return []Rule{
+func GetStaticRules() []types.Rule {
+	return []types.Rule{
 
 		// Comments: "test mapping 1",
 		{
 			Id:       1,
 			Disabled: true,
-			Comments: "test mapping 1",
-			Condition: Condition{
-				Fn: COND_EQUAL,
-				Args: Args{
+			Name:     "test mapping 1",
+			Condition: types.Condition{
+				Fn: types.COND_EQUAL,
+				Args: types.Args{
 					"Left":  "$deviceClass",
 					"Right": types.DEVICE_CLASS_PINGER,
 				},
 			},
-			Actions: []Action{{
-				Fn: ACTION_TELEGRAM_BOT_MESSAGE,
-				// Args: Args{"Text": "There is some message from pinger out there"}
+			Actions: []types.Action{{
+				Fn: types.ACTION_TELEGRAM_BOT_MESSAGE,
+				// Args: types.Args{"Text": "There is some message from pinger out there"}
 			}},
 		},
 
@@ -31,25 +31,25 @@ func GetStaticRules() []Rule {
 		{
 			Id:       2,
 			Disabled: true,
-			Comments: "test mapping for composite condition function",
-			Condition: Condition{
-				List: []Condition{
+			Name:     "test mapping for composite condition function",
+			Condition: types.Condition{
+				List: []types.Condition{
 					{
-						Fn: COND_ZIGBEE_DEVICE,
-						Args: Args{
+						Fn: types.COND_ZIGBEE_DEVICE,
+						Args: types.Args{
 							"List": []any{types.DeviceId("0x00158d0004244bda")},
 						},
 					},
 					{
-						Fn: COND_IN_LIST,
-						Args: Args{
+						Fn: types.COND_IN_LIST,
+						Args: types.Args{
 							"Value": "$message.action",
 							"List":  []any{"single_left", "single_right"},
 						},
 					},
 				},
 			},
-			Actions: []Action{{Fn: ACTION_TELEGRAM_BOT_MESSAGE}},
+			Actions: []types.Action{{Fn: types.ACTION_TELEGRAM_BOT_MESSAGE}},
 		},
 
 		// Comments: "balcony ceiling light on/off",
@@ -57,32 +57,32 @@ func GetStaticRules() []Rule {
 		{
 			Id:       3,
 			Disabled: true,
-			Comments: "balcony ceiling light on/off",
-			Condition: Condition{
-				List: []Condition{
+			Name:     "balcony ceiling light on/off",
+			Condition: types.Condition{
+				List: []types.Condition{
 					{
-						Fn: COND_ZIGBEE_DEVICE,
-						Args: Args{
+						Fn: types.COND_ZIGBEE_DEVICE,
+						Args: types.Args{
 							"List": []any{types.DeviceId("0x00158d0004244bda")},
 						},
 					},
 					{
-						Fn: COND_IN_LIST,
-						Args: Args{
+						Fn: types.COND_IN_LIST,
+						Args: types.Args{
 							"Value": "$message.action",
 							"List":  []any{"single_left", "single_right"},
 						},
 					},
 				},
 			},
-			Actions: []Action{
+			Actions: []types.Action{
 				{
-					Fn: ACTION_POST_SONOFF_SWITCH_MESSAGE,
-					Args: Args{
+					Fn: types.ACTION_POST_SONOFF_SWITCH_MESSAGE,
+					Args: types.Args{
 						"Command":  "$message.action",
 						"DeviceId": types.DeviceId("10011cec96"),
 					},
-					Mapping: Mapping{
+					Mapping: types.Mapping{
 						"Value": {
 							"single_left":  "on",
 							"single_right": "off",
@@ -94,21 +94,23 @@ func GetStaticRules() []Rule {
 
 		// Comments: "echo bot",
 		{
-			Id: 4,
-			// Disabled: false,
-			Comments: "echo bot",
+			Id:       4,
+			Disabled: false,
+			Name:     "echo bot",
 			Throttle: time.Second,
-			Condition: Condition{
-				Fn: COND_EQUAL,
-				Args: Args{
+			Condition: types.Condition{
+				Fn: types.COND_EQUAL,
+				Args: types.Args{
 					"Left":  "$deviceClass",
 					"Right": types.DEVICE_CLASS_BOT,
 				},
 			},
-			Actions: []Action{
+			Actions: []types.Action{
 				{
-					Fn:   ACTION_TELEGRAM_BOT_MESSAGE,
-					Args: Args{"Text": "Hello!"},
+					Fn: types.ACTION_TELEGRAM_BOT_MESSAGE,
+					Args: types.Args{
+						"Text": "accumulated {{len .Messages}} message(s):\n{{ range .Messages }}message from {{ .DeviceId }} with text {{ .Payload.Text }}\n{{ end }}",
+					},
 				},
 			},
 		},
@@ -116,80 +118,29 @@ func GetStaticRules() []Rule {
 		{
 			Id:       5,
 			Disabled: false,
-			Comments: "system rule to save received message in db",
-			Condition: Condition{
-				Fn: COND_NOT_EQUAL,
-				Args: Args{
+			Name:     "system rule to save received message in db",
+			Condition: types.Condition{
+				Fn: types.COND_NOT_EQUAL,
+				Args: types.Args{
 					"Left":  "$deviceClass",
 					"Right": types.DEVICE_CLASS_ZIGBEE_BRIDGE,
 				},
 			},
-			Actions: []Action{{Fn: ACTION_RECORD_MESSAGE}},
+			Actions: []types.Action{{Fn: types.ACTION_RECORD_MESSAGE}},
 		},
 
 		{
 			Id:       6,
 			Disabled: false,
-			Comments: "system rule to create devices upon receiving message from bridge",
-			Condition: Condition{
-				Fn: COND_EQUAL,
-				Args: Args{
+			Name:     "system rule to create devices upon receiving message from bridge",
+			Condition: types.Condition{
+				Fn: types.COND_EQUAL,
+				Args: types.Args{
 					"Left":  "$deviceClass",
 					"Right": types.DEVICE_CLASS_ZIGBEE_BRIDGE,
 				},
 			},
-			Actions: []Action{{Fn: ACTION_UPSERT_ZIGBEE_DEVICES}},
+			Actions: []types.Action{{Fn: types.ACTION_UPSERT_ZIGBEE_DEVICES}},
 		},
 	}
 }
-
-// wtf, can we do it more elegant in go? like int(withFn) + int(withList) == 1
-// if withList && withFn || (!withList && !withFn) {
-// 	panic("unexpected conditions")
-// }
-// OutChannel: CHANNEL_TELEGRAM,
-// nested []model.DbRuleCondition,
-// args []model.DbRuleConditionOrActionArgument,
-// var nested []model.DbRuleCondition
-// var current model.DbRuleCondition
-// slices.IndexFunc(conditions);
-// if len(ruleall) == 0 {
-// 	return
-// }
-// find root (with null ParentConditionId)
-// root, found := lo.Find(conditions, func(c model.DbRuleCondition) bool {
-// 	return !c.ParentConditionId.Valid
-// })
-// children := lo.Filter(conditions, func(c model.DbRuleCondition, i int) bool {
-// 	return c.ParentConditionId.Valid && c.ParentConditionId.Int32 == root.Id
-// })
-// for _, child := range children {
-// 	list = append(list, BuildConditions())
-// }
-// panic("FunctionType for root should not be null")
-// nested := lo.Filter(conditions, func(c model.DbRuleCondition, i int) bool {
-// 	return c.ParentConditionId.Valid
-// })
-// for _, c := range conditions {
-// 	if c.RuleId == ruleId {
-// 	}
-// }
-// return c_level()
-// List := make([]Condition, 0)
-// // if con
-// for _, c := range conditions {
-// 	if c.RuleId != ruleId {
-// 		continue
-// 	}
-// 	if c.FunctionType.Valid {
-// 		return Condition{
-// 			Fn: CondFn(c.FunctionType.Int32),
-// 		}
-// 	} else {
-// 		// TBD
-// 		// list = append(list, Condition{})
-// 	}
-// }
-// return Condition{
-// 	List: List,
-// }

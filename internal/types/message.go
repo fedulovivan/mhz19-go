@@ -5,16 +5,12 @@ import (
 	"time"
 )
 
-type ChannelMeta struct {
-	MqttTopic string
-}
-
 type Message struct {
 	// channel, which was used to receive message
 	ChannelType ChannelType `json:"channelType"`
 	// device class, see DeviceClass
 	DeviceClass DeviceClass `json:"deviceClass"`
-	// device id extracted from topic
+	// device id, specific for the current channel and device class, eg ieee adress for zigbee device
 	DeviceId DeviceId `json:"deviceId"`
 	// time when message was received by backend
 	Timestamp time.Time `json:"timestamp"`

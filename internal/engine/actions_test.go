@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/fedulovivan/mhz19-go/internal/devices"
+	"github.com/fedulovivan/mhz19-go/internal/engine_actions"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 	"github.com/stretchr/testify/suite"
 )
@@ -22,12 +22,12 @@ func (s *ActionsSuite) TeardownSuite() {
 type mockservice struct {
 }
 
-func (s mockservice) Get() ([]devices.Device, error) {
+func (s mockservice) Get() ([]types.Device, error) {
 	return nil, nil
 }
-func (s mockservice) GetOne(id types.DeviceId) (res devices.Device, err error) {
+func (s mockservice) GetOne(id types.DeviceId) (res types.Device, err error) {
 	if id == types.DeviceId("10011cec96") {
-		res = devices.Device{
+		res = types.Device{
 			Json: map[string]any{
 				"ip":   "192.168.88.60",
 				"port": "8081",
@@ -39,7 +39,7 @@ func (s mockservice) GetOne(id types.DeviceId) (res devices.Device, err error) {
 	return
 }
 
-func (s mockservice) Upsert(devices []devices.Device) error {
+func (s mockservice) Upsert(devices []types.Device) error {
 	return nil
 }
 
@@ -52,19 +52,19 @@ func (s *ActionsSuite) Test10() {
 			"action": "single_right",
 		},
 	}
-	action := Action{
-		Args: Args{
+	action := types.Action{
+		Args: types.Args{
 			"Command":        "$message.action",
 			"types.DeviceId": types.DeviceId("10011cec96"),
 		},
-		Mapping: Mapping{
+		Mapping: types.Mapping{
 			"Command": {
 				"single_left":  "on",
 				"single_right": "off",
 			},
 		},
 	}
-	PostSonoffSwitchMessage([]types.Message{message}, action, &engine)
+	engine_actions.PostSonoffSwitchMessage([]types.Message{message}, action, engine)
 }
 
 func TestActions(t *testing.T) {

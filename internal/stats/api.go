@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/fedulovivan/mhz19-go/internal/logger"
+	"github.com/fedulovivan/mhz19-go/internal/types"
 	"github.com/fedulovivan/mhz19-go/pkg/utils"
 	routing "github.com/go-ozzo/ozzo-routing/v2"
 )
@@ -11,10 +12,10 @@ import (
 var logTag = logger.MakeTag(logger.STATS)
 
 type statsApi struct {
-	service StatsService
+	service types.StatsService
 }
 
-func NewApi(router *routing.Router, service StatsService) {
+func NewApi(router *routing.Router, service types.StatsService) {
 	api := statsApi{
 		service,
 	}

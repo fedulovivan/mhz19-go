@@ -4,35 +4,18 @@ import (
 	"database/sql"
 	"encoding/json"
 
-	// "github.com/fedulovivan/mhz19-go/internal/devices"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
-
-type Device struct {
-	Id            int               `json:"id,omitempty"`
-	DeviceId      types.DeviceId    `json:"deviceId,omitempty"`
-	DeviceClassId types.DeviceClass `json:"deviceClassId,omitempty"`
-	Name          string            `json:"name,omitempty"`
-	Comments      string            `json:"comments,omitempty"`
-	Origin        string            `json:"origin,omitempty"`
-	Json          any               `json:"json,omitempty"`
-}
-
-type DevicesService interface {
-	Get() ([]Device, error)
-	GetOne(id types.DeviceId) (Device, error)
-	Upsert(devices []Device) error
-}
 
 type devicesService struct {
 	repository DevicesRepository
 }
 
-func (s devicesService) Upsert(devices []Device) (err error) {
+func (s devicesService) Upsert(devices []types.Device) (err error) {
 	return s.repository.UpsertDevices(ToDb(devices))
 }
 
-func ToDb(in []Device) (out []DbDevice) {
+func ToDb(in []types.Device) (out []DbDevice) {
 	for _, d := range in {
 		mjson, err := json.Marshal(d.Json)
 		out = append(out, DbDevice{
@@ -47,13 +30,13 @@ func ToDb(in []Device) (out []DbDevice) {
 	return
 }
 
-func BuildDevices(in []DbDevice) (out []Device) {
+func BuildDevices(in []DbDevice) (out []types.Device) {
 	for _, d := range in {
 		var payload any
 		if d.Json.Valid {
 			_ = json.Unmarshal([]byte(d.Json.String), &payload)
 		}
-		out = append(out, Device{
+		out = append(out, types.Device{
 			Id:            int(d.Id),
 			DeviceId:      types.DeviceId(d.NativeId),
 			DeviceClassId: types.DeviceClass(d.DeviceClassId),
@@ -66,7 +49,7 @@ func BuildDevices(in []DbDevice) (out []Device) {
 	return
 }
 
-func (s devicesService) Get() (devices []Device, err error) {
+func (s devicesService) Get() (devices []types.Device, err error) {
 	dbdev, err := s.repository.Get()
 	if err != nil {
 		return
@@ -74,11 +57,11 @@ func (s devicesService) Get() (devices []Device, err error) {
 	return BuildDevices(dbdev), nil
 }
 
-func (s devicesService) GetOne(id types.DeviceId) (res Device, err error) {
+func (s devicesService) GetOne(id types.DeviceId) (res types.Device, err error) {
 	return
 }
 
-func NewService(r DevicesRepository) DevicesService {
+func NewService(r DevicesRepository) types.DevicesService {
 	return devicesService{
 		repository: r,
 	}

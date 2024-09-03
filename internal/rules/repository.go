@@ -26,7 +26,7 @@ func NewRepository(database *sql.DB) RulesRepository {
 
 type DbRule struct {
 	Id         int32
-	Comments   string
+	Name       string
 	IsDisabled sql.NullInt32
 	Throttle   sql.NullInt32
 }
@@ -126,8 +126,8 @@ func ruleInsert(
 	return db.Insert(
 		tx,
 		ctx,
-		`INSERT INTO rules(comments, is_disabled, throttle) VALUES(?,?,?)`,
-		rule.Comments, rule.IsDisabled, rule.Throttle,
+		`INSERT INTO rules(name, is_disabled, throttle) VALUES(?,?,?)`,
+		rule.Name, rule.IsDisabled, rule.Throttle,
 	)
 }
 
@@ -137,13 +137,13 @@ func rulesSelect(ctx context.Context, tx *sql.Tx, ruleId sql.NullInt32) ([]DbRul
 		ctx,
 		`SELECT
 			id,
-			comments,
+			name,
 			is_disabled,
 			throttle
 		FROM 
 			rules`,
 		func(rows *sql.Rows, m *DbRule) error {
-			return rows.Scan(&m.Id, &m.Comments, &m.IsDisabled, &m.Throttle)
+			return rows.Scan(&m.Id, &m.Name, &m.IsDisabled, &m.Throttle)
 		},
 		db.Where{
 			"id": ruleId,

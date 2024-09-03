@@ -1,5 +1,5 @@
 {
-    "comments":"balcony ceiling light on/off",
+    "name":"balcony ceiling light on/off",
     "disabled":false,
     "throttle":0,
     "condition":{

@@ -21,7 +21,7 @@ type DbMessage struct {
 }
 
 type MessagesRepository interface {
-	Get() ([]DbMessage, error)
+	Get(deviceId sql.NullString) ([]DbMessage, error)
 	Create(message DbMessage) (messageId int64, err error)
 }
 
@@ -48,7 +48,7 @@ func messageInsert(
 	)
 }
 
-func messagesSelect(ctx context.Context, tx *sql.Tx) ([]DbMessage, error) {
+func messagesSelect(ctx context.Context, tx *sql.Tx, deviceId sql.NullString) ([]DbMessage, error) {
 	return db.Select(
 		tx,
 		ctx,
@@ -64,7 +64,7 @@ func messagesSelect(ctx context.Context, tx *sql.Tx) ([]DbMessage, error) {
 		func(rows *sql.Rows, m *DbMessage) error {
 			return rows.Scan(&m.Id, &m.ChannelTypeId, &m.DeviceClassId, &m.DeviceId, &m.Timestamp, &m.Json)
 		},
-		db.Where{},
+		db.Where{"device_id": deviceId},
 	)
 }
 
@@ -76,14 +76,14 @@ func Count(ctx context.Context, tx *sql.Tx) (int32, error) {
 	)
 }
 
-func (repo messagesRepository) Get() (messages []DbMessage, err error) {
+func (repo messagesRepository) Get(deviceId sql.NullString) (messages []DbMessage, err error) {
 	ctx := context.Background()
 	tx, err := repo.database.Begin()
 	defer db.Rollback(tx)
 	if err != nil {
 		return
 	}
-	messages, err = messagesSelect(ctx, tx)
+	messages, err = messagesSelect(ctx, tx, deviceId)
 	if err != nil {
 		return
 	}

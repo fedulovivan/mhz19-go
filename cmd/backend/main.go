@@ -10,6 +10,7 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/db"
 	"github.com/fedulovivan/mhz19-go/internal/devices"
 	"github.com/fedulovivan/mhz19-go/internal/engine"
+	ldm "github.com/fedulovivan/mhz19-go/internal/last_device_message"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/messages"
 	"github.com/fedulovivan/mhz19-go/internal/rest"
@@ -44,34 +45,39 @@ func main() {
 	// }
 	// close(entriesCh)
 
-	// bootstrap
-	app.Init()
+	// bootstrap application
+	app.ConfigInit()
 	logger.Init()
 	rest.Init()
 
-	// start engine
-	engineOptions := engine.NewOptions()
-	engineOptions.SetLogTag(logger.MakeTag(logger.ENGINE))
-	engineOptions.SetProviders(mqtt.Provider, tbot.Provider)
-	engineOptions.SetMessagesService(
+	// configure and start engine
+	eopts := engine.NewOptions()
+	eopts.SetLogTag(logger.MakeTag(logger.ENGINE))
+	eopts.SetProviders(mqtt.Provider, tbot.Provider)
+	eopts.SetMessagesService(
 		messages.NewService(
 			messages.NewRepository(
 				db.Instance(),
 			),
 		),
 	)
-	engineOptions.SetDevicesService(
+	eopts.SetDevicesService(
 		devices.NewService(
 			devices.NewRepository(
 				db.Instance(),
 			),
 		),
 	)
-	engineOptions.SetRules(
+	eopts.SetLdmService(
+		ldm.NewService(
+			ldm.RepositoryInstance(),
+		),
+	)
+	eopts.SetRules(
 		engine.GetStaticRules()...,
 	)
-	engineInstance := engine.NewEngine(engineOptions)
-	engineInstance.Start()
+	einst := engine.NewEngine(eopts)
+	einst.Start()
 
 	// notify we are in the development mode
 	if app.Config.IsDev {
@@ -91,7 +97,7 @@ func main() {
 	slog.Debug(logTag("App termination signal received"))
 
 	// stop engine and all underlying providers
-	engineInstance.Stop()
+	einst.Stop()
 
 	// stop rest
 	rest.Stop()

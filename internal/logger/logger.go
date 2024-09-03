@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/fedulovivan/mhz19-go/internal/app"
+	"github.com/fedulovivan/mhz19-go/internal/types"
 	"github.com/lmittmann/tint"
 )
 
@@ -27,8 +28,6 @@ func Init() {
 
 type TagName string
 
-type LogTagFn = func(m string) string
-
 const (
 	MAIN     TagName = "[main]     "
 	ENGINE   TagName = "[engine]   "
@@ -38,12 +37,13 @@ const (
 	REST     TagName = "[rest]     "
 	RULES    TagName = "[rules]    "
 	STATS    TagName = "[stats]    "
+	LDM      TagName = "[ldm]      "
 	MESSAGES TagName = "[messages] "
 	DEVICES  TagName = "[devices]  "
 	SONOFF   TagName = "[sonoff]   "
 )
 
-func MakeTag(tag TagName) LogTagFn {
+func MakeTag(tag TagName) types.LogTagFn {
 	return func(message string) string {
 		return string(tag) + " " + message
 	}

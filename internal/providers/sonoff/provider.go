@@ -9,7 +9,7 @@ type provider struct {
 	engine.ProviderBase
 }
 
-var Provider engine.ChannelProvider = &provider{}
+var Provider types.ChannelProvider = &provider{}
 
 func (s *provider) Channel() types.ChannelType {
 	return types.CHANNEL_SONOFF

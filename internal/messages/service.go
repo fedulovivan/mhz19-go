@@ -1,23 +1,27 @@
 package messages
 
 import (
+	"database/sql"
 	"encoding/json"
 
-	// "github.com/fedulovivan/mhz19-go/internal/messages"
+	"github.com/fedulovivan/mhz19-go/internal/db"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
-
-type MessagesService interface {
-	Get() ([]types.Message, error)
-	Create(message types.Message) error
-}
 
 type messagesService struct {
 	repository MessagesRepository
 }
 
 func (s messagesService) Get() (messages []types.Message, err error) {
-	dbmsg, err := s.repository.Get()
+	dbmsg, err := s.repository.Get(sql.NullString{})
+	if err != nil {
+		return
+	}
+	return BuildMessages(dbmsg), nil
+}
+
+func (s messagesService) GetByDeviceId(deviceId string) (messages []types.Message, err error) {
+	dbmsg, err := s.repository.Get(db.NewNullString(deviceId))
 	if err != nil {
 		return
 	}
@@ -54,7 +58,7 @@ func (s messagesService) Create(message types.Message) (err error) {
 	return
 }
 
-func NewService(r MessagesRepository) MessagesService {
+func NewService(r MessagesRepository) types.MessagesService {
 	return messagesService{
 		repository: r,
 	}

@@ -4,8 +4,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/fedulovivan/mhz19-go/internal/engine"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
+	"github.com/fedulovivan/mhz19-go/internal/types"
 	"github.com/fedulovivan/mhz19-go/pkg/utils"
 	routing "github.com/go-ozzo/ozzo-routing/v2"
 )
@@ -13,10 +13,10 @@ import (
 var logTag = logger.MakeTag(logger.RULES)
 
 type rulesApi struct {
-	service RulesService
+	service types.RulesService
 }
 
-func NewApi(router *routing.Router, service RulesService) {
+func NewApi(router *routing.Router, service types.RulesService) {
 	api := rulesApi{
 		service,
 	}
@@ -28,7 +28,7 @@ func NewApi(router *routing.Router, service RulesService) {
 
 func (api rulesApi) create(c *routing.Context) error {
 	defer utils.TimeTrack(logTag, time.Now(), "api:create")
-	rule := engine.Rule{}
+	rule := types.Rule{}
 	err := c.Read(&rule)
 	if err != nil {
 		return err

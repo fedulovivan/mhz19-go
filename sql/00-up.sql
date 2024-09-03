@@ -34,7 +34,7 @@ CREATE TABLE devices (
 
 CREATE TABLE rules (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
-	comments TEXT NOT NULL,
+	name TEXT NOT NULL UNIQUE,
 	is_disabled INTEGER,
 	throttle INTEGER
 );

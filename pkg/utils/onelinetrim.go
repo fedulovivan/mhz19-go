@@ -2,7 +2,7 @@ package utils
 
 import "strings"
 
-// similar to https://www.npmjs.com/package/common-tags
+// similar to https://github.com/zspecza/common-tags
 func OneLineTrim(in string) string {
 	ll := strings.Split(in, "\n")
 	for i, l := range ll {

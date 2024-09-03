@@ -35,7 +35,7 @@ type ConfigStorage struct {
 	Tz             string     `env:"TZ"`
 }
 
-func Init() {
+func ConfigInit() {
 	RecordStartTime()
 	fileName, withConf := os.LookupEnv("CONF")
 	if !withConf {

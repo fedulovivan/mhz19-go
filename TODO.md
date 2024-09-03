@@ -1,18 +1,19 @@
 
 ### Prio 0
-- feat: think how to implement calback-based mappings
 - feat: finish implementation of all actions
-- feat: load real mapping rules on engine startup
+- feat: load db mapping rules on engine startup
 - feat: api: log errors captured by router error handler, also change default handler to render error as a json
 - feat: mdns client for sonoff devices https://github.com/hashicorp/mdns
+- feat: implement last device messages api
 
 ### Prio 1
-- figure out how to test engine in ut end to end - internal/engine/mappings_test.go::Test10
-- bug: "http: superfluous response.WriteHeader call from github.com/go-ozzo/ozzo-routing/v2.(*Router).handleError (router.go:131)" - appears after intterruptin apache bench
+- figure out why we cannot test engine in uts end to end - internal/engine/mappings_test.go::Test10
+- bug: "http: superfluous response.WriteHeader call from github.com/go-ozzo/ozzo-routing/v2.(*Router).handleError (router.go:131)" - appears after termination of stucked apache bench
 - bug: find why UnmarshalJSON is not called in Test164
 - bug: "apr_socket_recv: Operation timed out (60)" - https://stackoverflow.com/questions/30352725/why-is-my-hello-world-go-server-getting-crushed-by-apachebench
-- bug: "🧨 api:getAll took 3.451973917s" when reading 1k rules 1k times - need postgres? 
+- bug: "🧨 api:getAll took 3.451973917s" when reading 1k rules 1k times - try with postgres
 - arch: "FOREIGN KEY (device_id) REFERENCES devices(native_id)" requires sole UNIQUE index for column devices.native_id, while we actually need UNIQUE(device_class_id, native_id) since its unreasonable to contraint native_id across devices off all classes
+- arch: in addition to "native_id" problem see also "unsafemap" in internal/last_device_message/repository.go
 
 ### Prio 2
 - arch: think how to move messages_* and devices_* outside of engine package to their own
@@ -30,12 +31,14 @@
 - try: opentelemetry - https://opentelemetry.io/docs/languages/go/getting-started/   
 - try: prometheus
 - try: grpc
-- try: openapi https://en.wikipedia.org/wiki/OpenAPI_Specification
+- try: openapi or swagger https://en.wikipedia.org/wiki/OpenAPI_Specification or https://swagger.io/
 - try: https://github.com/go-ozzo/ozzo-routing
 - arch: make logger and logTag a dependencies for service, api and repository
 
 ### Completed
 
+- (+) feat: implement template-based argument value mappings - https://pkg.go.dev/text/template
+- (+) arch: extract actions in separate files
 - (+) feat: implement throttle
 - (+) feat: finish handling of "Mapping" in invokeActionFunc (NewArgReader)
 - (+) feat: add action.PayloadData property - PayloadData was replaced by action args in new design

@@ -1,24 +1,16 @@
 package stats
 
-type StatsService interface {
-	Get() (GetResult, error)
-}
-
-type GetResult struct {
-	Rules    int32 `json:"rules"`
-	Devices  int32 `json:"devices"`
-	Messages int32 `json:"messages"`
-}
+import "github.com/fedulovivan/mhz19-go/internal/types"
 
 type statsService struct {
 	repository StatsRepository
 }
 
-func (s statsService) Get() (GetResult, error) {
+func (s statsService) Get() (types.StatsGetResult, error) {
 	return s.repository.Get()
 }
 
-func NewService(r StatsRepository) StatsService {
+func NewService(r StatsRepository) types.StatsService {
 	return statsService{
 		repository: r,
 	}
