@@ -14,8 +14,10 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/messages"
 	"github.com/fedulovivan/mhz19-go/internal/rest"
+	"github.com/fedulovivan/mhz19-go/internal/rules"
 
 	mqtt "github.com/fedulovivan/mhz19-go/internal/providers/mqtt"
+	sonoff "github.com/fedulovivan/mhz19-go/internal/providers/sonoff"
 	tbot "github.com/fedulovivan/mhz19-go/internal/providers/tbot"
 )
 
@@ -23,61 +25,48 @@ var logTag = logger.MakeTag(logger.MAIN)
 
 func main() {
 
-	// Make a channel for results and start listening
-	// mdns.DefaultParams()
-	// entriesCh := make(chan *mdns.ServiceEntry, 4)
-	// go func() {
-	// 	for entry := range entriesCh {
-	// 		fmt.Printf("Got new entry: %v\n", entry)
-	// 	}
-	// }()
-	// err := mdns.Query(&mdns.QueryParam{
-	// 	Service:     "_ewelink",
-	// 	DisableIPv6: true,
-	// 	Entries:     entriesCh,
-	// })
-	// if err != nil {
-	// 	slog.Error(err.Error())
-	// }
-	// err :=
-	// err := mdns.Lookup("_ewelink._tcp.local", entriesCh)
-	// 	fmt.Println(err)
-	// }
-	// close(entriesCh)
-
 	// bootstrap application
-	app.ConfigInit()
+	app.InitConfig()
 	logger.Init()
 	rest.Init()
 
 	// configure and start engine
-	eopts := engine.NewOptions()
-	eopts.SetLogTag(logger.MakeTag(logger.ENGINE))
-	eopts.SetProviders(mqtt.Provider, tbot.Provider)
-	eopts.SetMessagesService(
+	rulesService := rules.ServiceSingleton(
+		rules.NewRepository(
+			db.DbSingleton(),
+		),
+	)
+	dbRules, _ := rulesService.Get()
+	e := engine.NewEngine()
+	e.SetLogTag(logger.MakeTag(logger.ENGINE))
+	e.SetProviders(mqtt.Provider, tbot.Provider, sonoff.Provider)
+	e.SetMessagesService(
 		messages.NewService(
 			messages.NewRepository(
-				db.Instance(),
+				db.DbSingleton(),
 			),
 		),
 	)
-	eopts.SetDevicesService(
+	e.SetDevicesService(
 		devices.NewService(
 			devices.NewRepository(
-				db.Instance(),
+				db.DbSingleton(),
 			),
 		),
 	)
-	eopts.SetLdmService(
+	e.SetLdmService(
 		ldm.NewService(
-			ldm.RepositoryInstance(),
+			ldm.RepoSingleton(),
 		),
 	)
-	eopts.SetRules(
-		engine.GetStaticRules()...,
-	)
-	einst := engine.NewEngine(eopts)
-	einst.Start()
+	e.AppendRules(engine.GetStaticRules()...)
+	e.AppendRules(dbRules...)
+	go func() {
+		for rule := range rulesService.OnCreated() {
+			e.AppendRules(rule)
+		}
+	}()
+	e.Start()
 
 	// notify we are in the development mode
 	if app.Config.IsDev {
@@ -97,7 +86,7 @@ func main() {
 	slog.Debug(logTag("App termination signal received"))
 
 	// stop engine and all underlying providers
-	einst.Stop()
+	e.Stop()
 
 	// stop rest
 	rest.Stop()

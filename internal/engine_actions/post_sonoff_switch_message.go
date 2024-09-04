@@ -14,7 +14,10 @@ import (
 
 var PostSonoffSwitchMessage types.ActionImpl = func(mm []types.Message, a types.Action, e types.Engine) {
 
-	areader := arg_reader.NewArgReader(mm[0], a.Args, a.Mapping, nil)
+	tpayload := arg_reader.TemplatePayload{
+		Messages: mm,
+	}
+	areader := arg_reader.NewArgReader(&mm[0], a.Args, a.Mapping, &tpayload, e)
 	cmd := areader.Get("Command")
 	deviceId := areader.Get("DeviceId")
 	if !areader.Ok() {
@@ -22,7 +25,7 @@ var PostSonoffSwitchMessage types.ActionImpl = func(mm []types.Message, a types.
 		return
 	}
 
-	device, err := e.GetOptions().DevicesService().GetOne(deviceId.(types.DeviceId))
+	device, err := e.DevicesService().GetOne(deviceId.(types.DeviceId))
 	if err != nil {
 		slog.Error(err.Error())
 		return

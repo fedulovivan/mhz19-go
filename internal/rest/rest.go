@@ -35,9 +35,9 @@ func Init() {
 	// rules
 	rules.NewApi(
 		router,
-		rules.NewService(
+		rules.ServiceSingleton(
 			rules.NewRepository(
-				db.Instance(),
+				db.DbSingleton(),
 			),
 		),
 	)
@@ -47,7 +47,7 @@ func Init() {
 		router,
 		stats.NewService(
 			stats.NewRepository(
-				db.Instance(),
+				db.DbSingleton(),
 			),
 		),
 	)
@@ -57,7 +57,7 @@ func Init() {
 		router,
 		devices.NewService(
 			devices.NewRepository(
-				db.Instance(),
+				db.DbSingleton(),
 			),
 		),
 	)
@@ -67,7 +67,7 @@ func Init() {
 		router,
 		messages.NewService(
 			messages.NewRepository(
-				db.Instance(),
+				db.DbSingleton(),
 			),
 		),
 	)
@@ -76,7 +76,7 @@ func Init() {
 	ldm.NewApi(
 		router,
 		ldm.NewService(
-			ldm.RepositoryInstance(),
+			ldm.RepoSingleton(),
 		),
 	)
 

@@ -26,8 +26,8 @@ var UpsertZigbeeDevices types.ActionImpl = func(mm []types.Message, a types.Acti
 			Json:          d.Data(),
 		})
 	}
-	err := e.GetOptions().DevicesService().Upsert(out)
+	err := e.DevicesService().UpsertAll(out)
 	if err != nil {
-		slog.Error(e.GetOptions().LogTag()(err.Error()))
+		slog.Error(e.LogTag()(err.Error()))
 	}
 }

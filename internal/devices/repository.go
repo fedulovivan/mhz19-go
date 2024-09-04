@@ -18,8 +18,8 @@ type DbDevice struct {
 }
 
 type DevicesRepository interface {
-	UpsertDevices(devices []DbDevice) error
-	Get() ([]DbDevice, error)
+	UpsertAll(devices []DbDevice) error
+	Get(deviceId sql.NullString) ([]DbDevice, error)
 }
 
 type devicesRepository struct {
@@ -32,7 +32,7 @@ func NewRepository(database *sql.DB) DevicesRepository {
 	}
 }
 
-func (repo devicesRepository) UpsertDevices(devices []DbDevice) (err error) {
+func (repo devicesRepository) UpsertAll(devices []DbDevice) (err error) {
 	ctx := context.Background()
 	tx, err := repo.database.Begin()
 	defer db.Rollback(tx)
@@ -52,14 +52,14 @@ func (repo devicesRepository) UpsertDevices(devices []DbDevice) (err error) {
 	return
 }
 
-func (repo devicesRepository) Get() (devices []DbDevice, err error) {
+func (repo devicesRepository) Get(deviceId sql.NullString) (devices []DbDevice, err error) {
 	ctx := context.Background()
 	tx, err := repo.database.Begin()
 	defer db.Rollback(tx)
 	if err != nil {
 		return
 	}
-	devices, err = DevicesSelect(ctx, tx, sql.NullString{})
+	devices, err = DevicesSelect(ctx, tx, deviceId)
 	if err != nil {
 		return
 	}

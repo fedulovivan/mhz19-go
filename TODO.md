@@ -1,10 +1,10 @@
 
 ### Prio 0
 - feat: finish implementation of all actions
-- feat: load db mapping rules on engine startup
 - feat: api: log errors captured by router error handler, also change default handler to render error as a json
-- feat: mdns client for sonoff devices https://github.com/hashicorp/mdns
-- feat: implement last device messages api
+- feat: create api to update/delete rules
+- feat: create api to add/update/delete devices
+- feat: sonoff provider, mdns client for sonoff devices https://github.com/hashicorp/mdns
 
 ### Prio 1
 - figure out why we cannot test engine in uts end to end - internal/engine/mappings_test.go::Test10
@@ -37,10 +37,13 @@
 
 ### Completed
 
+- (+) feat: load db mapping rules on engine startup
+- (+) feat: implement last device messages api
+- (+) bug: rule created via api is not loaded to engine
 - (+) feat: implement template-based argument value mappings - https://pkg.go.dev/text/template
 - (+) arch: extract actions in separate files
 - (+) feat: implement throttle
-- (+) feat: finish handling of "Mapping" in invokeActionFunc (NewArgReader)
+- (+) feat: finish handling of "Mapping" in InvokeActionFunc (NewArgReader)
 - (+) feat: add action.PayloadData property - PayloadData was replaced by action args in new design
 - (+) bug: "s.repository.Get(db.NewNullInt32(ruleId))" returns wrong data - bug in db.AddWhere
 - (+) internal/devices/repository.go::UpsertDevices should not stop on error - was actual for plain insert only

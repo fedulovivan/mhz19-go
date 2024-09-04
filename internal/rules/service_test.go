@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/fedulovivan/mhz19-go/internal/db"
 	"github.com/fedulovivan/mhz19-go/internal/types"
@@ -125,7 +126,7 @@ var testDataTable = []TableRow{
 			},
 		},
 		expectedLen:  1,
-		expectedJson: `[{"id":1,"name":"case 2","condition":{"fn":"Changed","args":{"Fifth":"0x00158d0004244bda","Fourth":1,"Left":"foo","Right":"bar","Third":"baz"}},"actions":[{"fn":"PostSonoffSwitchMessage","args":{"ListIds":["10011cec96","78345aaa67"],"Value":"$message.action"},"mapping":{"Value":{"lorem-3":"dolor-4","sit-5":"amet-6"}}}]}]`,
+		expectedJson: `[{"id":1,"name":"case 2","throttle":"0s","condition":{"fn":"Changed","args":{"Fifth":"0x00158d0004244bda","Fourth":1,"Left":"foo","Right":"bar","Third":"baz"}},"actions":[{"fn":"PostSonoffSwitchMessage","args":{"ListIds":["10011cec96","78345aaa67"],"Value":"$message.action"},"mapping":{"Value":{"lorem-3":"dolor-4","sit-5":"amet-6"}}}]}]`,
 		// expectedJson: `[{"id":1,"comments":"case 2","condition":{"fn":1,"args":{"Fifth":"DeviceId(0x00158d0004244bda)","Fourth":"DeviceClass(1)","Left":"foo","Right":"bar","Third":"baz"}},"actions":[{"fn":1,"args":{"ListIds":["DeviceId(10011cec96)","DeviceId(78345aaa67)"],"Value":"$message.action"},"mapping":{"Value":{"lorem-3":"dolor-4","sit-5":"amet-6"}},"deviceId":"DeviceId(0x00158d0004244bda)"}]}]`,
 	},
 	// case 02
@@ -174,7 +175,7 @@ var testDataTable = []TableRow{
 				ParentConditionId: db.NewNullInt32(25),
 			},
 		},
-		expectedJson: `[{"id":2,"name":"case 3","condition":{"list":[{"fn":"Changed"},{"fn":"Equal"},{"list":[{"fn":"InList"},{"fn":"NotEqual"}],"or":true}]}}]`,
+		expectedJson: `[{"id":2,"name":"case 3","throttle":"0s","condition":{"list":[{"fn":"Changed"},{"fn":"Equal"},{"list":[{"fn":"InList"},{"fn":"NotEqual"}],"or":true}]}}]`,
 	},
 }
 
@@ -336,7 +337,7 @@ func (s *ServiceSuite) Test63() {
 				},
 			},
 		},
-		Throttle: 100500,
+		Throttle: types.Throttle{Value: time.Duration(100500)},
 	}
 	outrule, outconds, outactions, outargs, mappings := ToDb(inrule, utils.NewSeq())
 

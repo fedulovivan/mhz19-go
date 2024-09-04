@@ -3,7 +3,9 @@ package devices
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 
+	"github.com/fedulovivan/mhz19-go/internal/db"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
@@ -11,8 +13,8 @@ type devicesService struct {
 	repository DevicesRepository
 }
 
-func (s devicesService) Upsert(devices []types.Device) (err error) {
-	return s.repository.UpsertDevices(ToDb(devices))
+func (s devicesService) UpsertAll(devices []types.Device) (err error) {
+	return s.repository.UpsertAll(ToDb(devices))
 }
 
 func ToDb(in []types.Device) (out []DbDevice) {
@@ -50,7 +52,7 @@ func BuildDevices(in []DbDevice) (out []types.Device) {
 }
 
 func (s devicesService) Get() (devices []types.Device, err error) {
-	dbdev, err := s.repository.Get()
+	dbdev, err := s.repository.Get(sql.NullString{})
 	if err != nil {
 		return
 	}
@@ -58,6 +60,13 @@ func (s devicesService) Get() (devices []types.Device, err error) {
 }
 
 func (s devicesService) GetOne(id types.DeviceId) (res types.Device, err error) {
+	dbdev, err := s.repository.Get(db.NewNullString(string(id)))
+	if len(dbdev) == 0 {
+		err = fmt.Errorf("no such device")
+		return
+	}
+	devices := BuildDevices(dbdev)
+	res = devices[0]
 	return
 }
 

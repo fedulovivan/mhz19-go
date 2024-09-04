@@ -39,14 +39,14 @@ func (s mockservice) GetOne(id types.DeviceId) (res types.Device, err error) {
 	return
 }
 
-func (s mockservice) Upsert(devices []types.Device) error {
+func (s mockservice) UpsertAll(devices []types.Device) error {
 	return nil
 }
 
 func (s *ActionsSuite) Test10() {
-	opts := NewOptions()
-	opts.SetDevicesService(&mockservice{})
-	engine := NewEngine(opts)
+	// opts := NewOptions()
+	engine := NewEngine()
+	engine.SetDevicesService(&mockservice{})
 	message := types.Message{
 		Payload: map[string]any{
 			"action": "single_right",

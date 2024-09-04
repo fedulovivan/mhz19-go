@@ -14,6 +14,7 @@ var instance LdmRepository
 type LdmRepository interface {
 	MakeKey(deviceClass types.DeviceClass, deviceId types.DeviceId) types.LdmKey
 	Get(key types.LdmKey) types.Message
+	Has(key types.LdmKey) bool
 	Set(key types.LdmKey, m types.Message)
 	GetAll() []types.Message
 	GetByDeviceId(deviceId types.DeviceId) types.Message
@@ -27,7 +28,7 @@ type repository struct {
 	device_id_to_key_unsafemap map[types.DeviceId]types.LdmKey
 }
 
-func RepositoryInstance() LdmRepository {
+func RepoSingleton() LdmRepository {
 	if instance == nil {
 		instance = &repository{
 			data:                       make(map[types.LdmKey]types.Message),
@@ -65,6 +66,13 @@ func (r *repository) Get(key types.LdmKey) types.Message {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	return r.get_unsafe(key)
+}
+
+func (r *repository) Has(key types.LdmKey) (flag bool) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	_, flag = r.data[key]
+	return
 }
 
 // "private" getter not protected by lock

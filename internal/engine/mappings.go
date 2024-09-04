@@ -1,17 +1,45 @@
 package engine
 
 import (
-	"time"
-
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
 func GetStaticRules() []types.Rule {
 	return []types.Rule{
 
-		// Comments: "test mapping 1",
+		// system rule to save received message in db
 		{
 			Id:       1,
+			Disabled: false,
+			Name:     "system rule to save received message in db",
+			Condition: types.Condition{
+				Fn: types.COND_NOT_EQUAL,
+				Args: types.Args{
+					"Left":  "$deviceClass",
+					"Right": types.DEVICE_CLASS_ZIGBEE_BRIDGE,
+				},
+			},
+			Actions: []types.Action{{Fn: types.ACTION_RECORD_MESSAGE}},
+		},
+
+		// system rule to create devices upon receiving message from bridge
+		{
+			Id:       2,
+			Disabled: false,
+			Name:     "system rule to create devices upon receiving message from bridge",
+			Condition: types.Condition{
+				Fn: types.COND_EQUAL,
+				Args: types.Args{
+					"Left":  "$deviceClass",
+					"Right": types.DEVICE_CLASS_ZIGBEE_BRIDGE,
+				},
+			},
+			Actions: []types.Action{{Fn: types.ACTION_UPSERT_ZIGBEE_DEVICES}},
+		},
+
+		// Comments: "test mapping 1",
+		{
+			Id:       3,
 			Disabled: true,
 			Name:     "test mapping 1",
 			Condition: types.Condition{
@@ -29,7 +57,7 @@ func GetStaticRules() []types.Rule {
 
 		// Comments: "test mapping for composite condition function",
 		{
-			Id:       2,
+			Id:       4,
 			Disabled: true,
 			Name:     "test mapping for composite condition function",
 			Condition: types.Condition{
@@ -55,7 +83,7 @@ func GetStaticRules() []types.Rule {
 		// Comments: "balcony ceiling light on/off",
 		// 23:44:12.197 DBG [ENGN] New message ChannelType="mqtt (id=1)" ChannelMeta={MqttTopic:zigbee2mqtt/0x00158d0004244bda} DeviceClass="zigbee-device (id=1)" DeviceId=0x00158d0004244bda Payload="map[action:single_right battery:100 device_temperature:30 linkquality:69 power_outage_count:24 voltage:3025]"
 		{
-			Id:       3,
+			Id:       5,
 			Disabled: true,
 			Name:     "balcony ceiling light on/off",
 			Condition: types.Condition{
@@ -94,10 +122,10 @@ func GetStaticRules() []types.Rule {
 
 		// Comments: "echo bot",
 		{
-			Id:       4,
-			Disabled: false,
+			Id:       6,
+			Disabled: true,
 			Name:     "echo bot",
-			Throttle: time.Second,
+			// Throttle: time.Second / 2,
 			Condition: types.Condition{
 				Fn: types.COND_EQUAL,
 				Args: types.Args{
@@ -113,34 +141,6 @@ func GetStaticRules() []types.Rule {
 					},
 				},
 			},
-		},
-
-		{
-			Id:       5,
-			Disabled: false,
-			Name:     "system rule to save received message in db",
-			Condition: types.Condition{
-				Fn: types.COND_NOT_EQUAL,
-				Args: types.Args{
-					"Left":  "$deviceClass",
-					"Right": types.DEVICE_CLASS_ZIGBEE_BRIDGE,
-				},
-			},
-			Actions: []types.Action{{Fn: types.ACTION_RECORD_MESSAGE}},
-		},
-
-		{
-			Id:       6,
-			Disabled: false,
-			Name:     "system rule to create devices upon receiving message from bridge",
-			Condition: types.Condition{
-				Fn: types.COND_EQUAL,
-				Args: types.Args{
-					"Left":  "$deviceClass",
-					"Right": types.DEVICE_CLASS_ZIGBEE_BRIDGE,
-				},
-			},
-			Actions: []types.Action{{Fn: types.ACTION_UPSERT_ZIGBEE_DEVICES}},
 		},
 	}
 }

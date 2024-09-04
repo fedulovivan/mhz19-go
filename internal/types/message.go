@@ -14,7 +14,7 @@ type Message struct {
 	DeviceId DeviceId `json:"deviceId"`
 	// time when message was received by backend
 	Timestamp time.Time `json:"timestamp"`
-	// parsed message payload json
+	// message payload json specific for channel and device class
 	Payload any `json:"payload,omitempty"`
 	// filled only if failed to parse into json
 	RawPayload []byte `json:"-"`
@@ -22,8 +22,11 @@ type Message struct {
 	ChannelMeta ChannelMeta `json:"-"`
 }
 
-// tuple of current and previous messages
-type MessageTuple = [2]Message
+// tuple of current and previous messages, prev could be nil
+type MessageTuple struct {
+	Curr *Message
+	Prev *Message
+}
 
 // get message primitive field or message payload field
 func (m *Message) Get(field string) (any, error) {
@@ -37,13 +40,16 @@ func (m *Message) Get(field string) (any, error) {
 	case "Timestamp":
 		return m.Timestamp, nil
 	default:
+		if m.Payload == nil {
+			return nil, nil
+		}
 		p, ok := m.Payload.(map[string]any)
 		if !ok {
 			return nil, fmt.Errorf("Message.Get(): Payload expected to be map[string]any instead of '%T', reading field '%v'", m.Payload, field)
 		}
 		v, ok := p[field]
 		if !ok {
-			return nil, fmt.Errorf("Message.Get(): Payload '%T' has no field '%v'", m.Payload, field)
+			return nil, fmt.Errorf("Message.Get(): Payload '%T, %+v' has no field '%v'", m.Payload, m.Payload, field)
 		}
 		return v, nil
 	}

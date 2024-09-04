@@ -1,0 +1,17 @@
+{
+    "Name": "eWeLink_10011cec96._ewelink._tcp.local.",
+    "Host": "eWeLink_10011cec96.local.",
+    "AddrV4": "192.168.88.60",
+    "AddrV6": "",
+    "Port": 8081,
+    "Info": "txtvers=1|id=10011cec96|type=diy_plug|apivers=1|seq=160|data1={\\\"switch\\\":\\\"off\\\",\\\"startup\\\":\\\"off\\\",\\\"pulse\\\":\\\"off\\\",\\\"sledOnline\\\":\\\"on\\\",\\\"fwVersion\\\":\\\"3.6.0\\\",\\\"pulseWidth\\\":500,\\\"rssi\\\":-74}",
+    "InfoFields": [
+      "txtvers=1",
+      "id=10011cec96",
+      "type=diy_plug",
+      "apivers=1",
+      "seq=160",
+      "data1={\\\"switch\\\":\\\"off\\\",\\\"startup\\\":\\\"off\\\",\\\"pulse\\\":\\\"off\\\",\\\"sledOnline\\\":\\\"on\\\",\\\"fwVersion\\\":\\\"3.6.0\\\",\\\"pulseWidth\\\":500,\\\"rssi\\\":-74}"
+    ],
+    "Addr": "192.168.88.60"
+  }

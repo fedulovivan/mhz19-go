@@ -12,6 +12,7 @@ const (
 	COND_NOT_EQUAL     CondFn = 4
 	COND_NOT_NIL       CondFn = 5
 	COND_ZIGBEE_DEVICE CondFn = 6
+	COND_DEVICE_CLASS  CondFn = 7
 )
 
 var CONDITION_NAMES = map[CondFn]string{
@@ -22,6 +23,7 @@ var CONDITION_NAMES = map[CondFn]string{
 	COND_NOT_EQUAL:     "NotEqual",
 	COND_NOT_NIL:       "NotNil",
 	COND_ZIGBEE_DEVICE: "ZigbeeDevice",
+	COND_DEVICE_CLASS:  "DeviceClass",
 }
 
 func (s CondFn) String() string {

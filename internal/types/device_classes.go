@@ -11,6 +11,7 @@ const (
 	DEVICE_CLASS_VALVE         DeviceClass = 3
 	DEVICE_CLASS_ZIGBEE_BRIDGE DeviceClass = 4
 	DEVICE_CLASS_BOT           DeviceClass = 5
+	DEVICE_CLASS_SONOFF_DIY    DeviceClass = 6
 )
 
 var DEVICE_CLASS_NAMES = map[DeviceClass]string{
@@ -20,6 +21,7 @@ var DEVICE_CLASS_NAMES = map[DeviceClass]string{
 	DEVICE_CLASS_VALVE:         "valve-manipulator",
 	DEVICE_CLASS_ZIGBEE_BRIDGE: "zigbee-bridge",
 	DEVICE_CLASS_BOT:           "telegram-bot",
+	DEVICE_CLASS_SONOFF_DIY:    "sonoff-diy",
 }
 
 func (s DeviceClass) String() string {

@@ -28,7 +28,7 @@ func NewContainer() *container {
 
 func (c *container) MakeKey(deviceClass types.DeviceClass, deviceId types.DeviceId, ruleId int32) (key Key) {
 	return Key(
-		types.DEVICE_CLASS_NAMES[deviceClass] + "-" + string(deviceId) + "-rule#" + strconv.Itoa(int(ruleId)),
+		types.DEVICE_CLASS_NAMES[deviceClass] + "-" + string(deviceId) + "-rule" + strconv.Itoa(int(ruleId)),
 	)
 }
 
@@ -45,7 +45,7 @@ func (c *container) CreateQueue(key Key, throttle time.Duration, flush FlushFn) 
 	q = NewQueue(throttle, flush)
 	c.qlist[key] = q
 	slog.Debug(logTag(fmt.Sprintf(
-		"New Queue created for key=%v, total instantes %v",
+		"New Queue created for key='%v', total instances %v",
 		key,
 		len(c.qlist),
 	)))

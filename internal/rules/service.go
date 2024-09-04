@@ -3,6 +3,7 @@ package rules
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/fedulovivan/mhz19-go/internal/db"
 	"github.com/fedulovivan/mhz19-go/internal/types"
@@ -11,13 +12,28 @@ import (
 )
 
 type rulesService struct {
+	oncreated  chan types.Rule
 	repository RulesRepository
 }
 
+var instance types.RulesService
+
 func NewService(r RulesRepository) types.RulesService {
 	return rulesService{
+		oncreated:  make(chan types.Rule, 100),
 		repository: r,
 	}
+}
+
+func ServiceSingleton(r RulesRepository) types.RulesService {
+	if instance == nil {
+		instance = NewService(r)
+	}
+	return instance
+}
+
+func (s rulesService) OnCreated() chan types.Rule {
+	return s.oncreated
 }
 
 func (s rulesService) Create(rule types.Rule) (int64, error) {
@@ -25,13 +41,16 @@ func (s rulesService) Create(rule types.Rule) (int64, error) {
 		rule,
 		utils.NewSeq(),
 	)
-	return s.repository.Create(
+	newRuleId, err := s.repository.Create(
 		dbRule,
 		dbConditions,
 		dbActions,
 		dbArguments,
 		dbMappings,
 	)
+	rule.Id = int32(newRuleId)
+	s.oncreated <- rule
+	return newRuleId, err
 }
 
 func (s rulesService) GetOne(ruleId int32) (res types.Rule, err error) {
@@ -95,11 +114,16 @@ func Build(
 		if rootCondFound {
 			cond = BuildCondition(rootCond.Id, allConditions, allArgs)
 		}
+		var throttle types.Throttle
+		if r.Throttle.Valid {
+			throttle = types.Throttle{Value: time.Duration(r.Throttle.Int32) * time.Second}
+		}
 		rule := types.Rule{
 			Id:        r.Id,
 			Name:      r.Name,
 			Disabled:  r.IsDisabled.Int32 == 1,
 			Condition: cond,
+			Throttle:  throttle,
 			Actions:   BuildActions(r.Id, allRuleActions, allArgs, allMappings),
 		}
 		result = append(result, rule)
@@ -169,10 +193,9 @@ func BuildActions(
 			})
 		})
 		result = append(result, types.Action{
-			Id:   int(a.Id),
-			Fn:   types.ActionFn(a.FunctionType.Int32),
-			Args: BuildArguments(args),
-			// DeviceId: types.DeviceId(a.DeviceId.String),
+			Id:      int(a.Id),
+			Fn:      types.ActionFn(a.FunctionType.Int32),
+			Args:    BuildArguments(args),
 			Mapping: BuildMappings(mappings, args),
 		})
 	}
@@ -246,7 +269,7 @@ func ToDbRule(rule types.Rule, seq utils.Seq) DbRule {
 		Id:         int32(seq.Next()),
 		Name:       rule.Name,
 		IsDisabled: db.NewNullInt32FromBool(rule.Disabled),
-		Throttle:   db.NewNullInt32(int32(rule.Throttle.Seconds())),
+		Throttle:   db.NewNullInt32(int32(rule.Throttle.Value.Seconds())),
 	}
 }
 

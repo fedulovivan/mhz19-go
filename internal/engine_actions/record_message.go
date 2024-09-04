@@ -7,8 +7,8 @@ import (
 )
 
 var RecordMessage types.ActionImpl = func(mm []types.Message, a types.Action, e types.Engine) {
-	err := e.GetOptions().MessagesService().Create(mm[0])
+	err := e.MessagesService().Create(mm[0])
 	if err != nil {
-		slog.Error(e.GetOptions().LogTag()(err.Error()))
+		slog.Error(e.LogTag()(err.Error()))
 	}
 }

@@ -21,7 +21,7 @@ var logTag = logger.MakeTag(logger.DB)
 
 var instance *sql.DB
 
-func Instance() *sql.DB {
+func DbSingleton() *sql.DB {
 	if instance != nil {
 		return instance
 	}

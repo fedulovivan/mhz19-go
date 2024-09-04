@@ -9,7 +9,7 @@ type MessagesService interface {
 type DevicesService interface {
 	Get() ([]Device, error)
 	GetOne(id DeviceId) (Device, error)
-	Upsert(devices []Device) error
+	UpsertAll(devices []Device) error
 }
 
 type LdmKey string
@@ -17,6 +17,7 @@ type LdmKey string
 type LdmService interface {
 	MakeKey(deviceClass DeviceClass, deviceId DeviceId) LdmKey
 	Get(key LdmKey) Message
+	Has(key LdmKey) bool
 	Set(key LdmKey, m Message)
 	GetAll() []Message
 	GetByDeviceId(deviceId DeviceId) Message
@@ -36,4 +37,5 @@ type RulesService interface {
 	GetOne(ruleId int32) (Rule, error)
 	Get() ([]Rule, error)
 	Create(rule Rule) (int64, error)
+	OnCreated() chan Rule
 }

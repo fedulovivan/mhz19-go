@@ -9,17 +9,15 @@ import (
 )
 
 var TelegramBotMessage types.ActionImpl = func(mm []types.Message, a types.Action, e types.Engine) {
-
 	tpayload := arg_reader.TemplatePayload{
 		Messages: mm,
 	}
-	areader := arg_reader.NewArgReader(mm[0], a.Args, a.Mapping, &tpayload)
+	areader := arg_reader.NewArgReader(&mm[0], a.Args, a.Mapping, &tpayload, e)
 	text := areader.Get("Text")
 	if !areader.Ok() {
 		slog.Error(areader.Error().Error())
 		return
 	}
-
 	p := e.FindProvider(types.CHANNEL_TELEGRAM)
 	if text != nil {
 		p.Send(text)

@@ -14,6 +14,10 @@ func (s ldmService) Get(key types.LdmKey) types.Message {
 	return s.repository.Get(key)
 }
 
+func (s ldmService) Has(key types.LdmKey) bool {
+	return s.repository.Has(key)
+}
+
 func (s ldmService) Set(key types.LdmKey, m types.Message) {
 	s.repository.Set(key, m)
 }

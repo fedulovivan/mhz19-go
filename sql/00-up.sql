@@ -54,11 +54,8 @@ CREATE TABLE rule_actions (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	rule_id INTEGER NOT NULL,
 	function_type INTEGER,
-    -- device_id TEXT,
     CONSTRAINT rule_actions_fk_rules FOREIGN KEY (rule_id) REFERENCES rules(id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT rule_actions_fk_function FOREIGN KEY (function_type) REFERENCES action_functions(id) ON DELETE CASCADE ON UPDATE CASCADE
-    -- ,
-    -- CONSTRAINT rule_actions_fk_devices FOREIGN KEY (device_id) REFERENCES devices(native_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE rule_condition_or_action_arguments (
@@ -123,14 +120,11 @@ INSERT INTO condition_functions VALUES(3,'InList');
 INSERT INTO condition_functions VALUES(4,'NotEqual');
 INSERT INTO condition_functions VALUES(5,'NotNil');
 INSERT INTO condition_functions VALUES(6,'ZigbeeDevice');
+INSERT INTO condition_functions VALUES(7,'DeviceClass');
 
-INSERT INTO devices VALUES(1, '0x00158d00042446ec', 1, 'test zigbee device', NULL, NULL, NULL);
-INSERT INTO devices VALUES(2, '192.168.88.188', 2, 'test pinger device', NULL, NULL, NULL);
+INSERT INTO devices VALUES(1, '192.168.88.1', 2, 'MIKROTIK_ROUTER', NULL, NULL, NULL);
+INSERT INTO devices VALUES(2, '192.168.88.44', 2, 'IPHONE_15_PRO_IP', NULL, NULL, NULL);
+INSERT INTO devices VALUES(3, '192.168.0.11', 2, 'IPHONE_15_PRO_AP_IP', NULL, NULL, NULL);
+INSERT INTO devices VALUES(4, '192.168.88.62', 2, 'IPHONE_14_IP', NULL, NULL, NULL);
 
 COMMIT;
-
--- INSERT INTO rules VALUES(1,'test mapping 1',NULL,NULL);
--- INSERT INTO rule_conditions VALUES(1,1,2,NULL,NULL);
--- INSERT INTO rule_actions VALUES(1,1,2,NULL);
--- INSERT INTO rule_condition_or_action_arguments VALUES(1,1,NULL,'Left',NULL,'$deviceClass',NULL,NULL);
--- INSERT INTO rule_condition_or_action_arguments VALUES(2,1,NULL,'Right',NULL,NULL,NULL,2);
