@@ -17,7 +17,7 @@ This project is backend for the home automation server, written on golang. Evolu
 
 ### Architecture
 
-- Channel providers which collect messages from different channels and devices into unified stream. Supported channels are mqtt, telegram, sonoff diy (TBD), and yeelight (TBD).
+- Channel providers which collect messages from different channels and devices into unified stream. Supported channels are mqtt, telegram, dns-sd (former sonoff), and yeelight (TBD).
 - History storage which persist received messages in sqlite db
 - Versatile mapping rules engine which defines how application should respond to received messages
 - Actions executor which executes one or more actions in respond to received message
@@ -31,8 +31,8 @@ This project is backend for the home automation server, written on golang. Evolu
 
 No matter which channel was used to receive a message, or which certain device has emitted that message, we pack every message into unified strusture for future handling
 
-- Channel type - mqtt, telegram, sonoff, yeelight
-- Device class - zigbee device, zigbee bridge, device-pinger, valve-manipulator, telegram-bot, sonoff device, yeelight device
+- Channel type - mqtt, telegram, dns-sd, yeelight
+- Device class - zigbee device, zigbee bridge, device-pinger, valve-manipulator, telegram-bot, sonoff diy-plug device, yeelight device
 - Device id - unique device identified specific for the certain device class. e.g. zigbee ieee device address 0x00158d0004244bda
 - Payload - the message itself as a json. untyped, specific for the certain device and channel. e.g. zigbee wall switch message may look like `{"battery":100,"action":"single_left"}` or telegram-bot message as `{"Text":"/open-valves"}`
 - Timestamp - a time when message was received by the server, usefull when reading and visualizing historical data

@@ -8,14 +8,14 @@ const (
 	CHANNEL_UNKNOWN  ChannelType = 0
 	CHANNEL_MQTT     ChannelType = 1
 	CHANNEL_TELEGRAM ChannelType = 2
-	CHANNEL_SONOFF   ChannelType = 3
+	CHANNEL_DNS_SD   ChannelType = 3
 )
 
 var CHANNEL_NAMES = map[ChannelType]string{
 	CHANNEL_UNKNOWN:  "<unknown>",
 	CHANNEL_MQTT:     "mqtt",
 	CHANNEL_TELEGRAM: "telegram",
-	CHANNEL_SONOFF:   "sonoff",
+	CHANNEL_DNS_SD:   "dns-sd",
 }
 
 func (s ChannelType) String() string {

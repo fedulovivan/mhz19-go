@@ -66,7 +66,7 @@ type DbRuleActionArgumentMapping struct {
 	Value      string
 }
 
-func actionInsert(
+func actionInsertTx(
 	act DbRuleAction,
 	ctx context.Context,
 	tx *sql.Tx,
@@ -79,7 +79,7 @@ func actionInsert(
 	)
 }
 
-func conditionInsert(
+func conditionInsertTx(
 	cond DbRuleCondition,
 	ctx context.Context,
 	tx *sql.Tx,
@@ -92,7 +92,7 @@ func conditionInsert(
 	)
 }
 
-func mappingInsert(
+func mappingInsertTx(
 	mapping DbRuleActionArgumentMapping,
 	ctx context.Context,
 	tx *sql.Tx,
@@ -105,7 +105,7 @@ func mappingInsert(
 	)
 }
 
-func argumentInsert(
+func argumentInsertTx(
 	arg DbRuleConditionOrActionArgument,
 	ctx context.Context,
 	tx *sql.Tx,
@@ -118,7 +118,7 @@ func argumentInsert(
 	)
 }
 
-func ruleInsert(
+func ruleInsertTx(
 	rule DbRule,
 	ctx context.Context,
 	tx *sql.Tx,
@@ -131,7 +131,7 @@ func ruleInsert(
 	)
 }
 
-func rulesSelect(ctx context.Context, tx *sql.Tx, ruleId sql.NullInt32) ([]DbRule, error) {
+func rulesSelectTx(ctx context.Context, tx *sql.Tx, ruleId sql.NullInt32) ([]DbRule, error) {
 	return db.Select(
 		tx,
 		ctx,
@@ -151,7 +151,7 @@ func rulesSelect(ctx context.Context, tx *sql.Tx, ruleId sql.NullInt32) ([]DbRul
 	)
 }
 
-func conditionsSelect(ctx context.Context, tx *sql.Tx, ruleId sql.NullInt32) ([]DbRuleCondition, error) {
+func conditionsSelectTx(ctx context.Context, tx *sql.Tx, ruleId sql.NullInt32) ([]DbRuleCondition, error) {
 	return db.Select(
 		tx,
 		ctx,
@@ -172,7 +172,7 @@ func conditionsSelect(ctx context.Context, tx *sql.Tx, ruleId sql.NullInt32) ([]
 	)
 }
 
-func ruleActionsSelect(ctx context.Context, tx *sql.Tx, ruleId sql.NullInt32) ([]DbRuleAction, error) {
+func ruleActionsSelectTx(ctx context.Context, tx *sql.Tx, ruleId sql.NullInt32) ([]DbRuleAction, error) {
 	return db.Select(
 		tx,
 		ctx,
@@ -191,7 +191,7 @@ func ruleActionsSelect(ctx context.Context, tx *sql.Tx, ruleId sql.NullInt32) ([
 	)
 }
 
-func argsSelect(ctx context.Context, tx *sql.Tx, ruleId sql.NullInt32) ([]DbRuleConditionOrActionArgument, error) {
+func argsSelectTx(ctx context.Context, tx *sql.Tx, ruleId sql.NullInt32) ([]DbRuleConditionOrActionArgument, error) {
 	return db.Select(
 		tx,
 		ctx,
@@ -217,7 +217,7 @@ func argsSelect(ctx context.Context, tx *sql.Tx, ruleId sql.NullInt32) ([]DbRule
 	)
 }
 
-func mappingsSelect(ctx context.Context, tx *sql.Tx, ruleId sql.NullInt32) ([]DbRuleActionArgumentMapping, error) {
+func mappingsSelectTx(ctx context.Context, tx *sql.Tx, ruleId sql.NullInt32) ([]DbRuleActionArgumentMapping, error) {
 	return db.Select(
 		tx,
 		ctx,
@@ -233,7 +233,7 @@ func mappingsSelect(ctx context.Context, tx *sql.Tx, ruleId sql.NullInt32) ([]Db
 	)
 }
 
-func Count(ctx context.Context, tx *sql.Tx) (int32, error) {
+func CountTx(ctx context.Context, tx *sql.Tx) (int32, error) {
 	return db.Count(
 		tx,
 		ctx,
@@ -258,7 +258,7 @@ func (r rulesRepository) Create(
 		return
 	}
 	// rule
-	result, err := ruleInsert(rule, ctx, tx)
+	result, err := ruleInsertTx(rule, ctx, tx)
 	if err != nil {
 		return
 	}
@@ -276,7 +276,7 @@ func (r rulesRepository) Create(
 			realParentId := realCondIdsMap[cond.ParentConditionId.Int32]
 			cond.ParentConditionId = db.NewNullInt32(realParentId)
 		}
-		result, err = conditionInsert(cond, ctx, tx)
+		result, err = conditionInsertTx(cond, ctx, tx)
 		if err != nil {
 			return
 		}
@@ -290,7 +290,7 @@ func (r rulesRepository) Create(
 	// actions
 	for _, act := range actions {
 		act.RuleId = int32(ruleId)
-		result, err = actionInsert(act, ctx, tx)
+		result, err = actionInsertTx(act, ctx, tx)
 		if err != nil {
 			return
 		}
@@ -312,7 +312,7 @@ func (r rulesRepository) Create(
 			realActId := realActionIdsMap[arg.ActionId.Int32]
 			arg.ActionId = db.NewNullInt32(realActId)
 		}
-		result, err = argumentInsert(arg, ctx, tx)
+		result, err = argumentInsertTx(arg, ctx, tx)
 		if err != nil {
 			return
 		}
@@ -327,7 +327,7 @@ func (r rulesRepository) Create(
 	for _, mapping := range mappings {
 		mapping.RuleId = int32(ruleId)
 		mapping.ArgumentId = realArgIdsMap[mapping.ArgumentId]
-		_, err = mappingInsert(mapping, ctx, tx)
+		_, err = mappingInsertTx(mapping, ctx, tx)
 		if err != nil {
 			return
 		}
@@ -352,11 +352,11 @@ func (r rulesRepository) Get(ruleId sql.NullInt32) (
 	if err != nil {
 		return
 	}
-	g.Go(func() (e error) { rules, e = rulesSelect(ctx, tx, ruleId); return })
-	g.Go(func() (e error) { conditions, e = conditionsSelect(ctx, tx, ruleId); return })
-	g.Go(func() (e error) { ruleActions, e = ruleActionsSelect(ctx, tx, ruleId); return })
-	g.Go(func() (e error) { args, e = argsSelect(ctx, tx, ruleId); return })
-	g.Go(func() (e error) { mappings, e = mappingsSelect(ctx, tx, ruleId); return })
+	g.Go(func() (e error) { rules, e = rulesSelectTx(ctx, tx, ruleId); return })
+	g.Go(func() (e error) { conditions, e = conditionsSelectTx(ctx, tx, ruleId); return })
+	g.Go(func() (e error) { ruleActions, e = ruleActionsSelectTx(ctx, tx, ruleId); return })
+	g.Go(func() (e error) { args, e = argsSelectTx(ctx, tx, ruleId); return })
+	g.Go(func() (e error) { mappings, e = mappingsSelectTx(ctx, tx, ruleId); return })
 	err = g.Wait()
 	if err == nil {
 		err = db.Commit(tx)

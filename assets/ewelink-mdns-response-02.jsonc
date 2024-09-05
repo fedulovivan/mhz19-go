@@ -1,0 +1,20 @@
+// with github.com/brutella/dnssd lib
+{
+    "IPs": [
+      "192.168.88.60"
+    ],
+    "Host": "eWeLink_10011cec96",
+    "Port": 8081,
+    "IfaceName": "enp4s0f0",
+    "Name": "eWeLink_10011cec96",
+    "Type": "_ewelink._tcp",
+    "Domain": "local",
+    "Text": {
+      "apivers": "1",
+      "data1": "{\\\"switch\\\":\\\"off\\\",\\\"startup\\\":\\\"off\\\",\\\"pulse\\\":\\\"off\\\",\\\"sledOnline\\\":\\\"on\\\",\\\"fwVersion\\\":\\\"3.6.0\\\",\\\"pulseWidth\\\":500,\\\"rssi\\\":-62}",
+      "id": "10011cec96",
+      "seq": "179",
+      "txtvers": "1",
+      "type": "diy_plug"
+    }
+}

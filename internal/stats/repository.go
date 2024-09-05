@@ -36,9 +36,9 @@ func (r statsRepository) Get() (
 	if err != nil {
 		return
 	}
-	g.Go(func() (e error) { res.Rules, e = rules.Count(ctx, tx); return })
-	g.Go(func() (e error) { res.Devices, e = devices.Count(ctx, tx); return })
-	g.Go(func() (e error) { res.Messages, e = messages.Count(ctx, tx); return })
+	g.Go(func() (e error) { res.Rules, e = rules.CountTx(ctx, tx); return })
+	g.Go(func() (e error) { res.Devices, e = devices.CountTx(ctx, tx); return })
+	g.Go(func() (e error) { res.Messages, e = messages.CountTx(ctx, tx); return })
 	err = g.Wait()
 	if err == nil {
 		err = db.Commit(tx)

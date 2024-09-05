@@ -25,6 +25,9 @@ type mockservice struct {
 func (s mockservice) Get() ([]types.Device, error) {
 	return nil, nil
 }
+func (s mockservice) GetByDeviceClass(dc types.DeviceClass) ([]types.Device, error) {
+	return nil, nil
+}
 func (s mockservice) GetOne(id types.DeviceId) (res types.Device, err error) {
 	if id == types.DeviceId("10011cec96") {
 		res = types.Device{

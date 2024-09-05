@@ -35,7 +35,7 @@ func NewRepository(database *sql.DB) MessagesRepository {
 	}
 }
 
-func messageInsert(
+func messageInsertTx(
 	m DbMessage,
 	ctx context.Context,
 	tx *sql.Tx,
@@ -48,7 +48,7 @@ func messageInsert(
 	)
 }
 
-func messagesSelect(ctx context.Context, tx *sql.Tx, deviceId sql.NullString) ([]DbMessage, error) {
+func messagesSelectTx(ctx context.Context, tx *sql.Tx, deviceId sql.NullString) ([]DbMessage, error) {
 	return db.Select(
 		tx,
 		ctx,
@@ -68,7 +68,7 @@ func messagesSelect(ctx context.Context, tx *sql.Tx, deviceId sql.NullString) ([
 	)
 }
 
-func Count(ctx context.Context, tx *sql.Tx) (int32, error) {
+func CountTx(ctx context.Context, tx *sql.Tx) (int32, error) {
 	return db.Count(
 		tx,
 		ctx,
@@ -83,7 +83,7 @@ func (r messagesRepository) Get(deviceId sql.NullString) (messages []DbMessage, 
 	if err != nil {
 		return
 	}
-	messages, err = messagesSelect(ctx, tx, deviceId)
+	messages, err = messagesSelectTx(ctx, tx, deviceId)
 	if err != nil {
 		return
 	}
@@ -98,7 +98,11 @@ func (r messagesRepository) Create(message DbMessage) (messageId int64, err erro
 	if err != nil {
 		return
 	}
-	existingdevices, err := devices.DevicesSelect(ctx, tx, db.NewNullString(message.DeviceId))
+	existingdevices, err := devices.DevicesSelectTx(
+		ctx, tx,
+		db.NewNullString(message.DeviceId),
+		sql.NullInt32{},
+	)
 	if err != nil {
 		return
 	}
@@ -108,7 +112,7 @@ func (r messagesRepository) Create(message DbMessage) (messageId int64, err erro
 			message.DeviceClassId,
 			message.DeviceId,
 		))
-		_, err = devices.DeviceUpsert(devices.DbDevice{
+		_, err = devices.DeviceUpsertTx(devices.DbDevice{
 			NativeId:      message.DeviceId,
 			DeviceClassId: message.DeviceClassId,
 			Origin:        db.NewNullString("message-autoinsert"),
@@ -117,7 +121,7 @@ func (r messagesRepository) Create(message DbMessage) (messageId int64, err erro
 			return
 		}
 	}
-	result, err := messageInsert(message, ctx, tx)
+	result, err := messageInsertTx(message, ctx, tx)
 	if err != nil {
 		return
 	}

@@ -4,7 +4,9 @@
 - feat: api: log errors captured by router error handler, also change default handler to render error as a json
 - feat: create api to update/delete rules
 - feat: create api to add/update/delete devices
+- feat: create api to read device classes (or unified api for all dicts?)
 - feat: sonoff provider, mdns client for sonoff devices https://github.com/hashicorp/mdns
+- feat: rename channel=sonoff to channel=mdns
 
 ### Prio 1
 - figure out why we cannot test engine in uts end to end - internal/engine/mappings_test.go::Test10

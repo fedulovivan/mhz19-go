@@ -51,8 +51,20 @@ func BuildDevices(in []DbDevice) (out []types.Device) {
 	return
 }
 
+func (s devicesService) GetByDeviceClass(dc types.DeviceClass) (devices []types.Device, err error) {
+	dbdev, err := s.repository.Get(
+		sql.NullString{},
+		db.NewNullInt32(int32(dc)),
+	)
+	devices = BuildDevices(dbdev)
+	return
+}
+
 func (s devicesService) Get() (devices []types.Device, err error) {
-	dbdev, err := s.repository.Get(sql.NullString{})
+	dbdev, err := s.repository.Get(
+		sql.NullString{},
+		sql.NullInt32{},
+	)
 	if err != nil {
 		return
 	}
@@ -60,7 +72,10 @@ func (s devicesService) Get() (devices []types.Device, err error) {
 }
 
 func (s devicesService) GetOne(id types.DeviceId) (res types.Device, err error) {
-	dbdev, err := s.repository.Get(db.NewNullString(string(id)))
+	dbdev, err := s.repository.Get(
+		db.NewNullString(string(id)),
+		sql.NullInt32{},
+	)
 	if len(dbdev) == 0 {
 		err = fmt.Errorf("no such device")
 		return

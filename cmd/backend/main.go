@@ -16,8 +16,8 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/rest"
 	"github.com/fedulovivan/mhz19-go/internal/rules"
 
+	dnssd "github.com/fedulovivan/mhz19-go/internal/providers/dnssd"
 	mqtt "github.com/fedulovivan/mhz19-go/internal/providers/mqtt"
-	sonoff "github.com/fedulovivan/mhz19-go/internal/providers/sonoff"
 	tbot "github.com/fedulovivan/mhz19-go/internal/providers/tbot"
 )
 
@@ -39,7 +39,7 @@ func main() {
 	dbRules, _ := rulesService.Get()
 	e := engine.NewEngine()
 	e.SetLogTag(logger.MakeTag(logger.ENGINE))
-	e.SetProviders(mqtt.Provider, tbot.Provider, sonoff.Provider)
+	e.SetProviders(mqtt.Provider, tbot.Provider, dnssd.Provider)
 	e.SetMessagesService(
 		messages.NewService(
 			messages.NewRepository(

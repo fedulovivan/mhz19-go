@@ -19,7 +19,7 @@ type DbDevice struct {
 
 type DevicesRepository interface {
 	UpsertAll(devices []DbDevice) error
-	Get(deviceId sql.NullString) ([]DbDevice, error)
+	Get(deviceId sql.NullString, deviceClass sql.NullInt32) ([]DbDevice, error)
 }
 
 type devicesRepository struct {
@@ -40,7 +40,7 @@ func (r devicesRepository) UpsertAll(devices []DbDevice) (err error) {
 		return
 	}
 	for _, device := range devices {
-		_, err = DeviceUpsert(device, ctx, tx)
+		_, err = DeviceUpsertTx(device, ctx, tx)
 		if err != nil {
 			return
 		}
@@ -52,14 +52,14 @@ func (r devicesRepository) UpsertAll(devices []DbDevice) (err error) {
 	return
 }
 
-func (r devicesRepository) Get(deviceId sql.NullString) (devices []DbDevice, err error) {
+func (r devicesRepository) Get(deviceId sql.NullString, deviceClass sql.NullInt32) (devices []DbDevice, err error) {
 	ctx := context.Background()
 	tx, err := r.database.Begin()
 	defer db.Rollback(tx)
 	if err != nil {
 		return
 	}
-	devices, err = DevicesSelect(ctx, tx, deviceId)
+	devices, err = DevicesSelectTx(ctx, tx, deviceId, deviceClass)
 	if err != nil {
 		return
 	}
@@ -67,7 +67,7 @@ func (r devicesRepository) Get(deviceId sql.NullString) (devices []DbDevice, err
 	return
 }
 
-func Count(ctx context.Context, tx *sql.Tx) (int32, error) {
+func CountTx(ctx context.Context, tx *sql.Tx) (int32, error) {
 	return db.Count(
 		tx,
 		ctx,
@@ -75,7 +75,7 @@ func Count(ctx context.Context, tx *sql.Tx) (int32, error) {
 	)
 }
 
-func DevicesSelect(ctx context.Context, tx *sql.Tx, nativeId sql.NullString) ([]DbDevice, error) {
+func DevicesSelectTx(ctx context.Context, tx *sql.Tx, nativeId sql.NullString, deviceClass sql.NullInt32) ([]DbDevice, error) {
 	return db.Select(
 		tx,
 		ctx,
@@ -93,12 +93,13 @@ func DevicesSelect(ctx context.Context, tx *sql.Tx, nativeId sql.NullString) ([]
 			return rows.Scan(&m.Id, &m.NativeId, &m.DeviceClassId, &m.Name, &m.Comments, &m.Origin, &m.Json)
 		},
 		db.Where{
-			"native_id": nativeId,
+			"native_id":       nativeId,
+			"device_class_id": deviceClass,
 		},
 	)
 }
 
-func DeviceUpsert(
+func DeviceUpsertTx(
 	device DbDevice,
 	ctx context.Context,
 	tx *sql.Tx,

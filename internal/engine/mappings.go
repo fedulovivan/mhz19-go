@@ -11,7 +11,7 @@ func GetStaticRules() []types.Rule {
 		{
 			Id:       1,
 			Disabled: false,
-			Name:     "system rule to save received message in db",
+			Name:     "system rule to save (almost) all received messages in db",
 			Condition: types.Condition{
 				// Or: true,
 				List: []types.Condition{

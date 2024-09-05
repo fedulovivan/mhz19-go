@@ -40,7 +40,7 @@ const (
 	LDM      TagName = "[ldm]     "
 	MESSAGES TagName = "[messages]"
 	DEVICES  TagName = "[devices] "
-	SONOFF   TagName = "[sonoff]  "
+	DNSSD    TagName = "[dns-sd]  "
 	ACTIONS  TagName = "[actions] "
 )
 

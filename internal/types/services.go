@@ -8,6 +8,7 @@ type MessagesService interface {
 
 type DevicesService interface {
 	Get() ([]Device, error)
+	GetByDeviceClass(dc DeviceClass) ([]Device, error)
 	GetOne(id DeviceId) (Device, error)
 	UpsertAll(devices []Device) error
 }
