@@ -37,6 +37,7 @@
 
 ### Completed
 
+- (+) feat: $channelType directive
 - (+) feat: load db mapping rules on engine startup
 - (+) feat: implement last device messages api
 - (+) bug: rule created via api is not loaded to engine

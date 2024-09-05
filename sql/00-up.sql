@@ -100,6 +100,7 @@ CREATE TABLE messages (
 INSERT INTO channel_types VALUES(0,'<unknown>');
 INSERT INTO channel_types VALUES(1,'mqtt');
 INSERT INTO channel_types VALUES(2,'telegram');
+INSERT INTO channel_types VALUES(3,'sonoff');
 
 INSERT INTO device_classes VALUES(0,'<unknown>');
 INSERT INTO device_classes VALUES(1,'zigbee-device');
@@ -107,6 +108,7 @@ INSERT INTO device_classes VALUES(2,'device-pinger');
 INSERT INTO device_classes VALUES(3,'valve-manipulator');
 INSERT INTO device_classes VALUES(4,'zigbee-bridge');
 INSERT INTO device_classes VALUES(5,'telegram-bot');
+INSERT INTO device_classes VALUES(6,'sonoff-diy');
 
 INSERT INTO action_functions VALUES(1,'PostSonoffSwitchMessage');
 INSERT INTO action_functions VALUES(2,'TelegramBotMessage');

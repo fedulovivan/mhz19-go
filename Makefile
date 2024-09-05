@@ -58,7 +58,7 @@ migrate-dump:
 
 .PHONY: test
 test:
-	go test -cover -race -count 1 ./...
+	CGO_ENABLED=1 go test -cover -race -count 1 ./...
 
 .PHONY: test-one
 test-one:

@@ -115,6 +115,10 @@ func (r *ArgReader) Stage1(argName string) (any, error) {
 		return r.message.DeviceClass, nil
 	}
 
+	if vstring == "$channelType" {
+		return r.message.ChannelType, nil
+	}
+
 	return vstring, nil
 }
 

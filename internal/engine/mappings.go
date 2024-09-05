@@ -13,10 +13,21 @@ func GetStaticRules() []types.Rule {
 			Disabled: false,
 			Name:     "system rule to save received message in db",
 			Condition: types.Condition{
-				Fn: types.COND_NOT_EQUAL,
-				Args: types.Args{
-					"Left":  "$deviceClass",
-					"Right": types.DEVICE_CLASS_ZIGBEE_BRIDGE,
+				List: []types.Condition{
+					{
+						Fn: types.COND_NOT_EQUAL,
+						Args: types.Args{
+							"Left":  "$deviceClass",
+							"Right": types.DEVICE_CLASS_ZIGBEE_BRIDGE,
+						},
+					},
+					{
+						Fn: types.COND_NOT_EQUAL,
+						Args: types.Args{
+							"Left":  "$channelType",
+							"Right": types.CHANNEL_SONOFF,
+						},
+					},
 				},
 			},
 			Actions: []types.Action{{Fn: types.ACTION_RECORD_MESSAGE}},

@@ -19,32 +19,62 @@ func (s *provider) Channel() types.ChannelType {
 	return types.CHANNEL_SONOFF
 }
 
+// func Stop
+//   ticker.Stop
+
 func (s *provider) Init() {
 
 	s.Out = make(types.MessageChan, 100)
 
 	entriesCh := make(chan *mdns.ServiceEntry, 4)
+
 	go func() {
 		for entry := range entriesCh {
-			s.Out <- types.Message{
+			outMsg := types.Message{
 				DeviceId:    types.DeviceId(entry.Host),
 				ChannelType: s.Channel(),
 				DeviceClass: types.DEVICE_CLASS_SONOFF_DIY,
 				Timestamp:   time.Now(),
 				Payload:     entry,
 			}
+			s.Out <- outMsg
 		}
 	}()
 
-	err := mdns.Query(&mdns.QueryParam{
-		Service:     "_ewelink._tcp",
-		DisableIPv6: true,
-		Entries:     entriesCh,
-		Timeout:     time.Second * 1,
-	})
-	if err != nil {
-		slog.Error(err.Error())
+	var query = func() {
+
+		// service := "_ewelink"
+		// same queery is sent by macos "Discovery" tool, which makes all local devices to respond
+		// service := "_services._dns-sd._udp"
+		// service := "_googlecast._tcp"
+		service := "_ewelink._tcp"
+
+		slog.Debug("mdns.Query() " + service)
+		err := mdns.Query(&mdns.QueryParam{
+			Service: service,
+			Entries: entriesCh,
+			// DisableIPv6: true,
+			// Timeout:     time.Second * 1,
+		})
+		if err != nil {
+			slog.Error(err.Error())
+		}
 	}
+
+	// finrst time
+	query()
+
+	// periodic updates
+	// ticker := time.NewTicker(
+	// 	time.Second * 30,
+	// )
+	// go func() {
+	// 	for range ticker.C {
+
+	// 		query()
+
+	// 	}
+	// }()
 
 }
 
@@ -62,6 +92,8 @@ func (s *provider) Init() {
 //
 //
 //
+// err := mdns.Lookup("_googlecast._tcp", entriesCh)
+// err := mdns.Lookup("_ewelink._tcp", entriesCh)
 // Make a channel for results and start listening
 // entriesCh := make(chan *mdns.ServiceEntry, 4)
 // go func() {

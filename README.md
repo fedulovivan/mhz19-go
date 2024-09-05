@@ -51,3 +51,10 @@ No matter which channel was used to receive a message, or which certain device h
 ### Demo
 
 ![console.png](assets/demo-01.png)
+
+### Development requirements for the bare host 
+
+- sqlite3 `sudo apt-get install sqlite3`
+- go `wget https://go.dev/dl/go1.23.0.linux-amd64.tar.gz`, `rm -rf /usr/local/go && tar -C /usr/local -xzf go1.23.0.linux-amd64.tar.gz`, `export PATH=$PATH:/usr/local/go/bin`
+- golangci-lint https://golangci-lint.run/welcome/install `curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.60.3`
+- gcc `sudo apt install gcc`
