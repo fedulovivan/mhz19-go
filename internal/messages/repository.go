@@ -76,9 +76,9 @@ func Count(ctx context.Context, tx *sql.Tx) (int32, error) {
 	)
 }
 
-func (repo messagesRepository) Get(deviceId sql.NullString) (messages []DbMessage, err error) {
+func (r messagesRepository) Get(deviceId sql.NullString) (messages []DbMessage, err error) {
 	ctx := context.Background()
-	tx, err := repo.database.Begin()
+	tx, err := r.database.Begin()
 	defer db.Rollback(tx)
 	if err != nil {
 		return
@@ -91,9 +91,9 @@ func (repo messagesRepository) Get(deviceId sql.NullString) (messages []DbMessag
 	return
 }
 
-func (repo messagesRepository) Create(message DbMessage) (messageId int64, err error) {
+func (r messagesRepository) Create(message DbMessage) (messageId int64, err error) {
 	ctx := context.Background()
-	tx, err := repo.database.Begin()
+	tx, err := r.database.Begin()
 	defer db.Rollback(tx)
 	if err != nil {
 		return
@@ -103,7 +103,11 @@ func (repo messagesRepository) Create(message DbMessage) (messageId int64, err e
 		return
 	}
 	if len(existingdevices) == 0 {
-		slog.Warn( /* logTag */ (fmt.Sprintf("No device with class=%v id=%v in db, creating it automatically...", message.DeviceClassId, message.DeviceId)))
+		slog.Warn(fmt.Sprintf(
+			"No device with class=%v id=%v in db, creating it automatically...",
+			message.DeviceClassId,
+			message.DeviceId,
+		))
 		_, err = devices.DeviceUpsert(devices.DbDevice{
 			NativeId:      message.DeviceId,
 			DeviceClassId: message.DeviceClassId,

@@ -23,11 +23,11 @@ var UpsertZigbeeDevices types.ActionImpl = func(mm []types.Message, a types.Acti
 			DeviceId:      types.DeviceId(d.Path("ieee_address").Data().(string)),
 			Comments:      d.Path("definition.description").Data().(string),
 			Origin:        "bridge-upsert",
-			Json:          d.Data(),
+			// Json:          d.Data(),
 		})
 	}
 	err := e.DevicesService().UpsertAll(out)
 	if err != nil {
-		slog.Error(e.LogTag()(err.Error()))
+		slog.Error(logTag(err.Error()))
 	}
 }

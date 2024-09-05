@@ -19,7 +19,6 @@ type Engine interface {
 	SetLdmService(r LdmService)
 	AppendRules(rules ...Rule)
 
-	LogTag() LogTagFn
 	MessagesService() MessagesService
 	DevicesService() DevicesService
 }

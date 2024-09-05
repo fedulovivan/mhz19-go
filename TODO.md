@@ -37,6 +37,7 @@
 
 ### Completed
 
+- (+) bug: "database is locked" - dig deeper into https://github.com/mattn/go-sqlite3/issues/274
 - (+) feat: $channelType directive
 - (+) feat: load db mapping rules on engine startup
 - (+) feat: implement last device messages api

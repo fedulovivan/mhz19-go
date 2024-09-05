@@ -9,6 +9,6 @@ import (
 var RecordMessage types.ActionImpl = func(mm []types.Message, a types.Action, e types.Engine) {
 	err := e.MessagesService().Create(mm[0])
 	if err != nil {
-		slog.Error(e.LogTag()(err.Error()))
+		slog.Error(logTag(err.Error()))
 	}
 }

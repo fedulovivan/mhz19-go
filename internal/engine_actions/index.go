@@ -1,8 +1,11 @@
 package engine_actions
 
 import (
+	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
+
+var logTag = logger.MakeTag(logger.ACTIONS)
 
 var Actions = types.ActionImpls{
 	types.ACTION_POST_SONOFF_SWITCH_MESSAGE: PostSonoffSwitchMessage,

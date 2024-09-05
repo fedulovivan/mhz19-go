@@ -26,12 +26,12 @@ func NewRepository(database *sql.DB) StatsRepository {
 	}
 }
 
-func (repo statsRepository) Get() (
+func (r statsRepository) Get() (
 	res types.StatsGetResult,
 	err error,
 ) {
 	g, ctx := errgroup.WithContext(context.Background())
-	tx, err := repo.database.Begin()
+	tx, err := r.database.Begin()
 	defer db.Rollback(tx)
 	if err != nil {
 		return

@@ -22,7 +22,7 @@ type provider struct {
 
 var Provider types.ChannelProvider = &provider{}
 
-func (s *provider) Channel() types.ChannelType {
+func (p *provider) Channel() types.ChannelType {
 	return types.CHANNEL_MQTT
 }
 
@@ -53,33 +53,33 @@ func (p *parserBase) parse_base() (types.Message, bool) {
 	return outMsg, true
 }
 
-func (s *provider) Init() {
+func (p *provider) Init() {
 
-	s.Out = make(types.MessageChan, 100)
+	p.Out = make(types.MessageChan, 100)
 
 	var handlers = TopicHandlers{
 		"zigbee2mqtt/+": func(client MqttLib.Client, msg MqttLib.Message) {
 			outMsg, ok := NewZigbeeDevice(msg).Parse()
 			if ok {
-				s.Out <- outMsg
+				p.Out <- outMsg
 			}
 		},
 		"device-pinger/+/status": func(c MqttLib.Client, msg MqttLib.Message) {
 			outMsg, ok := NewDevicePinger(msg).Parse()
 			if ok {
-				s.Out <- outMsg
+				p.Out <- outMsg
 			}
 		},
 		"/VALVE/#": func(c MqttLib.Client, msg MqttLib.Message) {
 			outMsg, ok := NewValveManipulator(msg).Parse()
 			if ok {
-				s.Out <- outMsg
+				p.Out <- outMsg
 			}
 		},
 		"zigbee2mqtt/bridge/devices": func(c MqttLib.Client, msg MqttLib.Message) {
 			outMsg, ok := NewZigbeeBridge(msg).Parse()
 			if ok {
-				s.Out <- outMsg
+				p.Out <- outMsg
 			}
 		},
 	}
@@ -126,25 +126,25 @@ func (s *provider) Init() {
 	}
 
 	// create client
-	s.client = MqttLib.NewClient(opts)
+	p.client = MqttLib.NewClient(opts)
 
 	// register routes
 	for t, h := range handlers {
-		s.client.AddRoute(t, h)
+		p.client.AddRoute(t, h)
 	}
 
 	// connect
 	slog.Debug(logTag("Connecting..."))
-	if token := s.client.Connect(); token.Wait() && token.Error() != nil {
+	if token := p.client.Connect(); token.Wait() && token.Error() != nil {
 		slog.Error(logTag("Initial connect"), "error", token.Error())
 	}
 
 }
 
-func (s *provider) Stop() {
+func (p *provider) Stop() {
 	slog.Debug(logTag("Disconnecting..."))
-	if s.client.IsConnected() {
-		s.client.Disconnect(250)
+	if p.client.IsConnected() {
+		p.client.Disconnect(250)
 	} else {
 		slog.Warn(logTag("Not connected"))
 	}

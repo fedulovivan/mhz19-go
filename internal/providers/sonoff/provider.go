@@ -4,27 +4,36 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/fedulovivan/mhz19-go/internal/app"
 	"github.com/fedulovivan/mhz19-go/internal/engine"
+	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 	"github.com/hashicorp/mdns"
 )
 
 type provider struct {
 	engine.ProviderBase
+	ticker *time.Ticker
 }
+
+var logTag = logger.MakeTag(logger.SONOFF)
 
 var Provider types.ChannelProvider = &provider{}
 
-func (s *provider) Channel() types.ChannelType {
+func (p *provider) Channel() types.ChannelType {
 	return types.CHANNEL_SONOFF
 }
 
-// func Stop
-//   ticker.Stop
+func (p *provider) Stop() {
+	if p.ticker != nil {
+		slog.Debug(logTag("Stopping ticker..."))
+		p.ticker.Stop()
+	}
+}
 
-func (s *provider) Init() {
+func (p *provider) Init() {
 
-	s.Out = make(types.MessageChan, 100)
+	p.Out = make(types.MessageChan, 100)
 
 	entriesCh := make(chan *mdns.ServiceEntry, 4)
 
@@ -32,49 +41,50 @@ func (s *provider) Init() {
 		for entry := range entriesCh {
 			outMsg := types.Message{
 				DeviceId:    types.DeviceId(entry.Host),
-				ChannelType: s.Channel(),
+				ChannelType: p.Channel(),
 				DeviceClass: types.DEVICE_CLASS_SONOFF_DIY,
 				Timestamp:   time.Now(),
 				Payload:     entry,
 			}
-			s.Out <- outMsg
+			p.Out <- outMsg
 		}
 	}()
 
 	var query = func() {
 
-		// service := "_ewelink"
-		// same queery is sent by macos "Discovery" tool, which makes all local devices to respond
-		// service := "_services._dns-sd._udp"
+		// google tv
 		// service := "_googlecast._tcp"
-		service := "_ewelink._tcp"
 
-		slog.Debug("mdns.Query() " + service)
+		// sonoff diy-plug devices
+		// service := "_ewelink._tcp"
+
+		// this query is sent by macos's "Discovery" tool, which makes all local devices to respond
+		service := "_services._dns-sd._udp"
+
+		slog.Debug(logTag("mdns.Query() " + service))
 		err := mdns.Query(&mdns.QueryParam{
-			Service: service,
-			Entries: entriesCh,
-			// DisableIPv6: true,
+			Service:     service,
+			Entries:     entriesCh,
+			DisableIPv6: app.Config.MdnsDisableIPv6,
 			// Timeout:     time.Second * 1,
 		})
 		if err != nil {
-			slog.Error(err.Error())
+			slog.Error(logTag(err.Error()))
 		}
 	}
 
-	// finrst time
+	// query for the first time
 	query()
 
-	// periodic updates
-	// ticker := time.NewTicker(
-	// 	time.Second * 30,
-	// )
-	// go func() {
-	// 	for range ticker.C {
-
-	// 		query()
-
-	// 	}
-	// }()
+	// do periodic updates
+	p.ticker = time.NewTicker(
+		time.Second * 60,
+	)
+	go func() {
+		for range p.ticker.C {
+			query()
+		}
+	}()
 
 }
 
@@ -128,3 +138,25 @@ func (s *provider) Init() {
 // if err != nil {
 // 	slog.Error(err.Error())
 // }
+// emit several messages to emulate db load and reproduce `got an error "database is locked" executing INSERT INTO devices`
+// ticker := time.NewTicker(
+// 	time.Millisecond * 5,
+// )
+// ticks := 10
+// go func() {
+// 	for i := 0; i < ticks; i++ {
+// 		entriesCh <- &mdns.ServiceEntry{
+// 			Host: uuid.NewString(),
+// 		}
+// 	}
+// 	// for range ticker.C {
+// 	// 	if ticks == 0 {
+// 	// 		ticker.Stop()
+// 	// 		return
+// 	// 	}
+// 	// 	entriesCh <- &mdns.ServiceEntry{
+// 	// 		Host: uuid.NewString(),
+// 	// 	}
+// 	// 	ticks--
+// 	// }
+// }()

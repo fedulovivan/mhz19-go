@@ -52,9 +52,10 @@ func (e *engine) AppendRules(rules ...types.Rule) {
 	e.rules = append(e.rules, rules...)
 }
 
-func (e *engine) LogTag() types.LogTagFn {
-	return e.logTag
-}
+//	func (e *engine) LogTag(in string) string {
+//		return e.logTag(in)
+//	}
+
 func (e *engine) MessagesService() types.MessagesService {
 	return e.messageService
 }

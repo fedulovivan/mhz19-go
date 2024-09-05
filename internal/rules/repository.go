@@ -241,7 +241,7 @@ func Count(ctx context.Context, tx *sql.Tx) (int32, error) {
 	)
 }
 
-func (repo rulesRepository) Create(
+func (r rulesRepository) Create(
 	rule DbRule,
 	conditions []DbRuleCondition,
 	actions []DbRuleAction,
@@ -252,7 +252,7 @@ func (repo rulesRepository) Create(
 	var realActionIdsMap = make(map[int32]int32, len(actions))
 	var realArgIdsMap = make(map[int32]int32, len(arguments))
 	ctx := context.Background()
-	tx, err := repo.database.Begin()
+	tx, err := r.database.Begin()
 	defer db.Rollback(tx)
 	if err != nil {
 		return
@@ -338,7 +338,7 @@ func (repo rulesRepository) Create(
 	return
 }
 
-func (repo rulesRepository) Get(ruleId sql.NullInt32) (
+func (r rulesRepository) Get(ruleId sql.NullInt32) (
 	rules []DbRule,
 	conditions []DbRuleCondition,
 	ruleActions []DbRuleAction,
@@ -347,7 +347,7 @@ func (repo rulesRepository) Get(ruleId sql.NullInt32) (
 	err error,
 ) {
 	g, ctx := errgroup.WithContext(context.Background())
-	tx, err := repo.database.Begin()
+	tx, err := r.database.Begin()
 	defer db.Rollback(tx)
 	if err != nil {
 		return

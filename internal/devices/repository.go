@@ -32,9 +32,9 @@ func NewRepository(database *sql.DB) DevicesRepository {
 	}
 }
 
-func (repo devicesRepository) UpsertAll(devices []DbDevice) (err error) {
+func (r devicesRepository) UpsertAll(devices []DbDevice) (err error) {
 	ctx := context.Background()
-	tx, err := repo.database.Begin()
+	tx, err := r.database.Begin()
 	defer db.Rollback(tx)
 	if err != nil {
 		return
@@ -52,9 +52,9 @@ func (repo devicesRepository) UpsertAll(devices []DbDevice) (err error) {
 	return
 }
 
-func (repo devicesRepository) Get(deviceId sql.NullString) (devices []DbDevice, err error) {
+func (r devicesRepository) Get(deviceId sql.NullString) (devices []DbDevice, err error) {
 	ctx := context.Background()
-	tx, err := repo.database.Begin()
+	tx, err := r.database.Begin()
 	defer db.Rollback(tx)
 	if err != nil {
 		return
@@ -107,8 +107,8 @@ func DeviceUpsert(
 		tx,
 		ctx,
 		`INSERT INTO devices(native_id, device_class_id, name, comments, origin, json)
-		VALUES(?,?,?,?,?,?) 
-		ON CONFLICT(native_id) 
+		VALUES(?,?,?,?,?,?)
+		ON CONFLICT(native_id)
 		DO UPDATE SET json = excluded.json`,
 		device.NativeId, device.DeviceClassId, device.Name, device.Comments, device.Origin, device.Json,
 	)

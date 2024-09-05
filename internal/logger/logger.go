@@ -29,18 +29,19 @@ func Init() {
 type TagName string
 
 const (
-	MAIN     TagName = "[main]     "
-	ENGINE   TagName = "[engine]   "
-	MQTT     TagName = "[mqtt]     "
-	TBOT     TagName = "[tbot]     "
-	DB       TagName = "[db]       "
-	REST     TagName = "[rest]     "
-	RULES    TagName = "[rules]    "
-	STATS    TagName = "[stats]    "
-	LDM      TagName = "[ldm]      "
-	MESSAGES TagName = "[messages] "
-	DEVICES  TagName = "[devices]  "
-	SONOFF   TagName = "[sonoff]   "
+	MAIN     TagName = "[main]    "
+	ENGINE   TagName = "[engine]  "
+	MQTT     TagName = "[mqtt]    "
+	TBOT     TagName = "[tbot]    "
+	DB       TagName = "[db]      "
+	REST     TagName = "[rest]    "
+	RULES    TagName = "[rules]   "
+	STATS    TagName = "[stats]   "
+	LDM      TagName = "[ldm]     "
+	MESSAGES TagName = "[messages]"
+	DEVICES  TagName = "[devices] "
+	SONOFF   TagName = "[sonoff]  "
+	ACTIONS  TagName = "[actions] "
 )
 
 func MakeTag(tag TagName) types.LogTagFn {
