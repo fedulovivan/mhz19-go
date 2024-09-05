@@ -1,7 +1,16 @@
 package types
 
+type EngineAsSupplier interface {
+	SetDevicesService(s DevicesService)
+	DevicesService() DevicesService
+	SetMessagesService(s MessagesService)
+	MessagesService() MessagesService
+	SetProviders(s ...ChannelProvider)
+	Provider(ct ChannelType) ChannelProvider
+}
+
 type Engine interface {
-	FindProvider(ct ChannelType) ChannelProvider
+	EngineAsSupplier
 	InvokeActionFunc(mm []Message, a Action, r Rule, tid string)
 	MatchesCondition(mt MessageTuple, c Condition, r Rule, tid string) bool
 	InvokeConditionFunc(mt MessageTuple, fn CondFn, args Args, r Rule, tid string) bool
@@ -11,14 +20,7 @@ type Engine interface {
 	HandleMessage(m Message, rules []Rule)
 	Start()
 	Stop()
-
 	SetLogTag(f LogTagFn)
-	SetProviders(s ...ChannelProvider)
-	SetMessagesService(s MessagesService)
-	SetDevicesService(s DevicesService)
 	SetLdmService(r LdmService)
 	AppendRules(rules ...Rule)
-
-	MessagesService() MessagesService
-	DevicesService() DevicesService
 }

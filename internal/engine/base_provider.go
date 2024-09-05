@@ -10,7 +10,7 @@ func (s *ProviderBase) MessageChan() types.MessageChan {
 	return s.Out
 }
 
-func (s *ProviderBase) Send(a ...any) {
+func (s *ProviderBase) Send(a ...any) error {
 	panic("Send() should be implemented in concrete provider")
 }
 

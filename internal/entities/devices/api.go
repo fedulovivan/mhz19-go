@@ -23,7 +23,7 @@ func NewApi(router *routing.Router, service types.DevicesService) {
 	}
 	group := router.Group("/devices")
 	group.Get("", api.get)
-	group.Get("/class/<dc>", api.getByDeviceClass)
+	group.Get("/class/<deviceClass>", api.getByDeviceClass)
 }
 
 func (api devicesApi) get(c *routing.Context) error {
@@ -37,7 +37,7 @@ func (api devicesApi) get(c *routing.Context) error {
 
 func (api devicesApi) getByDeviceClass(c *routing.Context) error {
 	defer utils.TimeTrack(api.logTag, time.Now(), "api:getByDeviceClass")
-	dc, err := strconv.Atoi(c.Param("dc"))
+	dc, err := strconv.Atoi(c.Param("deviceClass"))
 	if err != nil {
 		return err
 	}

@@ -1,13 +1,12 @@
-package engine_actions
+package actions
 
 import (
-	"github.com/fedulovivan/mhz19-go/internal/logger"
+	"fmt"
+
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
-var logTag = logger.MakeTag(logger.ACTIONS)
-
-var Actions = types.ActionImpls{
+var actions = types.ActionImpls{
 	types.ACTION_POST_SONOFF_SWITCH_MESSAGE: PostSonoffSwitchMessage,
 	types.ACTION_YEELIGHT_DEVICE_SET_POWER:  YeelightDeviceSetPower,
 	types.ACTION_ZIGBEE2_MQTT_SET_STATE:     Zigbee2MqttSetState,
@@ -15,4 +14,12 @@ var Actions = types.ActionImpls{
 	types.ACTION_TELEGRAM_BOT_MESSAGE:       TelegramBotMessage,
 	types.ACTION_RECORD_MESSAGE:             RecordMessage,
 	types.ACTION_UPSERT_ZIGBEE_DEVICES:      UpsertZigbeeDevices,
+}
+
+func Get(fn types.ActionFn) (action types.ActionImpl) {
+	action, exist := actions[fn]
+	if !exist {
+		panic(fmt.Sprintf("Action function [%v] not yet implemented", fn))
+	}
+	return
 }

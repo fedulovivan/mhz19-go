@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/fedulovivan/mhz19-go/internal/db"
-	"github.com/fedulovivan/mhz19-go/internal/devices"
+	"github.com/fedulovivan/mhz19-go/internal/entities/devices"
 )
 
 type DbMessage struct {

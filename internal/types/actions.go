@@ -32,6 +32,6 @@ func (s *ActionFn) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%v"`, ACTION_NAMES[*s])), nil
 }
 
-type ActionImpl func(mm []Message, a Action, e Engine)
+type ActionImpl func(messages []Message, action Action, engine EngineAsSupplier) error
 
 type ActionImpls map[ActionFn]ActionImpl

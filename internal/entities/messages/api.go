@@ -22,7 +22,7 @@ func NewApi(router *routing.Router, service types.MessagesService) {
 	}
 	group := router.Group("/messages")
 	group.Get("", api.get)
-	group.Get("/<deviceId>", api.getByDeviceId)
+	group.Get("/device/<deviceId>", api.getByDeviceId)
 }
 
 func (api messagesApi) get(c *routing.Context) error {

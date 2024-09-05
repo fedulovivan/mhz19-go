@@ -8,13 +8,13 @@ import (
 
 	"github.com/fedulovivan/mhz19-go/internal/app"
 	"github.com/fedulovivan/mhz19-go/internal/db"
-	"github.com/fedulovivan/mhz19-go/internal/devices"
 	"github.com/fedulovivan/mhz19-go/internal/engine"
-	ldm "github.com/fedulovivan/mhz19-go/internal/last_device_message"
+	"github.com/fedulovivan/mhz19-go/internal/entities/devices"
+	"github.com/fedulovivan/mhz19-go/internal/entities/ldm"
+	"github.com/fedulovivan/mhz19-go/internal/entities/messages"
+	"github.com/fedulovivan/mhz19-go/internal/entities/rules"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
-	"github.com/fedulovivan/mhz19-go/internal/messages"
 	"github.com/fedulovivan/mhz19-go/internal/rest"
-	"github.com/fedulovivan/mhz19-go/internal/rules"
 
 	dnssd "github.com/fedulovivan/mhz19-go/internal/providers/dnssd"
 	mqtt "github.com/fedulovivan/mhz19-go/internal/providers/mqtt"

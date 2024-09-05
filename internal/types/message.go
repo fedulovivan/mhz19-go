@@ -22,6 +22,8 @@ type Message struct {
 	ChannelMeta ChannelMeta `json:"-"`
 }
 
+type MessageChan chan Message
+
 // tuple of current and previous messages, prev could be nil
 type MessageTuple struct {
 	Curr *Message
@@ -61,5 +63,3 @@ func (m *Message) Get(field string) (any, error) {
 	// case "RawPayload":
 	// 	return m.RawPayload, nil
 }
-
-type MessageChan chan Message

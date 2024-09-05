@@ -1,8 +1,7 @@
-package engine_actions
+package actions
 
 import (
 	"bytes"
-	"log/slog"
 	"net/http"
 
 	"fmt"
@@ -12,7 +11,7 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
-var PostSonoffSwitchMessage types.ActionImpl = func(mm []types.Message, a types.Action, e types.Engine) {
+var PostSonoffSwitchMessage types.ActionImpl = func(mm []types.Message, a types.Action, e types.EngineAsSupplier) (err error) {
 
 	tpayload := arg_reader.TemplatePayload{
 		Messages: mm,
@@ -21,13 +20,12 @@ var PostSonoffSwitchMessage types.ActionImpl = func(mm []types.Message, a types.
 	cmd := areader.Get("Command")
 	deviceId := areader.Get("DeviceId")
 	if !areader.Ok() {
-		slog.Error(areader.Error().Error())
+		err = areader.Error()
 		return
 	}
 
 	device, err := e.DevicesService().GetOne(deviceId.(types.DeviceId))
 	if err != nil {
-		slog.Error(err.Error())
 		return
 	}
 
@@ -42,4 +40,6 @@ var PostSonoffSwitchMessage types.ActionImpl = func(mm []types.Message, a types.
 		fmt.Println("success")
 	}
 	fmt.Println(url, string(payload), res, err)
+
+	return
 }

@@ -1,27 +1,27 @@
-package engine_actions
+package actions
 
 import (
 	"encoding/json"
-	"log/slog"
 
 	"github.com/fedulovivan/mhz19-go/internal/arg_reader"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
-var TelegramBotMessage types.ActionImpl = func(mm []types.Message, a types.Action, e types.Engine) {
+var TelegramBotMessage types.ActionImpl = func(mm []types.Message, a types.Action, e types.EngineAsSupplier) (err error) {
 	tpayload := arg_reader.TemplatePayload{
 		Messages: mm,
 	}
 	areader := arg_reader.NewArgReader(&mm[0], a.Args, a.Mapping, &tpayload, e)
 	text := areader.Get("Text")
 	if !areader.Ok() {
-		slog.Error(areader.Error().Error())
+		err = areader.Error()
 		return
 	}
-	p := e.FindProvider(types.CHANNEL_TELEGRAM)
+	p := e.Provider(types.CHANNEL_TELEGRAM)
 	if text != nil {
-		p.Send(text)
+		err = p.Send(text)
 	} else {
-		p.Send(json.Marshal(mm[0]))
+		err = p.Send(json.Marshal(mm[0]))
 	}
+	return
 }

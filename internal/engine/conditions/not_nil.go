@@ -1,4 +1,4 @@
-package engine_conditions
+package conditions
 
 import (
 	"fmt"

@@ -27,13 +27,13 @@ func (p *provider) Channel() types.ChannelType {
 	return types.CHANNEL_TELEGRAM
 }
 
-func (p *provider) Send(a ...any) {
+func (p *provider) Send(a ...any) error {
 	first := a[0]
 	switch fTyped := first.(type) {
 	case string:
-		p.SendNewMessage(fTyped, 0)
+		return p.SendNewMessage(fTyped, 0)
 	case []byte:
-		p.SendNewMessage(string(fTyped), 0)
+		return p.SendNewMessage(string(fTyped), 0)
 	default:
 		panic(fmt.Sprintf("expected type %T", fTyped))
 	}
@@ -48,17 +48,19 @@ func (p *provider) Stop() {
 	}
 }
 
-func (p *provider) SendNewMessage(text string, chatId int64) {
+func (p *provider) SendNewMessage(text string, chatId int64) (err error) {
 	// msg.ReplyToMessageID = update.Message.MessageID
 	slog.Debug(logTag("SendNewMessage()"), "text", text, "chatId", chatId)
 	if chatId == 0 {
 		chatId = app.Config.TelegramChatId
 	}
 	msg := tgbotapi.NewMessage(chatId, text)
-	_, err := p.bot.Send(msg)
-	if err != nil {
-		slog.Error(logTag("SendNewMessage()"), "err", err.Error())
-	}
+	_, err = p.bot.Send(msg)
+	return
+	// if err != nil {
+	// 	return err
+	// 	// slog.Error(logTag("SendNewMessage()"), "err", err.Error())
+	// }
 }
 
 func (p *provider) Init() {

@@ -6,7 +6,7 @@
 - feat: create api to add/update/delete devices
 - feat: create api to read device classes (or unified api for all dicts?)
 - feat: sonoff provider, mdns client for sonoff devices https://github.com/hashicorp/mdns
-- feat: rename channel=sonoff to channel=mdns
+- feat: rename channel=sonoff to channel=mdns, add new rule for dnssd-sources devices insertion
 
 ### Prio 1
 - figure out why we cannot test engine in uts end to end - internal/engine/mappings_test.go::Test10

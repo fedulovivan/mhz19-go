@@ -17,7 +17,7 @@ type ArgReader struct {
 	mapping  types.Mapping
 	errors   []error
 	tpayload *TemplatePayload
-	engine   types.Engine
+	engine   types.EngineAsSupplier
 }
 
 type TemplatePayload struct {
@@ -71,7 +71,7 @@ func NewArgReader(
 	args types.Args,
 	mapping types.Mapping,
 	tpayload *TemplatePayload,
-	engine types.Engine,
+	engine types.EngineAsSupplier,
 ) ArgReader {
 	return ArgReader{
 		message:  message,

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log/slog"
 
-	actions "github.com/fedulovivan/mhz19-go/internal/engine_actions"
-	conditions "github.com/fedulovivan/mhz19-go/internal/engine_conditions"
+	"github.com/fedulovivan/mhz19-go/internal/engine/actions"
+	"github.com/fedulovivan/mhz19-go/internal/engine/conditions"
 	"github.com/fedulovivan/mhz19-go/internal/message_queue"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 	"github.com/fedulovivan/mhz19-go/pkg/utils"
@@ -74,7 +74,7 @@ func (e *engine) Start() {
 	}
 }
 
-func (e *engine) FindProvider(ct types.ChannelType) types.ChannelProvider {
+func (e *engine) Provider(ct types.ChannelType) types.ChannelProvider {
 	for _, provider := range e.providers {
 		if provider.Channel() == ct {
 			return provider
@@ -90,24 +90,21 @@ func (e *engine) Stop() {
 }
 
 func (e *engine) InvokeConditionFunc(mt types.MessageTuple, fn types.CondFn, args types.Args, r types.Rule, tid string) bool {
-	impl, ok := conditions.Conditions[fn]
-	if !ok {
-		slog.Error(e.logTag(fmt.Sprintf("Condition function [%v] not yet implemented", fn)))
-		return false
-	}
+	impl := conditions.Get(fn)
 	res := impl(mt, args, e)
 	slog.Debug(e.logTag(tid+fmt.Sprintf("Rule #%v condition exec", r.Id)), "fn", fn, "args", args, "res", res)
 	return res
 }
 
 func (e *engine) InvokeActionFunc(mm []types.Message, a types.Action, r types.Rule, tid string) {
-	impl, ok := actions.Actions[a.Fn]
-	if !ok {
-		slog.Error(e.logTag(fmt.Sprintf("Action function [%v] not yet implemented", a.Fn)))
-		return
-	}
+	impl := actions.Get(a.Fn)
 	slog.Debug(e.logTag(tid+fmt.Sprintf("Rule #%v action exec", r.Id)), "fn", a.Fn, "args", a.Args)
-	go impl(mm, a, e)
+	go func() {
+		err := impl(mm, a, e)
+		if err != nil {
+			slog.Error(fmt.Sprintf("%s error: %s", a.Fn, err))
+		}
+	}()
 }
 
 func (e *engine) MatchesListSome(mt types.MessageTuple, cc []types.Condition, r types.Rule, tid string) bool {

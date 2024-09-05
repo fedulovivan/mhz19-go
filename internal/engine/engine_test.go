@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/fedulovivan/mhz19-go/internal/arg_reader"
-	conditions "github.com/fedulovivan/mhz19-go/internal/engine_conditions"
-	ldm "github.com/fedulovivan/mhz19-go/internal/last_device_message"
+	conditions "github.com/fedulovivan/mhz19-go/internal/engine/conditions"
+	"github.com/fedulovivan/mhz19-go/internal/entities/ldm"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 	"github.com/stretchr/testify/suite"
 )
@@ -50,9 +50,9 @@ func (s *EngineSuite) Test12() {
 }
 
 func (s *EngineSuite) Test20() {
-	// defer func() { _ = recover() }()
+	defer func() { _ = recover() }()
 	s.False(s.e.InvokeConditionFunc(types.MessageTuple{}, 0, nil, types.Rule{}, "Test20"))
-	// s.Fail("expected to panic")
+	s.Fail("expected to panic")
 }
 
 func (s *EngineSuite) Test30() {

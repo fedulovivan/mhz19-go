@@ -33,7 +33,7 @@ type ChannelProvider interface {
 	// - call tgbotapi.NewMessage for telegram bot provider
 	// - post to mqtt topic for mqtt provider
 	// - call sonoff http api
-	Send(...any)
+	Send(...any) error
 	// TODO, api for the unit tests
 	Write(m Message)
 	Channel() ChannelType

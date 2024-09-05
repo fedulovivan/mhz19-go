@@ -1,4 +1,4 @@
-package last_device_message
+package ldm
 
 import "github.com/fedulovivan/mhz19-go/internal/types"
 

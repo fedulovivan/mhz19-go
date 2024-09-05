@@ -5,9 +5,9 @@ import (
 	"database/sql"
 
 	"github.com/fedulovivan/mhz19-go/internal/db"
-	"github.com/fedulovivan/mhz19-go/internal/devices"
-	"github.com/fedulovivan/mhz19-go/internal/messages"
-	"github.com/fedulovivan/mhz19-go/internal/rules"
+	"github.com/fedulovivan/mhz19-go/internal/entities/devices"
+	"github.com/fedulovivan/mhz19-go/internal/entities/messages"
+	"github.com/fedulovivan/mhz19-go/internal/entities/rules"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 	"golang.org/x/sync/errgroup"
 )

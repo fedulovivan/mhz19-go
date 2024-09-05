@@ -1,10 +1,9 @@
-package engine
+package actions
 
 import (
 	"fmt"
 	"testing"
 
-	"github.com/fedulovivan/mhz19-go/internal/engine_actions"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 	"github.com/stretchr/testify/suite"
 )
@@ -41,14 +40,40 @@ func (s mockservice) GetOne(id types.DeviceId) (res types.Device, err error) {
 	}
 	return
 }
-
 func (s mockservice) UpsertAll(devices []types.Device) error {
 	return nil
 }
 
+type mockengine struct {
+	devicesService types.DevicesService
+}
+
+func (e *mockengine) SetDevicesService(s types.DevicesService) {
+	e.devicesService = s
+}
+
+func (e *mockengine) DevicesService() types.DevicesService {
+	return e.devicesService
+}
+
+func (e *mockengine) SetMessagesService(s types.MessagesService) {
+
+}
+
+func (e *mockengine) MessagesService() types.MessagesService {
+	return nil
+}
+
+func (e *mockengine) SetProviders(s ...types.ChannelProvider) {
+
+}
+
+func (e *mockengine) Provider(ct types.ChannelType) types.ChannelProvider {
+	return nil
+}
+
 func (s *ActionsSuite) Test10() {
-	// opts := NewOptions()
-	engine := NewEngine()
+	engine := &mockengine{}
 	engine.SetDevicesService(&mockservice{})
 	message := types.Message{
 		Payload: map[string]any{
@@ -57,8 +82,8 @@ func (s *ActionsSuite) Test10() {
 	}
 	action := types.Action{
 		Args: types.Args{
-			"Command":        "$message.action",
-			"types.DeviceId": types.DeviceId("10011cec96"),
+			"Command":  "$message.action",
+			"DeviceId": types.DeviceId("10011cec96"),
 		},
 		Mapping: types.Mapping{
 			"Command": {
@@ -67,7 +92,7 @@ func (s *ActionsSuite) Test10() {
 			},
 		},
 	}
-	engine_actions.PostSonoffSwitchMessage([]types.Message{message}, action, engine)
+	s.Nil(PostSonoffSwitchMessage([]types.Message{message}, action, engine))
 }
 
 func TestActions(t *testing.T) {
