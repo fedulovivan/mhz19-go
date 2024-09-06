@@ -5,11 +5,11 @@ import (
 )
 
 // args: Value
-var DeviceClass types.CondImpl = func(mt types.MessageTuple, args types.Args) bool {
+var Channel types.CondImpl = func(mt types.MessageTuple, args types.Args) bool {
 	return Equal(
 		mt,
 		types.Args{
-			"Left":  "$deviceClass",
+			"Left":  "$channelType",
 			"Right": args["Value"],
 		},
 	)

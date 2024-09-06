@@ -18,6 +18,30 @@ func (s *ActionsSuite) SetupSuite() {
 func (s *ActionsSuite) TeardownSuite() {
 }
 
+type mockprovider struct {
+}
+
+func (p *mockprovider) Messages() types.MessageChan {
+	return nil
+}
+func (p *mockprovider) Send(a ...any) error {
+	fmt.Println(a...)
+	return nil
+}
+func (p *mockprovider) Write(m types.Message) {
+
+}
+func (p *mockprovider) Channel() types.ChannelType {
+	return types.CHANNEL_UNKNOWN
+}
+
+func (p *mockprovider) Init() {
+
+}
+func (p *mockprovider) Stop() {
+
+}
+
 type mockservice struct {
 }
 
@@ -31,8 +55,8 @@ func (s mockservice) GetOne(id types.DeviceId) (res types.Device, err error) {
 	if id == types.DeviceId("10011cec96") {
 		res = types.Device{
 			Json: map[string]any{
-				"ip":   "192.168.88.60",
-				"port": "8081",
+				"Ip":   "192.168.88.60",
+				"Port": "8081",
 			},
 		}
 	} else {
@@ -45,15 +69,13 @@ func (s mockservice) UpsertAll(devices []types.Device) error {
 }
 
 type mockengine struct {
-	devicesService types.DevicesService
 }
 
 func (e *mockengine) SetDevicesService(s types.DevicesService) {
-	e.devicesService = s
 }
 
 func (e *mockengine) DevicesService() types.DevicesService {
-	return e.devicesService
+	return &mockservice{}
 }
 
 func (e *mockengine) SetMessagesService(s types.MessagesService) {
@@ -69,30 +91,46 @@ func (e *mockengine) SetProviders(s ...types.ChannelProvider) {
 }
 
 func (e *mockengine) Provider(ct types.ChannelType) types.ChannelProvider {
-	return nil
+	return &mockprovider{}
 }
 
 func (s *ActionsSuite) Test10() {
 	engine := &mockengine{}
-	engine.SetDevicesService(&mockservice{})
 	message := types.Message{
 		Payload: map[string]any{
 			"action": "single_right",
 		},
 	}
-	action := types.Action{
-		Args: types.Args{
-			"Command":  "$message.action",
-			"DeviceId": types.DeviceId("10011cec96"),
-		},
-		Mapping: types.Mapping{
-			"Command": {
-				"single_left":  "on",
-				"single_right": "off",
-			},
+	args := types.Args{
+		"Command":  "$message.action",
+		"DeviceId": types.DeviceId("10011cec96"),
+	}
+	mapping := types.Mapping{
+		"Command": {
+			"single_left":  "on",
+			"single_right": "off",
 		},
 	}
-	s.Nil(PostSonoffSwitchMessage([]types.Message{message}, action, engine))
+	err := PostSonoffSwitchMessage([]types.Message{message}, args, mapping, engine)
+	s.Nil(err)
+}
+
+func (s *ActionsSuite) Test20() {
+	engine := &mockengine{}
+	message := types.Message{}
+	args := types.Args{
+		"DeviceId": types.DeviceId("0xe0798dfffed39ed1"),
+		"Data":     "OFF",
+	}
+	err := Zigbee2MqttSetState([]types.Message{message}, args, nil, engine)
+	s.Nil(err)
+	fmt.Println(err)
+}
+
+func (s *ActionsSuite) Test30() {
+	defer func() { _ = recover() }()
+	Get(13)
+	s.Fail("expected to panic")
 }
 
 func TestActions(t *testing.T) {

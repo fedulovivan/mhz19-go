@@ -9,8 +9,8 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
-var InList types.CondImpl = func(mt types.MessageTuple, args types.Args, e types.Engine) bool {
-	c := arg_reader.NewArgReader(mt.Curr, args, nil, nil, e)
+var InList types.CondImpl = func(mt types.MessageTuple, args types.Args) bool {
+	c := arg_reader.NewArgReader(mt.Curr, args, nil, nil, nil)
 	v := c.Get("Value")
 	list := c.Get("List")
 	if !c.Ok() {

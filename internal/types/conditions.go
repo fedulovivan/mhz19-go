@@ -13,6 +13,7 @@ const (
 	COND_NOT_NIL       CondFn = 5
 	COND_ZIGBEE_DEVICE CondFn = 6
 	COND_DEVICE_CLASS  CondFn = 7
+	COND_СHANNEL       CondFn = 8
 )
 
 var CONDITION_NAMES = map[CondFn]string{
@@ -24,6 +25,7 @@ var CONDITION_NAMES = map[CondFn]string{
 	COND_NOT_NIL:       "NotNil",
 	COND_ZIGBEE_DEVICE: "ZigbeeDevice",
 	COND_DEVICE_CLASS:  "DeviceClass",
+	COND_СHANNEL:       "Channel",
 }
 
 func (s CondFn) String() string {
@@ -34,6 +36,6 @@ func (s *CondFn) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%v"`, CONDITION_NAMES[*s])), nil
 }
 
-type CondImpl func(mt MessageTuple, args Args, e Engine) bool
+type CondImpl func(mt MessageTuple, args Args) bool
 
 type CondImpls map[CondFn]CondImpl

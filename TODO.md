@@ -1,24 +1,22 @@
 
 ### Prio 0
 - feat: finish implementation of all actions
+- feat: implement "otherDeviceId"
+
+### Prio 1
+- arch: in NewEngine create mocks for all services, which will panic with friendly message if user forgot to set that service
 - feat: api: log errors captured by router error handler, also change default handler to render error as a json
 - feat: create api to update/delete rules
 - feat: create api to add/update/delete devices
 - feat: create api to read device classes (or unified api for all dicts?)
-- feat: sonoff provider, mdns client for sonoff devices https://github.com/hashicorp/mdns
-- feat: rename channel=sonoff to channel=mdns, add new rule for dnssd-sources devices insertion
-
-### Prio 1
-- figure out why we cannot test engine in uts end to end - internal/engine/mappings_test.go::Test10
+- bug: figure out why we cannot test engine in uts end to end - internal/engine/mappings_test.go::Test10
 - bug: "http: superfluous response.WriteHeader call from github.com/go-ozzo/ozzo-routing/v2.(*Router).handleError (router.go:131)" - appears after termination of stucked apache bench
-- bug: find why UnmarshalJSON is not called in Test164
 - bug: "apr_socket_recv: Operation timed out (60)" - https://stackoverflow.com/questions/30352725/why-is-my-hello-world-go-server-getting-crushed-by-apachebench
 - bug: "🧨 api:getAll took 3.451973917s" when reading 1k rules 1k times - try with postgres
 - arch: "FOREIGN KEY (device_id) REFERENCES devices(native_id)" requires sole UNIQUE index for column devices.native_id, while we actually need UNIQUE(device_class_id, native_id) since its unreasonable to contraint native_id across devices off all classes
 - arch: in addition to "native_id" problem see also "unsafemap" in internal/last_device_message/repository.go
 
 ### Prio 2
-- arch: think how to move messages_* and devices_* outside of engine package to their own
 - feat: implement log tag with meta, so we can add attrs to function
 - bug: no mqtt (re)connection if network was not available on app startup and returned online later
 - feat: create meta which descibes expected args for conditions and actions and validate
@@ -35,10 +33,14 @@
 - try: grpc
 - try: openapi or swagger https://en.wikipedia.org/wiki/OpenAPI_Specification or https://swagger.io/
 - try: https://github.com/go-ozzo/ozzo-routing
-- arch: make logger and logTag a dependencies for service, api and repository
+- arch: make logger and logTag a dependency of service, api and repository
 
 ### Completed
 
+- (+) quest: find out why Args::UnmarshalJSON() is not called in Test164 - just because go's encoding/json/decode.go::Unmarshal() contains call ofr checkValid(), which prevents further parsing if invalid input was given
+- (+) arch: think how to move messages_* and devices_* outside of engine package to their own
+- (+) feat: sonoff provider, mdns(dns-sd) client for sonoff devices https://github.com/hashicorp/mdns
+- (+) feat: rename channel=sonoff to channel=mdns, add new rule for dnssd-sources devices insertion
 - (+) bug: "database is locked" - dig deeper into https://github.com/mattn/go-sqlite3/issues/274
 - (+) feat: $channelType directive
 - (+) feat: load db mapping rules on engine startup

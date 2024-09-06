@@ -14,6 +14,7 @@ var conditions = types.CondImpls{
 	types.COND_NOT_NIL:       NotNil,
 	types.COND_ZIGBEE_DEVICE: ZigbeeDevice,
 	types.COND_DEVICE_CLASS:  DeviceClass,
+	types.COND_СHANNEL:       Channel,
 }
 
 func Get(fn types.CondFn) (action types.CondImpl) {

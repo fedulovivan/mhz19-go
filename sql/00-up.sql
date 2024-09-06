@@ -115,6 +115,9 @@ INSERT INTO action_functions VALUES(2,'TelegramBotMessage');
 INSERT INTO action_functions VALUES(3,'ValveSetState');
 INSERT INTO action_functions VALUES(4,'YeelightDeviceSetPower');
 INSERT INTO action_functions VALUES(5,'Zigbee2MqttSetState');
+INSERT INTO action_functions VALUES(6,'RecordMessage');
+INSERT INTO action_functions VALUES(7,'UpsertZigbeeDevices');
+INSERT INTO action_functions VALUES(8,'UpsertSonoffDevice');
 
 INSERT INTO condition_functions VALUES(1,'Changed');
 INSERT INTO condition_functions VALUES(2,'Equal');
@@ -123,6 +126,7 @@ INSERT INTO condition_functions VALUES(4,'NotEqual');
 INSERT INTO condition_functions VALUES(5,'NotNil');
 INSERT INTO condition_functions VALUES(6,'ZigbeeDevice');
 INSERT INTO condition_functions VALUES(7,'DeviceClass');
+INSERT INTO condition_functions VALUES(8,'Channel');
 
 INSERT INTO devices VALUES(1, '192.168.88.1', 2, 'MIKROTIK_ROUTER', NULL, NULL, NULL);
 INSERT INTO devices VALUES(2, '192.168.88.44', 2, 'IPHONE_15_PRO_IP', NULL, NULL, NULL);

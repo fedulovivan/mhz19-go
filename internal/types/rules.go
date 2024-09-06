@@ -34,7 +34,7 @@ func (t *Throttle) UnmarshalJSON(b []byte) (err error) {
 }
 
 type Rule struct {
-	Id        int32     `json:"id"`
+	Id        int       `json:"id"`
 	Disabled  bool      `json:"disabled,omitempty"`
 	Name      string    `json:"name,omitempty"`
 	Condition Condition `json:"condition,omitempty"`

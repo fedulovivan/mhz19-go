@@ -12,6 +12,7 @@ const (
 	ACTION_ZIGBEE2_MQTT_SET_STATE     ActionFn = 5
 	ACTION_RECORD_MESSAGE             ActionFn = 6
 	ACTION_UPSERT_ZIGBEE_DEVICES      ActionFn = 7
+	ACTION_UPSERT_SONOFF_DEVICE       ActionFn = 8
 )
 
 var ACTION_NAMES = map[ActionFn]string{
@@ -22,6 +23,7 @@ var ACTION_NAMES = map[ActionFn]string{
 	ACTION_ZIGBEE2_MQTT_SET_STATE:     "Zigbee2MqttSetState",
 	ACTION_RECORD_MESSAGE:             "RecordMessage",
 	ACTION_UPSERT_ZIGBEE_DEVICES:      "UpsertZigbeeDevices",
+	ACTION_UPSERT_SONOFF_DEVICE:       "UpsertSonoffDevice",
 }
 
 func (s ActionFn) String() string {
@@ -32,6 +34,6 @@ func (s *ActionFn) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%v"`, ACTION_NAMES[*s])), nil
 }
 
-type ActionImpl func(messages []Message, action Action, engine EngineAsSupplier) error
+type ActionImpl func(messages []Message, args Args, mapping Mapping, engine EngineAsSupplier) error
 
 type ActionImpls map[ActionFn]ActionImpl

@@ -2,6 +2,7 @@ package types
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -22,6 +23,7 @@ func parseDeviceIdOrClass(in string) any {
 
 // TODO seems there is a room for optimization here
 func (a *Args) UnmarshalJSON(data []byte) (err error) {
+	fmt.Println("UnmarshalJSON")
 	var raw map[string]any
 	err = json.Unmarshal(data, &raw)
 	if err != nil {

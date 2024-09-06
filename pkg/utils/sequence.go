@@ -11,8 +11,8 @@ type sequence struct {
 	id int
 }
 
-func NewSeq() Seq {
-	return new(sequence)
+func NewSeq(id int) Seq {
+	return &sequence{id: id}
 }
 
 func (a *sequence) Next() (id int) {

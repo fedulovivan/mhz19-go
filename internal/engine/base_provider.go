@@ -6,7 +6,7 @@ type ProviderBase struct {
 	Out types.MessageChan
 }
 
-func (s *ProviderBase) MessageChan() types.MessageChan {
+func (s *ProviderBase) Messages() types.MessageChan {
 	return s.Out
 }
 

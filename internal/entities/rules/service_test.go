@@ -263,7 +263,7 @@ func (s *ServiceSuite) Test52() {
 			{Fn: types.COND_EQUAL, Args: types.Args{"Left": 1, "Right": 2}},
 			{Fn: types.COND_IN_LIST},
 		},
-	}, utils.NewSeq(), &actualArgs)
+	}, utils.NewSeq(00), &actualArgs)
 	s.Len(actualArgs, 2)
 	s.Len(actualConds, 3)
 	// expectedArgs := "[{3 {2 true} {0 false} Left {0 false} {1 true} { false} {0 false}} {4 {2 true} {0 false} Right {0 false} {2 true} { false} {0 false}}]"
@@ -284,7 +284,7 @@ func (s *ServiceSuite) Test53() {
 				{Fn: types.COND_IN_LIST},
 			}},
 		},
-	}, utils.NewSeq(), nil)
+	}, utils.NewSeq(00), nil)
 	expected := "[{1 1 {0 false} {1 true} {0 false}} {2 1 {2 true} {0 false} {1 true}} {3 1 {0 false} {0 true} {1 true}} {4 1 {4 true} {0 false} {3 true}} {5 1 {3 true} {0 false} {3 true}}]"
 	s.Equal(expected, fmt.Sprintf("%v", actual))
 	// dump(actual)
@@ -299,14 +299,14 @@ func (s *ServiceSuite) Test60() {
 }
 
 // func (s *MappingsSuite) Test61() {
-// 	ToDb(types.Rule{}, utils.NewSeq())
+// 	ToDb(types.Rule{}, utils.NewSeq(0))
 // 	/* _, _, _, _, err :=  */
 // 	// s.Nil(err)
 // }
 
 func (s *ServiceSuite) Test62() {
 	inrule := types.Rule{}
-	outrule, outconds, outactions, outargs, mappings := ToDb(inrule, utils.NewSeq())
+	outrule, outconds, outactions, outargs, mappings := ToDb(inrule, utils.NewSeq(00))
 	expected := "{1  {0 true} {0 true}}"
 	s.Equal(expected, fmt.Sprintf("%v", outrule))
 	s.Len(outconds, 0)
@@ -339,7 +339,7 @@ func (s *ServiceSuite) Test63() {
 		},
 		Throttle: types.Throttle{Value: time.Duration(100500)},
 	}
-	outrule, outconds, outactions, outargs, mappings := ToDb(inrule, utils.NewSeq())
+	outrule, outconds, outactions, outargs, mappings := ToDb(inrule, utils.NewSeq(00))
 
 	expectedRule := "{1 unit test {1 true} {0 true}}"
 	s.Equal(expectedRule, fmt.Sprintf("%v", outrule))
@@ -432,7 +432,7 @@ func (s *ServiceSuite) Test80() {
 		nil,
 		"key",
 		111,
-		utils.NewSeq(),
+		utils.NewSeq(0),
 		false,
 	)
 	data, _ := json.Marshal(aa)
@@ -446,7 +446,7 @@ func (s *ServiceSuite) Test81() {
 		nil,
 		"key2",
 		[]any{222, 333},
-		utils.NewSeq(),
+		utils.NewSeq(0),
 		false,
 	)
 	data, _ := json.Marshal(aa)
@@ -461,7 +461,7 @@ func (s *ServiceSuite) Test82() {
 		nil,
 		"key3",
 		types.DeviceId("0xqwe111111"),
-		utils.NewSeq(),
+		utils.NewSeq(0),
 		false,
 	)
 	data, _ := json.Marshal(aa)
@@ -476,7 +476,7 @@ func (s *ServiceSuite) Test83() {
 		nil,
 		"key4",
 		types.DEVICE_CLASS_ZIGBEE_DEVICE,
-		utils.NewSeq(),
+		utils.NewSeq(0),
 		false,
 	)
 	data, _ := json.Marshal(aa)

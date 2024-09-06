@@ -15,7 +15,7 @@ var queuesContainer = message_queue.NewContainer()
 
 type GetProviderFn func(ch types.ChannelType) types.ChannelProvider
 
-var tidSeq = utils.NewSeq()
+var tidSeq = utils.NewSeq(0)
 
 type engine struct {
 	logTag         types.LogTagFn
@@ -29,6 +29,9 @@ type engine struct {
 func NewEngine() types.Engine {
 	return &engine{
 		logTag: func(m string) string { return m },
+		// messageService: mockmessagesservice,
+		// devicesService: mockdeviceservice,
+		// ldmService: mockldmservice,
 	}
 }
 
@@ -67,7 +70,7 @@ func (e *engine) Start() {
 	for _, p := range e.providers {
 		go func(provider types.ChannelProvider) {
 			provider.Init()
-			for message := range provider.MessageChan() {
+			for message := range provider.Messages() {
 				e.HandleMessage(message, e.rules)
 			}
 		}(p)
@@ -80,7 +83,7 @@ func (e *engine) Provider(ct types.ChannelType) types.ChannelProvider {
 			return provider
 		}
 	}
-	return nil
+	panic(fmt.Sprintf("%v provider is not found", ct))
 }
 
 func (e *engine) Stop() {
@@ -91,7 +94,7 @@ func (e *engine) Stop() {
 
 func (e *engine) InvokeConditionFunc(mt types.MessageTuple, fn types.CondFn, args types.Args, r types.Rule, tid string) bool {
 	impl := conditions.Get(fn)
-	res := impl(mt, args, e)
+	res := impl(mt, args)
 	slog.Debug(e.logTag(tid+fmt.Sprintf("Rule #%v condition exec", r.Id)), "fn", fn, "args", args, "res", res)
 	return res
 }
@@ -100,7 +103,7 @@ func (e *engine) InvokeActionFunc(mm []types.Message, a types.Action, r types.Ru
 	impl := actions.Get(a.Fn)
 	slog.Debug(e.logTag(tid+fmt.Sprintf("Rule #%v action exec", r.Id)), "fn", a.Fn, "args", a.Args)
 	go func() {
-		err := impl(mm, a, e)
+		err := impl(mm, a.Args, a.Mapping, e)
 		if err != nil {
 			slog.Error(fmt.Sprintf("%s error: %s", a.Fn, err))
 		}

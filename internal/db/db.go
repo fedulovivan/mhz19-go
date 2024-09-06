@@ -20,7 +20,7 @@ import (
 
 var logTag = logger.MakeTag(logger.DB)
 
-var seq = utils.NewSeq()
+var seq = utils.NewSeq(0)
 
 var instance *sql.DB
 

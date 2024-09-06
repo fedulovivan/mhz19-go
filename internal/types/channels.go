@@ -27,16 +27,22 @@ type ChannelMeta struct {
 }
 
 type ChannelProvider interface {
-	// getter for the provider's messages channel used in engine.Start
-	MessageChan() MessageChan
+
+	// getter for the provider's messages channel
+	Messages() MessageChan
+
 	// api to invoke provider outbound action, eg:
 	// - call tgbotapi.NewMessage for telegram bot provider
 	// - post to mqtt topic for mqtt provider
 	// - call sonoff http api
 	Send(...any) error
-	// TODO, api for the unit tests
-	Write(m Message)
+
+	// api for the unit tests
+	// Write(m Message)
+
+	// a channel type this provider was created for
 	Channel() ChannelType
+
 	Init()
 	Stop()
 }

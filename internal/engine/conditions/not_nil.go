@@ -10,8 +10,8 @@ import (
 
 // return false for nil and empty strings
 // return true for the rest
-var NotNil types.CondImpl = func(mt types.MessageTuple, args types.Args, e types.Engine) bool {
-	c := arg_reader.NewArgReader(mt.Curr, args, nil, nil, e)
+var NotNil types.CondImpl = func(mt types.MessageTuple, args types.Args) bool {
+	c := arg_reader.NewArgReader(mt.Curr, args, nil, nil, nil)
 	v := c.Get("Value")
 	if !c.Ok() {
 		slog.Error(fmt.Sprintf("NotNil: %v", c.Error()))

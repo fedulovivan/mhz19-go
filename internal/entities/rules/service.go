@@ -39,7 +39,7 @@ func (s rulesService) OnCreated() chan types.Rule {
 func (s rulesService) Create(rule types.Rule) (int64, error) {
 	dbRule, dbConditions, dbActions, dbArguments, dbMappings := ToDb(
 		rule,
-		utils.NewSeq(),
+		utils.NewSeq(0),
 	)
 	newRuleId, err := s.repository.Create(
 		dbRule,
@@ -48,7 +48,7 @@ func (s rulesService) Create(rule types.Rule) (int64, error) {
 		dbArguments,
 		dbMappings,
 	)
-	rule.Id = int32(newRuleId)
+	rule.Id = int(newRuleId)
 	s.oncreated <- rule
 	return newRuleId, err
 }
@@ -119,7 +119,7 @@ func Build(
 			throttle = types.Throttle{Value: time.Duration(r.Throttle.Int32) * time.Second}
 		}
 		rule := types.Rule{
-			Id:        r.Id,
+			Id:        int(r.Id),
 			Name:      r.Name,
 			Disabled:  r.IsDisabled.Int32 == 1,
 			Condition: cond,

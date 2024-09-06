@@ -26,7 +26,7 @@ func NewContainer() *container {
 	}
 }
 
-func (c *container) MakeKey(deviceClass types.DeviceClass, deviceId types.DeviceId, ruleId int32) (key Key) {
+func (c *container) MakeKey(deviceClass types.DeviceClass, deviceId types.DeviceId, ruleId int) (key Key) {
 	return Key(
 		types.DEVICE_CLASS_NAMES[deviceClass] + "-" + string(deviceId) + "-rule" + strconv.Itoa(int(ruleId)),
 	)

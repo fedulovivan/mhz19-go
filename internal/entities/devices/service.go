@@ -34,7 +34,7 @@ func ToDb(in []types.Device) (out []DbDevice) {
 
 func BuildDevices(in []DbDevice) (out []types.Device) {
 	for _, d := range in {
-		var payload any
+		var payload map[string]any
 		if d.Json.Valid {
 			_ = json.Unmarshal([]byte(d.Json.String), &payload)
 		}

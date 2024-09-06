@@ -30,7 +30,7 @@ func (s messagesService) GetByDeviceId(deviceId string) (messages []types.Messag
 
 func BuildMessages(in []DbMessage) (out []types.Message) {
 	for _, m := range in {
-		var payload any
+		var payload map[string]any
 		_ = json.Unmarshal([]byte(m.Json), &payload)
 		out = append(out, types.Message{
 			ChannelType: types.ChannelType(m.ChannelTypeId),

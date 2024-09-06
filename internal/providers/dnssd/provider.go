@@ -35,14 +35,21 @@ func (p *provider) Init() {
 
 	addFn := func(entry dnssd.BrowseEntry) {
 		if entry.Text["type"] != "diy_plug" {
+			slog.Warn(logTag(fmt.Sprintf("Unexpected entry data %+v", entry)))
 			return
+		}
+		payload := map[string]any{
+			"Port": entry.Port,
+			"Ip":   entry.IPs[0].String(),
+			"Text": entry.Text,
+			"Host": entry.Host,
 		}
 		outMsg := types.Message{
 			DeviceId:    types.DeviceId(entry.Text["id"]),
 			ChannelType: p.Channel(),
 			DeviceClass: types.DEVICE_CLASS_SONOFF_DIY_PLUG,
 			Timestamp:   time.Now(),
-			Payload:     entry,
+			Payload:     payload,
 		}
 		p.Out <- outMsg
 	}
@@ -62,6 +69,16 @@ func (p *provider) Init() {
 
 }
 
+// ips := lo.Map(
+// 	entry.IPs,
+// 	func(ip net.IP, i int) string {
+// 		return ip.String()
+// 	},
+// )
+// "Name": entry.Name,
+// "Type": entry.Type,
+// "Domain":    entry.Domain,
+// "IfaceName": entry.IfaceName,
 // func (p *provider) Stop() {
 // if p.ticker != nil {
 // 	slog.Debug(logTag("Stopping ticker..."))

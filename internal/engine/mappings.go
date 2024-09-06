@@ -2,18 +2,20 @@ package engine
 
 import (
 	"github.com/fedulovivan/mhz19-go/internal/types"
+	"github.com/fedulovivan/mhz19-go/pkg/utils"
 )
+
+var seq = utils.NewSeq(1000)
 
 func GetStaticRules() []types.Rule {
 	return []types.Rule{
 
 		// system rule to save received message in db
 		{
-			Id:       1,
-			Disabled: false,
+			Id:       seq.Next(),
 			Name:     "system rule to save (almost) all received messages in db",
+			Disabled: false,
 			Condition: types.Condition{
-				// Or: true,
 				List: []types.Condition{
 					{
 						Fn: types.COND_NOT_EQUAL,
@@ -22,38 +24,51 @@ func GetStaticRules() []types.Rule {
 							"Right": types.DEVICE_CLASS_ZIGBEE_BRIDGE,
 						},
 					},
-					// {
-					// 	Fn: types.COND_NOT_EQUAL,
-					// 	Args: types.Args{
-					// 		"Left":  "$channelType",
-					// 		"Right": types.CHANNEL_SONOFF,
-					// 	},
-					// },
+					{
+						Fn: types.COND_NOT_EQUAL,
+						Args: types.Args{
+							"Left":  "$channelType",
+							"Right": types.CHANNEL_DNS_SD,
+						},
+					},
 				},
 			},
 			Actions: []types.Action{{Fn: types.ACTION_RECORD_MESSAGE}},
 		},
 
-		// system rule to create devices upon receiving message from bridge
+		// system rule to create devices upon receiving message from zigbee2mqtt bridge
 		{
-			Id:       2,
+			Id:       seq.Next(),
+			Name:     "system rule to create devices upon receiving message from zigbee2mqtt bridge",
 			Disabled: false,
-			Name:     "system rule to create devices upon receiving message from bridge",
 			Condition: types.Condition{
-				Fn: types.COND_EQUAL,
+				Fn: types.COND_DEVICE_CLASS,
 				Args: types.Args{
-					"Left":  "$deviceClass",
-					"Right": types.DEVICE_CLASS_ZIGBEE_BRIDGE,
+					"Value": types.DEVICE_CLASS_ZIGBEE_BRIDGE,
 				},
 			},
 			Actions: []types.Action{{Fn: types.ACTION_UPSERT_ZIGBEE_DEVICES}},
 		},
 
+		// system rule to create devices upon receiving dns-sd message with _ewelink._tcp service
+		{
+			Id:       seq.Next(),
+			Name:     "system rule to create devices upon receiving dns-sd message with _ewelink._tcp service",
+			Disabled: false,
+			Condition: types.Condition{
+				Fn: types.COND_СHANNEL,
+				Args: types.Args{
+					"Value": types.CHANNEL_DNS_SD,
+				},
+			},
+			Actions: []types.Action{{Fn: types.ACTION_UPSERT_SONOFF_DEVICE}},
+		},
+
 		// Comments: "test mapping 1",
 		{
-			Id:       3,
-			Disabled: true,
+			Id:       seq.Next(),
 			Name:     "test mapping 1",
+			Disabled: true,
 			Condition: types.Condition{
 				Fn: types.COND_EQUAL,
 				Args: types.Args{
@@ -69,9 +84,9 @@ func GetStaticRules() []types.Rule {
 
 		// Comments: "test mapping for composite condition function",
 		{
-			Id:       4,
-			Disabled: true,
+			Id:       seq.Next(),
 			Name:     "test mapping for composite condition function",
+			Disabled: true,
 			Condition: types.Condition{
 				List: []types.Condition{
 					{
@@ -95,9 +110,9 @@ func GetStaticRules() []types.Rule {
 		// Comments: "balcony ceiling light on/off",
 		// 23:44:12.197 DBG [ENGN] New message ChannelType="mqtt (id=1)" ChannelMeta={MqttTopic:zigbee2mqtt/0x00158d0004244bda} DeviceClass="zigbee-device (id=1)" DeviceId=0x00158d0004244bda Payload="map[action:single_right battery:100 device_temperature:30 linkquality:69 power_outage_count:24 voltage:3025]"
 		{
-			Id:       5,
-			Disabled: true,
+			Id:       seq.Next(),
 			Name:     "balcony ceiling light on/off",
+			Disabled: true,
 			Condition: types.Condition{
 				List: []types.Condition{
 					{
@@ -134,9 +149,9 @@ func GetStaticRules() []types.Rule {
 
 		// Comments: "echo bot",
 		{
-			Id:       6,
-			Disabled: true,
+			Id:       seq.Next(),
 			Name:     "echo bot",
+			Disabled: true,
 			// Throttle: time.Second / 2,
 			Condition: types.Condition{
 				Fn: types.COND_EQUAL,

@@ -41,20 +41,23 @@ No matter which channel was used to receive a message, or which certain device h
 
 - [golang](https://go.dev/) as main app language
 - [sqlite3](https://www.sqlite.org/) with [go-sqlite3](github.com/mattn/go-sqlite3) client as a persistent storage
-- [ozzo-routing](github.com/go-ozzo/ozzo-routing/v2) for lightweight http router implementation
+- [ozzo-routing](github.com/go-ozzo/ozzo-routing/v2) http routing
 - [godotenv](github.com/joho/godotenv) and [go-envconfig](github.com/sethvargo/go-envconfig) as configuration layer
 - [eclipse paho](github.com/eclipse/paho.mqtt.golang) as mqtt client
 - [docker](https://www.docker.com/) for containerization
 - [Makefile](./blob/main/Makefile) for developer routine automation
 - [telegram bot api](https://core.telegram.org/bots/api) with [client](https://github.com/go-telegram-bot-api/telegram-bot-api) for the notifications and remote management
+- [dnssd](https://github.com/brutella/dnssd) as mdns client (sonoff smart devices discovery)
+- [gabs](https://github.com/Jeffail/gabs) as json querier
 
 ### Demo
 
 ![console.png](assets/demo-01.png)
 
-### Development requirements for the bare host 
+### Development requirements for the bare host
 
 - sqlite3 `sudo apt-get install sqlite3`
 - go `wget https://go.dev/dl/go1.23.0.linux-amd64.tar.gz`, `rm -rf /usr/local/go && tar -C /usr/local -xzf go1.23.0.linux-amd64.tar.gz`, `export PATH=$PATH:/usr/local/go/bin`
 - golangci-lint https://golangci-lint.run/welcome/install `curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.60.3`
 - gcc `sudo apt install gcc`
+- delve `go install -v github.com/go-delve/delve/cmd/dlv@latest`

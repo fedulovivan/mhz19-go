@@ -22,6 +22,19 @@ type provider struct {
 
 var Provider types.ChannelProvider = &provider{}
 
+func (p *provider) Send(a ...any) (err error) {
+	topic := a[0].(string)
+	payload := a[1].(string)
+	token := p.client.Publish(
+		topic,
+		0,
+		false,
+		payload,
+	)
+	token.Wait()
+	return token.Error()
+}
+
 func (p *provider) Channel() types.ChannelType {
 	return types.CHANNEL_MQTT
 }

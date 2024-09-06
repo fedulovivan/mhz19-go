@@ -8,8 +8,8 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
-var NotEqual types.CondImpl = func(mt types.MessageTuple, args types.Args, e types.Engine) bool {
-	c := arg_reader.NewArgReader(mt.Curr, args, nil, nil, e)
+var NotEqual types.CondImpl = func(mt types.MessageTuple, args types.Args) bool {
+	c := arg_reader.NewArgReader(mt.Curr, args, nil, nil, nil)
 	left := c.Get("Left")
 	right := c.Get("Right")
 	if c.Ok() {

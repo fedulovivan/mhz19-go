@@ -184,17 +184,17 @@ func (s *EngineSuite) Test72() {
 }
 
 func (s *EngineSuite) Test80() {
-	actual := conditions.Equal(types.MessageTuple{}, types.Args{}, s.e)
+	actual := conditions.Equal(types.MessageTuple{}, types.Args{})
 	s.False(actual)
 }
 
 func (s *EngineSuite) Test81() {
-	actual := conditions.Equal(types.MessageTuple{}, types.Args{"Left": 1, "Right": 1}, s.e)
+	actual := conditions.Equal(types.MessageTuple{}, types.Args{"Left": 1, "Right": 1})
 	s.True(actual)
 }
 
 func (s *EngineSuite) Test82() {
-	actual := conditions.Equal(types.MessageTuple{}, types.Args{"Left": "one", "Right": "one"}, s.e)
+	actual := conditions.Equal(types.MessageTuple{}, types.Args{"Left": "one", "Right": "one"})
 	s.True(actual)
 }
 
@@ -208,7 +208,6 @@ func (s *EngineSuite) Test83() {
 			},
 		},
 		types.Args{"Left": "$message.action", "Right": "my_action"},
-		s.e,
 	)
 	s.True(actual)
 }
@@ -223,22 +222,22 @@ func (s *EngineSuite) Test84() {
 		"Left":  "$deviceId",
 		"Right": types.DeviceId("0x00158d0004244bda"),
 	}
-	actual := conditions.Equal(mt, args, s.e)
+	actual := conditions.Equal(mt, args)
 	s.True(actual)
 }
 
 func (s *EngineSuite) Test90() {
-	actual := conditions.NotEqual(types.MessageTuple{}, types.Args{}, s.e)
+	actual := conditions.NotEqual(types.MessageTuple{}, types.Args{})
 	s.False(actual)
 }
 
 func (s *EngineSuite) Test91() {
-	actual := conditions.NotEqual(types.MessageTuple{}, types.Args{"Left": 1, "Right": 1}, s.e)
+	actual := conditions.NotEqual(types.MessageTuple{}, types.Args{"Left": 1, "Right": 1})
 	s.False(actual)
 }
 
 func (s *EngineSuite) Test92() {
-	actual := conditions.NotEqual(types.MessageTuple{}, types.Args{"Left": "one", "Right": "one"}, s.e)
+	actual := conditions.NotEqual(types.MessageTuple{}, types.Args{"Left": "one", "Right": "one"})
 	s.False(actual)
 }
 
@@ -251,16 +250,12 @@ func (s *EngineSuite) Test93() {
 		},
 	}
 	args := types.Args{"Left": "$message.action", "Right": "my_action"}
-	actual := conditions.NotEqual(
-		mt,
-		args,
-		s.e,
-	)
+	actual := conditions.NotEqual(mt, args)
 	s.False(actual)
 }
 
 func (s *EngineSuite) Test100() {
-	actual := conditions.InList(types.MessageTuple{}, types.Args{}, s.e)
+	actual := conditions.InList(types.MessageTuple{}, types.Args{})
 	s.False(actual)
 }
 
@@ -279,7 +274,7 @@ func (s *EngineSuite) Test101() {
 			"my_action",
 		},
 	}
-	actual := conditions.InList(mt, args, s.e)
+	actual := conditions.InList(mt, args)
 	s.True(actual)
 }
 
@@ -299,7 +294,7 @@ func (s *EngineSuite) Test102() {
 			2.0,
 		},
 	}
-	actual := conditions.InList(mt, args, s.e)
+	actual := conditions.InList(mt, args)
 	s.True(actual)
 }
 
@@ -311,7 +306,7 @@ func (s *EngineSuite) Test103() {
 		"Value": "some1",
 		"List":  []any{"some2", "some3"},
 	}
-	actual := conditions.InList(mt, args, s.e)
+	actual := conditions.InList(mt, args)
 	s.False(actual)
 }
 
@@ -321,7 +316,7 @@ func (s *EngineSuite) Test104() {
 		"Value": "some1",
 		"List":  "some2",
 	}
-	conditions.InList(types.MessageTuple{}, args, s.e)
+	conditions.InList(types.MessageTuple{}, args)
 	s.Fail("expected to panic")
 }
 
@@ -331,32 +326,32 @@ func (s *EngineSuite) Test105() {
 		"List":  []any{types.DeviceId("0x00158d0004244bda")},
 		"Value": types.DeviceId("0x00158d0004244bda"),
 	}
-	actual := conditions.InList(mt, args, s.e)
+	actual := conditions.InList(mt, args)
 	s.True(actual)
 }
 
 func (s *EngineSuite) Test110() {
-	actual := conditions.NotNil(types.MessageTuple{}, types.Args{}, s.e)
+	actual := conditions.NotNil(types.MessageTuple{}, types.Args{})
 	s.False(actual)
 }
 
 func (s *EngineSuite) Test111() {
-	actual := conditions.NotNil(types.MessageTuple{}, types.Args{"Value": "foo"}, s.e)
+	actual := conditions.NotNil(types.MessageTuple{}, types.Args{"Value": "foo"})
 	s.True(actual)
 }
 
 func (s *EngineSuite) Test112() {
-	actual := conditions.NotNil(types.MessageTuple{}, types.Args{"Value": false}, s.e)
+	actual := conditions.NotNil(types.MessageTuple{}, types.Args{"Value": false})
 	s.True(actual)
 }
 
 func (s *EngineSuite) Test113() {
-	actual := conditions.NotNil(types.MessageTuple{}, types.Args{"Value": 0}, s.e)
+	actual := conditions.NotNil(types.MessageTuple{}, types.Args{"Value": 0})
 	s.True(actual)
 }
 
 func (s *EngineSuite) Test114() {
-	actual := conditions.NotNil(types.MessageTuple{}, types.Args{"Value": 100500}, s.e)
+	actual := conditions.NotNil(types.MessageTuple{}, types.Args{"Value": 100500})
 	s.True(actual)
 }
 
@@ -372,17 +367,17 @@ func (s *EngineSuite) Test115() {
 			},
 		},
 	}
-	s.True(conditions.NotNil(mt, types.Args{"Value": "$message.action"}, s.e))
-	s.True(conditions.NotNil(mt, types.Args{"Value": "$message.double"}, s.e))
-	s.True(conditions.NotNil(mt, types.Args{"Value": "$message.int"}, s.e))
-	s.True(conditions.NotNil(mt, types.Args{"Value": "$message.boolean"}, s.e))
-	s.False(conditions.NotNil(mt, types.Args{"Value": "$message.voltage"}, s.e))
-	s.False(conditions.NotNil(mt, types.Args{"Value": "$message.nonexisting"}, s.e))
+	s.True(conditions.NotNil(mt, types.Args{"Value": "$message.action"}))
+	s.True(conditions.NotNil(mt, types.Args{"Value": "$message.double"}))
+	s.True(conditions.NotNil(mt, types.Args{"Value": "$message.int"}))
+	s.True(conditions.NotNil(mt, types.Args{"Value": "$message.boolean"}))
+	s.False(conditions.NotNil(mt, types.Args{"Value": "$message.voltage"}))
+	s.False(conditions.NotNil(mt, types.Args{"Value": "$message.nonexisting"}))
 }
 
 func (s *EngineSuite) Test120() {
 	// defer func() { _ = recover() }()
-	actual := conditions.Changed(types.MessageTuple{}, types.Args{}, s.e)
+	actual := conditions.Changed(types.MessageTuple{}, types.Args{})
 	s.False(actual)
 	// s.Fail("expected to panic")
 }
@@ -394,7 +389,6 @@ func (s *EngineSuite) Test121() {
 			Prev: &types.Message{DeviceId: "foo2"},
 		},
 		types.Args{"Value": "$deviceId"},
-		s.e,
 	)
 	s.True(actual)
 }
@@ -405,7 +399,6 @@ func (s *EngineSuite) Test122() {
 			Curr: &types.Message{DeviceId: "foo1"},
 		},
 		types.Args{"Value": "$deviceId"},
-		s.e,
 	)
 	s.True(actual)
 }
@@ -488,7 +481,7 @@ func (s *EngineSuite) Test141() {
 
 func (s *EngineSuite) Test150() {
 	defer func() { _ = recover() }()
-	actual := conditions.ZigbeeDevice(types.MessageTuple{}, types.Args{}, s.e)
+	actual := conditions.ZigbeeDevice(types.MessageTuple{}, types.Args{})
 	s.False(actual)
 	s.Fail("expected to panic")
 }
@@ -497,7 +490,7 @@ func (s *EngineSuite) Test151() {
 	mt := types.MessageTuple{
 		Curr: &types.Message{DeviceId: "0x00158d0004244bda", DeviceClass: types.DEVICE_CLASS_ZIGBEE_DEVICE},
 	}
-	actual := conditions.ZigbeeDevice(mt, types.Args{"List": []any{types.DeviceId("0x00158d0004244bda")}}, s.e)
+	actual := conditions.ZigbeeDevice(mt, types.Args{"List": []any{types.DeviceId("0x00158d0004244bda")}})
 	s.True(actual)
 }
 

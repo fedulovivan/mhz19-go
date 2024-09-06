@@ -7,11 +7,11 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
-var TelegramBotMessage types.ActionImpl = func(mm []types.Message, a types.Action, e types.EngineAsSupplier) (err error) {
+var TelegramBotMessage types.ActionImpl = func(mm []types.Message, args types.Args, mapping types.Mapping, e types.EngineAsSupplier) (err error) {
 	tpayload := arg_reader.TemplatePayload{
 		Messages: mm,
 	}
-	areader := arg_reader.NewArgReader(&mm[0], a.Args, a.Mapping, &tpayload, e)
+	areader := arg_reader.NewArgReader(&mm[0], args, mapping, &tpayload, e)
 	text := areader.Get("Text")
 	if !areader.Ok() {
 		err = areader.Error()

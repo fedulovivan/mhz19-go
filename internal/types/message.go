@@ -47,7 +47,7 @@ func (m *Message) Get(field string) (any, error) {
 		}
 		p, ok := m.Payload.(map[string]any)
 		if !ok {
-			return nil, fmt.Errorf("Message.Get(): Payload expected to be map[string]any instead of '%T', reading field '%v'", m.Payload, field)
+			return nil, fmt.Errorf("Message.Get(): Payload is expected to be map[string]any not '%T', reading field '%v'", m.Payload, field)
 		}
 		v, ok := p[field]
 		if !ok {
@@ -55,11 +55,12 @@ func (m *Message) Get(field string) (any, error) {
 		}
 		return v, nil
 	}
-	// case "ChannelMeta":
-	// 	return m.ChannelMeta, nil
-	// fmt.Printf("%+v, %T", m.Payload, m.Payload)
-	// case "Payload":
-	// 	return m.Payload, nil
-	// case "RawPayload":
-	// 	return m.RawPayload, nil
 }
+
+// case "ChannelMeta":
+// 	return m.ChannelMeta, nil
+// fmt.Printf("%+v, %T", m.Payload, m.Payload)
+// case "Payload":
+// 	return m.Payload, nil
+// case "RawPayload":
+// 	return m.RawPayload, nil
