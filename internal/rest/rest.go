@@ -9,7 +9,7 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/app"
 	"github.com/fedulovivan/mhz19-go/internal/db"
 	"github.com/fedulovivan/mhz19-go/internal/entities/devices"
-	ldm "github.com/fedulovivan/mhz19-go/internal/entities/ldm"
+	"github.com/fedulovivan/mhz19-go/internal/entities/ldm"
 	"github.com/fedulovivan/mhz19-go/internal/entities/messages"
 	"github.com/fedulovivan/mhz19-go/internal/entities/rules"
 	"github.com/fedulovivan/mhz19-go/internal/entities/stats"

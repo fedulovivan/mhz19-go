@@ -31,6 +31,7 @@
 - try: opentelemetry - https://opentelemetry.io/docs/languages/go/getting-started/   
 - try: prometheus
 - try: grpc
+- try: gorm
 - try: openapi or swagger https://en.wikipedia.org/wiki/OpenAPI_Specification or https://swagger.io/
 - try: https://github.com/go-ozzo/ozzo-routing
 - arch: make logger and logTag a dependency of service, api and repository
