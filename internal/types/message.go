@@ -57,6 +57,7 @@ func (m *Message) ExecDirective(field string) (any, error) {
 			return nil, fmt.Errorf("Message.ExecDirective(): Payload '%T, %+v' has no field '%v'", m.Payload, m.Payload, field)
 		}
 		return v, nil
+	} else {
+		panic(fmt.Sprintf("unknown directive %s", field))
 	}
-	return nil, nil
 }
