@@ -5,7 +5,7 @@ import (
 )
 
 // args: Value
-var DeviceClass types.CondImpl = func(mt types.MessageTuple, args types.Args) bool {
+var DeviceClass types.CondImpl = func(mt types.MessageTuple, args types.Args) (bool, error) {
 	return Equal(
 		mt,
 		types.Args{

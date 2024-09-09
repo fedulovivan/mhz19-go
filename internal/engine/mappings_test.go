@@ -61,25 +61,3 @@ func (s *MappingsSuite) Test10() {
 func TestMappings(t *testing.T) {
 	suite.Run(t, new(MappingsSuite))
 }
-
-// opts := NewOptions()
-// opts.SetProviders(provider)
-// opts.SetRules([]Rule{
-// 	{
-// 		Id:       1,
-// 		Comments: "ut rule",
-// 		Actions: []Action{
-// 			{Fn: ACTION_POST_SONOFF_SWITCH_MESSAGE},
-// 		},
-// 	},
-// }...)
-// ChannelType: CHANNEL_MQTT,
-// DeviceClass: DEVICE_CLASS_ZIGBEE_DEVICE,
-// DeviceId:    DeviceId("0x00158d0004244bda"),
-// Timestamp:   time.Now(),
-// Payload: map[string]any{
-// 	"action": "single_left",
-// },
-// message := types.Message{}
-// go provider.Write(message)
-// engine.Stop()

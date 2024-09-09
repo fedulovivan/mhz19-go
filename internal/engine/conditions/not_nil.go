@@ -1,28 +1,25 @@
 package conditions
 
 import (
-	"fmt"
-	"log/slog"
-
-	"github.com/fedulovivan/mhz19-go/internal/arg_reader"
+	"github.com/fedulovivan/mhz19-go/internal/arguments"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
 // return false for nil and empty strings
 // return true for the rest
-var NotNil types.CondImpl = func(mt types.MessageTuple, args types.Args) bool {
-	c := arg_reader.NewArgReader(mt.Curr, args, nil, nil, nil)
+var NotNil types.CondImpl = func(mt types.MessageTuple, args types.Args) (res bool, err error) {
+	c := arguments.NewReader(mt.Curr, args, nil, nil, nil)
 	v := c.Get("Value")
-	if !c.Ok() {
-		slog.Error(fmt.Sprintf("NotNil: %v", c.Error()))
-		return false
+	err = c.Error()
+	if err != nil {
+		return
 	}
 	switch vTyped := v.(type) {
 	case string:
-		return len(vTyped) > 0
+		return len(vTyped) > 0, nil
 	case nil:
-		return false
+		return false, nil
 	default:
-		return true
+		return true, nil
 	}
 }

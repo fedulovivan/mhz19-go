@@ -94,8 +94,11 @@ func (e *engine) Stop() {
 
 func (e *engine) InvokeConditionFunc(mt types.MessageTuple, fn types.CondFn, args types.Args, r types.Rule, tid string) bool {
 	impl := conditions.Get(fn)
-	res := impl(mt, args)
+	res, err := impl(mt, args)
 	slog.Debug(e.logTag(tid+fmt.Sprintf("Rule #%v condition exec", r.Id)), "fn", fn, "args", args, "res", res)
+	if err != nil {
+		slog.Error(fmt.Sprintf("%s error: %s", fn, err))
+	}
 	return res
 }
 

@@ -1,20 +1,17 @@
 package conditions
 
 import (
-	"fmt"
-	"log/slog"
-
-	"github.com/fedulovivan/mhz19-go/internal/arg_reader"
+	"github.com/fedulovivan/mhz19-go/internal/arguments"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
-var Equal types.CondImpl = func(mt types.MessageTuple, args types.Args) bool {
-	c := arg_reader.NewArgReader(mt.Curr, args, nil, nil, nil)
+var Equal types.CondImpl = func(mt types.MessageTuple, args types.Args) (res bool, err error) {
+	c := arguments.NewReader(mt.Curr, args, nil, nil, nil)
 	left := c.Get("Left")
 	right := c.Get("Right")
-	if c.Ok() {
-		return left == right
+	err = c.Error()
+	if err != nil {
+		return
 	}
-	slog.Error(fmt.Sprintf("Equal: %v", c.Error()))
-	return false
+	return left == right, nil
 }

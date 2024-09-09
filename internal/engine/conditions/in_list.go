@@ -2,25 +2,24 @@ package conditions
 
 import (
 	"fmt"
-	"log/slog"
 	"slices"
 
-	"github.com/fedulovivan/mhz19-go/internal/arg_reader"
+	"github.com/fedulovivan/mhz19-go/internal/arguments"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
-var InList types.CondImpl = func(mt types.MessageTuple, args types.Args) bool {
-	c := arg_reader.NewArgReader(mt.Curr, args, nil, nil, nil)
+var InList types.CondImpl = func(mt types.MessageTuple, args types.Args) (res bool, err error) {
+	c := arguments.NewReader(mt.Curr, args, nil, nil, nil)
 	v := c.Get("Value")
 	list := c.Get("List")
-	if !c.Ok() {
-		slog.Error(fmt.Sprintf("InList: %v", c.Error()))
-		return false
+	err = c.Error()
+	if err != nil {
+		return
 	}
 	lslice, ok := list.([]any)
 	if !ok {
-		panic("[]any is expected")
+		err = fmt.Errorf("[]any is expected for List")
+		return
 	}
-	res := slices.Contains(lslice, v)
-	return res
+	return slices.Contains(lslice, v), nil
 }

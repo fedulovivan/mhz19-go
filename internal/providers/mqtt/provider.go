@@ -2,6 +2,7 @@ package mqtt_provider
 
 import (
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"strings"
 	"time"
@@ -23,8 +24,11 @@ type provider struct {
 var Provider types.ChannelProvider = &provider{}
 
 func (p *provider) Send(a ...any) (err error) {
-	topic := a[0].(string)
-	payload := a[1].(string)
+	topic, ok1 := a[0].(string)
+	payload, ok2 := a[1].(string)
+	if !ok1 || !ok2 {
+		return fmt.Errorf("Send() expects two string arguments: topic and payload")
+	}
 	token := p.client.Publish(
 		topic,
 		0,

@@ -47,3 +47,7 @@ func (a *Args) UnmarshalJSON(data []byte) (err error) {
 	}
 	return
 }
+
+type TemplatePayload struct {
+	Messages []Message
+}

@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -30,37 +31,32 @@ type MessageTuple struct {
 	Prev *Message
 }
 
-// get message primitive field or message payload field
-func (m *Message) Get(field string) (any, error) {
-	switch field {
-	case "ChannelType":
-		return m.ChannelType, nil
-	case "DeviceClass":
-		return m.DeviceClass, nil
-	case "DeviceId":
+func (m *Message) IsSpecial(field string) bool {
+	return field == "$deviceId" || field == "$deviceClass" || field == "$channelType" || strings.HasPrefix(field, "$message.")
+}
+
+// read message or message payload field using special syntax designed to be used in types.Args
+func (m *Message) ExecDirective(field string) (any, error) {
+	if field == "$deviceId" {
 		return m.DeviceId, nil
-	case "Timestamp":
-		return m.Timestamp, nil
-	default:
+	} else if field == "$deviceClass" {
+		return m.DeviceClass, nil
+	} else if field == "$channelType" {
+		return m.ChannelType, nil
+	} else if strings.HasPrefix(field, "$message.") {
+		_, field, _ := strings.Cut(field, ".")
 		if m.Payload == nil {
 			return nil, nil
 		}
 		p, ok := m.Payload.(map[string]any)
 		if !ok {
-			return nil, fmt.Errorf("Message.Get(): Payload is expected to be map[string]any not '%T', reading field '%v'", m.Payload, field)
+			return nil, fmt.Errorf("Message.ExecDirective(): Payload is expected to be map[string]any not '%T', reading field '%v'", m.Payload, field)
 		}
 		v, ok := p[field]
 		if !ok {
-			return nil, fmt.Errorf("Message.Get(): Payload '%T, %+v' has no field '%v'", m.Payload, m.Payload, field)
+			return nil, fmt.Errorf("Message.ExecDirective(): Payload '%T, %+v' has no field '%v'", m.Payload, m.Payload, field)
 		}
 		return v, nil
 	}
+	return nil, nil
 }
-
-// case "ChannelMeta":
-// 	return m.ChannelMeta, nil
-// fmt.Printf("%+v, %T", m.Payload, m.Payload)
-// case "Payload":
-// 	return m.Payload, nil
-// case "RawPayload":
-// 	return m.RawPayload, nil

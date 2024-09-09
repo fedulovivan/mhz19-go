@@ -36,6 +36,6 @@ func (s *CondFn) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%v"`, CONDITION_NAMES[*s])), nil
 }
 
-type CondImpl func(mt MessageTuple, args Args) bool
+type CondImpl func(mt MessageTuple, args Args) (bool, error)
 
 type CondImpls map[CondFn]CondImpl

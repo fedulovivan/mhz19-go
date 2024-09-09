@@ -4,40 +4,41 @@
 - feat: implement "otherDeviceId"
 
 ### Prio 1
-- arch: in NewEngine create mocks for all services, which will panic with friendly message if user forgot to set that service
 - feat: api: log errors captured by router error handler, also change default handler to render error as a json
 - feat: create api to update/delete rules
 - feat: create api to add/update/delete devices
 - feat: create api to read device classes (or unified api for all dicts?)
-- bug: figure out why we cannot test engine in uts end to end - internal/engine/mappings_test.go::Test10
 - bug: "http: superfluous response.WriteHeader call from github.com/go-ozzo/ozzo-routing/v2.(*Router).handleError (router.go:131)" - appears after termination of stucked apache bench
 - bug: "apr_socket_recv: Operation timed out (60)" - https://stackoverflow.com/questions/30352725/why-is-my-hello-world-go-server-getting-crushed-by-apachebench
-- bug: "🧨 api:getAll took 3.451973917s" when reading 1k rules 1k times - try with postgres
-- arch: "FOREIGN KEY (device_id) REFERENCES devices(native_id)" requires sole UNIQUE index for column devices.native_id, while we actually need UNIQUE(device_class_id, native_id) since its unreasonable to contraint native_id across devices off all classes
-- arch: in addition to "native_id" problem see also "unsafemap" in internal/last_device_message/repository.go
+- bug: "🧨 api:getAll took 3.451973917s" when reading 1k rules 1k times - try same scenario with postgres
+- arch: "FOREIGN KEY (device_id) REFERENCES devices(native_id)" requires sole UNIQUE index for column devices.native_id, while we actually need UNIQUE(device_class_id, native_id) since its unreasonable to constraint native_id across devices off all classes
+- arch: in addition to "native_id" problem see also "unsafemap" in internal/entities/ldm/repository.go
 
 ### Prio 2
+- arch: make logger and logTag a dependency of service, api and repository
+- feat: merge Zigbee2MqttSetState and ValveSetState actions
+- arch: in NewEngine create mocks for all services, which will panic with friendly message if user forgot to set that service
 - feat: implement log tag with meta, so we can add attrs to function
 - bug: no mqtt (re)connection if network was not available on app startup and returned online later
 - feat: create meta which descibes expected args for conditions and actions and validate
-- arch: get rid of any in Send(...any)
-- ut: create tests for recursive conditions
-- arch: mappings rules could be pre-defined (system) and loaded from db (user-level) - think we need to store everything in db, even system
+- arch: get rid of any in Send(...any) - no ideas so far
+- uts: create tests for recursive conditions
+- arch: mapping rules could be pre-defined (system) and loaded from db (user-level) - think we need to store everything in db, even system rules
 - feat: create test service for sonoff wifi devices (poll them periodically to receive status updates)
 - try: find out why cli command "make test" and "vscode" report different coverage statistics: 86.9% vs 100%. vscode syntax - `Running tool: /opt/homebrew/bin/go test -timeout 30s -coverprofile=/var/folders/5v/0wjs9g1948ddpdqkgf1h31q80000gn/T/vscode-go7lC7ip/go-code-cover github.com/fedulovivan/mhz19-go/internal/engine`
 - try: validation https://github.com/asaskevich/govalidator
 - try: postgres instead of sqlite3
-- try: https://pkg.go.dev/go.uber.org/fx
-- try: opentelemetry - https://opentelemetry.io/docs/languages/go/getting-started/   
+- try: separate di library https://pkg.go.dev/go.uber.org/fx
+- try: opentelemetry https://opentelemetry.io/docs/languages/go/getting-started/   
 - try: prometheus
 - try: grpc
 - try: gorm
 - try: openapi or swagger https://en.wikipedia.org/wiki/OpenAPI_Specification or https://swagger.io/
-- try: https://github.com/go-ozzo/ozzo-routing
-- arch: make logger and logTag a dependency of service, api and repository
 
 ### Completed
 
+- (+) try: https://github.com/go-ozzo/ozzo-routing
+- (+) bug: figure out why we cannot test engine in uts end to end - internal/engine/mappings_test.go::Test10, fixed with emitting message within timeout
 - (+) quest: find out why Args::UnmarshalJSON() is not called in Test164 - just because go's encoding/json/decode.go::Unmarshal() contains call ofr checkValid(), which prevents further parsing if invalid input was given
 - (+) arch: think how to move messages_* and devices_* outside of engine package to their own
 - (+) feat: sonoff provider, mdns(dns-sd) client for sonoff devices https://github.com/hashicorp/mdns

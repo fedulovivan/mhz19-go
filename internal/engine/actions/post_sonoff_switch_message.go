@@ -7,19 +7,19 @@ import (
 	"fmt"
 
 	"github.com/Jeffail/gabs/v2"
-	"github.com/fedulovivan/mhz19-go/internal/arg_reader"
+	"github.com/fedulovivan/mhz19-go/internal/arguments"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
 var PostSonoffSwitchMessage types.ActionImpl = func(mm []types.Message, args types.Args, mapping types.Mapping, e types.EngineAsSupplier) (err error) {
-	tpayload := arg_reader.TemplatePayload{
+	tpayload := types.TemplatePayload{
 		Messages: mm,
 	}
-	areader := arg_reader.NewArgReader(&mm[0], args, mapping, &tpayload, e)
+	areader := arguments.NewReader(&mm[0], args, mapping, &tpayload, e)
 	cmd := areader.Get("Command")
 	deviceId := areader.Get("DeviceId")
-	if !areader.Ok() {
-		err = areader.Error()
+	err = areader.Error()
+	if err != nil {
 		return
 	}
 	device, err := e.DevicesService().GetOne(deviceId.(types.DeviceId))

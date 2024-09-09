@@ -1,24 +1,23 @@
 package conditions
 
 import (
-	"fmt"
-	"log/slog"
+	"errors"
 
-	"github.com/fedulovivan/mhz19-go/internal/arg_reader"
+	"github.com/fedulovivan/mhz19-go/internal/arguments"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
-var Changed types.CondImpl = func(mt types.MessageTuple, args types.Args) bool {
+var Changed types.CondImpl = func(mt types.MessageTuple, args types.Args) (res bool, err error) {
 	if mt.Prev == nil && mt.Curr != nil {
-		return true
+		return true, nil
 	}
-	cCurr := arg_reader.NewArgReader(mt.Curr, args, nil, nil, nil)
-	rPrev := arg_reader.NewArgReader(mt.Prev, args, nil, nil, nil)
+	cCurr := arguments.NewReader(mt.Curr, args, nil, nil, nil)
+	cPrev := arguments.NewReader(mt.Prev, args, nil, nil, nil)
 	vCurr := cCurr.Get("Value")
-	vPrev := rPrev.Get("Value")
-	if cCurr.Ok() && rPrev.Ok() {
-		return vCurr != vPrev
+	vPrev := cPrev.Get("Value")
+	err = errors.Join(cCurr.Error(), cPrev.Error())
+	if err != nil {
+		return
 	}
-	slog.Error(fmt.Sprintf("Changed: curr %v, prev %v", cCurr.Error(), rPrev.Error()))
-	return false
+	return vCurr != vPrev, nil
 }
