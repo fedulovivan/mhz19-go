@@ -16,6 +16,8 @@ type Queue interface {
 	Cnt() int64
 }
 
+var _ Queue = (*queue)(nil)
+
 type queue struct {
 	cnt      int64
 	mu       sync.RWMutex

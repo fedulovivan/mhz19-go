@@ -7,10 +7,6 @@ import (
 
 type TopicHandlers map[string]MqttLib.MessageHandler
 
-type Parser interface {
-	Parse() (types.Message, bool)
-}
-
 type parserBase struct {
 	m  MqttLib.Message
 	dc types.DeviceClass

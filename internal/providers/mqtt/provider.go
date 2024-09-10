@@ -21,7 +21,9 @@ type provider struct {
 	client MqttLib.Client
 }
 
-var Provider types.ChannelProvider = &provider{}
+func NewProvider() types.ChannelProvider {
+	return new(provider)
+}
 
 func (p *provider) Send(a ...any) (err error) {
 	topic, ok1 := a[0].(string)

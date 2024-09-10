@@ -19,7 +19,9 @@ type provider struct {
 
 var logTag = logger.MakeTag(logger.DNSSD)
 
-var Provider types.ChannelProvider = &provider{}
+func NewProvider() types.ChannelProvider {
+	return new(provider)
+}
 
 func (p *provider) Channel() types.ChannelType {
 	return types.CHANNEL_DNS_SD

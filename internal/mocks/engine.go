@@ -6,6 +6,13 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
+var (
+	// interface guards
+	_ types.DevicesService   = (*mockDevicesService)(nil)
+	_ types.ChannelProvider  = (*mockprovider)(nil)
+	_ types.EngineAsSupplier = (*mockengine)(nil)
+)
+
 type mockDevicesService struct {
 }
 

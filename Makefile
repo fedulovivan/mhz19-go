@@ -58,12 +58,9 @@ migrate-dump:
 
 .PHONY: test
 test:
-	CGO_ENABLED=1 go test -cover -race -count 1 ./...
+	CGO_ENABLED=1 go test -cover -race ./...
+# CGO_ENABLED=1 go test -cover -race -count 1 ./...
 
 .PHONY: test-one
 test-one:
 	go test -v github.com/fedulovivan/mhz19-go/internal/engine -run "TestMappings"
-	
-# go test -cover -race -count 1 -v github.com/fedulovivan/mhz19-go/internal/engine -run "TestMappings"
-
-

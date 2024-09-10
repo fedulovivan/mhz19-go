@@ -2,6 +2,8 @@ package ldm
 
 import "github.com/fedulovivan/mhz19-go/internal/types"
 
+var _ types.LdmService = (*ldmService)(nil)
+
 type ldmService struct {
 	repository LdmRepository
 }

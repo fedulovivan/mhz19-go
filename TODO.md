@@ -2,6 +2,7 @@
 ### Prio 0
 - feat: finish implementation of all actions
 - feat: implement "otherDeviceId"
+- feat: add Dockerfile
 
 ### Prio 1
 - feat: api: log errors captured by router error handler, also change default handler to render error as a json
@@ -15,16 +16,16 @@
 - arch: in addition to "native_id" problem see also "unsafemap" in internal/entities/ldm/repository.go
 
 ### Prio 2
-- arch: make logger and logTag a dependency of service, api and repository
-- feat: merge Zigbee2MqttSetState and ValveSetState actions
-- arch: in NewEngine create mocks for all services, which will panic with friendly message if user forgot to set that service
-- feat: implement log tag with meta, so we can add attrs to function
-- bug: no mqtt (re)connection if network was not available on app startup and returned online later
-- feat: create meta which descibes expected args for conditions and actions and validate
-- arch: get rid of any in Send(...any) - no ideas so far
 - uts: create tests for recursive conditions
-- arch: mapping rules could be pre-defined (system) and loaded from db (user-level) - think we need to store everything in db, even system rules
+- bug: no mqtt (re)connection if network was not available on app startup and returned online later
+- feat: merge Zigbee2MqttSetState and ValveSetState actions
+- feat: implement log tag with meta, so we can add attrs to function
+- feat: create meta which descibes expected args for conditions and actions and validate
 - feat: create test service for sonoff wifi devices (poll them periodically to receive status updates)
+- arch: make logger and logTag a dependency of service, api and repository
+- arch: in NewEngine create mocks for all services, which will panic with friendly message if user forgot to set that service
+- arch: get rid of any in Send(...any) - no ideas so far
+- arch: mapping rules could be pre-defined (system) and loaded from db (user-level) - think we need to store everything in db, even system rules
 - try: find out why cli command "make test" and "vscode" report different coverage statistics: 86.9% vs 100%. vscode syntax - `Running tool: /opt/homebrew/bin/go test -timeout 30s -coverprofile=/var/folders/5v/0wjs9g1948ddpdqkgf1h31q80000gn/T/vscode-go7lC7ip/go-code-cover github.com/fedulovivan/mhz19-go/internal/engine`
 - try: validation https://github.com/asaskevich/govalidator
 - try: postgres instead of sqlite3

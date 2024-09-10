@@ -9,6 +9,8 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
+var _ types.DevicesService = (*devicesService)(nil)
+
 type devicesService struct {
 	repository DevicesRepository
 }

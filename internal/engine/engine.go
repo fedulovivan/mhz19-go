@@ -17,6 +17,9 @@ type GetProviderFn func(ch types.ChannelType) types.ChannelProvider
 
 var tidSeq = utils.NewSeq(0)
 
+var _ types.Engine = (*engine)(nil)
+var _ types.EngineAsSupplier = (*engine)(nil)
+
 type engine struct {
 	logTag         types.LogTagFn
 	providers      []types.ChannelProvider

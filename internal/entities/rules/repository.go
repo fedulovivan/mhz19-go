@@ -14,6 +14,8 @@ type RulesRepository interface {
 	Create(rule DbRule, conditions []DbRuleCondition, actions []DbRuleAction, arguments []DbRuleConditionOrActionArgument, mappings []DbRuleActionArgumentMapping) (int64, error)
 }
 
+var _ RulesRepository = (*rulesRepository)(nil)
+
 type rulesRepository struct {
 	database *sql.DB
 }

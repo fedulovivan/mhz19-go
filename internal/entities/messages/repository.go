@@ -25,6 +25,8 @@ type MessagesRepository interface {
 	Create(message DbMessage) (messageId int64, err error)
 }
 
+var _ MessagesRepository = (*messagesRepository)(nil)
+
 type messagesRepository struct {
 	database *sql.DB
 }

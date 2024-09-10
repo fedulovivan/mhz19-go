@@ -16,6 +16,8 @@ type StatsRepository interface {
 	Get() (res types.StatsGetResult, err error)
 }
 
+var _ StatsRepository = (*statsRepository)(nil)
+
 type statsRepository struct {
 	database *sql.DB
 }

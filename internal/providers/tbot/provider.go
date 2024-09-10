@@ -21,7 +21,9 @@ type provider struct {
 	botStarted bool
 }
 
-var Provider types.ChannelProvider = &provider{}
+func NewProvider() types.ChannelProvider {
+	return new(provider)
+}
 
 func (p *provider) Channel() types.ChannelType {
 	return types.CHANNEL_TELEGRAM

@@ -17,7 +17,7 @@ func (t *Throttle) MarshalJSON() (b []byte, err error) {
 }
 
 func (t *Throttle) UnmarshalJSON(b []byte) (err error) {
-	var v interface{}
+	var v any
 	err = json.Unmarshal(b, &v)
 	if err != nil {
 		return

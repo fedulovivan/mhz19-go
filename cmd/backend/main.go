@@ -39,7 +39,7 @@ func main() {
 	dbRules, _ := rulesService.Get()
 	e := engine.NewEngine()
 	e.SetLogTag(logger.MakeTag(logger.ENGINE))
-	e.SetProviders(mqtt.Provider, tbot.Provider, dnssd.Provider)
+	e.SetProviders(mqtt.NewProvider(), tbot.NewProvider(), dnssd.NewProvider())
 	e.SetMessagesService(
 		messages.NewService(
 			messages.NewRepository(

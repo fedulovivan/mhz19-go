@@ -8,6 +8,8 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
+var _ types.MessagesService = (*messagesService)(nil)
+
 type messagesService struct {
 	repository MessagesRepository
 }

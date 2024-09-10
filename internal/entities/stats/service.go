@@ -2,6 +2,8 @@ package stats
 
 import "github.com/fedulovivan/mhz19-go/internal/types"
 
+var _ types.StatsService = (*statsService)(nil)
+
 type statsService struct {
 	repository StatsRepository
 }

@@ -22,6 +22,8 @@ type DevicesRepository interface {
 	Get(deviceId sql.NullString, deviceClass sql.NullInt32) ([]DbDevice, error)
 }
 
+var _ DevicesRepository = (*devicesRepository)(nil)
+
 type devicesRepository struct {
 	database *sql.DB
 }

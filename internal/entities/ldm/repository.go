@@ -20,6 +20,8 @@ type LdmRepository interface {
 	GetByDeviceId(deviceId types.DeviceId) types.Message
 }
 
+var _ LdmRepository = (*repository)(nil)
+
 type repository struct {
 	mu   sync.RWMutex
 	data map[types.LdmKey]types.Message
