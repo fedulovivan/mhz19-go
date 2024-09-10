@@ -32,9 +32,6 @@ type engine struct {
 func NewEngine() types.Engine {
 	return &engine{
 		logTag: func(m string) string { return m },
-		// messageService: mockmessagesservice,
-		// devicesService: mockdeviceservice,
-		// ldmService: mockldmservice,
 	}
 }
 
@@ -116,37 +113,39 @@ func (e *engine) InvokeActionFunc(mm []types.Message, a types.Action, r types.Ru
 	}()
 }
 
-func (e *engine) MatchesListSome(mt types.MessageTuple, cc []types.Condition, r types.Rule, tid string) bool {
+func (e *engine) MatchesListSome(mtcb types.MessageTupleFn, cc []types.Condition, r types.Rule, tid string) bool {
 	for _, c := range cc {
-		if e.MatchesCondition(mt, c, r, tid) {
+		if e.MatchesCondition(mtcb, c, r, tid) {
 			return true
 		}
 	}
 	return false
 }
 
-func (e *engine) MatchesListEvery(mt types.MessageTuple, cc []types.Condition, r types.Rule, tid string) bool {
+func (e *engine) MatchesListEvery(mtcb types.MessageTupleFn, cc []types.Condition, r types.Rule, tid string) bool {
 	if len(cc) == 0 {
 		return false
 	}
 	for _, c := range cc {
-		if !e.MatchesCondition(mt, c, r, tid) {
+		if !e.MatchesCondition(mtcb, c, r, tid) {
 			return false
 		}
 	}
 	return true
 }
 
-func (e *engine) MatchesCondition(mt types.MessageTuple, c types.Condition, r types.Rule, tid string) bool {
+func (e *engine) MatchesCondition(mtcb types.MessageTupleFn, c types.Condition, r types.Rule, tid string) bool {
 	withFn := c.Fn != 0
 	withList := len(c.List) > 0
+
 	if withFn && !withList {
+		mt := mtcb(c.OtherDeviceId)
 		return e.InvokeConditionFunc(mt, c.Fn, c.Args, r, tid)
 	} else if withList && !withFn {
 		if c.Or {
-			return e.MatchesListSome(mt, c.List, r, tid)
+			return e.MatchesListSome(mtcb, c.List, r, tid)
 		} else {
-			return e.MatchesListEvery(mt, c.List, r, tid)
+			return e.MatchesListEvery(mtcb, c.List, r, tid)
 		}
 	} else {
 		return true
@@ -177,14 +176,6 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 		"Payload", p,
 	)
 	ldmKey := e.ldmService.MakeKey(m.DeviceClass, m.DeviceId)
-	// var prev types.Message
-	tuple := types.MessageTuple{
-		Curr: &m,
-	}
-	if e.ldmService.Has(ldmKey) {
-		prev := e.ldmService.Get(ldmKey)
-		tuple.Prev = &prev
-	}
 	slog.Debug(e.logTag(tid + fmt.Sprintf("Matching against %v rules", len(rules))))
 	matches := 0
 	for _, r := range rules {
@@ -192,7 +183,26 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 			slog.Debug(e.logTag(tid + fmt.Sprintf("Rule #%v is disabled, skipping", r.Id)))
 			continue
 		}
-		if e.MatchesCondition(tuple, r.Condition, r, tid) {
+		var mtcb = func(otherDeviceId types.DeviceId) types.MessageTuple {
+			tuple := types.MessageTuple{}
+			takeOtherDeviceMessage := len(otherDeviceId) > 0
+			if takeOtherDeviceMessage {
+				slog.Warn(e.logTag(tid + fmt.Sprintf("Rule #%v requesting message for otherDeviceId=%v", r.Id, otherDeviceId)))
+				otherLdmKey := e.ldmService.MakeKey(m.DeviceClass, otherDeviceId)
+				if e.ldmService.Has(otherLdmKey) {
+					tmp := e.ldmService.Get(otherLdmKey)
+					tuple.Curr = &tmp
+				}
+			} else {
+				tuple.Curr = &m
+				if e.ldmService.Has(ldmKey) {
+					tmp := e.ldmService.Get(ldmKey)
+					tuple.Prev = &tmp
+				}
+			}
+			return tuple
+		}
+		if e.MatchesCondition(mtcb, r.Condition, r, tid) {
 			slog.Debug(e.logTag(tid+fmt.Sprintf("Rule #%v matches", r.Id)), "name", r.Name)
 			matches++
 			if r.Throttle.Value == 0 {

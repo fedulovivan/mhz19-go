@@ -228,11 +228,9 @@ func (s *ConditionsSuite) Test122() {
 }
 
 func (s *ConditionsSuite) Test150() {
-	defer func() { _ = recover() }()
 	actual, err := ZigbeeDevice(types.MessageTuple{}, types.Args{})
-	s.Nil(err)
+	s.EqualError(err, "[]any is expected for List")
 	s.False(actual)
-	s.Fail("expected to panic")
 }
 
 func (s *ConditionsSuite) Test151() {

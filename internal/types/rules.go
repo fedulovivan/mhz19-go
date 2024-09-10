@@ -43,11 +43,12 @@ type Rule struct {
 }
 
 type Condition struct {
-	Id   int         `json:"-"`
-	Fn   CondFn      `json:"fn,omitempty"`
-	Args Args        `json:"args,omitempty"`
-	List []Condition `json:"list,omitempty"`
-	Or   bool        `json:"or,omitempty"`
+	Id            int         `json:"-"`
+	Fn            CondFn      `json:"fn,omitempty"`
+	Args          Args        `json:"args,omitempty"`
+	List          []Condition `json:"list,omitempty"`
+	Or            bool        `json:"or,omitempty"`
+	OtherDeviceId DeviceId    `json:"otherDeviceId,omitempty"`
 }
 
 type Action struct {

@@ -1,11 +1,10 @@
 
 ### Prio 0
-- feat: finish implementation of all actions
-- feat: implement "otherDeviceId"
-- feat: add Dockerfile
+- big: fix "go-sqlite3 requires cgo to work" for docker build
+- feat: api: log errors captured by router error handler, also change default handler to render error as a json
 
 ### Prio 1
-- feat: api: log errors captured by router error handler, also change default handler to render error as a json
+- arch: think where we can construct types.TemplatePayload automatically
 - feat: create api to update/delete rules
 - feat: create api to add/update/delete devices
 - feat: create api to read device classes (or unified api for all dicts?)
@@ -38,6 +37,9 @@
 
 ### Completed
 
+- (+) feat: add Dockerfile
+- (+) feat: finish implementation for "otherDeviceId"
+- (+) feat: finish implementation of all actions
 - (+) try: https://github.com/go-ozzo/ozzo-routing
 - (+) bug: figure out why we cannot test engine in uts end to end - internal/engine/mappings_test.go::Test10, fixed with emitting message within timeout
 - (+) quest: find out why Args::UnmarshalJSON() is not called in Test164 - just because go's encoding/json/decode.go::Unmarshal() contains call ofr checkValid(), which prevents further parsing if invalid input was given

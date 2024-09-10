@@ -1,5 +1,5 @@
 CONF ?= .env
-NAME ?= backend
+NAME ?= mhz19-go-backend
 GIT_REV ?= $(shell git rev-parse --short HEAD)
 DATE ?= $(shell date +%FT%T)
 NUM_MIGRATION ?= 00
@@ -11,7 +11,19 @@ default: lint test build
 
 .PHONY: build
 build:
-	CGO_ENABLED=1 go build -o ./bin/$(NAME) ./cmd/$(NAME)
+	CGO_ENABLED=1 go build -o ./bin/backend ./cmd/backend
+
+.PHONY: docker-build
+docker-build:
+	DOCKER_CLI_HINTS=false docker build --label "git.revision=${GIT_REV}" --tag $(NAME) .
+
+.PHONY: docker-down
+docker-down:
+	docker stop $(NAME) && docker rm $(NAME)
+
+.PHONY: docker-up
+docker-up:
+	docker run -d --env-file=$(CONF) -v ./database.bin:/database.bin --name=$(NAME) $(NAME)
 
 .PHONY: clean
 clean:

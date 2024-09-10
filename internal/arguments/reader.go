@@ -44,6 +44,19 @@ func (r *reader) push_err(err error) {
 	r.errors = append(r.errors, err)
 }
 
+func GetTyped[T any](r *reader, field string) (res T, err error) {
+	v := r.Get(field)
+	err = r.Error()
+	if err != nil {
+		return
+	}
+	res, ok := v.(T)
+	if !ok {
+		err = fmt.Errorf("cannot cast to %T", res)
+	}
+	return
+}
+
 func (r *reader) Get(field string) any {
 
 	// stage 1: check if requested arg exist in map
@@ -64,7 +77,7 @@ func (r *reader) Get(field string) any {
 			} else {
 				r.push_err(err)
 			}
-		} else if r.message.IsSpecial(sIn) {
+		} else if types.IsSpecialDirective(sIn) {
 			// stage 2: process string argument as special Message's getter directive
 			processed, err := r.message.ExecDirective(sIn)
 			if err == nil {

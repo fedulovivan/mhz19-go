@@ -31,12 +31,18 @@ type MessageTuple struct {
 	Prev *Message
 }
 
-func (m *Message) IsSpecial(field string) bool {
+type MessageTupleFn = func(otherDeviceId DeviceId) MessageTuple
+
+func IsSpecialDirective(field string) bool {
 	return field == "$deviceId" || field == "$deviceClass" || field == "$channelType" || strings.HasPrefix(field, "$message.")
 }
 
 // read message or message payload field using special syntax designed to be used in types.Args
 func (m *Message) ExecDirective(field string) (any, error) {
+	if m == nil {
+		return nil, nil
+		// panic("Message.ExecDirective(): message is nil")
+	}
 	if field == "$deviceId" {
 		return m.DeviceId, nil
 	} else if field == "$deviceClass" {

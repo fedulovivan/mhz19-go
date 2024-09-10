@@ -20,13 +20,17 @@ func (s *EngineSuite) SetupSuite() {
 	s.e.SetLdmService(ldm.NewService(ldm.RepoSingleton()))
 }
 
+var dummy_mtcb types.MessageTupleFn = func(types.DeviceId) (res types.MessageTuple) {
+	return
+}
+
 func (s *EngineSuite) Test10() {
-	actual := s.e.MatchesCondition(types.MessageTuple{}, types.Condition{}, types.Rule{}, "Test10")
+	actual := s.e.MatchesCondition(dummy_mtcb, types.Condition{}, types.Rule{}, "Test10")
 	s.True(actual)
 }
 
 func (s *EngineSuite) Test11() {
-	actual := s.e.MatchesCondition(types.MessageTuple{}, types.Condition{
+	actual := s.e.MatchesCondition(dummy_mtcb, types.Condition{
 		Or: true,
 		List: []types.Condition{
 			{Fn: types.COND_EQUAL, Args: types.Args{"Left": true, "Right": false}},
@@ -37,7 +41,7 @@ func (s *EngineSuite) Test11() {
 }
 
 func (s *EngineSuite) Test12() {
-	actual := s.e.MatchesCondition(types.MessageTuple{}, types.Condition{
+	actual := s.e.MatchesCondition(dummy_mtcb, types.Condition{
 		List: []types.Condition{
 			{Fn: types.COND_EQUAL, Args: types.Args{"Left": true, "Right": false}},
 			{Fn: types.COND_EQUAL, Args: types.Args{"Left": 1.11, "Right": 1.11}},
@@ -53,12 +57,12 @@ func (s *EngineSuite) Test20() {
 }
 
 func (s *EngineSuite) Test30() {
-	actual := s.e.MatchesListSome(types.MessageTuple{}, []types.Condition{}, types.Rule{}, "Test30")
+	actual := s.e.MatchesListSome(dummy_mtcb, []types.Condition{}, types.Rule{}, "Test30")
 	s.False(actual)
 }
 
 func (s *EngineSuite) Test31() {
-	actual := s.e.MatchesListSome(types.MessageTuple{}, []types.Condition{
+	actual := s.e.MatchesListSome(dummy_mtcb, []types.Condition{
 		{Fn: types.COND_EQUAL, Args: types.Args{"Left": 1, "Right": 1}},
 		{Fn: types.COND_EQUAL, Args: types.Args{"Left": "foo", "Right": "bar"}},
 	}, types.Rule{}, "Test31")
@@ -66,12 +70,12 @@ func (s *EngineSuite) Test31() {
 }
 
 func (s *EngineSuite) Test40() {
-	actual := s.e.MatchesListEvery(types.MessageTuple{}, []types.Condition{}, types.Rule{}, "Test40")
+	actual := s.e.MatchesListEvery(dummy_mtcb, []types.Condition{}, types.Rule{}, "Test40")
 	s.False(actual)
 }
 
 func (s *EngineSuite) Test41() {
-	actual := s.e.MatchesListEvery(types.MessageTuple{}, []types.Condition{
+	actual := s.e.MatchesListEvery(dummy_mtcb, []types.Condition{
 		{Fn: types.COND_EQUAL, Args: types.Args{"Left": 1, "Right": 1}},
 		{Fn: types.COND_EQUAL, Args: types.Args{"Left": "foo", "Right": "foo"}},
 	}, types.Rule{}, "Test41")

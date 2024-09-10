@@ -80,8 +80,7 @@ func (s *MessageSuite) Test30() {
 }
 
 func (s *MessageSuite) Test40() {
-	m := Message{}
-	s.True(m.IsSpecial("$deviceId"))
+	s.True(IsSpecialDirective("$deviceId"))
 }
 
 func (s *MessageSuite) Test50() {

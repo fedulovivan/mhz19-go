@@ -2,23 +2,23 @@ package engine
 
 import (
 	"github.com/fedulovivan/mhz19-go/internal/types"
-	"github.com/fedulovivan/mhz19-go/pkg/utils"
 )
 
-var seq = utils.NewSeq(1000)
+// var seq = utils.NewSeq(1000)
 
 func GetStaticRules() []types.Rule {
 	return []types.Rule{
 
 		// system rule to save received message in db
 		{
-			Id:       seq.Next(),
+			Id:       1000,
 			Name:     "system rule to save (almost) all received messages in db",
 			Disabled: false,
 			Condition: types.Condition{
 				List: []types.Condition{
 					{
-						Fn: types.COND_NOT_EQUAL,
+						Fn:            types.COND_NOT_EQUAL,
+						OtherDeviceId: types.DeviceId("foo1"),
 						Args: types.Args{
 							"Left":  "$deviceClass",
 							"Right": types.DEVICE_CLASS_ZIGBEE_BRIDGE,
@@ -38,7 +38,7 @@ func GetStaticRules() []types.Rule {
 
 		// system rule to create devices upon receiving message from zigbee2mqtt bridge
 		{
-			Id:       seq.Next(),
+			Id:       2000,
 			Name:     "system rule to create devices upon receiving message from zigbee2mqtt bridge",
 			Disabled: false,
 			Condition: types.Condition{
@@ -52,7 +52,7 @@ func GetStaticRules() []types.Rule {
 
 		// system rule to create devices upon receiving dns-sd message with _ewelink._tcp service
 		{
-			Id:       seq.Next(),
+			Id:       3000,
 			Name:     "system rule to create devices upon receiving dns-sd message with _ewelink._tcp service",
 			Disabled: false,
 			Condition: types.Condition{
@@ -66,7 +66,7 @@ func GetStaticRules() []types.Rule {
 
 		// Comments: "test mapping 1",
 		{
-			Id:       seq.Next(),
+			Id:       4000,
 			Name:     "test mapping 1",
 			Disabled: true,
 			Condition: types.Condition{
@@ -84,7 +84,7 @@ func GetStaticRules() []types.Rule {
 
 		// Comments: "test mapping for composite condition function",
 		{
-			Id:       seq.Next(),
+			Id:       5000,
 			Name:     "test mapping for composite condition function",
 			Disabled: true,
 			Condition: types.Condition{
@@ -110,7 +110,7 @@ func GetStaticRules() []types.Rule {
 		// Comments: "balcony ceiling light on/off",
 		// 23:44:12.197 DBG [ENGN] New message ChannelType="mqtt (id=1)" ChannelMeta={MqttTopic:zigbee2mqtt/0x00158d0004244bda} DeviceClass="zigbee-device (id=1)" DeviceId=0x00158d0004244bda Payload="map[action:single_right battery:100 device_temperature:30 linkquality:69 power_outage_count:24 voltage:3025]"
 		{
-			Id:       seq.Next(),
+			Id:       6000,
 			Name:     "balcony ceiling light on/off",
 			Disabled: true,
 			Condition: types.Condition{
@@ -149,7 +149,7 @@ func GetStaticRules() []types.Rule {
 
 		// Comments: "echo bot",
 		{
-			Id:       seq.Next(),
+			Id:       7000,
 			Name:     "echo bot",
 			Disabled: true,
 			// Throttle: time.Second / 2,

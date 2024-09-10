@@ -58,6 +58,53 @@ func (s *ActionsSuite) Test30() {
 	s.Fail("expected to panic")
 }
 
+func (s *ActionsSuite) Test40() {
+	engine := mocks.NewEngineMock()
+	messages := []types.Message{{}}
+	mapping := types.Mapping{}
+	args := types.Args{}
+	err := YeelightDeviceSetPower(messages, args, mapping, engine)
+	s.EqualError(err, "no such argument IP")
+}
+
+func (s *ActionsSuite) Test41() {
+	engine := mocks.NewEngineMock()
+	messages := []types.Message{{}}
+	mapping := types.Mapping{}
+	args := types.Args{
+		"IP": "1.1.1.1",
+	}
+	err := YeelightDeviceSetPower(messages, args, mapping, engine)
+	s.EqualError(err, "no such argument Cmd")
+}
+
+func (s *ActionsSuite) Test42() {
+	engine := mocks.NewEngineMock()
+	messages := []types.Message{{}}
+	mapping := types.Mapping{}
+	args := types.Args{
+		"IP":  "1.1.1.1",
+		"Cmd": "foo",
+	}
+	err := YeelightDeviceSetPower(messages, args, mapping, engine)
+	s.EqualError(err, "unsupported command 'foo'")
+}
+
+func (s *ActionsSuite) Test43() {
+
+	s.T().Skip()
+
+	engine := mocks.NewEngineMock()
+	messages := []types.Message{{}}
+	mapping := types.Mapping{}
+	args := types.Args{
+		"IP":  "192.168.88.169",
+		"Cmd": "Off",
+	}
+	err := YeelightDeviceSetPower(messages, args, mapping, engine)
+	s.Nil(err)
+}
+
 func TestActions(t *testing.T) {
 	suite.Run(t, new(ActionsSuite))
 }
