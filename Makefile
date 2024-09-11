@@ -24,10 +24,14 @@ docker-down:
 .PHONY: docker-up
 docker-up:
 	docker run -d --env-file=$(CONF) -v ./database.bin:/database.bin --name=$(NAME) $(NAME)
+	
+.PHONY: docker-logs
+docker-logs:
+	docker logs --follow $(NAME)
 
 .PHONY: clean
 clean:
-	rm ./bin/$(NAME)
+	rm ./bin/backend
 
 .PHONY: api-load-read
 api-load-read:
@@ -43,7 +47,7 @@ api-load-once:
 
 .PHONY: run
 run:
-	go run ./cmd/$(NAME)
+	go run ./cmd/backend
 
 .PHONY: tidy
 tidy:

@@ -1,8 +1,15 @@
 package types
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 type CondFn byte
+
+var _ fmt.Stringer = (*CondFn)(nil)
+var _ json.Marshaler = (*CondFn)(nil)
+var _ json.Unmarshaler = (*CondFn)(nil)
 
 const (
 	COND_UNKNOWN       CondFn = 0
@@ -28,12 +35,35 @@ var CONDITION_NAMES = map[CondFn]string{
 	COND_СHANNEL:       "Channel",
 }
 
-func (s CondFn) String() string {
-	return fmt.Sprintf("%v (id=%d)", CONDITION_NAMES[s], s)
+func (fn CondFn) String() string {
+	return fmt.Sprintf("%v (id=%d)", CONDITION_NAMES[fn], fn)
 }
 
-func (s *CondFn) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf(`"%v"`, CONDITION_NAMES[*s])), nil
+func (fn *CondFn) UnmarshalJSON(b []byte) (err error) {
+	var v any
+	err = json.Unmarshal(b, &v)
+	if err != nil {
+		return err
+	}
+	for cond, name := range CONDITION_NAMES {
+		switch vtyped := v.(type) {
+		case string:
+			if name == vtyped {
+				*fn = cond
+				return
+			}
+		case float64:
+			if float64(cond) == vtyped {
+				*fn = CondFn(vtyped)
+				return
+			}
+		}
+	}
+	return fmt.Errorf("failed to unmarshal %v(%T) to CondFn", v, v)
+}
+
+func (fn CondFn) MarshalJSON() ([]byte, error) {
+	return []byte(fmt.Sprintf(`"%v"`, CONDITION_NAMES[fn])), nil
 }
 
 type CondImpl func(mt MessageTuple, args Args) (bool, error)

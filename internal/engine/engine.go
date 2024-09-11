@@ -137,10 +137,10 @@ func (e *engine) MatchesListEvery(mtcb types.MessageTupleFn, cc []types.Conditio
 func (e *engine) MatchesCondition(mtcb types.MessageTupleFn, c types.Condition, r types.Rule, tid string) bool {
 	withFn := c.Fn != 0
 	withList := len(c.List) > 0
-
 	if withFn && !withList {
-		mt := mtcb(c.OtherDeviceId)
-		return e.InvokeConditionFunc(mt, c.Fn, c.Args, r, tid)
+		return e.InvokeConditionFunc(
+			mtcb(c.OtherDeviceId), c.Fn, c.Args, r, tid,
+		)
 	} else if withList && !withFn {
 		if c.Or {
 			return e.MatchesListSome(mtcb, c.List, r, tid)

@@ -1,6 +1,8 @@
 
 ### Prio 0
-- big: fix "go-sqlite3 requires cgo to work" for docker build
+- (+) bug: MarshalJSON is not working for condition.fn and throttle - change from pointer to value receiver
+- (+) feat: add OtherDeviceId to repository, schema and service
+- (+) big: fix "go-sqlite3 requires cgo to work" for docker build
 - feat: api: log errors captured by router error handler, also change default handler to render error as a json
 
 ### Prio 1

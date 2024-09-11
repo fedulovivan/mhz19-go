@@ -39,13 +39,13 @@ type DbRuleCondition struct {
 	FunctionType      sql.NullInt32
 	LogicOr           sql.NullInt32
 	ParentConditionId sql.NullInt32
+	OtherDeviceId     sql.NullString
 }
 
 type DbRuleAction struct {
 	Id           int32
 	RuleId       int32
 	FunctionType sql.NullInt32
-	// DeviceId     sql.NullString
 }
 
 type DbRuleConditionOrActionArgument struct {
@@ -89,8 +89,8 @@ func conditionInsertTx(
 	return db.Insert(
 		tx,
 		ctx,
-		`INSERT INTO rule_conditions(rule_id, function_type, logic_or, parent_condition_id) VALUES(?,?,?,?)`,
-		cond.RuleId, cond.FunctionType, cond.LogicOr, cond.ParentConditionId,
+		`INSERT INTO rule_conditions(rule_id, function_type, logic_or, parent_condition_id, other_device_id) VALUES(?,?,?,?,?)`,
+		cond.RuleId, cond.FunctionType, cond.LogicOr, cond.ParentConditionId, cond.OtherDeviceId,
 	)
 }
 
@@ -162,11 +162,12 @@ func conditionsSelectTx(ctx context.Context, tx *sql.Tx, ruleId sql.NullInt32) (
 			rule_id,
 			function_type,
 			logic_or,
-			parent_condition_id
+			parent_condition_id,
+			other_device_id
 		FROM
 			rule_conditions`,
 		func(rows *sql.Rows, m *DbRuleCondition) error {
-			return rows.Scan(&m.Id, &m.RuleId, &m.FunctionType, &m.LogicOr, &m.ParentConditionId)
+			return rows.Scan(&m.Id, &m.RuleId, &m.FunctionType, &m.LogicOr, &m.ParentConditionId, &m.OtherDeviceId)
 		},
 		db.Where{
 			"rule_id": ruleId,

@@ -1,8 +1,14 @@
 package types
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 type ActionFn byte
+
+var _ fmt.Stringer = (*ActionFn)(nil)
+var _ json.Marshaler = (*ActionFn)(nil)
 
 const (
 	ACTION_POST_SONOFF_SWITCH_MESSAGE ActionFn = 1
@@ -26,12 +32,35 @@ var ACTION_NAMES = map[ActionFn]string{
 	ACTION_UPSERT_SONOFF_DEVICE:       "UpsertSonoffDevice",
 }
 
-func (s ActionFn) String() string {
-	return fmt.Sprintf("%v (id=%d)", ACTION_NAMES[s], s)
+func (fn ActionFn) String() string {
+	return fmt.Sprintf("%v (id=%d)", ACTION_NAMES[fn], fn)
 }
 
-func (s *ActionFn) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf(`"%v"`, ACTION_NAMES[*s])), nil
+func (fn ActionFn) MarshalJSON() ([]byte, error) {
+	return []byte(fmt.Sprintf(`"%v"`, ACTION_NAMES[fn])), nil
+}
+
+func (fn *ActionFn) UnmarshalJSON(b []byte) (err error) {
+	var v any
+	err = json.Unmarshal(b, &v)
+	if err != nil {
+		return err
+	}
+	for action, name := range ACTION_NAMES {
+		switch vtyped := v.(type) {
+		case string:
+			if name == vtyped {
+				*fn = action
+				return
+			}
+		case float64:
+			if float64(action) == vtyped {
+				*fn = ActionFn(vtyped)
+				return
+			}
+		}
+	}
+	return fmt.Errorf("failed to unmarshal %v(%T) to ActionFn", v, v)
 }
 
 type ActionImpl func(messages []Message, args Args, mapping Mapping, engine EngineAsSupplier) error

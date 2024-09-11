@@ -339,6 +339,9 @@ func ToDbConditions(
 			RuleId:  ruleId,
 			LogicOr: db.NewNullInt32FromBool(condition.Or),
 		}
+		if len(condition.OtherDeviceId) > 0 {
+			cond.OtherDeviceId = db.NewNullString(string(condition.OtherDeviceId))
+		}
 		if parent != nil {
 			cond.ParentConditionId = db.NewNullInt32(parent.Id)
 		}

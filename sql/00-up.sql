@@ -45,9 +45,11 @@ CREATE TABLE rule_conditions (
 	function_type INTEGER,
 	logic_or INTEGER,
 	parent_condition_id INTEGER,
+    other_device_id TEXT,
 	CONSTRAINT rule_conditions_fk_rules FOREIGN KEY (rule_id) REFERENCES rules(id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT rule_conditions_fk_function FOREIGN KEY (function_type) REFERENCES condition_functions(id) ON DELETE CASCADE ON UPDATE CASCADE,
-	CONSTRAINT rule_conditions_fk_parent FOREIGN KEY (parent_condition_id) REFERENCES rule_conditions(id)  ON DELETE CASCADE ON UPDATE CASCADE
+	CONSTRAINT rule_conditions_fk_parent FOREIGN KEY (parent_condition_id) REFERENCES rule_conditions(id)  ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT rule_conditions_fk_devices FOREIGN KEY (other_device_id) REFERENCES devices(native_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE rule_actions (
@@ -132,5 +134,7 @@ INSERT INTO devices VALUES(1, '192.168.88.1', 2, 'MIKROTIK_ROUTER', NULL, NULL, 
 INSERT INTO devices VALUES(2, '192.168.88.44', 2, 'IPHONE_15_PRO_IP', NULL, NULL, NULL);
 INSERT INTO devices VALUES(3, '192.168.0.11', 2, 'IPHONE_15_PRO_AP_IP', NULL, NULL, NULL);
 INSERT INTO devices VALUES(4, '192.168.88.62', 2, 'IPHONE_14_IP', NULL, NULL, NULL);
+
+-- INSERT INTO devices VALUES(5, '0x00158d0004244bda', 1, 'WALL_SWITCH_SPARE', NULL, NULL, NULL);
 
 COMMIT;

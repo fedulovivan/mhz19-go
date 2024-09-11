@@ -17,22 +17,21 @@ import (
 var Config ConfigStorage
 
 type ConfigStorage struct {
-	TelegramDebug   bool       `env:"TELEGRAM_DEBUG,default=false"`
-	MqttDebug       bool       `env:"MQTT_DEBUG,default=false"`
-	DbDebug         bool       `env:"DB_DEBUG,default=false"`
-	RestApiPort     int        `env:"REST_API_PORT,default=8888"`
-	SqliteFilename  string     `env:"SQLITE_FILENAME,default=database.bin"`
-	TelegramToken   string     `env:"TELEGRAM_TOKEN"`
-	TelegramChatId  int64      `env:"TELEGRAM_CHATID"`
-	MqttHost        string     `env:"MQTT_HOST,default=mosquitto"`
-	MqttPort        int        `env:"MQTT_PORT,default=1883"`
-	MqttUsername    string     `env:"MQTT_USERNAME"`
-	MqttPassword    string     `env:"MQTT_PASSWORD"`
-	MqttClientId    string     `env:"MQTT_CLIENT_ID,default=mhz19-go"`
-	LogLevel        slog.Level `env:"LOG_LEVEL,default=debug"`
-	IsDev           bool       `env:"DEV,default=false"`
-	Tz              string     `env:"TZ"`
-	MdnsDisableIPv6 bool       `env:"MDNS_DISABLE_IP_V6,default=false"`
+	TelegramDebug  bool       `env:"TELEGRAM_DEBUG,default=false"`
+	MqttDebug      bool       `env:"MQTT_DEBUG,default=false"`
+	DbDebug        bool       `env:"DB_DEBUG,default=false"`
+	RestApiPort    int        `env:"REST_API_PORT,default=8888"`
+	SqliteFilename string     `env:"SQLITE_FILENAME,default=database.bin"`
+	TelegramToken  string     `env:"TELEGRAM_TOKEN"`
+	TelegramChatId int64      `env:"TELEGRAM_CHATID"`
+	MqttHost       string     `env:"MQTT_HOST,default=mosquitto"`
+	MqttPort       int        `env:"MQTT_PORT,default=1883"`
+	MqttUsername   string     `env:"MQTT_USERNAME"`
+	MqttPassword   string     `env:"MQTT_PASSWORD"`
+	MqttClientId   string     `env:"MQTT_CLIENT_ID,default=mhz19-go"`
+	LogLevel       slog.Level `env:"LOG_LEVEL,default=debug"`
+	IsDev          bool       `env:"DEV,default=false"`
+	Tz             string     `env:"TZ"`
 }
 
 func InitConfig() {

@@ -1,8 +1,16 @@
 package types
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 type DeviceClass byte
+
+var _ fmt.Stringer = (*DeviceClass)(nil)
+var _ json.Marshaler = (*DeviceClass)(nil)
+
+// var _ json.Unmarshaler = (*DeviceClass)(nil)
 
 const (
 	DEVICE_CLASS_UNKNOWN         DeviceClass = 0
@@ -24,10 +32,10 @@ var DEVICE_CLASS_NAMES = map[DeviceClass]string{
 	DEVICE_CLASS_SONOFF_DIY_PLUG: "sonoff-diy-plug",
 }
 
-func (s DeviceClass) String() string {
-	return fmt.Sprintf("%v (id=%d)", DEVICE_CLASS_NAMES[s], s)
+func (dc DeviceClass) String() string {
+	return fmt.Sprintf("%v (id=%d)", DEVICE_CLASS_NAMES[dc], dc)
 }
 
-// func (s DeviceClass) MarshalJSON() ([]byte, error) {
-// 	return []byte(fmt.Sprintf(`"DeviceClass(%d)"`, s)), nil
-// }
+func (dc DeviceClass) MarshalJSON() ([]byte, error) {
+	return []byte(fmt.Sprintf(`"DeviceClass(%v)"`, DEVICE_CLASS_NAMES[dc])), nil
+}
