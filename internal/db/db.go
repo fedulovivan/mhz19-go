@@ -47,6 +47,7 @@ func DbSingleton() *sql.DB {
 		Panic(err)
 	}
 
+	// aid for "database is locked"
 	// https://github.com/mattn/go-sqlite3/issues/274#issuecomment-191597862
 	instance.SetMaxOpenConns(1)
 

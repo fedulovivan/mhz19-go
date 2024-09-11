@@ -21,6 +21,7 @@ const (
 	COND_ZIGBEE_DEVICE CondFn = 6
 	COND_DEVICE_CLASS  CondFn = 7
 	COND_СHANNEL       CondFn = 8
+	COND_NOT_СHANNEL   CondFn = 9
 )
 
 var CONDITION_NAMES = map[CondFn]string{
@@ -33,6 +34,7 @@ var CONDITION_NAMES = map[CondFn]string{
 	COND_ZIGBEE_DEVICE: "ZigbeeDevice",
 	COND_DEVICE_CLASS:  "DeviceClass",
 	COND_СHANNEL:       "Channel",
+	COND_NOT_СHANNEL:   "NotChannel",
 }
 
 func (fn CondFn) String() string {

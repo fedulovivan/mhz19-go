@@ -172,8 +172,8 @@ func (s *ReaderSuite) Test121() {
 		DeviceId: "lorem111",
 	}}}
 	r := NewReader(&m, args, nil, &tpayload, engine)
-	r.Get("Foo5")
-	s.EqualError(r.Error(), `template: Foo5:1:42: executing "Foo5" at <deviceName .DeviceId>: error calling deviceName: no such device`)
+	s.Equal("lorem111 - lorem111", r.Get("Foo5"))
+	// s.EqualError(r.Error(), `template: Foo5:1:42: executing "Foo5" at <deviceName .DeviceId>: error calling deviceName: no such device`)
 }
 
 func (s *ReaderSuite) Test122() {

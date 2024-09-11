@@ -6,6 +6,8 @@ import (
 	"log/slog"
 	"net/http"
 
+	"runtime/debug"
+
 	"github.com/fedulovivan/mhz19-go/internal/app"
 	"github.com/fedulovivan/mhz19-go/internal/db"
 	"github.com/fedulovivan/mhz19-go/internal/entities/devices"
@@ -23,6 +25,34 @@ var logTag = logger.MakeTag(logger.REST)
 
 var server http.Server
 
+// borrowed with simplifications from qiangxue/go-rest-api
+// see original at https://github.com/qiangxue/go-rest-api/blob/master/internal/errors/middleware.go
+func ErrorHandler(c *routing.Context) (err error) {
+	defer func() {
+		if rerr := recover(); rerr != nil {
+			var ok bool
+			if err, ok = rerr.(error); !ok {
+				err = fmt.Errorf("%v", rerr)
+			}
+			slog.Error(logTag("recovered from panic"))
+			fmt.Println(string(debug.Stack()))
+		}
+		if err != nil {
+			slog.Error(logTag(err.Error()))
+			res := map[string]any{
+				"is_error": true,
+				"error":    err.Error(),
+			}
+			if err = c.Write(res); err != nil {
+				slog.Error(logTag("failed writing error response"), "err", err)
+			}
+			c.Abort()
+			err = nil
+		}
+	}()
+	return c.Next()
+}
+
 func Init() {
 
 	router := routing.New()
@@ -30,6 +60,7 @@ func Init() {
 	router.Use(
 		slash.Remover(http.StatusMovedPermanently),
 		content.TypeNegotiator(content.JSON),
+		ErrorHandler,
 	)
 
 	// rules

@@ -13,10 +13,13 @@ type DevicesService interface {
 	UpsertAll(devices []Device) error
 }
 
-type LdmKey string
+type LdmKey struct {
+	DeviceClass DeviceClass
+	DeviceId    DeviceId
+}
 
 type LdmService interface {
-	MakeKey(deviceClass DeviceClass, deviceId DeviceId) LdmKey
+	NewKey(deviceClass DeviceClass, deviceId DeviceId) LdmKey
 	Get(key LdmKey) Message
 	Has(key LdmKey) bool
 	Set(key LdmKey, m Message)

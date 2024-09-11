@@ -9,7 +9,36 @@ import (
 func GetStaticRules() []types.Rule {
 	return []types.Rule{
 
-		// system rule to save received message in db
+		{
+			Id:       500,
+			Name:     `system rule for "buried devices" aka "have not seen for a while" feature`,
+			Disabled: false,
+			Condition: types.Condition{
+				List: []types.Condition{
+					{
+						Fn:   types.COND_СHANNEL,
+						Args: types.Value(types.CHANNEL_SYSTEM),
+					},
+					{
+						Fn: types.COND_IN_LIST,
+						Args: types.Args{
+							"Value": "$deviceId",
+							"List":  []any{types.BuriedDeviceId},
+						},
+					},
+				},
+			},
+			Actions: []types.Action{
+				{
+					Fn: types.ACTION_TELEGRAM_BOT_MESSAGE,
+					Args: types.Args{
+						"Text": "Have not seen «{{ deviceName .Message.Payload.BuriedDeviceId }}» for a while...",
+					},
+				},
+			},
+		},
+
+		// system rule to save (almost) all received messages in db
 		{
 			Id:       1000,
 			Name:     "system rule to save (almost) all received messages in db",
@@ -17,19 +46,19 @@ func GetStaticRules() []types.Rule {
 			Condition: types.Condition{
 				List: []types.Condition{
 					{
-						Fn:            types.COND_NOT_EQUAL,
-						OtherDeviceId: types.DeviceId("foo1"),
+						Fn: types.COND_NOT_EQUAL,
 						Args: types.Args{
 							"Left":  "$deviceClass",
 							"Right": types.DEVICE_CLASS_ZIGBEE_BRIDGE,
 						},
 					},
 					{
-						Fn: types.COND_NOT_EQUAL,
-						Args: types.Args{
-							"Left":  "$channelType",
-							"Right": types.CHANNEL_DNS_SD,
-						},
+						Fn:   types.COND_NOT_СHANNEL,
+						Args: types.Value(types.CHANNEL_DNS_SD),
+					},
+					{
+						Fn:   types.COND_NOT_СHANNEL,
+						Args: types.Value(types.CHANNEL_SYSTEM),
 					},
 				},
 			},
@@ -42,10 +71,8 @@ func GetStaticRules() []types.Rule {
 			Name:     "system rule to create devices upon receiving message from zigbee2mqtt bridge",
 			Disabled: false,
 			Condition: types.Condition{
-				Fn: types.COND_DEVICE_CLASS,
-				Args: types.Args{
-					"Value": types.DEVICE_CLASS_ZIGBEE_BRIDGE,
-				},
+				Fn:   types.COND_DEVICE_CLASS,
+				Args: types.Value(types.DEVICE_CLASS_ZIGBEE_BRIDGE),
 			},
 			Actions: []types.Action{{Fn: types.ACTION_UPSERT_ZIGBEE_DEVICES}},
 		},
@@ -56,10 +83,8 @@ func GetStaticRules() []types.Rule {
 			Name:     "system rule to create devices upon receiving dns-sd message with _ewelink._tcp service",
 			Disabled: false,
 			Condition: types.Condition{
-				Fn: types.COND_СHANNEL,
-				Args: types.Args{
-					"Value": types.CHANNEL_DNS_SD,
-				},
+				Fn:   types.COND_СHANNEL,
+				Args: types.Value(types.CHANNEL_DNS_SD),
 			},
 			Actions: []types.Action{{Fn: types.ACTION_UPSERT_SONOFF_DEVICE}},
 		},

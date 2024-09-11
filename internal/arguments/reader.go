@@ -112,12 +112,15 @@ func (r *reader) ExecTemplate(in string, field string) (string, error) {
 				if typedDeviceId, ok := deviceId.(types.DeviceId); ok {
 					device, err := r.engine.DevicesService().GetOne(typedDeviceId)
 					if err != nil {
-						return string(typedDeviceId), err
+						return string(typedDeviceId), nil
 					}
-					if device.Name == "" {
-						return fmt.Sprintf("<unknonwn device originated from %v> %v", device.Origin, deviceId), nil
+					if len(device.Name) > 0 {
+						return device.Name, nil
 					}
-					return device.Name, nil
+					if len(device.Comments) > 0 {
+						return device.Comments, nil
+					}
+					return fmt.Sprintf("<unknonwn device originated from %v> %v", device.Origin, deviceId), nil
 				} else {
 					return fmt.Sprintf("%v", deviceId), fmt.Errorf(
 						"deviceName accepts only types.DeviceId as an argument",

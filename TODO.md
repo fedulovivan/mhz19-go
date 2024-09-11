@@ -1,15 +1,16 @@
 
 ### Prio 0
-- (+) bug: MarshalJSON is not working for condition.fn and throttle - change from pointer to value receiver
-- (+) feat: add OtherDeviceId to repository, schema and service
-- (+) big: fix "go-sqlite3 requires cgo to work" for docker build
-- feat: api: log errors captured by router error handler, also change default handler to render error as a json
+- feat: add Condition.FnInverted bool flag instead of NotEqual, NotChannel
+- feat: add devices.buried_ignored column or devices.buried_timeout (use 0 to blacklist device)
+- feat: new action play alert
 
 ### Prio 1
-- arch: think where we can construct types.TemplatePayload automatically
+- arch: think how to distinquish "end device" message from all "others"
+- arch: think how we can construct/init "TemplatePayload" automatically, now we need to build it manually in action implementation
 - feat: create api to update/delete rules
 - feat: create api to add/update/delete devices
-- feat: create api to read device classes (or unified api for all dicts?)
+- feat: create api to read one device
+- feat: create api to read device classes (or unified api for any simple dict table?)
 - bug: "http: superfluous response.WriteHeader call from github.com/go-ozzo/ozzo-routing/v2.(*Router).handleError (router.go:131)" - appears after termination of stucked apache bench
 - bug: "apr_socket_recv: Operation timed out (60)" - https://stackoverflow.com/questions/30352725/why-is-my-hello-world-go-server-getting-crushed-by-apachebench
 - bug: "🧨 api:getAll took 3.451973917s" when reading 1k rules 1k times - try same scenario with postgres
@@ -28,17 +29,24 @@
 - arch: get rid of any in Send(...any) - no ideas so far
 - arch: mapping rules could be pre-defined (system) and loaded from db (user-level) - think we need to store everything in db, even system rules
 - try: find out why cli command "make test" and "vscode" report different coverage statistics: 86.9% vs 100%. vscode syntax - `Running tool: /opt/homebrew/bin/go test -timeout 30s -coverprofile=/var/folders/5v/0wjs9g1948ddpdqkgf1h31q80000gn/T/vscode-go7lC7ip/go-code-cover github.com/fedulovivan/mhz19-go/internal/engine`
-- try: validation https://github.com/asaskevich/govalidator
-- try: postgres instead of sqlite3
+- try: validation https://github.com/asaskevich/govalidator OR https://github.com/go-ozzo/ozzo-validation
 - try: separate di library https://pkg.go.dev/go.uber.org/fx
 - try: opentelemetry https://opentelemetry.io/docs/languages/go/getting-started/   
+- try: openapi or swagger https://en.wikipedia.org/wiki/OpenAPI_Specification or https://swagger.io/
+- try: postgres instead of sqlite3
 - try: prometheus
 - try: grpc
 - try: gorm
-- try: openapi or swagger https://en.wikipedia.org/wiki/OpenAPI_Specification or https://swagger.io/
 
 ### Completed
 
+- (+) arch: messages with ewelink device mdns announcement should not have device id in DeviceId field, since semantically this is not a message from device itself (same as "special" zigbee bridge message with devices list)
+- (+) arch: rename system provider to "hnsfaw" or "notseen" or "buried"
+- (+) feat: implement "buried devices" aka "have not seen for a while" notifications
+- (+) feat: api: log errors captured by router error handler, also change default handler to render error as a json
+- (+) bug: MarshalJSON is not working for condition.fn and throttle - change from pointer to value receiver
+- (+) feat: add OtherDeviceId to repository, schema and service
+- (+) big: fix "go-sqlite3 requires cgo to work" for docker build
 - (+) feat: add Dockerfile
 - (+) feat: finish implementation for "otherDeviceId"
 - (+) feat: finish implementation of all actions

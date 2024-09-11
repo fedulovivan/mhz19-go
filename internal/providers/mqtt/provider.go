@@ -108,7 +108,7 @@ func (p *provider) Init() {
 	}
 
 	var connectHandler = func(client MqttLib.Client) {
-		slog.Info(logTag("Connected"), "broker", app.GetMqttBroker())
+		slog.Info(logTag("Connected"), "broker", app.GetMqttBrokerUrl())
 		for t := range handlers {
 			subscribe(client, t)
 		}
@@ -116,7 +116,7 @@ func (p *provider) Init() {
 	}
 
 	var reconnectHandler = func(client MqttLib.Client, opts *MqttLib.ClientOptions) {
-		slog.Warn(logTag("Reconnecting..."), "broker", app.GetMqttBroker())
+		slog.Warn(logTag("Reconnecting..."), "broker", app.GetMqttBrokerUrl())
 	}
 
 	var connectLostHandler = func(client MqttLib.Client, err error) {
@@ -125,7 +125,7 @@ func (p *provider) Init() {
 
 	// build opts
 	opts := MqttLib.NewClientOptions()
-	opts.AddBroker(app.GetMqttBroker())
+	opts.AddBroker(app.GetMqttBrokerUrl())
 	opts.SetClientID(app.Config.MqttClientId)
 	opts.SetUsername(app.Config.MqttUsername)
 	opts.SetPassword(app.Config.MqttPassword)

@@ -103,6 +103,7 @@ INSERT INTO channel_types VALUES(0,'<unknown>');
 INSERT INTO channel_types VALUES(1,'mqtt');
 INSERT INTO channel_types VALUES(2,'telegram');
 INSERT INTO channel_types VALUES(3,'dns-sd');
+INSERT INTO channel_types VALUES(4,'system');
 
 INSERT INTO device_classes VALUES(0,'<unknown>');
 INSERT INTO device_classes VALUES(1,'zigbee-device');
@@ -111,6 +112,8 @@ INSERT INTO device_classes VALUES(3,'valve-manipulator');
 INSERT INTO device_classes VALUES(4,'zigbee-bridge');
 INSERT INTO device_classes VALUES(5,'telegram-bot');
 INSERT INTO device_classes VALUES(6,'sonoff-diy-plug');
+INSERT INTO device_classes VALUES(7,'system');
+INSERT INTO device_classes VALUES(9,'sonoff-announce');
 
 INSERT INTO action_functions VALUES(1,'PostSonoffSwitchMessage');
 INSERT INTO action_functions VALUES(2,'TelegramBotMessage');
@@ -129,12 +132,11 @@ INSERT INTO condition_functions VALUES(5,'NotNil');
 INSERT INTO condition_functions VALUES(6,'ZigbeeDevice');
 INSERT INTO condition_functions VALUES(7,'DeviceClass');
 INSERT INTO condition_functions VALUES(8,'Channel');
+INSERT INTO condition_functions VALUES(9,'NotChannel');
 
 INSERT INTO devices VALUES(1, '192.168.88.1', 2, 'MIKROTIK_ROUTER', NULL, NULL, NULL);
 INSERT INTO devices VALUES(2, '192.168.88.44', 2, 'IPHONE_15_PRO_IP', NULL, NULL, NULL);
 INSERT INTO devices VALUES(3, '192.168.0.11', 2, 'IPHONE_15_PRO_AP_IP', NULL, NULL, NULL);
 INSERT INTO devices VALUES(4, '192.168.88.62', 2, 'IPHONE_14_IP', NULL, NULL, NULL);
-
--- INSERT INTO devices VALUES(5, '0x00158d0004244bda', 1, 'WALL_SWITCH_SPARE', NULL, NULL, NULL);
 
 COMMIT;

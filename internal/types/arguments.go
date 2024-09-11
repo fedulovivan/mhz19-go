@@ -8,6 +8,12 @@ import (
 
 type Args map[string]any
 
+func Value(value any) Args {
+	return Args{
+		"Value": value,
+	}
+}
+
 func parseDeviceIdOrClass(in string) any {
 	if strings.HasPrefix(in, "DeviceId(") {
 		deviceId := in[9 : len(in)-1]
@@ -47,5 +53,6 @@ func (a *Args) UnmarshalJSON(data []byte) (err error) {
 }
 
 type TemplatePayload struct {
+	Message  Message
 	Messages []Message
 }

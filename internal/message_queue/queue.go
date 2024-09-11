@@ -24,7 +24,7 @@ type queue struct {
 	mm       []types.Message
 	throttle time.Duration
 	flushCb  FlushFn
-	t        *time.Timer
+	timer    *time.Timer
 }
 
 func (q *queue) onFlushed() {
@@ -32,7 +32,7 @@ func (q *queue) onFlushed() {
 	defer q.mu.Unlock()
 	q.flushCb(q.mm)
 	q.cnt++
-	q.t = nil
+	q.timer = nil
 	q.mm = make([]types.Message, 0)
 }
 
@@ -46,10 +46,10 @@ func (q *queue) PushMessage(m types.Message) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 	q.mm = append(q.mm, m)
-	if q.t == nil {
-		q.t = time.AfterFunc(q.throttle, q.onFlushed)
+	if q.timer == nil {
+		q.timer = time.AfterFunc(q.throttle, q.onFlushed)
 	} else {
-		q.t.Reset(q.throttle)
+		q.timer.Reset(q.throttle)
 	}
 }
 

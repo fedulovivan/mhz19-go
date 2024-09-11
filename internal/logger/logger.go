@@ -42,6 +42,7 @@ const (
 	DEVICES  TagName = "[devices] "
 	DNSSD    TagName = "[dns-sd]  "
 	ACTIONS  TagName = "[actions] "
+	SYSTEM   TagName = "[system]  "
 )
 
 func MakeTag(tag TagName) types.LogTagFn {

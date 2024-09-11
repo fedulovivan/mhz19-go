@@ -55,10 +55,6 @@ func (e *engine) AppendRules(rules ...types.Rule) {
 	e.rules = append(e.rules, rules...)
 }
 
-//	func (e *engine) LogTag(in string) string {
-//		return e.logTag(in)
-//	}
-
 func (e *engine) MessagesService() types.MessagesService {
 	return e.messageService
 }
@@ -164,7 +160,10 @@ func (e *engine) ExecuteActions(mm []types.Message, r types.Rule, tid string) {
 func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 	tid := fmt.Sprintf("Tid #%v ", tidSeq.Next())
 	p := m.Payload
-	if m.DeviceClass == types.DEVICE_CLASS_ZIGBEE_BRIDGE {
+	isSystem := m.DeviceClass == types.DEVICE_CLASS_SYSTEM
+	isBridge := m.DeviceClass == types.DEVICE_CLASS_ZIGBEE_BRIDGE
+	sonoffAnnounce := m.DeviceClass == types.DEVICE_CLASS_SONOFF_ANNOUNCE
+	if isBridge {
 		p = "<too big to render>"
 	}
 	slog.Debug(
@@ -175,7 +174,7 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 		"DeviceId", m.DeviceId,
 		"Payload", p,
 	)
-	ldmKey := e.ldmService.MakeKey(m.DeviceClass, m.DeviceId)
+	ldmKey := e.ldmService.NewKey(m.DeviceClass, m.DeviceId)
 	slog.Debug(e.logTag(tid + fmt.Sprintf("Matching against %v rules", len(rules))))
 	matches := 0
 	for _, r := range rules {
@@ -188,7 +187,7 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 			takeOtherDeviceMessage := len(otherDeviceId) > 0
 			if takeOtherDeviceMessage {
 				slog.Warn(e.logTag(tid + fmt.Sprintf("Rule #%v requesting message for otherDeviceId=%v", r.Id, otherDeviceId)))
-				otherLdmKey := e.ldmService.MakeKey(m.DeviceClass, otherDeviceId)
+				otherLdmKey := e.ldmService.NewKey(m.DeviceClass, otherDeviceId)
 				if e.ldmService.Has(otherLdmKey) {
 					tmp := e.ldmService.Get(otherLdmKey)
 					tuple.Curr = &tmp
@@ -225,5 +224,7 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 	} else {
 		slog.Debug(e.logTag(tid + fmt.Sprintf("%v out of %v rules were matched", matches, len(rules))))
 	}
-	e.ldmService.Set(ldmKey, m)
+	if !isBridge && !sonoffAnnounce && !isSystem {
+		e.ldmService.Set(ldmKey, m)
+	}
 }

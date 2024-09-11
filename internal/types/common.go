@@ -1,3 +1,3 @@
 package types
 
-// type Json map[string]any
+const BuriedDeviceId DeviceId = DeviceId("buried-device")

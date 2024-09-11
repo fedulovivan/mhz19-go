@@ -10,7 +10,6 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/engine"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/types"
-	"github.com/fedulovivan/mhz19-go/pkg/utils"
 )
 
 type provider struct {
@@ -47,9 +46,9 @@ func (p *provider) Init() {
 			"Host": entry.Host,
 		}
 		outMsg := types.Message{
-			DeviceId:    types.DeviceId(entry.Text["id"]),
+			// DeviceId:    types.DeviceId(entry.Text["id"]),
 			ChannelType: p.Channel(),
-			DeviceClass: types.DEVICE_CLASS_SONOFF_DIY_PLUG,
+			DeviceClass: types.DEVICE_CLASS_SONOFF_ANNOUNCE,
 			Timestamp:   time.Now(),
 			Payload:     payload,
 		}
@@ -58,7 +57,7 @@ func (p *provider) Init() {
 
 	rmvFn := func(e dnssd.BrowseEntry) {
 		// TODO?
-		utils.Dump("Removed", e)
+		// utils.Dump("Removed", e)
 	}
 
 	go func() {

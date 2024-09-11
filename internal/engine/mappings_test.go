@@ -31,7 +31,7 @@ func (s *MappingsSuite) TeardownSuite() {
 type dummyldmservice struct {
 }
 
-func (s *dummyldmservice) MakeKey(deviceClass types.DeviceClass, deviceId types.DeviceId) (res types.LdmKey) {
+func (s *dummyldmservice) NewKey(deviceClass types.DeviceClass, deviceId types.DeviceId) (res types.LdmKey) {
 	return
 }
 func (s *dummyldmservice) Get(key types.LdmKey) (out types.Message) {

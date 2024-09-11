@@ -8,8 +8,8 @@ type ldmService struct {
 	repository LdmRepository
 }
 
-func (s ldmService) MakeKey(deviceClass types.DeviceClass, deviceId types.DeviceId) types.LdmKey {
-	return s.repository.MakeKey(deviceClass, deviceId)
+func (s ldmService) NewKey(deviceClass types.DeviceClass, deviceId types.DeviceId) types.LdmKey {
+	return s.repository.NewKey(deviceClass, deviceId)
 }
 
 func (s ldmService) Get(key types.LdmKey) types.Message {

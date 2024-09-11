@@ -9,6 +9,7 @@ import (
 
 var TelegramBotMessage types.ActionImpl = func(mm []types.Message, args types.Args, mapping types.Mapping, e types.EngineAsSupplier) (err error) {
 	tpayload := types.TemplatePayload{
+		Message:  mm[0],
 		Messages: mm,
 	}
 	areader := arguments.NewReader(&mm[0], args, mapping, &tpayload, e)

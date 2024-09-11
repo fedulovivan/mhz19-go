@@ -126,8 +126,7 @@ var testDataTable = []TableRow{
 			},
 		},
 		expectedLen:  1,
-		expectedJson: `[{"id":1,"name":"case 2","throttle":"0s","condition":{"fn":"Changed","args":{"Fifth":"0x00158d0004244bda","Fourth":1,"Left":"foo","Right":"bar","Third":"baz"}},"actions":[{"fn":"PostSonoffSwitchMessage","args":{"ListIds":["10011cec96","78345aaa67"],"Value":"$message.action"},"mapping":{"Value":{"lorem-3":"dolor-4","sit-5":"amet-6"}}}]}]`,
-		// expectedJson: `[{"id":1,"comments":"case 2","condition":{"fn":1,"args":{"Fifth":"DeviceId(0x00158d0004244bda)","Fourth":"DeviceClass(1)","Left":"foo","Right":"bar","Third":"baz"}},"actions":[{"fn":1,"args":{"ListIds":["DeviceId(10011cec96)","DeviceId(78345aaa67)"],"Value":"$message.action"},"mapping":{"Value":{"lorem-3":"dolor-4","sit-5":"amet-6"}},"deviceId":"DeviceId(0x00158d0004244bda)"}]}]`,
+		expectedJson: `[{"id":1,"name":"case 2","condition":{"fn":"Changed","args":{"Fifth":"0x00158d0004244bda","Fourth":"zigbee-device","Left":"foo","Right":"bar","Third":"baz"}},"actions":[{"fn":"PostSonoffSwitchMessage","args":{"ListIds":["10011cec96","78345aaa67"],"Value":"$message.action"},"mapping":{"Value":{"lorem-3":"dolor-4","sit-5":"amet-6"}}}],"throttle":null}]`,
 	},
 	// case 02
 	{
@@ -175,7 +174,7 @@ var testDataTable = []TableRow{
 				ParentConditionId: db.NewNullInt32(25),
 			},
 		},
-		expectedJson: `[{"id":2,"name":"case 3","throttle":"0s","condition":{"list":[{"fn":"Changed"},{"fn":"Equal"},{"list":[{"fn":"InList"},{"fn":"NotEqual"}],"or":true}]}}]`,
+		expectedJson: `[{"id":2,"name":"case 3","condition":{"list":[{"fn":"Changed"},{"fn":"Equal"},{"list":[{"fn":"InList"},{"fn":"NotEqual"}],"or":true}]},"throttle":null}]`,
 	},
 }
 
@@ -217,7 +216,7 @@ func (s *ServiceSuite) Test12() {
 	)
 	data, _ := json.Marshal(result)
 	s.JSONEq(string(data), row.expectedJson)
-	fmt.Println(string(data))
+	// fmt.Println(string(data))
 }
 
 func (s *ServiceSuite) Test20() {
@@ -285,9 +284,8 @@ func (s *ServiceSuite) Test53() {
 			}},
 		},
 	}, utils.NewSeq(00), nil)
-	expected := "[{1 1 {0 false} {1 true} {0 false}} {2 1 {2 true} {0 false} {1 true}} {3 1 {0 false} {0 true} {1 true}} {4 1 {4 true} {0 false} {3 true}} {5 1 {3 true} {0 false} {3 true}}]"
+	expected := "[{1 1 {0 false} {1 true} {0 false} { false}} {2 1 {2 true} {0 false} {1 true} { false}} {3 1 {0 false} {0 true} {1 true} { false}} {4 1 {4 true} {0 false} {3 true} { false}} {5 1 {3 true} {0 false} {3 true} { false}}]"
 	s.Equal(expected, fmt.Sprintf("%v", actual))
-	// dump(actual)
 }
 
 func (s *ServiceSuite) Test60() {
@@ -329,8 +327,7 @@ func (s *ServiceSuite) Test63() {
 		},
 		Actions: []types.Action{
 			{
-				Fn: types.ACTION_ZIGBEE2_MQTT_SET_STATE,
-				// DeviceId: "0x00158d0004244bda",
+				Fn:   types.ACTION_ZIGBEE2_MQTT_SET_STATE,
 				Args: types.Args{"Lorem": 100, "Ipsum": "200"},
 				Mapping: types.Mapping{
 					"Lorem": {"Ipsum": "112233", "Bar": "Baz"},
@@ -344,7 +341,7 @@ func (s *ServiceSuite) Test63() {
 	expectedRule := "{1 unit test {1 true} {0 true}}"
 	s.Equal(expectedRule, fmt.Sprintf("%v", outrule))
 
-	expectedConds := "[{2 1 {2 true} {0 false} {0 false}}]"
+	expectedConds := "[{2 1 {2 true} {0 false} {0 false} { false}}]"
 	s.Len(outconds, 1)
 	s.Equal(expectedConds, fmt.Sprintf("%v", outconds))
 
