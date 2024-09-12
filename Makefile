@@ -23,7 +23,7 @@ docker-down:
 
 .PHONY: docker-up
 docker-up:
-	docker run -d --env-file=$(CONF) -v ./database.bin:/database.bin --name=$(NAME) $(NAME)
+	docker run -d --env-file=$(CONF) -v ./database.bin:/database.bin -p 7070:7070 --name=$(NAME) $(NAME)
 	
 .PHONY: docker-logs
 docker-logs:
