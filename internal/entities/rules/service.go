@@ -53,6 +53,10 @@ func (s rulesService) Create(rule types.Rule) (int64, error) {
 	return newRuleId, err
 }
 
+func (s rulesService) Delete(ruleId int32) error {
+	return s.repository.Delete(ruleId)
+}
+
 func (s rulesService) GetOne(ruleId int32) (res types.Rule, err error) {
 	rules,
 		conditions,
@@ -116,15 +120,18 @@ func Build(
 		}
 		var throttle types.Throttle
 		if r.Throttle.Valid {
-			throttle = types.Throttle{Value: time.Duration(r.Throttle.Int32) * time.Second}
+			throttle = types.Throttle{
+				Duration: time.Duration(r.Throttle.Int32) * time.Second,
+			}
 		}
 		rule := types.Rule{
-			Id:        int(r.Id),
-			Name:      r.Name,
-			Disabled:  r.IsDisabled.Int32 == 1,
-			Condition: cond,
-			Throttle:  throttle,
-			Actions:   BuildActions(r.Id, allRuleActions, allArgs, allMappings),
+			Id:          int(r.Id),
+			Name:        r.Name,
+			Disabled:    r.IsDisabled.Int32 == 1,
+			SkipCounter: r.SkipCounter.Int32 == 1,
+			Condition:   cond,
+			Throttle:    throttle,
+			Actions:     BuildActions(r.Id, allRuleActions, allArgs, allMappings),
 		}
 		result = append(result, rule)
 	}
@@ -169,6 +176,7 @@ func BuildCondition(
 			Id:   int(root.Id),
 			List: list,
 			Or:   root.LogicOr.Int32 == 1,
+			Not:  root.Not.Int32 == 1,
 		}
 	}
 	return
@@ -266,10 +274,11 @@ func ToDb(inrule types.Rule, seq utils.Seq) (
 
 func ToDbRule(rule types.Rule, seq utils.Seq) DbRule {
 	return DbRule{
-		Id:         int32(seq.Next()),
-		Name:       rule.Name,
-		IsDisabled: db.NewNullInt32FromBool(rule.Disabled),
-		Throttle:   db.NewNullInt32(int32(rule.Throttle.Value.Seconds())),
+		Id:          int32(seq.Inc()),
+		Name:        rule.Name,
+		IsDisabled:  db.NewNullInt32FromBool(rule.Disabled),
+		SkipCounter: db.NewNullInt32FromBool(rule.SkipCounter),
+		Throttle:    db.NewNullInt32(int32(rule.Throttle.Duration.Seconds())),
 	}
 }
 
@@ -282,7 +291,7 @@ func ToDbActions(
 ) (res []DbRuleAction) {
 	for _, action := range actions {
 		node := DbRuleAction{
-			Id:           int32(seq.Next()),
+			Id:           int32(seq.Inc()),
 			RuleId:       ruleId,
 			FunctionType: db.NewNullInt32(int32(action.Fn)),
 		}
@@ -306,7 +315,7 @@ func ToDbActions(
 		for argName, argMapping := range action.Mapping {
 			for key, value := range argMapping {
 				*mappings = append(*mappings, DbRuleActionArgumentMapping{
-					Id:         int32(seq.Next()),
+					Id:         int32(seq.Inc()),
 					RuleId:     ruleId,
 					ArgumentId: argNameToId[argName],
 					Key:        key,
@@ -335,9 +344,10 @@ func ToDbConditions(
 	}
 	if withList {
 		cond := DbRuleCondition{
-			Id:      int32(seq.Next()),
+			Id:      int32(seq.Inc()),
 			RuleId:  ruleId,
 			LogicOr: db.NewNullInt32FromBool(condition.Or),
+			Not:     db.NewNullInt32FromBool(condition.Not),
 		}
 		if len(condition.OtherDeviceId) > 0 {
 			cond.OtherDeviceId = db.NewNullString(string(condition.OtherDeviceId))
@@ -351,7 +361,7 @@ func ToDbConditions(
 		}
 	} else if withFn {
 		node := DbRuleCondition{
-			Id:           int32(seq.Next()),
+			Id:           int32(seq.Inc()),
 			RuleId:       ruleId,
 			FunctionType: db.NewNullInt32(int32(condition.Fn)),
 		}
@@ -392,7 +402,7 @@ func ToDbArguments(
 		}
 	} else {
 		arg := DbRuleConditionOrActionArgument{
-			Id:           int32(seq.Next()),
+			Id:           int32(seq.Inc()),
 			RuleId:       ruleId,
 			ArgumentName: key,
 			IsList:       db.NewNullInt32FromBool(islist),

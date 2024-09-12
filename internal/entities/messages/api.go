@@ -14,13 +14,13 @@ type messagesApi struct {
 	logTag  types.LogTagFn
 }
 
-func NewApi(router *routing.Router, service types.MessagesService) {
+func NewApi(base *routing.RouteGroup, service types.MessagesService) {
 	logTag := logger.MakeTag(logger.MESSAGES)
 	api := messagesApi{
 		service,
 		logTag,
 	}
-	group := router.Group("/messages")
+	group := base.Group("/messages")
 	group.Get("", api.get)
 	group.Get("/device/<deviceId>", api.getByDeviceId)
 }

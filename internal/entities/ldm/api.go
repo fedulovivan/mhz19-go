@@ -15,11 +15,11 @@ type ldmApi struct {
 	service types.LdmService
 }
 
-func NewApi(router *routing.Router, service types.LdmService) {
+func NewApi(base *routing.RouteGroup, service types.LdmService) {
 	api := ldmApi{
 		service,
 	}
-	group := router.Group("/last-device-messages")
+	group := base.Group("/last-device-messages")
 	group.Get("", api.get)
 	group.Get("/<deviceId>", api.getByDeviceId)
 }

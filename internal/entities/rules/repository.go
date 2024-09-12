@@ -10,6 +10,7 @@ import (
 )
 
 type RulesRepository interface {
+	Delete(ruleId int32) error
 	Get(ruleId sql.NullInt32) (rules []DbRule, conditions []DbRuleCondition, ruleActions []DbRuleAction, args []DbRuleConditionOrActionArgument, mappings []DbRuleActionArgumentMapping, err error)
 	Create(rule DbRule, conditions []DbRuleCondition, actions []DbRuleAction, arguments []DbRuleConditionOrActionArgument, mappings []DbRuleActionArgumentMapping) (int64, error)
 }
@@ -27,10 +28,11 @@ func NewRepository(database *sql.DB) RulesRepository {
 }
 
 type DbRule struct {
-	Id         int32
-	Name       string
-	IsDisabled sql.NullInt32
-	Throttle   sql.NullInt32
+	Id          int32
+	Name        string
+	IsDisabled  sql.NullInt32
+	Throttle    sql.NullInt32
+	SkipCounter sql.NullInt32
 }
 
 type DbRuleCondition struct {
@@ -38,6 +40,7 @@ type DbRuleCondition struct {
 	RuleId            int32
 	FunctionType      sql.NullInt32
 	LogicOr           sql.NullInt32
+	Not               sql.NullInt32
 	ParentConditionId sql.NullInt32
 	OtherDeviceId     sql.NullString
 }
@@ -73,7 +76,7 @@ func actionInsertTx(
 	ctx context.Context,
 	tx *sql.Tx,
 ) (sql.Result, error) {
-	return db.Insert(
+	return db.Exec(
 		tx,
 		ctx,
 		`INSERT INTO rule_actions(rule_id, function_type) VALUES(?,?)`,
@@ -86,11 +89,11 @@ func conditionInsertTx(
 	ctx context.Context,
 	tx *sql.Tx,
 ) (sql.Result, error) {
-	return db.Insert(
+	return db.Exec(
 		tx,
 		ctx,
-		`INSERT INTO rule_conditions(rule_id, function_type, logic_or, parent_condition_id, other_device_id) VALUES(?,?,?,?,?)`,
-		cond.RuleId, cond.FunctionType, cond.LogicOr, cond.ParentConditionId, cond.OtherDeviceId,
+		`INSERT INTO rule_conditions(rule_id, function_type, logic_or, parent_condition_id, other_device_id, function_inverted) VALUES(?,?,?,?,?)`,
+		cond.RuleId, cond.FunctionType, cond.LogicOr, cond.ParentConditionId, cond.OtherDeviceId, cond.Not,
 	)
 }
 
@@ -99,7 +102,7 @@ func mappingInsertTx(
 	ctx context.Context,
 	tx *sql.Tx,
 ) (sql.Result, error) {
-	return db.Insert(
+	return db.Exec(
 		tx,
 		ctx,
 		`INSERT INTO rule_action_argument_mappings(rule_id, argument_id, key, value) VALUES(?,?,?,?)`,
@@ -112,7 +115,7 @@ func argumentInsertTx(
 	ctx context.Context,
 	tx *sql.Tx,
 ) (sql.Result, error) {
-	return db.Insert(
+	return db.Exec(
 		tx,
 		ctx,
 		`INSERT INTO rule_condition_or_action_arguments(rule_id, condition_id, action_id, argument_name, is_list, value, device_id, device_class_id) VALUES(?,?,?,?,?,?,?,?)`,
@@ -125,11 +128,11 @@ func ruleInsertTx(
 	ctx context.Context,
 	tx *sql.Tx,
 ) (sql.Result, error) {
-	return db.Insert(
+	return db.Exec(
 		tx,
 		ctx,
-		`INSERT INTO rules(name, is_disabled, throttle) VALUES(?,?,?)`,
-		rule.Name, rule.IsDisabled, rule.Throttle,
+		`INSERT INTO rules(name, is_disabled, throttle, skip_counter) VALUES(?,?,?,?)`,
+		rule.Name, rule.IsDisabled, rule.Throttle, rule.SkipCounter,
 	)
 }
 
@@ -141,11 +144,12 @@ func rulesSelectTx(ctx context.Context, tx *sql.Tx, ruleId sql.NullInt32) ([]DbR
 			id,
 			name,
 			is_disabled,
-			throttle
+			throttle,
+			skip_counter
 		FROM 
 			rules`,
 		func(rows *sql.Rows, m *DbRule) error {
-			return rows.Scan(&m.Id, &m.Name, &m.IsDisabled, &m.Throttle)
+			return rows.Scan(&m.Id, &m.Name, &m.IsDisabled, &m.Throttle, &m.SkipCounter)
 		},
 		db.Where{
 			"id": ruleId,
@@ -163,11 +167,12 @@ func conditionsSelectTx(ctx context.Context, tx *sql.Tx, ruleId sql.NullInt32) (
 			function_type,
 			logic_or,
 			parent_condition_id,
-			other_device_id
+			other_device_id,
+			function_inverted
 		FROM
 			rule_conditions`,
 		func(rows *sql.Rows, m *DbRuleCondition) error {
-			return rows.Scan(&m.Id, &m.RuleId, &m.FunctionType, &m.LogicOr, &m.ParentConditionId, &m.OtherDeviceId)
+			return rows.Scan(&m.Id, &m.RuleId, &m.FunctionType, &m.LogicOr, &m.ParentConditionId, &m.OtherDeviceId, &m.Not)
 		},
 		db.Where{
 			"rule_id": ruleId,
@@ -365,4 +370,25 @@ func (r rulesRepository) Get(ruleId sql.NullInt32) (
 		err = db.Commit(tx)
 	}
 	return
+}
+
+func ruleDeleteTx(
+	ruleId int32,
+	ctx context.Context,
+	tx *sql.Tx,
+) (sql.Result, error) {
+	return db.Exec(
+		tx,
+		ctx,
+		`DELETE FROM rules WHERE id = ?`,
+		ruleId,
+	)
+}
+
+func (r rulesRepository) Delete(ruleId int32) error {
+	ctx := context.Background()
+	return db.WithTx(r.database, func(tx *sql.Tx) (err error) {
+		_, err = ruleDeleteTx(ruleId, ctx, tx)
+		return
+	})
 }

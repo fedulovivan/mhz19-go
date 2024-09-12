@@ -27,7 +27,7 @@ func (p *provider) Init() {
 	p.Out = make(types.MessageChan, 100)
 	go func() {
 		p.ldmRepository.AppendBuriedBlacklist(
-			p.ldmRepository.NewKey(types.DEVICE_CLASS_SYSTEM, types.BuriedDeviceId),
+			p.ldmRepository.NewKey(types.DEVICE_CLASS_SYSTEM, types.DeviceIdForTheBuriedDeviceMessage),
 			p.ldmRepository.NewKey(types.DEVICE_CLASS_ZIGBEE_BRIDGE, types.DeviceId("bridge")),
 		)
 		for key := range p.ldmRepository.Buried() {
@@ -35,7 +35,7 @@ func (p *provider) Init() {
 			p.Out <- types.Message{
 				ChannelType: types.CHANNEL_SYSTEM,
 				DeviceClass: types.DEVICE_CLASS_SYSTEM,
-				DeviceId:    types.BuriedDeviceId,
+				DeviceId:    types.DeviceIdForTheBuriedDeviceMessage,
 				Timestamp:   time.Now(),
 				Payload: map[string]any{
 					"BuriedDeviceId": key.DeviceId,

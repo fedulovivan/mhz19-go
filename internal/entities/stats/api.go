@@ -15,11 +15,11 @@ type statsApi struct {
 	service types.StatsService
 }
 
-func NewApi(router *routing.Router, service types.StatsService) {
+func NewApi(base *routing.RouteGroup, service types.StatsService) {
 	api := statsApi{
 		service,
 	}
-	group := router.Group("/stats")
+	group := base.Group("/stats")
 	group.Get("", api.get)
 }
 

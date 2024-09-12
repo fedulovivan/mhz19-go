@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-
 	"runtime/debug"
 
 	"github.com/fedulovivan/mhz19-go/internal/app"
@@ -27,7 +26,7 @@ var server http.Server
 
 // borrowed with simplifications from qiangxue/go-rest-api
 // see original at https://github.com/qiangxue/go-rest-api/blob/master/internal/errors/middleware.go
-func ErrorHandler(c *routing.Context) (err error) {
+func errorHandler(c *routing.Context) (err error) {
 	defer func() {
 		if rerr := recover(); rerr != nil {
 			var ok bool
@@ -38,7 +37,7 @@ func ErrorHandler(c *routing.Context) (err error) {
 			fmt.Println(string(debug.Stack()))
 		}
 		if err != nil {
-			slog.Error(logTag(err.Error()))
+			slog.Error(logTag("errorHandler:"), "path", c.Request.URL.Path, "err", err.Error())
 			res := map[string]any{
 				"is_error": true,
 				"error":    err.Error(),
@@ -53,19 +52,38 @@ func ErrorHandler(c *routing.Context) (err error) {
 	return c.Next()
 }
 
+func requestCounter(c *routing.Context) error {
+	go app.StatsSingleton().ApiRequests.Inc()
+	return c.Next()
+}
+
 func Init() {
 
 	router := routing.New()
-
 	router.Use(
 		slash.Remover(http.StatusMovedPermanently),
+	)
+
+	router.Get("/", func(ctx *routing.Context) error {
+		return ctx.Write(fmt.Sprintf(
+			"server root, rest api is available at %v",
+			app.Config.RestApiPath,
+		))
+	})
+	router.Get(app.Config.RestApiPath, func(ctx *routing.Context) error {
+		return ctx.Write("rest api root")
+	})
+
+	basegroup := router.Group(app.Config.RestApiPath)
+	basegroup.Use(
+		errorHandler,
 		content.TypeNegotiator(content.JSON),
-		ErrorHandler,
+		requestCounter,
 	)
 
 	// rules
 	rules.NewApi(
-		router,
+		basegroup,
 		rules.ServiceSingleton(
 			rules.NewRepository(
 				db.DbSingleton(),
@@ -75,7 +93,7 @@ func Init() {
 
 	// stats
 	stats.NewApi(
-		router,
+		basegroup,
 		stats.NewService(
 			stats.NewRepository(
 				db.DbSingleton(),
@@ -85,7 +103,7 @@ func Init() {
 
 	// devices
 	devices.NewApi(
-		router,
+		basegroup,
 		devices.NewService(
 			devices.NewRepository(
 				db.DbSingleton(),
@@ -95,7 +113,7 @@ func Init() {
 
 	// messages
 	messages.NewApi(
-		router,
+		basegroup,
 		messages.NewService(
 			messages.NewRepository(
 				db.DbSingleton(),
@@ -105,7 +123,7 @@ func Init() {
 
 	// last device message
 	ldm.NewApi(
-		router,
+		basegroup,
 		ldm.NewService(
 			ldm.RepoSingleton(),
 		),

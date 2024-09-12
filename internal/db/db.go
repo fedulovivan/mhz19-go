@@ -73,10 +73,6 @@ func NewNullString(v string) sql.NullString {
 	return sql.NullString{String: v, Valid: true}
 }
 
-// func Begin() (*sql.Tx, error) {
-// 	return dbh.Begin()
-// }
-
 func Rollback(tx *sql.Tx) {
 	if tx == nil {
 		return
@@ -95,13 +91,13 @@ func Commit(tx *sql.Tx) error {
 	return nil
 }
 
-func Insert(
+func Exec(
 	tx *sql.Tx,
 	ctx context.Context,
 	query string,
 	values ...any,
 ) (res sql.Result, err error) {
-	tid := seq.Next()
+	tid := seq.Inc()
 	if app.Config.DbDebug {
 		defer utils.TimeTrack(logTag, time.Now(), fmt.Sprintf("#%v", tid))
 	}
@@ -209,7 +205,7 @@ func Select[T any](
 	scan func(rows *sql.Rows, model *T) error,
 	where Where,
 ) (result []T, err error) {
-	tid := seq.Next()
+	tid := seq.Inc()
 	if app.Config.DbDebug {
 		defer utils.TimeTrack(logTag, time.Now(), fmt.Sprintf("#%v", tid))
 	}
@@ -248,7 +244,20 @@ func Select[T any](
 	}
 }
 
-// https://www.reddit.com/r/golang/comments/18flz7z/comment/kcviej8/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
+// initially borrowed from https://www.reddit.com/r/golang/comments/18flz7z/comment/kcviej8/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
+func WithTx(db *sql.DB, callback func(tx *sql.Tx) error) error {
+	tx, err := db.Begin()
+	defer Rollback(tx)
+	if err != nil {
+		return err
+	}
+	err = callback(tx)
+	if err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
 // func WithTx(db *sql.DB, fn func(tx *sql.Tx) error) error {
 //     txn, err := db.Begin()
 //     if err != nil {

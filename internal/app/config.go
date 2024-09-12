@@ -44,6 +44,7 @@ type ConfigStorage struct {
 	LogLevel      slog.Level    `env:"LOG_LEVEL,default=debug"`
 	BuriedTimeout time.Duration `env:"BURIED_TIMEOUT,default=90m"`
 	RestApiPort   int           `env:"REST_API_PORT,default=8888"`
+	RestApiPath   string        `env:"REST_API_PATH,default=/api"`
 }
 
 func InitConfig() {
@@ -64,7 +65,8 @@ func InitConfig() {
 	configAsJson, _ := json.MarshalIndent(Config, "", "  ")
 	fmt.Printf("starting with config %v\n", string(configAsJson))
 	if Config.IsDev {
-		fmt.Println("all known config variables", getExpectedEnvVars())
+		varsAsJson, _ := json.MarshalIndent(getExpectedEnvVars(), "", "  ")
+		fmt.Println("known config variables", string(varsAsJson))
 	}
 }
 

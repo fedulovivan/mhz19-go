@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/fedulovivan/mhz19-go/internal/app"
 	"github.com/fedulovivan/mhz19-go/internal/engine/actions"
 	"github.com/fedulovivan/mhz19-go/internal/engine/conditions"
 	"github.com/fedulovivan/mhz19-go/internal/message_queue"
@@ -88,9 +89,12 @@ func (e *engine) Stop() {
 	}
 }
 
-func (e *engine) InvokeConditionFunc(mt types.MessageTuple, fn types.CondFn, args types.Args, r types.Rule, tid string) bool {
+func (e *engine) InvokeConditionFunc(mt types.MessageTuple, fn types.CondFn, not bool, args types.Args, r types.Rule, tid string) bool {
 	impl := conditions.Get(fn)
 	res, err := impl(mt, args)
+	if not {
+		res = !res
+	}
 	slog.Debug(e.logTag(tid+fmt.Sprintf("Rule #%v condition exec", r.Id)), "fn", fn, "args", args, "res", res)
 	if err != nil {
 		slog.Error(fmt.Sprintf("%s error: %s", fn, err))
@@ -135,7 +139,7 @@ func (e *engine) MatchesCondition(mtcb types.MessageTupleFn, c types.Condition, 
 	withList := len(c.List) > 0
 	if withFn && !withList {
 		return e.InvokeConditionFunc(
-			mtcb(c.OtherDeviceId), c.Fn, c.Args, r, tid,
+			mtcb(c.OtherDeviceId), c.Fn, c.Not, c.Args, r, tid,
 		)
 	} else if withList && !withFn {
 		if c.Or {
@@ -158,7 +162,8 @@ func (e *engine) ExecuteActions(mm []types.Message, r types.Rule, tid string) {
 // called simultaneusly upon receiving messages from all providers
 // should be thread-safe
 func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
-	tid := fmt.Sprintf("Tid #%v ", tidSeq.Next())
+	app.StatsSingleton().EngineMessagesReceived.Inc()
+	tid := fmt.Sprintf("Tid #%v ", tidSeq.Inc())
 	p := m.Payload
 	isSystem := m.DeviceClass == types.DEVICE_CLASS_SYSTEM
 	isBridge := m.DeviceClass == types.DEVICE_CLASS_ZIGBEE_BRIDGE
@@ -202,20 +207,23 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 			return tuple
 		}
 		if e.MatchesCondition(mtcb, r.Condition, r, tid) {
+			if !r.SkipCounter {
+				app.StatsSingleton().EngineRulesMatched.Inc()
+			}
 			slog.Debug(e.logTag(tid+fmt.Sprintf("Rule #%v matches", r.Id)), "name", r.Name)
 			matches++
-			if r.Throttle.Value == 0 {
+			if r.Throttle.Duration == 0 {
 				e.ExecuteActions([]types.Message{m}, r, tid)
 			} else {
 				key := queuesContainer.MakeKey(m.DeviceClass, m.DeviceId, r.Id)
 				if !queuesContainer.HasQueue(key) {
-					queuesContainer.CreateQueue(key, r.Throttle.Value, func(mm []types.Message) {
+					queuesContainer.CreateQueue(key, r.Throttle.Duration, func(mm []types.Message) {
 						slog.Debug(e.logTag(tid + fmt.Sprintf("Rule #%v messages queue is flushed now", r.Id)))
 						e.ExecuteActions(mm, r, tid)
 					})
 				}
 				queuesContainer.GetQueue(key).PushMessage(m)
-				slog.Debug(e.logTag(tid + fmt.Sprintf("Rule #%v message was queued for %s", r.Id, r.Throttle.Value)))
+				slog.Debug(e.logTag(tid + fmt.Sprintf("Rule #%v message was queued for %s", r.Id, r.Throttle.Duration)))
 			}
 		}
 	}

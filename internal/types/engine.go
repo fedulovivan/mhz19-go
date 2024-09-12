@@ -13,7 +13,7 @@ type Engine interface {
 	EngineAsSupplier
 	InvokeActionFunc(mm []Message, a Action, r Rule, tid string)
 	MatchesCondition(mtcb MessageTupleFn, c Condition, r Rule, tid string) bool
-	InvokeConditionFunc(mt MessageTuple, fn CondFn, args Args, r Rule, tid string) bool
+	InvokeConditionFunc(mt MessageTuple, fn CondFn, not bool, args Args, r Rule, tid string) bool
 	MatchesListSome(mtcb MessageTupleFn, cc []Condition, r Rule, tid string) bool
 	MatchesListEvery(mtcb MessageTupleFn, cc []Condition, r Rule, tid string) bool
 	ExecuteActions(mm []Message, r Rule, tid string)

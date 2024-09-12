@@ -65,23 +65,23 @@ func (s *ConditionsSuite) Test84() {
 	s.True(actual)
 }
 
-func (s *ConditionsSuite) Test90() {
-	actual, err := NotEqual(types.MessageTuple{}, types.Args{})
-	s.NotNil(err)
-	s.False(actual)
-}
+// func (s *ConditionsSuite) Test90() {
+// 	actual, err := NotEqual(types.MessageTuple{}, types.Args{})
+// 	s.NotNil(err)
+// 	s.False(actual)
+// }
 
-func (s *ConditionsSuite) Test91() {
-	actual, err := NotEqual(types.MessageTuple{}, types.Args{"Left": 1, "Right": 1})
-	s.Nil(err)
-	s.False(actual)
-}
+// func (s *ConditionsSuite) Test91() {
+// 	actual, err := NotEqual(types.MessageTuple{}, types.Args{"Left": 1, "Right": 1})
+// 	s.Nil(err)
+// 	s.False(actual)
+// }
 
-func (s *ConditionsSuite) Test92() {
-	actual, err := NotEqual(types.MessageTuple{}, types.Args{"Left": "one", "Right": "one"})
-	s.Nil(err)
-	s.False(actual)
-}
+// func (s *ConditionsSuite) Test92() {
+// 	actual, err := NotEqual(types.MessageTuple{}, types.Args{"Left": "one", "Right": "one"})
+// 	s.Nil(err)
+// 	s.False(actual)
+// }
 
 func (s *ConditionsSuite) Test93() {
 	mt := types.MessageTuple{
@@ -92,9 +92,9 @@ func (s *ConditionsSuite) Test93() {
 		},
 	}
 	args := types.Args{"Left": "$message.action", "Right": "my_action"}
-	actual, err := NotEqual(mt, args)
+	actual, err := Equal(mt, args)
 	s.Nil(err)
-	s.False(actual)
+	s.True(actual)
 }
 
 func (s *ConditionsSuite) Test100() {

@@ -32,18 +32,12 @@ func (r statsRepository) Get() (
 	res types.StatsGetResult,
 	err error,
 ) {
-	g, ctx := errgroup.WithContext(context.Background())
-	tx, err := r.database.Begin()
-	defer db.Rollback(tx)
-	if err != nil {
-		return
-	}
-	g.Go(func() (e error) { res.Rules, e = rules.CountTx(ctx, tx); return })
-	g.Go(func() (e error) { res.Devices, e = devices.CountTx(ctx, tx); return })
-	g.Go(func() (e error) { res.Messages, e = messages.CountTx(ctx, tx); return })
-	err = g.Wait()
-	if err == nil {
-		err = db.Commit(tx)
-	}
+	err = db.WithTx(r.database, func(tx *sql.Tx) error {
+		g, ctx := errgroup.WithContext(context.Background())
+		g.Go(func() (e error) { res.Rules, e = rules.CountTx(ctx, tx); return })
+		g.Go(func() (e error) { res.Devices, e = devices.CountTx(ctx, tx); return })
+		g.Go(func() (e error) { res.Messages, e = messages.CountTx(ctx, tx); return })
+		return g.Wait()
+	})
 	return
 }

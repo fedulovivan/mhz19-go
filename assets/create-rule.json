@@ -1,19 +1,18 @@
 {
     "name":"balcony ceiling light on/off",
     "disabled":false,
-    "throttle":0,
     "condition":{
         "list":[
-            {"fn":6,"args":{"List":["DeviceId(0x00158d0004244bda)"]}},
-            {"fn":3,"args":{"Value": "$message.action","List":["single_left","single_right"]}}
+            {"fn":"InList","args":{"Value": "$message.action","List":["single_left","single_right"]}},
+            {"fn":"ZigbeeDevice","args":{"List":["DeviceId(0x00158d0004244bda)"]}}
         ]
     },
     "actions":[
         {
-            "fn":1,
+            "fn":"PostSonoffSwitchMessage",
             "args":{
                 "Command":"$message.action",
-                "DeviceId":"DeviceId(192.168.88.188)"
+                "DeviceId":"DeviceId(192.168.88.44)"
             },
             "mapping": {
                 "Command": {

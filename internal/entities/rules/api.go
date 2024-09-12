@@ -16,13 +16,14 @@ type rulesApi struct {
 	service types.RulesService
 }
 
-func NewApi(router *routing.Router, service types.RulesService) {
+func NewApi(base *routing.RouteGroup, service types.RulesService) {
 	api := rulesApi{
 		service,
 	}
-	group := router.Group("/rules")
+	group := base.Group("/rules")
 	group.Get("", api.getAll)
 	group.Get("/<id>", api.getOne)
+	group.Delete("/<id>", api.delete)
 	group.Put("", api.create)
 }
 
@@ -51,6 +52,19 @@ func (api rulesApi) getOne(c *routing.Context) error {
 		return err
 	}
 	return c.Write(rule)
+}
+
+func (api rulesApi) delete(c *routing.Context) error {
+	defer utils.TimeTrack(logTag, time.Now(), "api:delete")
+	ruleId, err := strconv.ParseInt(c.Param("id"), 10, 32)
+	if err != nil {
+		return err
+	}
+	err = api.service.Delete(int32(ruleId))
+	if err != nil {
+		return err
+	}
+	return c.Write(map[string]any{"ok": true})
 }
 
 func (api rulesApi) getAll(c *routing.Context) error {

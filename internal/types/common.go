@@ -1,3 +1,3 @@
 package types
 
-const BuriedDeviceId DeviceId = DeviceId("buried-device")
+const DeviceIdForTheBuriedDeviceMessage DeviceId = DeviceId("buried-device")

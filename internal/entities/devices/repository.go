@@ -15,6 +15,7 @@ type DbDevice struct {
 	Comments      sql.NullString
 	Origin        sql.NullString
 	Json          sql.NullString
+	BuriedTimeout sql.NullInt32
 }
 
 type DevicesRepository interface {
@@ -35,23 +36,33 @@ func NewRepository(database *sql.DB) DevicesRepository {
 }
 
 func (r devicesRepository) UpsertAll(devices []DbDevice) (err error) {
-	ctx := context.Background()
-	tx, err := r.database.Begin()
-	defer db.Rollback(tx)
-	if err != nil {
-		return
-	}
-	for _, device := range devices {
-		_, err = DeviceUpsertTx(device, ctx, tx)
-		if err != nil {
-			return
+	return db.WithTx(r.database, func(tx *sql.Tx) error {
+		ctx := context.Background()
+		for _, device := range devices {
+			_, err = DeviceUpsertTx(device, ctx, tx)
+			if err != nil {
+				return err
+			}
 		}
-	}
-	if err != nil {
-		return
-	}
-	err = tx.Commit()
-	return
+		return nil
+	})
+	// ctx := context.Background()
+	// tx, err := r.database.Begin()
+	// defer db.Rollback(tx)
+	// if err != nil {
+	// 	return
+	// }
+	// for _, device := range devices {
+	// 	_, err = DeviceUpsertTx(device, ctx, tx)
+	// 	if err != nil {
+	// 		return
+	// 	}
+	// }
+	// if err != nil {
+	// 	return
+	// }
+	// err = tx.Commit()
+	// return
 }
 
 func (r devicesRepository) Get(deviceId sql.NullString, deviceClass sql.NullInt32) (devices []DbDevice, err error) {
@@ -88,11 +99,21 @@ func DevicesSelectTx(ctx context.Context, tx *sql.Tx, nativeId sql.NullString, d
 			name,
 			comments,
 			origin,
-			json
+			json,
+			buried_timeout
 		FROM 
 			devices`,
 		func(rows *sql.Rows, m *DbDevice) error {
-			return rows.Scan(&m.Id, &m.NativeId, &m.DeviceClassId, &m.Name, &m.Comments, &m.Origin, &m.Json)
+			return rows.Scan(
+				&m.Id,
+				&m.NativeId,
+				&m.DeviceClassId,
+				&m.Name,
+				&m.Comments,
+				&m.Origin,
+				&m.Json,
+				&m.BuriedTimeout,
+			)
 		},
 		db.Where{
 			"native_id":       nativeId,
@@ -106,7 +127,7 @@ func DeviceUpsertTx(
 	ctx context.Context,
 	tx *sql.Tx,
 ) (sql.Result, error) {
-	return db.Insert(
+	return db.Exec(
 		tx,
 		ctx,
 		`INSERT INTO devices(native_id, device_class_id, name, comments, origin, json)

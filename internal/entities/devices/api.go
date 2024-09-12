@@ -15,13 +15,13 @@ type devicesApi struct {
 	logTag  types.LogTagFn
 }
 
-func NewApi(router *routing.Router, service types.DevicesService) {
+func NewApi(base *routing.RouteGroup, service types.DevicesService) {
 	logTag := logger.MakeTag(logger.DEVICES)
 	api := devicesApi{
 		service,
 		logTag,
 	}
-	group := router.Group("/devices")
+	group := base.Group("/devices")
 	group.Get("", api.get)
 	group.Get("/class/<deviceClass>", api.getByDeviceClass)
 }

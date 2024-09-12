@@ -1,13 +1,12 @@
 
 ### Prio 0
-- feat: add Condition.FnInverted bool flag instead of NotEqual, NotChannel
-- feat: add devices.buried_ignored column or devices.buried_timeout (use 0 to blacklist device)
-- feat: new action play alert
+- feat: add devices.buried_ignored column or devices.buried_timeout (0 - blacklisted device, nill - default timeout)
 
 ### Prio 1
+- feat: new action to play alert
 - arch: think how to distinquish "end device" message from all "others"
 - arch: think how we can construct/init "TemplatePayload" automatically, now we need to build it manually in action implementation
-- feat: create api to update/delete rules
+- feat: create api to update rule
 - feat: create api to add/update/delete devices
 - feat: create api to read one device
 - feat: create api to read device classes (or unified api for any simple dict table?)
@@ -33,6 +32,7 @@
 - try: separate di library https://pkg.go.dev/go.uber.org/fx
 - try: opentelemetry https://opentelemetry.io/docs/languages/go/getting-started/   
 - try: openapi or swagger https://en.wikipedia.org/wiki/OpenAPI_Specification or https://swagger.io/
+- try: https://github.com/julienschmidt/httprouter istead of ozzo-routing
 - try: postgres instead of sqlite3
 - try: prometheus
 - try: grpc
@@ -40,6 +40,11 @@
 
 ### Completed
 
+- (+) basic app counters
+- (+) feat: add Condition.FnInverted bool flag instead of NotEqual, NotChannel
+- (+) feat: introduce SkipCounter field for the rule
+- (+) feat: create api to delete rule
+- (+) bug: a weird sporadic "ERR [rest] Not Found" in logs for sussess responses - RCA this is chrome requesting /favicon.ico along with api url
 - (+) arch: messages with ewelink device mdns announcement should not have device id in DeviceId field, since semantically this is not a message from device itself (same as "special" zigbee bridge message with devices list)
 - (+) arch: rename system provider to "hnsfaw" or "notseen" or "buried"
 - (+) feat: implement "buried devices" aka "have not seen for a while" notifications

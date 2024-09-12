@@ -29,6 +29,7 @@ CREATE TABLE devices (
 	comments TEXT,
     origin TEXT,
     json TEXT,
+    buried_timeout INTEGER,
     CONSTRAINT devices_fk_dc FOREIGN KEY (device_class_id) REFERENCES device_classes(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -36,7 +37,8 @@ CREATE TABLE rules (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	name TEXT NOT NULL UNIQUE,
 	is_disabled INTEGER,
-	throttle INTEGER
+	throttle INTEGER,
+    skip_counter INTEGER
 );
 
 CREATE TABLE rule_conditions (
@@ -44,6 +46,7 @@ CREATE TABLE rule_conditions (
 	rule_id INTEGER NOT NULL,
 	function_type INTEGER,
 	logic_or INTEGER,
+    function_inverted INTEGER,
 	parent_condition_id INTEGER,
     other_device_id TEXT,
 	CONSTRAINT rule_conditions_fk_rules FOREIGN KEY (rule_id) REFERENCES rules(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -127,16 +130,14 @@ INSERT INTO action_functions VALUES(8,'UpsertSonoffDevice');
 INSERT INTO condition_functions VALUES(1,'Changed');
 INSERT INTO condition_functions VALUES(2,'Equal');
 INSERT INTO condition_functions VALUES(3,'InList');
-INSERT INTO condition_functions VALUES(4,'NotEqual');
 INSERT INTO condition_functions VALUES(5,'NotNil');
 INSERT INTO condition_functions VALUES(6,'ZigbeeDevice');
 INSERT INTO condition_functions VALUES(7,'DeviceClass');
 INSERT INTO condition_functions VALUES(8,'Channel');
-INSERT INTO condition_functions VALUES(9,'NotChannel');
 
-INSERT INTO devices VALUES(1, '192.168.88.1', 2, 'MIKROTIK_ROUTER', NULL, NULL, NULL);
-INSERT INTO devices VALUES(2, '192.168.88.44', 2, 'IPHONE_15_PRO_IP', NULL, NULL, NULL);
-INSERT INTO devices VALUES(3, '192.168.0.11', 2, 'IPHONE_15_PRO_AP_IP', NULL, NULL, NULL);
-INSERT INTO devices VALUES(4, '192.168.88.62', 2, 'IPHONE_14_IP', NULL, NULL, NULL);
+INSERT INTO devices VALUES(1, '192.168.88.1', 2, 'MIKROTIK_ROUTER', NULL, NULL, NULL, NULL);
+INSERT INTO devices VALUES(2, '192.168.88.44', 2, 'IPHONE_15_PRO_IP', NULL, NULL, NULL, NULL);
+INSERT INTO devices VALUES(3, '192.168.0.11', 2, 'IPHONE_15_PRO_AP_IP', NULL, NULL, NULL, NULL);
+INSERT INTO devices VALUES(4, '192.168.88.62', 2, 'IPHONE_14_IP', NULL, NULL, NULL, NULL);
 
 COMMIT;

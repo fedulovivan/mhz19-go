@@ -52,7 +52,7 @@ func (s *EngineSuite) Test12() {
 
 func (s *EngineSuite) Test20() {
 	defer func() { _ = recover() }()
-	s.False(s.e.InvokeConditionFunc(types.MessageTuple{}, 0, nil, types.Rule{}, "Test20"))
+	s.False(s.e.InvokeConditionFunc(types.MessageTuple{}, 0, false, nil, types.Rule{}, "Test20"))
 	s.Fail("expected to panic")
 }
 

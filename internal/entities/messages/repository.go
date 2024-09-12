@@ -42,7 +42,7 @@ func messageInsertTx(
 	ctx context.Context,
 	tx *sql.Tx,
 ) (sql.Result, error) {
-	return db.Insert(
+	return db.Exec(
 		tx,
 		ctx,
 		`INSERT INTO messages(channel_type_id,device_class_id,device_id,timestamp,json) VALUES(?,?,?,?,?)`,

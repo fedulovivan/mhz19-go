@@ -7,15 +7,15 @@ import (
 )
 
 type Throttle struct {
-	Value time.Duration
+	time.Duration
 }
 
 // https://github.com/golang/go/issues/50480
 func (t Throttle) MarshalJSON() (b []byte, err error) {
-	if t.Value == 0 {
+	if t.Duration == 0 {
 		return []byte("null"), nil
 	}
-	return []byte(fmt.Sprintf(`"%s"`, t.Value)), nil
+	return []byte(fmt.Sprintf(`"%s"`, t.Duration)), nil
 }
 
 func (t *Throttle) UnmarshalJSON(b []byte) (err error) {
@@ -28,7 +28,7 @@ func (t *Throttle) UnmarshalJSON(b []byte) (err error) {
 	if !issting {
 		return
 	}
-	t.Value, err = time.ParseDuration(vstring)
+	t.Duration, err = time.ParseDuration(vstring)
 	if err != nil {
 		return
 	}

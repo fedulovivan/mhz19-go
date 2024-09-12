@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/fedulovivan/mhz19-go/internal/db"
 	"github.com/fedulovivan/mhz19-go/internal/types"
@@ -29,6 +30,7 @@ func ToDb(in []types.Device) (out []DbDevice) {
 			Comments:      sql.NullString{String: d.Comments, Valid: len(d.Comments) > 0},
 			Origin:        sql.NullString{String: d.Origin, Valid: len(d.Origin) > 0},
 			Json:          sql.NullString{String: string(mjson), Valid: err == nil},
+			BuriedTimeout: db.NewNullInt32(int32(d.BuriedTimeout.Duration.Seconds())),
 		})
 	}
 	return
@@ -40,7 +42,7 @@ func BuildDevices(in []DbDevice) (out []types.Device) {
 		if d.Json.Valid {
 			_ = json.Unmarshal([]byte(d.Json.String), &payload)
 		}
-		out = append(out, types.Device{
+		device := types.Device{
 			Id:            int(d.Id),
 			DeviceId:      types.DeviceId(d.NativeId),
 			DeviceClassId: types.DeviceClass(d.DeviceClassId),
@@ -48,7 +50,13 @@ func BuildDevices(in []DbDevice) (out []types.Device) {
 			Comments:      d.Comments.String,
 			Origin:        d.Origin.String,
 			Json:          payload,
-		})
+		}
+		if d.BuriedTimeout.Valid {
+			device.BuriedTimeout = types.BuriedTimeout{
+				Duration: time.Duration(d.BuriedTimeout.Int32) * time.Second,
+			}
+		}
+		out = append(out, device)
 	}
 	return
 }
