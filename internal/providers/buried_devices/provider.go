@@ -12,13 +12,15 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
-var logTag = logger.MakeTag(logger.BURIED)
+var tag = logger.NewTag(logger.BURIED)
+
+type BuriedTimers = map[types.LdmKey]*time.Timer
 
 type provider struct {
 	engine.ProviderBase
 	ldmService     types.LdmService
 	devicesService types.DevicesService
-	buriedTimers   map[types.LdmKey]*time.Timer
+	buriedTimers   BuriedTimers
 	timersMu       sync.Mutex
 }
 
@@ -29,7 +31,7 @@ func NewProvider(
 	return &provider{
 		ldmService:     ldmService,
 		devicesService: devicesService,
-		buriedTimers:   make(map[types.LdmKey]*time.Timer),
+		buriedTimers:   make(BuriedTimers),
 	}
 }
 
@@ -45,16 +47,16 @@ func (p *provider) handleKey(key types.LdmKey) {
 	device, err := p.devicesService.GetOne(key.DeviceId)
 	if err == nil && device.BuriedTimeout != nil {
 		if device.BuriedTimeout.Duration == 0 {
-			slog.Debug(logTag(fmt.Sprintf("%v device skipped (devices.buried_timeout == 0)", key.DeviceId)))
+			slog.Debug(tag.F(fmt.Sprintf("%v device skipped (devices.buried_timeout == 0)", key.DeviceId)))
 			skipped = true
 		} else {
-			slog.Warn(logTag(fmt.Sprintf("%v using custom BuriedTimeout value=%s", key.DeviceId, device.BuriedTimeout.Duration)))
+			slog.Warn(tag.F(fmt.Sprintf("%v using custom BuriedTimeout value=%s", key.DeviceId, device.BuriedTimeout.Duration)))
 			timeout = device.BuriedTimeout.Duration
 		}
 	}
 	if timer, ok := p.buriedTimers[key]; ok {
 		if skipped {
-			slog.Warn(logTag(fmt.Sprintf("%v is now skipped, stopping and deleting timer", key.DeviceId)))
+			slog.Warn(tag.F(fmt.Sprintf("%v is now skipped, stopping and deleting timer", key.DeviceId)))
 			timer.Stop()
 			delete(p.buriedTimers, key)
 			return

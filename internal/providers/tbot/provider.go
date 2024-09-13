@@ -13,7 +13,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-var logTag = logger.MakeTag(logger.TBOT)
+var tag = logger.NewTag(logger.TBOT)
 
 type provider struct {
 	engine.ProviderBase
@@ -42,17 +42,17 @@ func (p *provider) Send(a ...any) error {
 }
 
 func (p *provider) Stop() {
-	slog.Debug(logTag("Stopping bot..."))
+	slog.Debug(tag.F("Stopping bot..."))
 	if p.botStarted {
 		p.bot.StopReceivingUpdates()
 	} else {
-		slog.Warn(logTag("Not started"))
+		slog.Warn(tag.F("Not started"))
 	}
 }
 
 func (p *provider) SendNewMessage(text string, chatId int64) (err error) {
 	// msg.ReplyToMessageID = update.Message.MessageID
-	slog.Debug(logTag("SendNewMessage()"), "text", text, "chatId", chatId)
+	slog.Debug(tag.F("SendNewMessage()"), "text", text, "chatId", chatId)
 	if chatId == 0 {
 		chatId = app.Config.TelegramChatId
 	}
@@ -61,7 +61,7 @@ func (p *provider) SendNewMessage(text string, chatId int64) (err error) {
 	return
 	// if err != nil {
 	// 	return err
-	// 	// slog.Error(logTag("SendNewMessage()"), "err", err.Error())
+	// 	// slog.Error(tag.F("SendNewMessage()"), "err", err.Error())
 	// }
 }
 
@@ -72,27 +72,27 @@ func (p *provider) Init() {
 	var err error
 	p.bot, err = tgbotapi.NewBotAPI(app.Config.TelegramToken)
 	if err != nil {
-		slog.Error(logTag("NewBotAPI()"), "err", err.Error())
+		slog.Error(tag.F("NewBotAPI()"), "err", err.Error())
 		return
 	}
 	p.bot.Debug = app.Config.TelegramDebug
-	slog.Debug(logTag("Authorized"), "UserName", p.bot.Self.UserName)
+	slog.Debug(tag.F("Authorized"), "UserName", p.bot.Self.UserName)
 	p.botStarted = true
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 	updates := p.bot.GetUpdatesChan(u)
 	err = tgbotapi.SetLogger(slogAdapter{})
 	if err != nil {
-		slog.Error(logTag("SetLogger()"), "err", err.Error())
+		slog.Error(tag.F("SetLogger()"), "err", err.Error())
 	}
 
 	// updates
 	go func() {
 		for update := range updates {
 			if update.Message != nil {
-				slog.Debug(logTag("Got a message"), "UserName", update.Message.From.UserName, "Text", update.Message.Text)
+				slog.Debug(tag.F("Got a message"), "UserName", update.Message.From.UserName, "Text", update.Message.Text)
 				if update.Message.IsCommand() {
-					slog.Debug(logTag("IsCommand() == true"), "command", update.Message.Command())
+					slog.Debug(tag.F("IsCommand() == true"), "command", update.Message.Command())
 				}
 				payload := map[string]any{
 					"Text":   update.Message.Text,

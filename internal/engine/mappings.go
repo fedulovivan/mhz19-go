@@ -4,23 +4,13 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
-// const RULE_ID_BURIED_DEVICE = 500
-// const RULE_ID_RECORD_MESSAGE = 1000
-// const RULE_ID_UPSERT_ZIGBEE_DEVICES = 2000
-// const RULE_ID_UPSERT_SONOFF_DEVICE = 3000
-
-// var NOT_COUNTED_RULE_IDS = []int{
-// 	RULE_ID_RECORD_MESSAGE,
-// 	RULE_ID_UPSERT_ZIGBEE_DEVICES,
-// 	RULE_ID_UPSERT_SONOFF_DEVICE,
-// }
-
 func GetStaticRules() []types.Rule {
 	return []types.Rule{
 
 		{
-			Id:   1000,
-			Name: `system rule for "buried devices" aka "have not seen for a while" feature`,
+			Id:       1000,
+			Name:     `system rule for "buried devices" aka "have not seen for a while" feature`,
+			Disabled: true,
 			Condition: types.Condition{
 				List: []types.Condition{
 					{
@@ -50,6 +40,7 @@ func GetStaticRules() []types.Rule {
 		{
 			Id:          2000,
 			Name:        "system rule to save (almost) all received messages in db",
+			Disabled:    true,
 			SkipCounter: true,
 			Condition: types.Condition{
 				List: []types.Condition{
@@ -80,6 +71,7 @@ func GetStaticRules() []types.Rule {
 		{
 			Id:          3000,
 			Name:        "system rule to create devices upon receiving message from zigbee2mqtt bridge",
+			Disabled:    true,
 			SkipCounter: true,
 			Condition: types.Condition{
 				Fn:   types.COND_DEVICE_CLASS,
@@ -92,6 +84,7 @@ func GetStaticRules() []types.Rule {
 		{
 			Id:          4000,
 			Name:        "system rule to create devices upon receiving dns-sd message with _ewelink._tcp service",
+			Disabled:    true,
 			SkipCounter: true,
 			Condition: types.Condition{
 				Fn:   types.COND_СHANNEL,

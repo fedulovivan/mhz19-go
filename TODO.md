@@ -1,5 +1,6 @@
 
 ### Prio 0
+- None
 
 ### Prio 1
 - feat: new action to play alert
@@ -18,7 +19,6 @@
 - uts: create tests for recursive conditions
 - bug: no mqtt (re)connection if network was not available on app startup and returned online later
 - feat: merge Zigbee2MqttSetState and ValveSetState actions
-- feat: implement log tag with meta, so we can add attrs to function
 - feat: create meta which descibes expected args for conditions and actions and validate
 - feat: create test service for sonoff wifi devices (poll them periodically to receive status updates)
 - arch: make logger and logTag a dependency of service, api and repository
@@ -38,6 +38,7 @@
 
 ### Completed
 
+- (+) feat: implement log tag with meta, so we can add attrs to function
 - (+) feat: create api to read one device
 - (+) feat: add devices.buried_ignored column or devices.buried_timeout (0 - blacklisted device, null - default timeout)
 - (+) basic app counters

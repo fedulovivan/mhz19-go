@@ -1,5 +1,7 @@
 package types
 
+import "github.com/fedulovivan/mhz19-go/internal/logger"
+
 type EngineAsSupplier interface {
 	SetDevicesService(s DevicesService)
 	DevicesService() DevicesService
@@ -11,16 +13,16 @@ type EngineAsSupplier interface {
 
 type Engine interface {
 	EngineAsSupplier
-	InvokeActionFunc(mm []Message, a Action, r Rule, tid string)
-	MatchesCondition(mtcb MessageTupleFn, c Condition, r Rule, tid string) bool
-	InvokeConditionFunc(mt MessageTuple, fn CondFn, not bool, args Args, r Rule, tid string) bool
-	MatchesListSome(mtcb MessageTupleFn, cc []Condition, r Rule, tid string) bool
-	MatchesListEvery(mtcb MessageTupleFn, cc []Condition, r Rule, tid string) bool
-	ExecuteActions(mm []Message, r Rule, tid string)
+	InvokeActionFunc(mm []Message, a Action, tag logger.Tag)
+	MatchesCondition(mtcb MessageTupleFn, c Condition, tag logger.Tag) bool
+	InvokeConditionFunc(mt MessageTuple, fn CondFn, not bool, args Args, tag logger.Tag) bool
+	MatchesListSome(mtcb MessageTupleFn, cc []Condition, tag logger.Tag) bool
+	MatchesListEvery(mtcb MessageTupleFn, cc []Condition, tag logger.Tag) bool
+	ExecuteActions(mm []Message, r Rule, tag logger.Tag)
 	HandleMessage(m Message, rules []Rule)
 	Start()
 	Stop()
-	SetLogTag(f LogTagFn)
+	SetLogTag(f logger.Tag)
 	SetLdmService(r LdmService)
 	AppendRules(rules ...Rule)
 }

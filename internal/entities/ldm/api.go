@@ -9,7 +9,7 @@ import (
 	routing "github.com/go-ozzo/ozzo-routing/v2"
 )
 
-var logTag = logger.MakeTag(logger.LDM)
+var tag = logger.NewTag(logger.LDM)
 
 type ldmApi struct {
 	service types.LdmService
@@ -25,13 +25,13 @@ func NewApi(base *routing.RouteGroup, service types.LdmService) {
 }
 
 func (api ldmApi) get(c *routing.Context) error {
-	defer utils.TimeTrack(logTag, time.Now(), "api:get")
+	defer utils.TimeTrack(tag.F, time.Now(), "api:get")
 	data := api.service.GetAll()
 	return c.Write(data)
 }
 
 func (api ldmApi) getByDeviceId(c *routing.Context) error {
-	defer utils.TimeTrack(logTag, time.Now(), "api:getByDeviceId")
+	defer utils.TimeTrack(tag.F, time.Now(), "api:getByDeviceId")
 	data := api.service.GetByDeviceId(
 		types.DeviceId(c.Param("deviceId")),
 	)

@@ -11,11 +11,11 @@ import (
 
 type messagesApi struct {
 	service types.MessagesService
-	logTag  types.LogTagFn
+	tag     logger.Tag
 }
 
 func NewApi(base *routing.RouteGroup, service types.MessagesService) {
-	logTag := logger.MakeTag(logger.MESSAGES)
+	logTag := logger.NewTag(logger.MESSAGES)
 	api := messagesApi{
 		service,
 		logTag,
@@ -26,7 +26,7 @@ func NewApi(base *routing.RouteGroup, service types.MessagesService) {
 }
 
 func (api messagesApi) get(c *routing.Context) error {
-	defer utils.TimeTrack(api.logTag, time.Now(), "api:get")
+	defer utils.TimeTrack(api.tag.F, time.Now(), "api:get")
 	data, err := api.service.Get()
 	if err != nil {
 		return err
@@ -35,7 +35,7 @@ func (api messagesApi) get(c *routing.Context) error {
 }
 
 func (api messagesApi) getByDeviceId(c *routing.Context) error {
-	defer utils.TimeTrack(api.logTag, time.Now(), "api:getByDeviceId")
+	defer utils.TimeTrack(api.tag.F, time.Now(), "api:getByDeviceId")
 	data, err := api.service.GetByDeviceId(c.Param("deviceId"))
 	if err != nil {
 		return err

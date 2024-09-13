@@ -16,7 +16,7 @@ func (s statsService) Get() (res types.StatsGetResult, err error) {
 	if err != nil {
 		return
 	}
-	res.WithAppStats(app.StatsSingleton())
+	res.InjectAppStats(app.StatsSingleton())
 	return
 }
 

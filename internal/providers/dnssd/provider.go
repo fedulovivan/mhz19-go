@@ -16,7 +16,7 @@ type provider struct {
 	engine.ProviderBase
 }
 
-var logTag = logger.MakeTag(logger.DNSSD)
+var tag = logger.NewTag(logger.DNSSD)
 
 func NewProvider() types.ChannelProvider {
 	return new(provider)
@@ -36,7 +36,7 @@ func (p *provider) Init() {
 
 	addFn := func(entry dnssd.BrowseEntry) {
 		if entry.Text["type"] != "diy_plug" {
-			slog.Warn(logTag(fmt.Sprintf("Unexpected entry data %+v", entry)))
+			slog.Warn(tag.F(fmt.Sprintf("Unexpected entry data %+v", entry)))
 			return
 		}
 		payload := map[string]any{
@@ -63,7 +63,7 @@ func (p *provider) Init() {
 	go func() {
 		if err := dnssd.LookupType(ctx, service, addFn, rmvFn); err != nil {
 			fmt.Println(err)
-			slog.Error(logTag(err.Error()))
+			slog.Error(tag.F(err.Error()))
 			return
 		}
 	}()
@@ -82,7 +82,7 @@ func (p *provider) Init() {
 // "IfaceName": entry.IfaceName,
 // func (p *provider) Stop() {
 // if p.ticker != nil {
-// 	slog.Debug(logTag("Stopping ticker..."))
+// 	slog.Debug(logTag.F("Stopping ticker..."))
 // 	p.ticker.Stop()
 // }
 // }// utils.Dump("Added", entry)
@@ -119,7 +119,7 @@ func (p *provider) Init() {
 // 		// and https://datatracker.ietf.org/doc/html/rfc6763#section-9
 // 		// on ubuntu `avahi-browse -a`
 // 		// service := "_services._dns-sd._udp"
-// 		slog.Debug(logTag("mdns.Query() " + service))
+// 		slog.Debug(logTag.F("mdns.Query() " + service))
 // 		err := mdns.Query(&mdns.QueryParam{
 // 			Service:     service,
 // 			Entries:     entriesCh,
@@ -127,7 +127,7 @@ func (p *provider) Init() {
 // 			// Timeout:     time.Second * 1,
 // 		})
 // 		if err != nil {
-// 			slog.Error(logTag(err.Error()))
+// 			slog.Error(logTag.F(err.Error()))
 // 		}
 // 	}
 // 	// query for the first time

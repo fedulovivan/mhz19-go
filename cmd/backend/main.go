@@ -22,7 +22,7 @@ import (
 	tbot "github.com/fedulovivan/mhz19-go/internal/providers/tbot"
 )
 
-var logTag = logger.MakeTag(logger.MAIN)
+var tag = logger.NewTag(logger.MAIN)
 
 func main() {
 
@@ -43,7 +43,7 @@ func main() {
 		),
 	)
 	e := engine.NewEngine()
-	e.SetLogTag(logger.MakeTag(logger.ENGINE))
+	e.SetLogTag(logger.NewTag(logger.ENGINE))
 	e.SetProviders(
 		mqtt.NewProvider(),
 		tbot.NewProvider(),
@@ -73,7 +73,7 @@ func main() {
 	if err == nil {
 		e.AppendRules(dbRules...)
 	} else {
-		slog.Error(logTag("Failed to load rules from db"), "err", err.Error())
+		slog.Error(tag.F("Failed to load rules from db"), "err", err.Error())
 	}
 	go func() {
 		for rule := range rulesService.OnCreated() {
@@ -84,7 +84,7 @@ func main() {
 
 	// notify we are in the development mode
 	if app.Config.IsDev {
-		slog.Debug(logTag("Running in developlment mode"))
+		slog.Debug(tag.F("Running in developlment mode"))
 	}
 
 	// handle shutdown
@@ -97,7 +97,7 @@ func main() {
 		}
 	}()
 	<-stopped
-	slog.Debug(logTag("App termination signal received"))
+	slog.Debug(tag.F("App termination signal received"))
 
 	// stop engine and all underlying providers
 	e.Stop()
@@ -105,5 +105,5 @@ func main() {
 	// stop rest
 	rest.Stop()
 
-	slog.Info(logTag("All done, bye-bye"))
+	slog.Info(tag.F("All done, bye-bye"))
 }

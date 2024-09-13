@@ -6,13 +6,15 @@ import (
 	"testing"
 
 	"github.com/fedulovivan/mhz19-go/internal/entities/ldm"
+	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 	"github.com/stretchr/testify/suite"
 )
 
 type EngineSuite struct {
 	suite.Suite
-	e types.Engine
+	e   types.Engine
+	tag logger.Tag
 }
 
 func (s *EngineSuite) SetupSuite() {
@@ -25,7 +27,7 @@ var dummy_mtcb types.MessageTupleFn = func(types.DeviceId) (res types.MessageTup
 }
 
 func (s *EngineSuite) Test10() {
-	actual := s.e.MatchesCondition(dummy_mtcb, types.Condition{}, types.Rule{}, "Test10")
+	actual := s.e.MatchesCondition(dummy_mtcb, types.Condition{}, s.tag)
 	s.True(actual)
 }
 
@@ -36,7 +38,7 @@ func (s *EngineSuite) Test11() {
 			{Fn: types.COND_EQUAL, Args: types.Args{"Left": true, "Right": false}},
 			{Fn: types.COND_EQUAL, Args: types.Args{"Left": 1.11, "Right": 1.11}},
 		},
-	}, types.Rule{}, "Test11")
+	}, s.tag)
 	s.True(actual)
 }
 
@@ -46,18 +48,18 @@ func (s *EngineSuite) Test12() {
 			{Fn: types.COND_EQUAL, Args: types.Args{"Left": true, "Right": false}},
 			{Fn: types.COND_EQUAL, Args: types.Args{"Left": 1.11, "Right": 1.11}},
 		},
-	}, types.Rule{}, "Test12")
+	}, s.tag)
 	s.False(actual)
 }
 
 func (s *EngineSuite) Test20() {
 	defer func() { _ = recover() }()
-	s.False(s.e.InvokeConditionFunc(types.MessageTuple{}, 0, false, nil, types.Rule{}, "Test20"))
+	s.False(s.e.InvokeConditionFunc(types.MessageTuple{}, 0, false, nil, s.tag))
 	s.Fail("expected to panic")
 }
 
 func (s *EngineSuite) Test30() {
-	actual := s.e.MatchesListSome(dummy_mtcb, []types.Condition{}, types.Rule{}, "Test30")
+	actual := s.e.MatchesListSome(dummy_mtcb, []types.Condition{}, s.tag)
 	s.False(actual)
 }
 
@@ -65,12 +67,12 @@ func (s *EngineSuite) Test31() {
 	actual := s.e.MatchesListSome(dummy_mtcb, []types.Condition{
 		{Fn: types.COND_EQUAL, Args: types.Args{"Left": 1, "Right": 1}},
 		{Fn: types.COND_EQUAL, Args: types.Args{"Left": "foo", "Right": "bar"}},
-	}, types.Rule{}, "Test31")
+	}, s.tag)
 	s.True(actual)
 }
 
 func (s *EngineSuite) Test40() {
-	actual := s.e.MatchesListEvery(dummy_mtcb, []types.Condition{}, types.Rule{}, "Test40")
+	actual := s.e.MatchesListEvery(dummy_mtcb, []types.Condition{}, s.tag)
 	s.False(actual)
 }
 
@@ -78,12 +80,12 @@ func (s *EngineSuite) Test41() {
 	actual := s.e.MatchesListEvery(dummy_mtcb, []types.Condition{
 		{Fn: types.COND_EQUAL, Args: types.Args{"Left": 1, "Right": 1}},
 		{Fn: types.COND_EQUAL, Args: types.Args{"Left": "foo", "Right": "foo"}},
-	}, types.Rule{}, "Test41")
+	}, s.tag)
 	s.True(actual)
 }
 
 func (s *EngineSuite) Test60() {
-	s.e.ExecuteActions([]types.Message{}, types.Rule{}, "Test60")
+	s.e.ExecuteActions([]types.Message{}, types.Rule{}, s.tag)
 }
 
 func (s *EngineSuite) Test70() {
@@ -185,5 +187,7 @@ func (s *EngineSuite) Test171() {
 }
 
 func TestEngine(t *testing.T) {
-	suite.Run(t, new(EngineSuite))
+	suite.Run(t, &EngineSuite{
+		tag: logger.NewTag("EngineSuite"),
+	})
 }

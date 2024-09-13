@@ -11,7 +11,7 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
-var logTag = logger.MakeTag(logger.MAIN)
+var tag = logger.NewTag(logger.MAIN)
 
 type container struct {
 	mu    sync.RWMutex
@@ -44,7 +44,7 @@ func (c *container) CreateQueue(key Key, throttle time.Duration, flush FlushFn) 
 	defer c.mu.Unlock()
 	q = NewQueue(throttle, flush)
 	c.qlist[key] = q
-	slog.Debug(logTag(fmt.Sprintf(
+	slog.Debug(tag.F(fmt.Sprintf(
 		"New Queue created for key='%v', total instances %v",
 		key,
 		len(c.qlist),

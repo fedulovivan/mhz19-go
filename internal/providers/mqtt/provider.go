@@ -14,7 +14,7 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
-var logTag = logger.MakeTag(logger.MQTT)
+var tag = logger.NewTag(logger.MQTT)
 
 type provider struct {
 	engine.ProviderBase
@@ -65,7 +65,7 @@ func (p *parserBase) parse_base() (types.Message, bool) {
 	}
 
 	if err := json.Unmarshal(payload, &outMsg.Payload); err != nil {
-		slog.Warn(logTag("Failed to parse payload as json"), "payload", string(payload[:]), "err", err)
+		slog.Warn(tag.F("Failed to parse payload as json"), "payload", string(payload[:]), "err", err)
 		outMsg.RawPayload = payload
 	}
 
@@ -104,23 +104,23 @@ func (p *provider) Init() {
 	}
 
 	var defaultMessageHandler = func(client MqttLib.Client, msg MqttLib.Message) {
-		slog.Error(logTag("defaultMessageHandler is not expected to be reached"), "topic", msg.Topic())
+		slog.Error(tag.F("defaultMessageHandler is not expected to be reached"), "topic", msg.Topic())
 	}
 
 	var connectHandler = func(client MqttLib.Client) {
-		slog.Info(logTag("Connected"), "broker", app.GetMqttBrokerUrl())
+		slog.Info(tag.F("Connected"), "broker", app.GetMqttBrokerUrl())
 		for t := range handlers {
 			subscribe(client, t)
 		}
-		slog.Debug(logTag("All subscribtions are settled"))
+		slog.Debug(tag.F("All subscribtions are settled"))
 	}
 
 	var reconnectHandler = func(client MqttLib.Client, opts *MqttLib.ClientOptions) {
-		slog.Warn(logTag("Reconnecting..."), "broker", app.GetMqttBrokerUrl())
+		slog.Warn(tag.F("Reconnecting..."), "broker", app.GetMqttBrokerUrl())
 	}
 
 	var connectLostHandler = func(client MqttLib.Client, err error) {
-		slog.Error(logTag("Connection lost"), "error", err)
+		slog.Error(tag.F("Connection lost"), "error", err)
 	}
 
 	// build opts
@@ -153,25 +153,25 @@ func (p *provider) Init() {
 	}
 
 	// connect
-	slog.Debug(logTag("Connecting..."))
+	slog.Debug(tag.F("Connecting..."))
 	if token := p.client.Connect(); token.Wait() && token.Error() != nil {
-		slog.Error(logTag("Initial connect"), "error", token.Error())
+		slog.Error(tag.F("Initial connect"), "error", token.Error())
 	}
 
 }
 
 func (p *provider) Stop() {
-	slog.Debug(logTag("Disconnecting..."))
+	slog.Debug(tag.F("Disconnecting..."))
 	if p.client.IsConnected() {
 		p.client.Disconnect(250)
 	} else {
-		slog.Warn(logTag("Not connected"))
+		slog.Warn(tag.F("Not connected"))
 	}
 }
 
 func subscribe(client MqttLib.Client, topic string) {
 	if token := client.Subscribe(topic, 0, nil); token.Wait() && token.Error() != nil {
-		slog.Error(logTag("client.Subscribe()"), "error", token.Error())
+		slog.Error(tag.F("client.Subscribe()"), "error", token.Error())
 	}
-	slog.Info(logTag("Subscribed to"), "topic", topic)
+	slog.Info(tag.F("Subscribed to"), "topic", topic)
 }

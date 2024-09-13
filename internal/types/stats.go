@@ -16,10 +16,10 @@ type StatsGetResult struct {
 	Memory                 string     `json:"memory"`
 }
 
-func (r *StatsGetResult) WithAppStats(stats *app.AppStatCounters) {
-	r.EngineMessagesReceived = int32(stats.EngineMessagesReceived.Value())
-	r.EngineRulesMatched = int32(stats.EngineRulesMatched.Value())
-	r.ApiRequests = int32(stats.ApiRequests.Value())
+func (r *StatsGetResult) InjectAppStats(stats *app.AppStatCounters) {
+	r.EngineMessagesReceived = stats.EngineMessagesReceived.Value()
+	r.EngineRulesMatched = stats.EngineRulesMatched.Value()
+	r.ApiRequests = stats.ApiRequests.Value()
 	r.Uptime = app.GetUptime()
 	r.Memory = utils.GetMemUsage()
 }

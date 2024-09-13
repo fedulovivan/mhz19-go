@@ -9,7 +9,7 @@ import (
 	routing "github.com/go-ozzo/ozzo-routing/v2"
 )
 
-var logTag = logger.MakeTag(logger.STATS)
+var tag = logger.NewTag(logger.STATS)
 
 type statsApi struct {
 	service types.StatsService
@@ -24,7 +24,7 @@ func NewApi(base *routing.RouteGroup, service types.StatsService) {
 }
 
 func (api statsApi) get(c *routing.Context) error {
-	defer utils.TimeTrack(logTag, time.Now(), "api:get")
+	defer utils.TimeTrack(tag.F, time.Now(), "api:get")
 	data, err := api.service.Get()
 	if err != nil {
 		return err

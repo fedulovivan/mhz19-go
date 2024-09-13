@@ -20,7 +20,7 @@ import (
 	"github.com/go-ozzo/ozzo-routing/v2/slash"
 )
 
-var logTag = logger.MakeTag(logger.REST)
+var tag = logger.NewTag(logger.REST)
 
 var server http.Server
 
@@ -33,17 +33,17 @@ func errorHandler(c *routing.Context) (err error) {
 			if err, ok = rerr.(error); !ok {
 				err = fmt.Errorf("%v", rerr)
 			}
-			slog.Error(logTag("recovered from panic"))
+			slog.Error(tag.F("recovered from panic"))
 			fmt.Println(string(debug.Stack()))
 		}
 		if err != nil {
-			slog.Error(logTag("errorHandler:"), "path", c.Request.URL.Path, "err", err.Error())
+			slog.Error(tag.F("errorHandler:"), "path", c.Request.URL.Path, "err", err.Error())
 			res := map[string]any{
 				"is_error": true,
 				"error":    err.Error(),
 			}
 			if err = c.Write(res); err != nil {
-				slog.Error(logTag("failed writing error response"), "err", err)
+				slog.Error(tag.F("failed writing error response"), "err", err)
 			}
 			c.Abort()
 			err = nil
@@ -132,17 +132,17 @@ func Init() {
 	http.Handle("/", router)
 	go func() {
 		addr := fmt.Sprintf(":%v", app.Config.RestApiPort)
-		slog.Debug(logTag("server is running at " + addr))
+		slog.Debug(tag.F("server is running at " + addr))
 		server = http.Server{Addr: addr}
 		err := server.ListenAndServe()
-		slog.Warn(logTag(err.Error()))
+		slog.Warn(tag.F(err.Error()))
 	}()
 }
 
 func Stop() {
-	slog.Debug(logTag("Stopping rest..."))
+	slog.Debug(tag.F("Stopping rest..."))
 	err := server.Shutdown(context.Background())
 	if err != nil {
-		slog.Error(logTag(err.Error()))
+		slog.Error(tag.F(err.Error()))
 	}
 }

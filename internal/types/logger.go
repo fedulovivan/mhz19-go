@@ -1,3 +1,3 @@
 package types
 
-type LogTagFn = func(m string) string
+// type LogTagFn = func(m string) string

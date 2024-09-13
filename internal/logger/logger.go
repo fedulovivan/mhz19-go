@@ -1,14 +1,18 @@
 package logger
 
 import (
+	"fmt"
 	"log"
 	"log/slog"
 	"os"
+	"strings"
 
 	"github.com/fedulovivan/mhz19-go/internal/app"
-	"github.com/fedulovivan/mhz19-go/internal/types"
+	"github.com/fedulovivan/mhz19-go/pkg/utils"
 	"github.com/lmittmann/tint"
 )
+
+var seq = utils.NewSeq(0)
 
 func Init() {
 	if app.Config.IsDev {
@@ -45,14 +49,35 @@ const (
 	BURIED   TagName = "[buried]  "
 )
 
-func MakeTag(tag TagName) types.LogTagFn {
-	return func(message string) string {
-		return string(tag) + " " + message
+type Tag interface {
+	With(string, ...any) Tag
+	WithTid() Tag
+	F(string) string
+}
+
+type tag struct {
+	tags []string
+}
+
+func NewTag(first TagName) Tag {
+	return &tag{
+		tags: []string{string(first)},
 	}
-	// if app.Config.IsDev {
-	// 	// in development pad tag with spaces for extra nice output
-	// 	return func(message string) string {
-	// 		return fmt.Sprintf("%-10s", "["+tag+"]") + " " + message
-	// 	}
-	// }
+}
+
+func (t *tag) With(format string, a ...any) Tag {
+	res := *t
+	res.tags = append(res.tags, fmt.Sprintf(format, a...))
+	return &res
+}
+
+func (t *tag) WithTid() Tag {
+	return t.With("Tid#%v", seq.Inc())
+}
+
+func (t *tag) F(message string) string {
+	return strings.Join(
+		append(t.tags, message),
+		" ",
+	)
 }

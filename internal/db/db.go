@@ -18,9 +18,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var logTag = logger.MakeTag(logger.DB)
-
-var seq = utils.NewSeq(0)
+var rootTag = logger.NewTag(logger.DB)
 
 var instance *sql.DB
 
@@ -28,6 +26,8 @@ func DbSingleton() *sql.DB {
 	if instance != nil {
 		return instance
 	}
+
+	slog.Debug(rootTag.F("instance created"))
 
 	var err error
 	dbabspath, err := filepath.Abs(app.Config.SqliteFilename)
@@ -97,21 +97,21 @@ func Exec(
 	query string,
 	values ...any,
 ) (res sql.Result, err error) {
-	tid := seq.Inc()
+	tag := rootTag.WithTid()
 	if app.Config.DbDebug {
-		defer utils.TimeTrack(logTag, time.Now(), fmt.Sprintf("#%v", tid))
+		defer utils.TimeTrack(tag.F, time.Now(), "Exec")
 	}
 	select {
 	case <-ctx.Done():
 		return
 	default:
 		lquery := utils.OneLineTrim(query)
-		logQuery(tid, lquery, values)
+		logQuery(tag, lquery, values)
 		res, err = tx.ExecContext(ctx, query, values...)
 		if err != nil {
 			err = fmt.Errorf(
-				"#%v got an error \"%v\" executing %v, values %v",
-				tid, err, lquery, values,
+				"got an error \"%v\" executing %v, values %v",
+				err, lquery, values,
 			)
 		}
 		return
@@ -184,14 +184,13 @@ func Count(
 	return
 }
 
-func logQuery(tid int, query string, values ...any) {
+func logQuery(tag logger.Tag, query string, values ...any) {
 	if !app.Config.DbDebug {
 		return
 	}
-	slog.Debug(logTag(
+	slog.Debug(tag.F(
 		fmt.Sprintf(
-			"#%v executing query %v, values %v",
-			tid,
+			"executing query %v, values %v",
 			query,
 			values,
 		),
@@ -205,9 +204,9 @@ func Select[T any](
 	scan func(rows *sql.Rows, model *T) error,
 	where Where,
 ) (result []T, err error) {
-	tid := seq.Inc()
+	tag := rootTag.WithTid()
 	if app.Config.DbDebug {
-		defer utils.TimeTrack(logTag, time.Now(), fmt.Sprintf("#%v", tid))
+		defer utils.TimeTrack(tag.F, time.Now(), "Exec")
 	}
 	select {
 	case <-ctx.Done():
@@ -217,7 +216,7 @@ func Select[T any](
 		wquery := AddWhere(query, where)
 		values := PickWhereValues(where)
 		lquery := utils.OneLineTrim(wquery)
-		logQuery(tid, lquery, values)
+		logQuery(tag, lquery, values)
 		rows, err = tx.QueryContext(
 			ctx,
 			wquery,
@@ -225,8 +224,8 @@ func Select[T any](
 		)
 		if err != nil {
 			err = fmt.Errorf(
-				"#%v got an error \"%v\" for query %v, values %v",
-				tid, err, lquery, values,
+				"got an error \"%v\" for query %v, values %v",
+				err, lquery, values,
 			)
 			return
 		}
