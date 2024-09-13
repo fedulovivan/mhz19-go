@@ -1,6 +1,5 @@
 
 ### Prio 0
-- feat: add devices.buried_ignored column or devices.buried_timeout (0 - blacklisted device, nill - default timeout)
 
 ### Prio 1
 - feat: new action to play alert
@@ -8,7 +7,6 @@
 - arch: think how we can construct/init "TemplatePayload" automatically, now we need to build it manually in action implementation
 - feat: create api to update rule
 - feat: create api to add/update/delete devices
-- feat: create api to read one device
 - feat: create api to read device classes (or unified api for any simple dict table?)
 - bug: "http: superfluous response.WriteHeader call from github.com/go-ozzo/ozzo-routing/v2.(*Router).handleError (router.go:131)" - appears after termination of stucked apache bench
 - bug: "apr_socket_recv: Operation timed out (60)" - https://stackoverflow.com/questions/30352725/why-is-my-hello-world-go-server-getting-crushed-by-apachebench
@@ -40,6 +38,8 @@
 
 ### Completed
 
+- (+) feat: create api to read one device
+- (+) feat: add devices.buried_ignored column or devices.buried_timeout (0 - blacklisted device, null - default timeout)
 - (+) basic app counters
 - (+) feat: add Condition.FnInverted bool flag instead of NotEqual, NotChannel
 - (+) feat: introduce SkipCounter field for the rule

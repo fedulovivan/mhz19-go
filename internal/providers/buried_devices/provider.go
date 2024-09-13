@@ -1,21 +1,33 @@
 package buried_devices_provider
 
 import (
+	"fmt"
+	"log/slog"
 	"time"
 
+	"github.com/fedulovivan/mhz19-go/internal/app"
 	"github.com/fedulovivan/mhz19-go/internal/engine"
-	"github.com/fedulovivan/mhz19-go/internal/entities/ldm"
+	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
+var logTag = logger.MakeTag(logger.BURIED)
+
 type provider struct {
 	engine.ProviderBase
-	ldmRepository ldm.LdmRepository
+	ldmService     types.LdmService
+	devicesService types.DevicesService
+	buriedTimers   map[types.LdmKey]*time.Timer
 }
 
-func NewProvider(ldmRepository ldm.LdmRepository) types.ChannelProvider {
+func NewProvider(
+	ldmService types.LdmService,
+	devicesService types.DevicesService,
+) types.ChannelProvider {
 	return &provider{
-		ldmRepository: ldmRepository,
+		ldmService:     ldmService,
+		devicesService: devicesService,
+		buriedTimers:   make(map[types.LdmKey]*time.Timer),
 	}
 }
 
@@ -26,20 +38,45 @@ func (p *provider) Channel() types.ChannelType {
 func (p *provider) Init() {
 	p.Out = make(types.MessageChan, 100)
 	go func() {
-		p.ldmRepository.AppendBuriedBlacklist(
-			p.ldmRepository.NewKey(types.DEVICE_CLASS_SYSTEM, types.DeviceIdForTheBuriedDeviceMessage),
-			p.ldmRepository.NewKey(types.DEVICE_CLASS_ZIGBEE_BRIDGE, types.DeviceId("bridge")),
-		)
-		for key := range p.ldmRepository.Buried() {
-			time.Sleep(time.Second)
-			p.Out <- types.Message{
-				ChannelType: types.CHANNEL_SYSTEM,
-				DeviceClass: types.DEVICE_CLASS_SYSTEM,
-				DeviceId:    types.DeviceIdForTheBuriedDeviceMessage,
-				Timestamp:   time.Now(),
-				Payload: map[string]any{
-					"BuriedDeviceId": key.DeviceId,
-				},
+		for key := range p.ldmService.OnSet() {
+			skipped := false
+			timeout := app.Config.DefaultBuriedTimeout
+			device, err := p.devicesService.GetOne(key.DeviceId)
+			if err == nil && device.BuriedTimeout != nil {
+				if device.BuriedTimeout.Duration == 0 {
+					slog.Debug(logTag(fmt.Sprintf("%v device skipped (devices.buried_timeout == 0)", key.DeviceId)))
+					skipped = true
+				} else {
+					slog.Warn(logTag(fmt.Sprintf("%v using custom BuriedTimeout value=%s", key.DeviceId, device.BuriedTimeout.Duration)))
+					timeout = device.BuriedTimeout.Duration
+				}
+			}
+			if timer, ok := p.buriedTimers[key]; ok {
+				if skipped {
+					slog.Warn(logTag(fmt.Sprintf("%v is now skipped, stopping and deleting timer", key.DeviceId)))
+					timer.Stop()
+					delete(p.buriedTimers, key)
+					continue
+				}
+				timer.Reset(timeout)
+			} else {
+				if skipped {
+					continue
+				}
+				p.buriedTimers[key] = time.AfterFunc(
+					timeout,
+					func() {
+						p.Out <- types.Message{
+							ChannelType: types.CHANNEL_SYSTEM,
+							DeviceClass: types.DEVICE_CLASS_SYSTEM,
+							DeviceId:    types.DeviceIdForTheBuriedDeviceMessage,
+							Timestamp:   time.Now(),
+							Payload: map[string]any{
+								"BuriedDeviceId": key.DeviceId,
+							},
+						}
+					},
+				)
 			}
 		}
 	}()

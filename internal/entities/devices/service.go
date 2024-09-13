@@ -23,15 +23,18 @@ func (s devicesService) UpsertAll(devices []types.Device) (err error) {
 func ToDb(in []types.Device) (out []DbDevice) {
 	for _, d := range in {
 		mjson, err := json.Marshal(d.Json)
-		out = append(out, DbDevice{
+		dbDevice := DbDevice{
 			NativeId:      string(d.DeviceId),
 			DeviceClassId: int32(d.DeviceClassId),
 			Name:          sql.NullString{String: d.Name, Valid: len(d.Name) > 0},
 			Comments:      sql.NullString{String: d.Comments, Valid: len(d.Comments) > 0},
 			Origin:        sql.NullString{String: d.Origin, Valid: len(d.Origin) > 0},
 			Json:          sql.NullString{String: string(mjson), Valid: err == nil},
-			BuriedTimeout: db.NewNullInt32(int32(d.BuriedTimeout.Duration.Seconds())),
-		})
+		}
+		if d.BuriedTimeout != nil {
+			dbDevice.BuriedTimeout = db.NewNullInt32(int32(d.BuriedTimeout.Duration.Seconds()))
+		}
+		out = append(out, dbDevice)
 	}
 	return
 }
@@ -52,7 +55,7 @@ func BuildDevices(in []DbDevice) (out []types.Device) {
 			Json:          payload,
 		}
 		if d.BuriedTimeout.Valid {
-			device.BuriedTimeout = types.BuriedTimeout{
+			device.BuriedTimeout = &types.BuriedTimeout{
 				Duration: time.Duration(d.BuriedTimeout.Int32) * time.Second,
 			}
 		}

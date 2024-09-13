@@ -92,7 +92,7 @@ func conditionInsertTx(
 	return db.Exec(
 		tx,
 		ctx,
-		`INSERT INTO rule_conditions(rule_id, function_type, logic_or, parent_condition_id, other_device_id, function_inverted) VALUES(?,?,?,?,?)`,
+		`INSERT INTO rule_conditions(rule_id, function_type, logic_or, parent_condition_id, other_device_id, function_inverted) VALUES(?,?,?,?,?,?)`,
 		cond.RuleId, cond.FunctionType, cond.LogicOr, cond.ParentConditionId, cond.OtherDeviceId, cond.Not,
 	)
 }

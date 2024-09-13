@@ -37,7 +37,11 @@ func main() {
 			db.DbSingleton(),
 		),
 	)
-	dbRules, _ := rulesService.Get()
+	devicesService := devices.NewService(
+		devices.NewRepository(
+			db.DbSingleton(),
+		),
+	)
 	e := engine.NewEngine()
 	e.SetLogTag(logger.MakeTag(logger.ENGINE))
 	e.SetProviders(
@@ -45,7 +49,8 @@ func main() {
 		tbot.NewProvider(),
 		dnssd.NewProvider(),
 		buried_devices.NewProvider(
-			ldm.RepoSingleton(),
+			ldm.NewService(ldm.RepoSingleton()),
+			devicesService,
 		),
 	)
 	e.SetMessagesService(
@@ -56,11 +61,7 @@ func main() {
 		),
 	)
 	e.SetDevicesService(
-		devices.NewService(
-			devices.NewRepository(
-				db.DbSingleton(),
-			),
-		),
+		devicesService,
 	)
 	e.SetLdmService(
 		ldm.NewService(
@@ -68,7 +69,12 @@ func main() {
 		),
 	)
 	e.AppendRules(engine.GetStaticRules()...)
-	e.AppendRules(dbRules...)
+	dbRules, err := rulesService.Get()
+	if err == nil {
+		e.AppendRules(dbRules...)
+	} else {
+		slog.Error(logTag("Failed to load rules from db"), "err", err.Error())
+	}
 	go func() {
 		for rule := range rulesService.OnCreated() {
 			e.AppendRules(rule)

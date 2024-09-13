@@ -32,6 +32,10 @@ func (s ldmService) GetByDeviceId(deviceId types.DeviceId) types.Message {
 	return s.repository.GetByDeviceId(deviceId)
 }
 
+func (s ldmService) OnSet() chan types.LdmKey {
+	return s.repository.OnSet()
+}
+
 func NewService(r LdmRepository) types.LdmService {
 	return ldmService{
 		repository: r,

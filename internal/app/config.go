@@ -40,11 +40,11 @@ type ConfigStorage struct {
 	MqttClientId string `env:"MQTT_CLIENT_ID,default=mhz19-go"`
 
 	// other
-	Tz            string        `env:"TZ"`
-	LogLevel      slog.Level    `env:"LOG_LEVEL,default=debug"`
-	BuriedTimeout time.Duration `env:"BURIED_TIMEOUT,default=90m"`
-	RestApiPort   int           `env:"REST_API_PORT,default=8888"`
-	RestApiPath   string        `env:"REST_API_PATH,default=/api"`
+	Tz                   string        `env:"TZ"`
+	LogLevel             slog.Level    `env:"LOG_LEVEL,default=debug"`
+	DefaultBuriedTimeout time.Duration `env:"BURIED_TIMEOUT,default=90m"`
+	RestApiPort          int           `env:"REST_API_PORT,default=8888"`
+	RestApiPath          string        `env:"REST_API_PATH,default=/api"`
 }
 
 func InitConfig() {

@@ -24,26 +24,36 @@ func NewApi(base *routing.RouteGroup, service types.DevicesService) {
 	group := base.Group("/devices")
 	group.Get("", api.get)
 	group.Get("/class/<deviceClass>", api.getByDeviceClass)
+	group.Get("/<deviceId>", api.getByDeviceId)
 }
 
-func (api devicesApi) get(c *routing.Context) error {
+func (api devicesApi) get(c *routing.Context) (err error) {
 	defer utils.TimeTrack(api.logTag, time.Now(), "api:get")
 	data, err := api.service.Get()
 	if err != nil {
-		return err
+		return
 	}
 	return c.Write(data)
 }
 
-func (api devicesApi) getByDeviceClass(c *routing.Context) error {
+func (api devicesApi) getByDeviceClass(c *routing.Context) (err error) {
 	defer utils.TimeTrack(api.logTag, time.Now(), "api:getByDeviceClass")
 	dc, err := strconv.Atoi(c.Param("deviceClass"))
 	if err != nil {
-		return err
+		return
 	}
 	data, err := api.service.GetByDeviceClass(types.DeviceClass(dc))
 	if err != nil {
-		return err
+		return
+	}
+	return c.Write(data)
+}
+
+func (api devicesApi) getByDeviceId(c *routing.Context) (err error) {
+	defer utils.TimeTrack(api.logTag, time.Now(), "api:getByDeviceId")
+	data, err := api.service.GetOne(types.DeviceId(c.Param("deviceId")))
+	if err != nil {
+		return
 	}
 	return c.Write(data)
 }

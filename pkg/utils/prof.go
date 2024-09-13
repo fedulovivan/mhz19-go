@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"log/slog"
 	"runtime"
 )
@@ -26,6 +27,12 @@ func PrintMemUsage() {
 		"SYS", bToKb(m.Sys),
 		"NUM_GC", m.NumGC,
 	)
+}
+
+func GetMemUsage() string {
+	var m runtime.MemStats
+	runtime.ReadMemStats(&m)
+	return fmt.Sprintf("%vkb", bToKb(m.Alloc))
 }
 
 func bToKb(b uint64) uint64 {
