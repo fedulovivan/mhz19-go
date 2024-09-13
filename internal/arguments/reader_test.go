@@ -179,12 +179,12 @@ func (s *ReaderSuite) Test121() {
 func (s *ReaderSuite) Test122() {
 	engine := mocks.NewEngineMock()
 	m := types.Message{}
-	args := types.Args{"Foo5": "{{ range .Messages }}device name is {{ deviceName .DeviceId }}{{end}}"}
+	args := types.Args{"Foo5": "{{ range .Messages }}device name is '{{ deviceName .DeviceId }}'{{end}}"}
 	tpayload := types.TemplatePayload{Messages: []types.Message{{
 		DeviceId: "nullish-device-id",
 	}}}
 	r := NewReader(&m, args, nil, &tpayload, engine)
-	expected := "device name is <unknonwn device originated from > nullish-device-id"
+	expected := "device name is 'Device of class <unknown> (id=0), with id nullish-device-id'"
 	actual := r.Get("Foo5")
 	s.Equal(expected, actual)
 	s.Nil(r.Error())

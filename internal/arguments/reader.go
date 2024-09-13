@@ -120,7 +120,7 @@ func (r *reader) ExecTemplate(in string, field string) (string, error) {
 					if len(device.Comments) > 0 {
 						return device.Comments, nil
 					}
-					return fmt.Sprintf("<unknonwn device originated from %v> %v", device.Origin, deviceId), nil
+					return fmt.Sprintf("Device of class %s, with id %v", device.DeviceClassId, deviceId), nil
 				} else {
 					return fmt.Sprintf("%v", deviceId), fmt.Errorf(
 						"deviceName accepts only types.DeviceId as an argument",
