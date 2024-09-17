@@ -24,6 +24,7 @@ type Message struct {
 	// indicates this is end device message,
 	// and not a thing like z2m bridge message with list of registered devices,
 	// or not a dns-sd channel message with sonoff device announcement
+	// or not system message from buried_devices/provider.go
 	FromEndDevice bool `json:"fromEndDevice"`
 }
 

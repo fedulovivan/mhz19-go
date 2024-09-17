@@ -12,7 +12,7 @@ func GetStaticRules() []types.Rule {
 			Name:     `system rule for "buried devices" aka "have not seen for a while" feature`,
 			Disabled: true,
 			Condition: types.Condition{
-				List: []types.Condition{
+				Nested: []types.Condition{
 					{
 						Fn:   types.COND_СHANNEL,
 						Args: types.Value(types.CHANNEL_SYSTEM),
@@ -38,12 +38,11 @@ func GetStaticRules() []types.Rule {
 
 		// system rule to save (almost) all received messages in db
 		{
-			Id:          2000,
-			Name:        "system rule to save (almost) all received messages in db",
-			Disabled:    true,
-			SkipCounter: true,
+			Id:       2000,
+			Name:     "system rule to save (almost) all received messages in db",
+			Disabled: true,
 			Condition: types.Condition{
-				List: []types.Condition{
+				Nested: []types.Condition{
 					{
 						Fn: types.COND_FROM_END_DEVICE,
 					},
@@ -61,10 +60,9 @@ func GetStaticRules() []types.Rule {
 
 		// system rule to create devices upon receiving message from zigbee2mqtt bridge
 		{
-			Id:          3000,
-			Name:        "system rule to create devices upon receiving message from zigbee2mqtt bridge",
-			Disabled:    true,
-			SkipCounter: true,
+			Id:       3000,
+			Name:     "system rule to create devices upon receiving message from zigbee2mqtt bridge",
+			Disabled: true,
 			Condition: types.Condition{
 				Fn:   types.COND_DEVICE_CLASS,
 				Args: types.Value(types.DEVICE_CLASS_ZIGBEE_BRIDGE),
@@ -74,10 +72,9 @@ func GetStaticRules() []types.Rule {
 
 		// system rule to create devices upon receiving dns-sd message with _ewelink._tcp service
 		{
-			Id:          4000,
-			Name:        "system rule to create sonoff devices upon receiving dns-sd message with _ewelink._tcp service",
-			Disabled:    true,
-			SkipCounter: true,
+			Id:       4000,
+			Name:     "system rule to create sonoff devices upon receiving dns-sd message with _ewelink._tcp service",
+			Disabled: true,
 			Condition: types.Condition{
 				Fn:   types.COND_СHANNEL,
 				Args: types.Value(types.CHANNEL_DNS_SD),
@@ -109,7 +106,7 @@ func GetStaticRules() []types.Rule {
 			Name:     "test mapping for composite condition function",
 			Disabled: true,
 			Condition: types.Condition{
-				List: []types.Condition{
+				Nested: []types.Condition{
 					{
 						Fn: types.COND_ZIGBEE_DEVICE,
 						Args: types.Args{
@@ -135,7 +132,7 @@ func GetStaticRules() []types.Rule {
 			Name:     "balcony ceiling light on/off",
 			Disabled: true,
 			Condition: types.Condition{
-				List: []types.Condition{
+				Nested: []types.Condition{
 					{
 						Fn: types.COND_ZIGBEE_DEVICE,
 						Args: types.Args{

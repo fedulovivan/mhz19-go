@@ -28,13 +28,13 @@ var dummy_mtcb types.MessageTupleFn = func(types.DeviceId) (res types.MessageTup
 
 func (s *EngineSuite) Test10() {
 	actual := s.e.MatchesCondition(dummy_mtcb, types.Condition{}, s.tag)
-	s.True(actual)
+	s.False(actual)
 }
 
 func (s *EngineSuite) Test11() {
 	actual := s.e.MatchesCondition(dummy_mtcb, types.Condition{
 		Or: true,
-		List: []types.Condition{
+		Nested: []types.Condition{
 			{Fn: types.COND_EQUAL, Args: types.Args{"Left": true, "Right": false}},
 			{Fn: types.COND_EQUAL, Args: types.Args{"Left": 1.11, "Right": 1.11}},
 		},
@@ -44,12 +44,30 @@ func (s *EngineSuite) Test11() {
 
 func (s *EngineSuite) Test12() {
 	actual := s.e.MatchesCondition(dummy_mtcb, types.Condition{
-		List: []types.Condition{
+		Nested: []types.Condition{
 			{Fn: types.COND_EQUAL, Args: types.Args{"Left": true, "Right": false}},
 			{Fn: types.COND_EQUAL, Args: types.Args{"Left": 1.11, "Right": 1.11}},
 		},
 	}, s.tag)
 	s.False(actual)
+}
+
+func (s *EngineSuite) Test13() {
+	actual := s.e.MatchesCondition(dummy_mtcb, types.Condition{
+		Nested: []types.Condition{
+			{
+				Fn:   types.COND_IS_NIL,
+				Args: types.Args{"Value": nil},
+			},
+			{
+				Nested: []types.Condition{
+					{Fn: types.COND_EQUAL, Args: types.Args{"Left": true, "Right": true}},
+					{Fn: types.COND_EQUAL, Args: types.Args{"Left": 1, "Right": 1}},
+				},
+			},
+		},
+	}, s.tag)
+	s.True(actual)
 }
 
 func (s *EngineSuite) Test20() {
@@ -89,14 +107,10 @@ func (s *EngineSuite) Test60() {
 }
 
 func (s *EngineSuite) Test70() {
-
-	// TODO
-	s.T().Skip()
-
-	defer func() { _ = recover() }()
+	// defer func() { _ = recover() }()
 	s.e.HandleMessage(types.Message{}, []types.Rule{})
 	s.e.HandleMessage(types.Message{DeviceClass: types.DEVICE_CLASS_ZIGBEE_BRIDGE}, []types.Rule{})
-	s.Fail("expected to panic")
+	// s.Fail("expected to panic")
 }
 
 func (s *EngineSuite) Test72() {

@@ -15,7 +15,7 @@ const (
 	COND_CHANGED         CondFn = 1
 	COND_EQUAL           CondFn = 2
 	COND_IN_LIST         CondFn = 3
-	COND_NOT_NIL         CondFn = 5
+	COND_IS_NIL          CondFn = 5
 	COND_ZIGBEE_DEVICE   CondFn = 6
 	COND_DEVICE_CLASS    CondFn = 7
 	COND_СHANNEL         CondFn = 8
@@ -26,7 +26,7 @@ var CONDITION_NAMES = map[CondFn]string{
 	COND_CHANGED:         "Changed",
 	COND_EQUAL:           "Equal",
 	COND_IN_LIST:         "InList",
-	COND_NOT_NIL:         "NotNil",
+	COND_IS_NIL:          "IsNil",
 	COND_ZIGBEE_DEVICE:   "ZigbeeDevice",
 	COND_DEVICE_CLASS:    "DeviceClass",
 	COND_СHANNEL:         "Channel",

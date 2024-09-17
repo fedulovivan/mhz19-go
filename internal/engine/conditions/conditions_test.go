@@ -65,24 +65,6 @@ func (s *ConditionsSuite) Test84() {
 	s.True(actual)
 }
 
-// func (s *ConditionsSuite) Test90() {
-// 	actual, err := NotEqual(types.MessageTuple{}, types.Args{})
-// 	s.NotNil(err)
-// 	s.False(actual)
-// }
-
-// func (s *ConditionsSuite) Test91() {
-// 	actual, err := NotEqual(types.MessageTuple{}, types.Args{"Left": 1, "Right": 1})
-// 	s.Nil(err)
-// 	s.False(actual)
-// }
-
-// func (s *ConditionsSuite) Test92() {
-// 	actual, err := NotEqual(types.MessageTuple{}, types.Args{"Left": "one", "Right": "one"})
-// 	s.Nil(err)
-// 	s.False(actual)
-// }
-
 func (s *ConditionsSuite) Test93() {
 	mt := types.MessageTuple{
 		Curr: &types.Message{
@@ -169,33 +151,33 @@ func (s *ConditionsSuite) Test105() {
 }
 
 func (s *ConditionsSuite) Test110() {
-	actual, err := NotNil(types.MessageTuple{}, types.Args{})
+	actual, err := IsNil(types.MessageTuple{}, types.Args{})
 	s.NotNil(err)
-	s.False(actual)
+	s.True(actual)
 }
 
 func (s *ConditionsSuite) Test111() {
-	actual, err := NotNil(types.MessageTuple{}, types.Args{"Value": "foo"})
+	actual, err := IsNil(types.MessageTuple{}, types.Args{"Value": "foo"})
 	s.Nil(err)
-	s.True(actual)
+	s.False(actual)
 }
 
 func (s *ConditionsSuite) Test112() {
-	actual, err := NotNil(types.MessageTuple{}, types.Args{"Value": false})
+	actual, err := IsNil(types.MessageTuple{}, types.Args{"Value": false})
 	s.Nil(err)
-	s.True(actual)
+	s.False(actual)
 }
 
 func (s *ConditionsSuite) Test113() {
-	actual, err := NotNil(types.MessageTuple{}, types.Args{"Value": 0})
+	actual, err := IsNil(types.MessageTuple{}, types.Args{"Value": 0})
 	s.Nil(err)
-	s.True(actual)
+	s.False(actual)
 }
 
 func (s *ConditionsSuite) Test114() {
-	actual, err := NotNil(types.MessageTuple{}, types.Args{"Value": 100500})
+	actual, err := IsNil(types.MessageTuple{}, types.Args{"Value": 100500})
 	s.Nil(err)
-	s.True(actual)
+	s.False(actual)
 }
 
 func (s *ConditionsSuite) Test120() {
@@ -270,24 +252,64 @@ func (s *ConditionsSuite) Test115() {
 	var res bool
 	var err error
 
-	res, err = NotNil(mt, types.Args{"Value": "$message.action"})
-	s.True(res)
-	s.Nil(err)
-	res, err = NotNil(mt, types.Args{"Value": "$message.double"})
-	s.True(res)
-	s.Nil(err)
-	res, err = NotNil(mt, types.Args{"Value": "$message.int"})
-	s.True(res)
-	s.Nil(err)
-	res, err = NotNil(mt, types.Args{"Value": "$message.boolean"})
-	s.True(res)
-	s.Nil(err)
-	res, err = NotNil(mt, types.Args{"Value": "$message.voltage"})
+	res, err = IsNil(mt, types.Args{"Value": "$message.action"})
 	s.False(res)
 	s.Nil(err)
-	res, err = NotNil(mt, types.Args{"Value": "$message.nonexisting"})
+	res, err = IsNil(mt, types.Args{"Value": "$message.double"})
 	s.False(res)
+	s.Nil(err)
+	res, err = IsNil(mt, types.Args{"Value": "$message.int"})
+	s.False(res)
+	s.Nil(err)
+	res, err = IsNil(mt, types.Args{"Value": "$message.boolean"})
+	s.False(res)
+	s.Nil(err)
+	res, err = IsNil(mt, types.Args{"Value": "$message.voltage"})
+	s.True(res)
+	s.Nil(err)
+	res, err = IsNil(mt, types.Args{"Value": "$message.nonexisting"})
+	s.True(res)
 	s.NotNil(err)
+}
+
+func (s *ConditionsSuite) Test160() {
+	mt := types.MessageTuple{
+		Curr: &types.Message{},
+	}
+	actual, err := Channel(mt, types.Args{"Value": types.ChannelType(0)})
+	s.Nil(err)
+	s.True(actual)
+}
+
+func (s *ConditionsSuite) Test161() {
+	mt := types.MessageTuple{
+		Curr: &types.Message{
+			ChannelType: types.CHANNEL_TELEGRAM,
+		},
+	}
+	actual, err := Channel(mt, types.Args{"Value": types.CHANNEL_TELEGRAM})
+	s.Nil(err)
+	s.True(actual)
+}
+
+func (s *ConditionsSuite) Test170() {
+	mt := types.MessageTuple{
+		Curr: &types.Message{},
+	}
+	actual, err := FromEndDevice(mt, types.Args{})
+	s.Nil(err)
+	s.False(actual)
+}
+
+func (s *ConditionsSuite) Test171() {
+	mt := types.MessageTuple{
+		Curr: &types.Message{
+			FromEndDevice: true,
+		},
+	}
+	actual, err := FromEndDevice(mt, types.Args{})
+	s.Nil(err)
+	s.True(actual)
 }
 
 func TestConditions(t *testing.T) {

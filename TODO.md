@@ -1,11 +1,7 @@
 
 ### Prio 0
-- uts: create tests for recursive conditions
-- arch: avoid "args=map[]" in logs - slog always writes nil map as "map[]", not "nil", see also Test20, Test21 in service_test.go, https://github.com/golang/go/issues/69496
-- try: postgres instead of sqlite3
-- bug: unable to start vscode debugging or unit tests with current implementation around SqliteFilename and SQLITE_FILENAME
-- arch: support several bots
-- try: validation https://github.com/asaskevich/govalidator OR https://github.com/go-ozzo/ozzo-validation
+- uts: create tests for nested conditions
+- feat: make RecordMessage throttled + implement batch insert + ensure there no misses with throttled handling 
 
 ### Prio 1
 - None
@@ -37,6 +33,7 @@
  
 
 ### Try
+- try: validation https://github.com/asaskevich/govalidator OR https://github.com/go-ozzo/ozzo-validation
 - try: find out why cli command "make test" and "vscode" report different coverage statistics: 86.9% vs 100%. vscode syntax - `Running tool: /opt/homebrew/bin/go test -timeout 30s -coverprofile=/var/folders/5v/0wjs9g1948ddpdqkgf1h31q80000gn/T/vscode-go7lC7ip/go-code-cover github.com/fedulovivan/mhz19-go/internal/engine`
 - try: separate di library https://pkg.go.dev/go.uber.org/fx
 - try: opentelemetry https://opentelemetry.io/docs/languages/go/getting-started/   
@@ -47,7 +44,11 @@
 
 ### Completed
 
-- (+) try: gorm
+- (+) arch: avoid "args=map[]" in logs - slog always writes nil map as "map[]", not "nil", see also Test20, Test21 in service_test.go, https://github.com/golang/go/issues/69496
+- try: postgres instead of sqlite3
+- (+) bug: unable to start vscode debugging or unit tests with current implementation around SqliteFilename and SQLITE_FILENAME
+- (+) arch: support several bots
+- (+) try: gorm - /Users/ivanf/Desktop/Projects/go/gorm-test/main.go
 - (+) feat: implement log tag with meta, so we can add attrs to function
 - (+) feat: create api to read one device
 - (+) feat: add devices.buried_ignored column or devices.buried_timeout (0 - blacklisted device, null - default timeout)

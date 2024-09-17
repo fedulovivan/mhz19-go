@@ -38,11 +38,10 @@ var testDataTable = []TableRow{
 	{
 		rules: []DbRule{
 			{
-				Id:          1,
-				Name:        "case 2",
-				IsDisabled:  db.NewNullInt32(0),
-				Throttle:    db.NewNullInt32(0),
-				SkipCounter: db.NewNullInt32(0),
+				Id:         1,
+				Name:       "case 2",
+				IsDisabled: db.NewNullInt32(0),
+				Throttle:   db.NewNullInt32(0),
 			},
 		},
 		conditions: []DbRuleCondition{
@@ -127,17 +126,16 @@ var testDataTable = []TableRow{
 			},
 		},
 		expectedLen:  1,
-		expectedJson: `[{"id":1,"name":"case 2","condition":{"fn":"Changed","args":{"Fifth":"0x00158d0004244bda","Fourth":"zigbee-device","Left":"foo","Right":"bar","Third":"baz"}},"actions":[{"fn":"PostSonoffSwitchMessage","args":{"ListIds":["10011cec96","78345aaa67"],"Value":"$message.action"},"mapping":{"Value":{"lorem-3":"dolor-4","sit-5":"amet-6"}}}],"throttle":null,"skipCounter":false}]`,
+		expectedJson: `[{"id":1,"name":"case 2","condition":{"fn":"Changed","args":{"Fifth":"0x00158d0004244bda","Fourth":"zigbee-device","Left":"foo","Right":"bar","Third":"baz"}},"actions":[{"fn":"PostSonoffSwitchMessage","args":{"ListIds":["10011cec96","78345aaa67"],"Value":"$message.action"},"mapping":{"Value":{"lorem-3":"dolor-4","sit-5":"amet-6"}}}],"throttle":null}]`,
 	},
 	// case 02
 	{
 		rules: []DbRule{
 			{
-				Id:          2,
-				Name:        "case 3",
-				IsDisabled:  db.NewNullInt32(0),
-				Throttle:    db.NewNullInt32(0),
-				SkipCounter: db.NewNullInt32(0),
+				Id:         2,
+				Name:       "case 3",
+				IsDisabled: db.NewNullInt32(0),
+				Throttle:   db.NewNullInt32(0),
 			},
 		},
 		conditions: []DbRuleCondition{
@@ -176,7 +174,7 @@ var testDataTable = []TableRow{
 				ParentConditionId: db.NewNullInt32(25),
 			},
 		},
-		expectedJson: `[{"id":2,"name":"case 3","condition":{"list":[{"fn":"Changed"},{"fn":"Equal"},{"list":[{"fn":"InList"},{"fn":""}],"or":true}]},"throttle":null,"skipCounter":false}]`,
+		expectedJson: `[{"id":2,"name":"case 3","condition":{"nested":[{"fn":"Changed"},{"fn":"Equal"},{"nested":[{"fn":"InList"},{"fn":""}],"or":true}]},"throttle":null}]`,
 	},
 }
 
@@ -263,8 +261,8 @@ func (s *ServiceSuite) Test50() {
 func (s *ServiceSuite) Test51() {
 	defer func() { _ = recover() }()
 	ToDbConditions(1, nil, types.Condition{
-		Fn:   types.COND_CHANGED,
-		List: []types.Condition{{Fn: types.COND_EQUAL}},
+		Fn:     types.COND_CHANGED,
+		Nested: []types.Condition{{Fn: types.COND_EQUAL}},
 	}, nil, nil)
 	s.Fail("expected to panic")
 }
@@ -273,7 +271,7 @@ func (s *ServiceSuite) Test52() {
 	actualArgs := []DbRuleConditionOrActionArgument{}
 	actualConds := ToDbConditions(1, nil, types.Condition{
 		Or: true,
-		List: []types.Condition{
+		Nested: []types.Condition{
 			{Fn: types.COND_EQUAL, Args: types.Args{"Left": 1, "Right": 2}},
 			{Fn: types.COND_IN_LIST},
 		},
@@ -291,9 +289,9 @@ func (s *ServiceSuite) Test52() {
 func (s *ServiceSuite) Test53() {
 	actual := ToDbConditions(1, nil, types.Condition{
 		Or: true,
-		List: []types.Condition{
+		Nested: []types.Condition{
 			{Fn: types.COND_EQUAL},
-			{List: []types.Condition{
+			{Nested: []types.Condition{
 				{Fn: types.COND_EQUAL, Not: true},
 				{Fn: types.COND_IN_LIST},
 			}},
@@ -320,7 +318,7 @@ func (s *ServiceSuite) Test60() {
 func (s *ServiceSuite) Test62() {
 	inrule := types.Rule{}
 	outrule, outconds, outactions, outargs, mappings := ToDb(inrule, utils.NewSeq(00))
-	expected := "{1  {0 true} {0 true} {0 true}}"
+	expected := "{1  {0 true} {0 true}}"
 	s.Equal(expected, fmt.Sprintf("%v", outrule))
 	s.Len(outconds, 0)
 	s.Len(outactions, 0)
@@ -355,7 +353,7 @@ func (s *ServiceSuite) Test63() {
 	}
 	outrule, outconds, outactions, outargs, mappings := ToDb(inrule, utils.NewSeq(00))
 
-	expectedRule := "{1 unit test {1 true} {0 true} {0 true}}"
+	expectedRule := "{1 unit test {1 true} {0 true}}"
 	s.Equal(expectedRule, fmt.Sprintf("%v", outrule))
 
 	expectedConds := "[{2 1 {2 true} {0 false} {0 true} {0 false} { false}}]"

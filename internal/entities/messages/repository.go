@@ -18,7 +18,6 @@ type DbMessage struct {
 	DeviceId      string
 	Timestamp     time.Time
 	Json          string
-	FromEndDevice byte
 }
 
 type MessagesRepository interface {
@@ -51,15 +50,13 @@ func messageInsertTx(
 			device_class_id,
 			device_id,
 			timestamp,
-			json,
-			from_end_device
-		) VALUES(?,?,?,?,?,?)`,
+			json
+		) VALUES(?,?,?,?,?)`,
 		m.ChannelTypeId,
 		m.DeviceClassId,
 		m.DeviceId,
 		m.Timestamp,
 		m.Json,
-		m.FromEndDevice,
 	)
 }
 
@@ -73,12 +70,11 @@ func messagesSelectTx(ctx context.Context, tx *sql.Tx, deviceId sql.NullString) 
 			device_class_id,
 			device_id,
 			timestamp,
-			json,
-			from_end_device
+			json
 		FROM 
 			messages`,
 		func(rows *sql.Rows, m *DbMessage) error {
-			return rows.Scan(&m.Id, &m.ChannelTypeId, &m.DeviceClassId, &m.DeviceId, &m.Timestamp, &m.Json, &m.FromEndDevice)
+			return rows.Scan(&m.Id, &m.ChannelTypeId, &m.DeviceClassId, &m.DeviceId, &m.Timestamp, &m.Json)
 		},
 		db.Where{"device_id": deviceId},
 	)
@@ -123,7 +119,6 @@ func (r messagesRepository) Create(message DbMessage) (messageId int64, err erro
 		return
 	}
 	if len(existingdevices) == 0 {
-		// var origin = "message-autoinsert"
 		slog.Warn(fmt.Sprintf(
 			"No device with class=%v id=%v in db, creating it automatically...",
 			message.DeviceClassId,

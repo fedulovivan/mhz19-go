@@ -56,8 +56,10 @@ func (p *provider) Init() {
 		p.Out <- outMsg
 	}
 
+	// just swallow "onremoved" entry with no action
+	// since LookupType api does not allow nil callback
+	// also looks like this feature does not work properly - cb is called when device is still "online" / "not removed"
 	rmvFn := func(e dnssd.BrowseEntry) {
-		// TODO?
 		// utils.Dump("Removed", e)
 	}
 

@@ -31,7 +31,7 @@ func (s *RulesSuite) Test10() {
 	}
 	actual, err := json.Marshal(rule)
 	s.Nil(err)
-	s.Equal(`{"id":0,"condition":{"fn":"Equal"},"actions":[{"fn":"TelegramBotMessage"}],"throttle":null,"skipCounter":false}`, string(actual))
+	s.Equal(`{"id":0,"condition":{"fn":"Equal"},"actions":[{"fn":"TelegramBotMessage"}],"throttle":null}`, string(actual))
 }
 
 func (s *RulesSuite) Test20() {

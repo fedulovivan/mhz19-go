@@ -137,13 +137,12 @@ func Build(
 			}
 		}
 		rule := types.Rule{
-			Id:          int(r.Id),
-			Name:        r.Name,
-			Disabled:    r.IsDisabled.Int32 == 1,
-			SkipCounter: r.SkipCounter.Int32 == 1,
-			Condition:   cond,
-			Throttle:    throttle,
-			Actions:     BuildActions(r.Id, allRuleActions, allArgs, allMappings),
+			Id:        int(r.Id),
+			Name:      r.Name,
+			Disabled:  r.IsDisabled.Int32 == 1,
+			Condition: cond,
+			Throttle:  throttle,
+			Actions:   BuildActions(r.Id, allRuleActions, allArgs, allMappings),
 		}
 		result = append(result, rule)
 	}
@@ -180,18 +179,18 @@ func BuildCondition(
 			cond.OtherDeviceId = types.DeviceId(root.OtherDeviceId.String)
 		}
 	} else {
-		// recursively build list nodes
-		list := []types.Condition{}
+		// recursively build nested nodes
+		nested := []types.Condition{}
 		children := lo.Filter(conditions, func(c DbRuleCondition, i int) bool {
 			return c.ParentConditionId.Valid && c.ParentConditionId.Int32 == rootConditionId
 		})
 		for _, child := range children {
-			list = append(list, BuildCondition(child.Id, conditions, allArgs))
+			nested = append(nested, BuildCondition(child.Id, conditions, allArgs))
 		}
 		cond = types.Condition{
-			Id:   int(root.Id),
-			List: list,
-			Or:   root.LogicOr.Int32 == 1,
+			Id:     int(root.Id),
+			Nested: nested,
+			Or:     root.LogicOr.Int32 == 1,
 		}
 	}
 	return
@@ -294,11 +293,10 @@ func ToDb(inrule types.Rule, seq utils.Seq) (
 
 func ToDbRule(rule types.Rule, seq utils.Seq) DbRule {
 	return DbRule{
-		Id:          int32(seq.Inc()),
-		Name:        rule.Name,
-		IsDisabled:  db.NewNullInt32FromBool(rule.Disabled),
-		SkipCounter: db.NewNullInt32FromBool(rule.SkipCounter),
-		Throttle:    db.NewNullInt32(int32(rule.Throttle.Duration.Seconds())),
+		Id:         int32(seq.Inc()),
+		Name:       rule.Name,
+		IsDisabled: db.NewNullInt32FromBool(rule.Disabled),
+		Throttle:   db.NewNullInt32(int32(rule.Throttle.Duration.Seconds())),
 	}
 }
 
@@ -354,7 +352,7 @@ func ToDbConditions(
 	seq utils.Seq,
 	args *[]DbRuleConditionOrActionArgument,
 ) (res []DbRuleCondition) {
-	withList := len(condition.List) > 0
+	withList := len(condition.Nested) > 0
 	withFn := condition.Fn > 0
 	if !withList && !withFn {
 		return
@@ -372,7 +370,7 @@ func ToDbConditions(
 			cond.ParentConditionId = db.NewNullInt32(parent.Id)
 		}
 		res = append(res, cond)
-		for _, childIn := range condition.List {
+		for _, childIn := range condition.Nested {
 			res = append(res, ToDbConditions(ruleId, &cond, childIn, seq, args)...)
 		}
 	} else if withFn {

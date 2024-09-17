@@ -1,5 +1,6 @@
 .DS_Store
 bin/
 .env
+.env.debug
 database*.bin
 sql/*dump.sql

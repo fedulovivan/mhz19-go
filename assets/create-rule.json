@@ -2,7 +2,7 @@
     "name":"balcony ceiling light on/off",
     "disabled":false,
     "condition":{
-        "list":[
+        "nested":[
             {"fn":"InList","args":{"Value": "$message.action","List":["single_left","single_right"]}},
             {"fn":"ZigbeeDevice","args":{"List":["DeviceId(0x00158d0004244bda)"]}}
         ]

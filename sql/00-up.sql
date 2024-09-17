@@ -37,8 +37,7 @@ CREATE TABLE rules (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	name TEXT NOT NULL UNIQUE,
 	is_disabled INTEGER,
-	throttle INTEGER,
-    skip_counter INTEGER
+	throttle INTEGER
 );
 
 CREATE TABLE rule_conditions (
@@ -97,7 +96,6 @@ CREATE TABLE messages (
     device_id TEXT,
 	timestamp DATETIME NOT NULL,
 	json TEXT NOT NULL,
-    from_end_device INTEGER NOT NULL,
     CONSTRAINT messages_fk_device FOREIGN KEY (device_id) REFERENCES devices(native_id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT messages_fk_dc FOREIGN KEY (device_class_id) REFERENCES device_classes(id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT messages_fk_channel FOREIGN KEY (channel_type_id) REFERENCES channel_types(id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -129,7 +127,7 @@ INSERT INTO action_functions VALUES(8,'UpsertSonoffDevice');
 INSERT INTO condition_functions VALUES(1,'Changed');
 INSERT INTO condition_functions VALUES(2,'Equal');
 INSERT INTO condition_functions VALUES(3,'InList');
-INSERT INTO condition_functions VALUES(5,'NotNil');
+INSERT INTO condition_functions VALUES(5,'IsNil');
 INSERT INTO condition_functions VALUES(6,'ZigbeeDevice');
 INSERT INTO condition_functions VALUES(7,'DeviceClass');
 INSERT INTO condition_functions VALUES(8,'Channel');

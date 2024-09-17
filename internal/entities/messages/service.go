@@ -35,7 +35,7 @@ func BuildMessages(in []DbMessage) (out []types.Message) {
 		var payload map[string]any
 		_ = json.Unmarshal([]byte(m.Json), &payload)
 		out = append(out, types.Message{
-			FromEndDevice: m.FromEndDevice == 1,
+			FromEndDevice: true,
 			ChannelType:   types.ChannelType(m.ChannelTypeId),
 			DeviceClass:   types.DeviceClass(m.DeviceClassId),
 			DeviceId:      types.DeviceId(m.DeviceId),
@@ -51,17 +51,12 @@ func (s messagesService) Create(message types.Message) (err error) {
 	if err != nil {
 		return
 	}
-	var fromEndDevice byte = 0
-	if message.FromEndDevice {
-		fromEndDevice = 1
-	}
 	_, err = s.repository.Create(DbMessage{
 		ChannelTypeId: int32(message.ChannelType),
 		DeviceClassId: int32(message.DeviceClass),
 		DeviceId:      string(message.DeviceId),
 		Timestamp:     message.Timestamp,
 		Json:          string(mjson),
-		FromEndDevice: fromEndDevice,
 	})
 	return
 }

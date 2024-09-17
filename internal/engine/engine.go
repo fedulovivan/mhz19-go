@@ -152,19 +152,21 @@ func (e *engine) MatchesListEvery(mtcb types.MessageTupleFn, cc []types.Conditio
 
 func (e *engine) MatchesCondition(mtcb types.MessageTupleFn, c types.Condition, tag logger.Tag) bool {
 	withFn := c.Fn != 0
-	withList := len(c.List) > 0
-	if withFn && !withList {
+	withList := len(c.Nested) > 0
+	if !withFn && !withList {
+		return false
+	} else if withFn && !withList {
 		return e.InvokeConditionFunc(
 			mtcb(c.OtherDeviceId), c.Fn, c.Not, c.Args, tag,
 		)
 	} else if withList && !withFn {
 		if c.Or {
-			return e.MatchesListSome(mtcb, c.List, tag)
+			return e.MatchesListSome(mtcb, c.Nested, tag)
 		} else {
-			return e.MatchesListEvery(mtcb, c.List, tag)
+			return e.MatchesListEvery(mtcb, c.Nested, tag)
 		}
 	} else {
-		return true
+		panic("unexpected conditions")
 	}
 }
 
@@ -232,7 +234,7 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 			return tuple
 		}
 		if e.MatchesCondition(mtcb, r.Condition, tag) {
-			if !r.SkipCounter {
+			if m.FromEndDevice {
 				app.StatsSingleton().EngineRulesMatched.Inc()
 			}
 			slog.Debug(tag.F("matches"), "name", r.Name)
