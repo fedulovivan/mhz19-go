@@ -5,7 +5,6 @@ import "fmt"
 type ChannelType byte
 
 const (
-	CHANNEL_UNKNOWN  ChannelType = 0
 	CHANNEL_MQTT     ChannelType = 1
 	CHANNEL_TELEGRAM ChannelType = 2
 	CHANNEL_DNS_SD   ChannelType = 3
@@ -13,7 +12,6 @@ const (
 )
 
 var CHANNEL_NAMES = map[ChannelType]string{
-	CHANNEL_UNKNOWN:  "<unknown>",
 	CHANNEL_MQTT:     "mqtt",
 	CHANNEL_TELEGRAM: "telegram",
 	CHANNEL_DNS_SD:   "dns-sd",
@@ -42,9 +40,6 @@ type ChannelProvider interface {
 	// - post to mqtt topic for mqtt provider
 	// - call sonoff http api
 	Send(...any) error
-
-	// tbd
-	// Write(m Message)
 
 	// a channel type this provider was created for
 	Channel() ChannelType

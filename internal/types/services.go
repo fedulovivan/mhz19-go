@@ -33,9 +33,10 @@ type StatsService interface {
 }
 
 type RulesService interface {
-	GetOne(ruleId int32) (Rule, error)
-	Delete(ruleId int32) error
+	GetOne(ruleId int) (Rule, error)
+	Delete(ruleId int) error
 	Get() ([]Rule, error)
 	Create(rule Rule) (int64, error)
 	OnCreated() chan Rule
+	OnDeleted() chan int
 }

@@ -77,6 +77,7 @@ func (p *provider) handleKey(key types.LdmKey) {
 					Payload: map[string]any{
 						"BuriedDeviceId": key.DeviceId,
 					},
+					FromEndDevice: false,
 				}
 			},
 		)

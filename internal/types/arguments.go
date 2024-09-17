@@ -19,9 +19,13 @@ func parseDeviceIdOrClass(in string) any {
 		deviceId := in[9 : len(in)-1]
 		return DeviceId(deviceId)
 	} else if strings.HasPrefix(in, "DeviceClass(") {
-		deviceClass := in[12 : len(in)-1]
-		i, _ := strconv.Atoi(deviceClass)
+		dc := in[12 : len(in)-1]
+		i, _ := strconv.Atoi(dc)
 		return DeviceClass(i)
+	} else if strings.HasPrefix(in, "ChannelType(") {
+		ct := in[12 : len(in)-1]
+		i, _ := strconv.Atoi(ct)
+		return ChannelType(i)
 	}
 	return in
 }

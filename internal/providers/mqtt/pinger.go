@@ -14,6 +14,9 @@ func NewDevicePinger(m MqttLib.Message) *devicePinger {
 }
 
 func (p *devicePinger) Parse() (types.Message, bool) {
-	// no customization, just call parse_base
-	return p.parse_base()
+	out, ok := p.parse_base()
+	if ok {
+		out.FromEndDevice = true
+	}
+	return out, ok
 }

@@ -14,6 +14,9 @@ func NewValveManipulator(m MqttLib.Message) *valveManipulator {
 }
 
 func (p *valveManipulator) Parse() (types.Message, bool) {
-	// no customization, just call parse_base
-	return p.parse_base()
+	out, ok := p.parse_base()
+	if ok {
+		out.FromEndDevice = true
+	}
+	return out, ok
 }

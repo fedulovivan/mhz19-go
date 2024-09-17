@@ -26,9 +26,9 @@ func ToDb(in []types.Device) (out []DbDevice) {
 		dbDevice := DbDevice{
 			NativeId:      string(d.DeviceId),
 			DeviceClassId: int32(d.DeviceClassId),
-			Name:          sql.NullString{String: d.Name, Valid: len(d.Name) > 0},
-			Comments:      sql.NullString{String: d.Comments, Valid: len(d.Comments) > 0},
-			Origin:        sql.NullString{String: d.Origin, Valid: len(d.Origin) > 0},
+			Name:          sql.NullString{String: *d.Name, Valid: d.Name != nil},
+			Comments:      sql.NullString{String: *d.Comments, Valid: d.Comments != nil},
+			Origin:        sql.NullString{String: *d.Origin, Valid: d.Origin != nil},
 			Json:          sql.NullString{String: string(mjson), Valid: err == nil},
 		}
 		if d.BuriedTimeout != nil {
@@ -49,10 +49,16 @@ func BuildDevices(in []DbDevice) (out []types.Device) {
 			Id:            int(d.Id),
 			DeviceId:      types.DeviceId(d.NativeId),
 			DeviceClassId: types.DeviceClass(d.DeviceClassId),
-			Name:          d.Name.String,
-			Comments:      d.Comments.String,
-			Origin:        d.Origin.String,
 			Json:          payload,
+		}
+		if d.Name.Valid {
+			device.Name = &d.Name.String
+		}
+		if d.Comments.Valid {
+			device.Comments = &d.Comments.String
+		}
+		if d.Origin.Valid {
+			device.Origin = &d.Origin.String
 		}
 		if d.BuriedTimeout.Valid {
 			device.BuriedTimeout = &types.BuriedTimeout{

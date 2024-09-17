@@ -20,12 +20,20 @@ type Message struct {
 	// filled only if failed to parse into json
 	RawPayload []byte `json:"-"`
 	// additional metadata specific for the current channel
-	ChannelMeta ChannelMeta `json:"-"`
+	ChannelMeta *ChannelMeta `json:"-"`
+	// indicates this is end device message,
+	// and not a thing like z2m bridge message with list of registered devices,
+	// or not a dns-sd channel message with sonoff device announcement
+	FromEndDevice bool `json:"fromEndDevice"`
 }
 
 type MessageChan chan Message
 
-// tuple of current and previous messages, prev could be nil
+// tuple of current and previous messages
+// when its normal handling, Curr is always specified, while Prev could be empty
+// (if this is first message for such device class and device id and LdmService.Has() returns false)
+// however, when Condition.OtherDeviceId is set, only Curr may be filled if exists in LdmService
+// (but also could be not filled, meaning both may be nil)
 type MessageTuple struct {
 	Curr *Message
 	Prev *Message
@@ -34,7 +42,7 @@ type MessageTuple struct {
 type MessageTupleFn = func(otherDeviceId DeviceId) MessageTuple
 
 func IsSpecialDirective(field string) bool {
-	return field == "$deviceId" || field == "$deviceClass" || field == "$channelType" || strings.HasPrefix(field, "$message.")
+	return field == "$deviceId" || field == "$deviceClass" || field == "$channelType" || field == "$fromEndDevice" || strings.HasPrefix(field, "$message.")
 }
 
 // read message or message payload field using special syntax designed to be used in types.Args
@@ -49,6 +57,8 @@ func (m *Message) ExecDirective(field string) (any, error) {
 		return m.DeviceClass, nil
 	} else if field == "$channelType" {
 		return m.ChannelType, nil
+	} else if field == "$fromEndDevice" {
+		return m.FromEndDevice, nil
 	} else if strings.HasPrefix(field, "$message.") {
 		_, field, _ := strings.Cut(field, ".")
 		if m.Payload == nil {

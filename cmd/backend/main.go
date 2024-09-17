@@ -31,7 +31,7 @@ func main() {
 	logger.Init()
 	rest.Init()
 
-	// configure and start engine
+	// configure engine dependencies and start it
 	rulesService := rules.ServiceSingleton(
 		rules.NewRepository(
 			db.DbSingleton(),
@@ -68,16 +68,25 @@ func main() {
 			ldm.RepoSingleton(),
 		),
 	)
-	e.AppendRules(engine.GetStaticRules()...)
+	// e.AppendRules(engine.GetStaticRules()...)
 	dbRules, err := rulesService.Get()
 	if err == nil {
-		e.AppendRules(dbRules...)
+		if len(dbRules) > 0 {
+			e.AppendRules(dbRules...)
+		} else {
+			slog.Warn(tag.F("No mapping rules in database"))
+		}
 	} else {
 		slog.Error(tag.F("Failed to load rules from db"), "err", err.Error())
 	}
 	go func() {
 		for rule := range rulesService.OnCreated() {
 			e.AppendRules(rule)
+		}
+	}()
+	go func() {
+		for ruleId := range rulesService.OnDeleted() {
+			e.DeleteRule(ruleId)
 		}
 	}()
 	e.Start()

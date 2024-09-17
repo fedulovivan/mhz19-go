@@ -3,6 +3,7 @@ package tbot_provider
 import (
 	"fmt"
 	"log/slog"
+	"sync"
 	"time"
 
 	"github.com/fedulovivan/mhz19-go/internal/app"
@@ -17,8 +18,8 @@ var tag = logger.NewTag(logger.TBOT)
 
 type provider struct {
 	engine.ProviderBase
-	bot        *tgbotapi.BotAPI
-	botStarted bool
+	bots   map[string]*tgbotapi.BotAPI
+	botsMu sync.RWMutex
 }
 
 func NewProvider() types.ChannelProvider {
@@ -30,63 +31,71 @@ func (p *provider) Channel() types.ChannelType {
 }
 
 func (p *provider) Send(a ...any) error {
-	first := a[0]
-	switch fTyped := first.(type) {
+	botName := a[0].(string)
+	switch text := a[1].(type) {
 	case string:
-		return p.SendNewMessage(fTyped, 0)
+		return p.SendNewMessage(text /* 114333844,  */, botName)
 	case []byte:
-		return p.SendNewMessage(string(fTyped), 0)
+		return p.SendNewMessage(string(text) /* 114333844,  */, botName)
 	default:
-		panic(fmt.Sprintf("expected type %T", fTyped))
+		panic(fmt.Sprintf("expected type %T", text))
 	}
 }
 
 func (p *provider) Stop() {
-	slog.Debug(tag.F("Stopping bot..."))
-	if p.botStarted {
-		p.bot.StopReceivingUpdates()
-	} else {
-		slog.Warn(tag.F("Not started"))
-	}
-}
-
-func (p *provider) SendNewMessage(text string, chatId int64) (err error) {
-	// msg.ReplyToMessageID = update.Message.MessageID
-	slog.Debug(tag.F("SendNewMessage()"), "text", text, "chatId", chatId)
-	if chatId == 0 {
-		chatId = app.Config.TelegramChatId
-	}
-	msg := tgbotapi.NewMessage(chatId, text)
-	_, err = p.bot.Send(msg)
-	return
-	// if err != nil {
-	// 	return err
-	// 	// slog.Error(tag.F("SendNewMessage()"), "err", err.Error())
-	// }
-}
-
-func (p *provider) Init() {
-
-	p.Out = make(types.MessageChan, 100)
-
-	var err error
-	p.bot, err = tgbotapi.NewBotAPI(app.Config.TelegramToken)
-	if err != nil {
-		slog.Error(tag.F("NewBotAPI()"), "err", err.Error())
+	botsLen := len(p.bots)
+	if botsLen == 0 {
 		return
 	}
-	p.bot.Debug = app.Config.TelegramDebug
-	slog.Debug(tag.F("Authorized"), "UserName", p.bot.Self.UserName)
-	p.botStarted = true
-	u := tgbotapi.NewUpdate(0)
-	u.Timeout = 60
-	updates := p.bot.GetUpdatesChan(u)
+	slog.Debug(tag.F("Stopping %d bot(s)...", botsLen))
+	for _, bot := range p.bots {
+		bot.StopReceivingUpdates()
+	}
+}
+
+func (p *provider) SendNewMessage(text string, botName string) (err error) {
+	bot, found := p.bots[botName]
+	if !found {
+		err = fmt.Errorf("No such bot %v", botName)
+		return
+	}
+	chatId := app.Config.TelegramChatId
+	slog.Debug(tag.F("SendNewMessage()"), "text", text, "chatId", chatId, "botName", botName)
+	msg := tgbotapi.NewMessage(chatId, text)
+	_, err = bot.Send(msg)
+	return
+}
+
+// msg.ReplyToMessageID = update.Message.MessageID
+// if chatId == 0 {
+// 	chatId = app.Config.TelegramChatId
+// }
+// chatId = int64(114333844)
+// if err != nil {
+// 	return err
+// 	// slog.Error(tag.F("SendNewMessage()"), "err", err.Error())
+// }
+
+func (p *provider) StartBotClient(token string) (err error) {
+	p.botsMu.Lock()
+	defer p.botsMu.Unlock()
+	bot, err := tgbotapi.NewBotAPI(token)
+	if err != nil {
+		return
+	}
 	err = tgbotapi.SetLogger(slogAdapter{})
 	if err != nil {
-		slog.Error(tag.F("SetLogger()"), "err", err.Error())
+		return
 	}
-
-	// updates
+	bot.Debug = app.Config.TelegramDebug
+	slog.Debug(tag.F("Authorized"), "UserName", bot.Self.UserName)
+	p.bots[bot.Self.UserName] = bot
+	updates := bot.GetUpdatesChan(
+		tgbotapi.UpdateConfig{
+			Offset:  0,
+			Timeout: 60,
+		},
+	)
 	go func() {
 		for update := range updates {
 			if update.Message != nil {
@@ -100,14 +109,27 @@ func (p *provider) Init() {
 					"ChatId": update.Message.Chat.ID,
 				}
 				outMsg := types.Message{
-					DeviceId:    types.DeviceId(p.bot.Self.UserName),
-					ChannelType: types.CHANNEL_TELEGRAM,
-					DeviceClass: types.DEVICE_CLASS_BOT,
-					Timestamp:   time.Now(),
-					Payload:     payload,
+					DeviceId:      types.DeviceId(bot.Self.UserName),
+					ChannelType:   types.CHANNEL_TELEGRAM,
+					DeviceClass:   types.DEVICE_CLASS_BOT,
+					Timestamp:     time.Now(),
+					Payload:       payload,
+					FromEndDevice: true,
 				}
 				p.Out <- outMsg
 			}
 		}
 	}()
+	return
+}
+
+func (p *provider) Init() {
+	p.Out = make(types.MessageChan, 100)
+	p.bots = make(map[string]*tgbotapi.BotAPI)
+	for _, token := range app.Config.TelegramTokens {
+		err := p.StartBotClient(token)
+		if err != nil {
+			slog.Error(tag.F("StartBotClient()"), "err", err.Error())
+		}
+	}
 }

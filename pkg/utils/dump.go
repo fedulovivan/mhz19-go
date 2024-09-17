@@ -5,10 +5,10 @@ import (
 	"fmt"
 )
 
-func Dump(name string, in any) {
-	json, err := json.MarshalIndent(in, "", "  ")
+func Dump(name string, value any) {
+	json, err := json.MarshalIndent(value, "", "  ")
 	if err != nil {
-		fmt.Println(name, err, in)
+		fmt.Println(name, err, value)
 		return
 	}
 	fmt.Println(name, string(json))

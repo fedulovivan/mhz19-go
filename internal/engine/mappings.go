@@ -45,22 +45,14 @@ func GetStaticRules() []types.Rule {
 			Condition: types.Condition{
 				List: []types.Condition{
 					{
-						Fn:  types.COND_EQUAL,
+						Fn: types.COND_FROM_END_DEVICE,
+					},
+					{
 						Not: true,
+						Fn:  types.COND_DEVICE_CLASS,
 						Args: types.Args{
-							"Left":  "$deviceClass",
-							"Right": types.DEVICE_CLASS_ZIGBEE_BRIDGE,
+							"Value": types.DEVICE_CLASS_ZIGBEE_BRIDGE,
 						},
-					},
-					{
-						Fn:   types.COND_СHANNEL,
-						Not:  true,
-						Args: types.Value(types.CHANNEL_DNS_SD),
-					},
-					{
-						Fn:   types.COND_СHANNEL,
-						Not:  true,
-						Args: types.Value(types.CHANNEL_SYSTEM),
 					},
 				},
 			},
@@ -83,7 +75,7 @@ func GetStaticRules() []types.Rule {
 		// system rule to create devices upon receiving dns-sd message with _ewelink._tcp service
 		{
 			Id:          4000,
-			Name:        "system rule to create devices upon receiving dns-sd message with _ewelink._tcp service",
+			Name:        "system rule to create sonoff devices upon receiving dns-sd message with _ewelink._tcp service",
 			Disabled:    true,
 			SkipCounter: true,
 			Condition: types.Condition{

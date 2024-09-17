@@ -1,43 +1,53 @@
 
 ### Prio 0
-- None
+- uts: create tests for recursive conditions
+- arch: avoid "args=map[]" in logs - slog always writes nil map as "map[]", not "nil", see also Test20, Test21 in service_test.go, https://github.com/golang/go/issues/69496
+- try: postgres instead of sqlite3
+- bug: unable to start vscode debugging or unit tests with current implementation around SqliteFilename and SQLITE_FILENAME
+- arch: support several bots
+- try: validation https://github.com/asaskevich/govalidator OR https://github.com/go-ozzo/ozzo-validation
 
 ### Prio 1
+- None
+
+### Prio 2
+- bug: no mqtt (re)connection if network was not available on app startup and returned online later
+- bug: "http: superfluous response.WriteHeader call from github.com/go-ozzo/ozzo-routing/v2.(*Router).handleError (router.go:131)" - appears after termination of stucked apache bench
+- bug: "apr_socket_recv: Operation timed out (60)" - https://stackoverflow.com/questions/30352725/why-is-my-hello-world-go-server-getting-crushed-by-apachebench
+- bug: "api:getAll took 3.451973917s" when reading 1k rules 1k times - try same scenario with postgres
 - feat: new action to play alert
-- arch: think how to distinquish "end device" message from all "others"
-- arch: think how we can construct/init "TemplatePayload" automatically, now we need to build it manually in action implementation
 - feat: create api to update rule
 - feat: create api to add/update/delete devices
 - feat: create api to read device classes (or unified api for any simple dict table?)
-- bug: "http: superfluous response.WriteHeader call from github.com/go-ozzo/ozzo-routing/v2.(*Router).handleError (router.go:131)" - appears after termination of stucked apache bench
-- bug: "apr_socket_recv: Operation timed out (60)" - https://stackoverflow.com/questions/30352725/why-is-my-hello-world-go-server-getting-crushed-by-apachebench
-- bug: "🧨 api:getAll took 3.451973917s" when reading 1k rules 1k times - try same scenario with postgres
-- arch: "FOREIGN KEY (device_id) REFERENCES devices(native_id)" requires sole UNIQUE index for column devices.native_id, while we actually need UNIQUE(device_class_id, native_id) since its unreasonable to constraint native_id across devices off all classes
-- arch: in addition to "native_id" problem see also "unsafemap" in internal/entities/ldm/repository.go
-
-### Prio 2
-- uts: create tests for recursive conditions
-- bug: no mqtt (re)connection if network was not available on app startup and returned online later
 - feat: merge Zigbee2MqttSetState and ValveSetState actions
 - feat: create meta which descibes expected args for conditions and actions and validate
 - feat: create test service for sonoff wifi devices (poll them periodically to receive status updates)
+
+### Arch
+- arch: think how to distinquish "end device" message from all "others" - just as new flag for the message Struct?
+- arch: think how we can construct/init "TemplatePayload" automatically, now we need to build it manually in action implementation
+- arch: "FOREIGN KEY (device_id) REFERENCES devices(native_id)" requires sole UNIQUE index for column devices.native_id, while we actually need UNIQUE(device_class_id, native_id) since its unreasonable to constraint native_id across devices off all classes
+- arch: in addition to "native_id" problem see also "unsafemap" in internal/entities/ldm/repository.go
 - arch: make logger and logTag a dependency of service, api and repository
 - arch: in NewEngine create mocks for all services, which will panic with friendly message if user forgot to set that service
 - arch: get rid of any in Send(...any) - no ideas so far
 - arch: mapping rules could be pre-defined (system) and loaded from db (user-level) - think we need to store everything in db, even system rules
+- arch: split rest api and engine into different microservices
+- (?) arch: consider replacing sql.NullInt32 and sql.NullString with corresponding of pointer types - https://stackoverflow.com/questions/40092155/difference-between-string-and-sql-nullstring
+ 
+
+### Try
 - try: find out why cli command "make test" and "vscode" report different coverage statistics: 86.9% vs 100%. vscode syntax - `Running tool: /opt/homebrew/bin/go test -timeout 30s -coverprofile=/var/folders/5v/0wjs9g1948ddpdqkgf1h31q80000gn/T/vscode-go7lC7ip/go-code-cover github.com/fedulovivan/mhz19-go/internal/engine`
-- try: validation https://github.com/asaskevich/govalidator OR https://github.com/go-ozzo/ozzo-validation
 - try: separate di library https://pkg.go.dev/go.uber.org/fx
 - try: opentelemetry https://opentelemetry.io/docs/languages/go/getting-started/   
 - try: openapi or swagger https://en.wikipedia.org/wiki/OpenAPI_Specification or https://swagger.io/
 - try: https://github.com/julienschmidt/httprouter istead of ozzo-routing
-- try: postgres instead of sqlite3
 - try: prometheus
 - try: grpc
-- try: gorm
 
 ### Completed
 
+- (+) try: gorm
 - (+) feat: implement log tag with meta, so we can add attrs to function
 - (+) feat: create api to read one device
 - (+) feat: add devices.buried_ignored column or devices.buried_timeout (0 - blacklisted device, null - default timeout)
@@ -118,8 +128,6 @@
 - (+) consider replacing hand-written adapters with mqttClient.AddRoute() API, also add warning for messages captured by defaultMessageHandler (assuming all topics we subscribe should have own handlers and default one should not be reached)
 - (?) introduce intermediate layer between named args and function implementation using regular args (more robust, simplify things like ZigbeeDeviceFn)
 - (?) think about "first match" strategy in handleMessage - we do not need this, since we to execute RecordMessage and some other action
-- (?) split rest api and engine into separate microservices - does no look much reasonable, since both are heavily rely on db layer
-
 
 ### new mapping rule structure
 ```golang

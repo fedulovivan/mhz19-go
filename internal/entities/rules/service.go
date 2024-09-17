@@ -12,7 +12,8 @@ import (
 )
 
 type rulesService struct {
-	oncreated  chan types.Rule
+	created    chan types.Rule
+	deleted    chan int
 	repository RulesRepository
 }
 
@@ -20,7 +21,8 @@ var instance types.RulesService
 
 func NewService(r RulesRepository) types.RulesService {
 	return rulesService{
-		oncreated:  make(chan types.Rule, 100),
+		created:    make(chan types.Rule, 100),
+		deleted:    make(chan int, 100),
 		repository: r,
 	}
 }
@@ -33,15 +35,19 @@ func ServiceSingleton(r RulesRepository) types.RulesService {
 }
 
 func (s rulesService) OnCreated() chan types.Rule {
-	return s.oncreated
+	return s.created
 }
 
-func (s rulesService) Create(rule types.Rule) (int64, error) {
+func (s rulesService) OnDeleted() chan int {
+	return s.deleted
+}
+
+func (s rulesService) Create(rule types.Rule) (newRuleId int64, err error) {
 	dbRule, dbConditions, dbActions, dbArguments, dbMappings := ToDb(
 		rule,
 		utils.NewSeq(0),
 	)
-	newRuleId, err := s.repository.Create(
+	newRuleId, err = s.repository.Create(
 		dbRule,
 		dbConditions,
 		dbActions,
@@ -49,21 +55,27 @@ func (s rulesService) Create(rule types.Rule) (int64, error) {
 		dbMappings,
 	)
 	rule.Id = int(newRuleId)
-	s.oncreated <- rule
-	return newRuleId, err
+	if err == nil {
+		s.created <- rule
+	}
+	return
 }
 
-func (s rulesService) Delete(ruleId int32) error {
-	return s.repository.Delete(ruleId)
+func (s rulesService) Delete(ruleId int) (err error) {
+	err = s.repository.Delete(int32(ruleId))
+	if err == nil {
+		s.deleted <- ruleId
+	}
+	return
 }
 
-func (s rulesService) GetOne(ruleId int32) (res types.Rule, err error) {
+func (s rulesService) GetOne(ruleId int) (res types.Rule, err error) {
 	rules,
 		conditions,
 		ruleActions,
 		ruleConditionOrActionArguments,
 		ruleActionArgumentMappings,
-		err := s.repository.Get(db.NewNullInt32(ruleId))
+		err := s.repository.Get(db.NewNullInt32(int32(ruleId)))
 	if err != nil {
 		return
 	}
@@ -162,6 +174,10 @@ func BuildCondition(
 			Id:   int(root.Id),
 			Fn:   types.CondFn(root.FunctionType.Int32),
 			Args: BuildArguments(args),
+			Not:  root.Not.Int32 == 1,
+		}
+		if root.OtherDeviceId.Valid {
+			cond.OtherDeviceId = types.DeviceId(root.OtherDeviceId.String)
 		}
 	} else {
 		// recursively build list nodes
@@ -176,7 +192,6 @@ func BuildCondition(
 			Id:   int(root.Id),
 			List: list,
 			Or:   root.LogicOr.Int32 == 1,
-			Not:  root.Not.Int32 == 1,
 		}
 	}
 	return
@@ -229,7 +244,6 @@ func BuildMappings(
 }
 
 func BuildArguments(args []DbRuleConditionOrActionArgument) (result types.Args) {
-	result = types.Args{}
 	lists := make(map[string][]any)
 	for _, a := range args {
 		islist := a.IsList.Valid && a.IsList.Int32 == 1
@@ -246,10 +260,16 @@ func BuildArguments(args []DbRuleConditionOrActionArgument) (result types.Args) 
 		if islist {
 			lists[a.ArgumentName] = append(lists[a.ArgumentName], value)
 		} else {
+			if result == nil {
+				result = make(types.Args)
+			}
 			result[a.ArgumentName] = value
 		}
 	}
 	for k, v := range lists {
+		if result == nil {
+			result = make(types.Args)
+		}
 		result[k] = v
 	}
 	return
@@ -347,10 +367,6 @@ func ToDbConditions(
 			Id:      int32(seq.Inc()),
 			RuleId:  ruleId,
 			LogicOr: db.NewNullInt32FromBool(condition.Or),
-			Not:     db.NewNullInt32FromBool(condition.Not),
-		}
-		if len(condition.OtherDeviceId) > 0 {
-			cond.OtherDeviceId = db.NewNullString(string(condition.OtherDeviceId))
 		}
 		if parent != nil {
 			cond.ParentConditionId = db.NewNullInt32(parent.Id)
@@ -364,6 +380,10 @@ func ToDbConditions(
 			Id:           int32(seq.Inc()),
 			RuleId:       ruleId,
 			FunctionType: db.NewNullInt32(int32(condition.Fn)),
+			Not:          db.NewNullInt32FromBool(condition.Not),
+		}
+		if len(condition.OtherDeviceId) > 0 {
+			node.OtherDeviceId = db.NewNullString(string(condition.OtherDeviceId))
 		}
 		if parent != nil {
 			node.ParentConditionId = db.NewNullInt32(parent.Id)

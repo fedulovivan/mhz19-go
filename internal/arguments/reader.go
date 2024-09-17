@@ -114,11 +114,11 @@ func (r *reader) ExecTemplate(in string, field string) (string, error) {
 					if err != nil {
 						return string(typedDeviceId), nil
 					}
-					if len(device.Name) > 0 {
-						return device.Name, nil
+					if device.Name != nil {
+						return *device.Name, nil
 					}
-					if len(device.Comments) > 0 {
-						return device.Comments, nil
+					if device.Comments != nil {
+						return *device.Comments, nil
 					}
 					return fmt.Sprintf("Device of class %s, with id %v", device.DeviceClassId, deviceId), nil
 				} else {

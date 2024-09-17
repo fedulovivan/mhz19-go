@@ -20,14 +20,10 @@ func (s *ProviderBase) Send(a ...any) error {
 	panic("Send() must be implemented in concrete provider")
 }
 
-// func (s *ProviderBase) Write(m types.Message) {
-// 	s.Out <- m
-// }
-
 func (s *ProviderBase) Stop() {
 	// noop
 }
 
 func (s *ProviderBase) Channel() types.ChannelType {
-	return types.CHANNEL_UNKNOWN
+	panic("Channel() must be implemented in concrete provider")
 }

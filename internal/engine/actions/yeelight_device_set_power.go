@@ -8,6 +8,7 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
+// Args: ID, Cmd
 var YeelightDeviceSetPower types.ActionImpl = func(
 	mm []types.Message,
 	args types.Args,

@@ -3,6 +3,8 @@ package engine
 import (
 	"fmt"
 	"log/slog"
+	"slices"
+	"sync"
 
 	"github.com/fedulovivan/mhz19-go/internal/app"
 	"github.com/fedulovivan/mhz19-go/internal/engine/actions"
@@ -26,6 +28,7 @@ type engine struct {
 	messageService types.MessagesService
 	devicesService types.DevicesService
 	ldmService     types.LdmService
+	rulesMu        sync.RWMutex
 }
 
 func NewEngine() types.Engine {
@@ -50,8 +53,21 @@ func (e *engine) SetLdmService(r types.LdmService) {
 	e.ldmService = r
 }
 func (e *engine) AppendRules(rules ...types.Rule) {
-	slog.Debug(e.tag.F("AppendRules"), "len", len(rules))
+	e.rulesMu.Lock()
+	defer e.rulesMu.Unlock()
 	e.rules = append(e.rules, rules...)
+	slog.Debug(e.tag.F("AppendRules"), "appended", len(rules), "total", len(e.rules))
+}
+
+func (e *engine) DeleteRule(ruleId int) {
+	e.rulesMu.Lock()
+	defer e.rulesMu.Unlock()
+	before := len(e.rules)
+	e.rules = slices.DeleteFunc(e.rules, func(r types.Rule) bool {
+		return r.Id == ruleId
+	})
+	after := len(e.rules)
+	slog.Debug(e.tag.F("DeleteRule"), "deleted", before-after, "total", after)
 }
 
 func (e *engine) MessagesService() types.MessagesService {
@@ -90,10 +106,12 @@ func (e *engine) Stop() {
 func (e *engine) InvokeConditionFunc(mt types.MessageTuple, fn types.CondFn, not bool, args types.Args, tag logger.Tag) bool {
 	impl := conditions.Get(fn)
 	res, err := impl(mt, args)
+	fnString := fn.String()
 	if not {
 		res = !res
+		fnString = "Not " + fnString
 	}
-	slog.Debug(tag.F("condition exec"), "fn", fn, "args", args, "res", res)
+	slog.Debug(tag.F("condition exec"), "fn", fnString, "args", args, "res", res)
 	if err != nil {
 		slog.Error(fmt.Sprintf("%s error: %s", fn, err))
 	}
@@ -158,8 +176,10 @@ func (e *engine) ExecuteActions(mm []types.Message, r types.Rule, tag logger.Tag
 }
 
 // called simultaneusly upon receiving messages from all providers
-// should be thread-safe
+// should have thread-safe implementation
 func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
+	e.rulesMu.RLock()
+	defer e.rulesMu.RUnlock()
 	app.StatsSingleton().EngineMessagesReceived.Inc()
 	tag := e.tag.WithTid()
 	p := m.Payload
@@ -176,9 +196,15 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 		"DeviceClass", m.DeviceClass,
 		"DeviceId", m.DeviceId,
 		"Payload", p,
+		"FromEndDevice", m.FromEndDevice,
 	)
+	rulesCnt := len(rules)
+	if rulesCnt == 0 {
+		slog.Warn(tag.F("No rules"))
+		return
+	}
 	ldmKey := e.ldmService.NewKey(m.DeviceClass, m.DeviceId)
-	slog.Debug(tag.F(fmt.Sprintf("Matching against %v rules", len(rules))))
+	slog.Debug(tag.F(fmt.Sprintf("Matching against %v rules", rulesCnt)))
 	matches := 0
 	for _, r := range rules {
 		tag := tag.With("Rule#%v", r.Id)

@@ -11,7 +11,6 @@ var _ fmt.Stringer = (*DeviceClass)(nil)
 var _ json.Marshaler = (*DeviceClass)(nil)
 
 const (
-	DEVICE_CLASS_UNKNOWN         DeviceClass = 0
 	DEVICE_CLASS_ZIGBEE_DEVICE   DeviceClass = 1
 	DEVICE_CLASS_PINGER          DeviceClass = 2
 	DEVICE_CLASS_VALVE           DeviceClass = 3
@@ -23,7 +22,6 @@ const (
 )
 
 var DEVICE_CLASS_NAMES = map[DeviceClass]string{
-	DEVICE_CLASS_UNKNOWN:         "<unknown>",
 	DEVICE_CLASS_ZIGBEE_DEVICE:   "zigbee-device",
 	DEVICE_CLASS_PINGER:          "device-pinger",
 	DEVICE_CLASS_VALVE:           "valve-manipulator",
@@ -41,3 +39,5 @@ func (dc DeviceClass) String() string {
 func (dc DeviceClass) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%v"`, DEVICE_CLASS_NAMES[dc])), nil
 }
+
+// return []byte(fmt.Sprintf(`"DeviceClass(%d)"`, dc)), nil

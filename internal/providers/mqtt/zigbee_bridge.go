@@ -14,6 +14,9 @@ func NewZigbeeBridge(m MqttLib.Message) *zigbeeBridge {
 }
 
 func (p *zigbeeBridge) Parse() (types.Message, bool) {
-	// no customization, just call parse_base
-	return p.parse_base()
+	out, ok := p.parse_base()
+	if ok {
+		out.FromEndDevice = false
+	}
+	return out, ok
 }

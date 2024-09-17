@@ -23,13 +23,15 @@ type ConfigStorage struct {
 	IsDev bool `env:"DEV,default=false"`
 
 	// db
-	DbDebug        bool   `env:"DB_DEBUG,default=false"`
+	DbDebug bool `env:"DB_DEBUG,default=false"`
+
 	SqliteFilename string `env:"SQLITE_FILENAME,default=database.bin"`
+	// SqliteFilename string `env:"SQLITE_FILENAME,default=/Users/ivanf/Desktop/Projects/go/mhz19-go/database.bin"`
 
 	// telegram
-	TelegramDebug  bool   `env:"TELEGRAM_DEBUG,default=false"`
-	TelegramToken  string `env:"TELEGRAM_TOKEN"`
-	TelegramChatId int64  `env:"TELEGRAM_CHATID"`
+	TelegramDebug  bool     `env:"TELEGRAM_DEBUG,default=false"`
+	TelegramTokens []string `env:"TELEGRAM_TOKENS"`
+	TelegramChatId int64    `env:"TELEGRAM_CHAT_ID"`
 
 	// mqtt
 	MqttDebug    bool   `env:"MQTT_DEBUG,default=false"`
@@ -62,7 +64,12 @@ func InitConfig() {
 	if err := envconfig.Process(context.Background(), &Config); err != nil {
 		panic("failed loading env variables into struct: " + err.Error())
 	}
-	configAsJson, _ := json.MarshalIndent(Config, "", "  ")
+	var configAsJson []byte
+	if Config.IsDev {
+		configAsJson, _ = json.MarshalIndent(Config, "", "  ")
+	} else {
+		configAsJson, _ = json.Marshal(Config)
+	}
 	fmt.Printf("starting with config %v\n", string(configAsJson))
 	if Config.IsDev {
 		varsAsJson, _ := json.MarshalIndent(getExpectedEnvVars(), "", "  ")

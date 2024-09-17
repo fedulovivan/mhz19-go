@@ -25,4 +25,5 @@ type Engine interface {
 	SetLogTag(f logger.Tag)
 	SetLdmService(r LdmService)
 	AppendRules(rules ...Rule)
+	DeleteRule(ruleId int)
 }

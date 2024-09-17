@@ -11,6 +11,7 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
+// Args: Command, DeviceId
 var PostSonoffSwitchMessage types.ActionImpl = func(mm []types.Message, args types.Args, mapping types.Mapping, e types.EngineAsSupplier) (err error) {
 	tpayload := types.TemplatePayload{
 		Messages: mm,

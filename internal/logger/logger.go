@@ -21,7 +21,6 @@ func Init() {
 			tint.NewHandler(w, &tint.Options{
 				Level:      app.Config.LogLevel,
 				TimeFormat: "15:04:05.000",
-				// TimeFormat: time.TimeOnly,
 			}),
 		))
 	} else {
@@ -33,26 +32,25 @@ func Init() {
 type TagName string
 
 const (
-	MAIN     TagName = "[main]    "
-	ENGINE   TagName = "[engine]  "
-	MQTT     TagName = "[mqtt]    "
-	TBOT     TagName = "[tbot]    "
-	DB       TagName = "[db]      "
-	REST     TagName = "[rest]    "
-	RULES    TagName = "[rules]   "
-	STATS    TagName = "[stats]   "
-	LDM      TagName = "[ldm]     "
-	MESSAGES TagName = "[messages]"
-	DEVICES  TagName = "[devices] "
-	DNSSD    TagName = "[dns-sd]  "
-	ACTIONS  TagName = "[actions] "
-	BURIED   TagName = "[buried]  "
+	MAIN     TagName = "[main]      "
+	ENGINE   TagName = "[engine]    "
+	DB       TagName = "[db]        "
+	REST     TagName = "[rest]      "
+	LDM      TagName = "[ldm]       "
+	RULES    TagName = "[a_rules]   "
+	STATS    TagName = "[a_stats]   "
+	MESSAGES TagName = "[a_messages]"
+	DEVICES  TagName = "[a_devices] "
+	TBOT     TagName = "[p_tbot]    "
+	DNSSD    TagName = "[p_dnssd]   "
+	MQTT     TagName = "[p_mqtt]    "
+	BURIED   TagName = "[p_buried]  "
 )
 
 type Tag interface {
 	With(string, ...any) Tag
 	WithTid() Tag
-	F(string) string
+	F(format string, a ...any) string
 }
 
 type tag struct {
@@ -75,9 +73,16 @@ func (t *tag) WithTid() Tag {
 	return t.With("Tid#%v", seq.Inc())
 }
 
-func (t *tag) F(message string) string {
+func (t *tag) F(format string, a ...any) string {
 	return strings.Join(
-		append(t.tags, message),
+		append(t.tags, fmt.Sprintf(format, a...)),
 		" ",
 	)
 }
+
+// if app.Config.IsDev {
+// 	// in development pad tag with spaces for extra nice output
+// 	return func(message string) string {
+// 		return fmt.Sprintf("%-10s", "["+tag+"]") + " " + message
+// 	}
+// }

@@ -229,6 +229,19 @@ func (s *ServiceSuite) Test20() {
 	s.Fail("expected to panic")
 }
 
+func (s *ServiceSuite) Test21() {
+	s.Nil(BuildArguments([]DbRuleConditionOrActionArgument{}))
+}
+
+func (s *ServiceSuite) Test22() {
+	s.NotNil(BuildArguments([]DbRuleConditionOrActionArgument{
+		{
+			ArgumentName: "Bar",
+			Value:        db.NewNullString("foo"),
+		},
+	}))
+}
+
 func (s *ServiceSuite) Test30() {
 	res := BuildCondition(0, []DbRuleCondition{}, []DbRuleConditionOrActionArgument{})
 	s.Zero(res)
@@ -286,7 +299,7 @@ func (s *ServiceSuite) Test53() {
 			}},
 		},
 	}, utils.NewSeq(00), nil)
-	expected := "[{1 1 {0 false} {1 true} {0 true} {0 false} { false}} {2 1 {2 true} {0 false} {0 false} {1 true} { false}} {3 1 {0 false} {0 true} {0 true} {1 true} { false}} {4 1 {2 true} {0 false} {0 false} {3 true} { false}} {5 1 {3 true} {0 false} {0 false} {3 true} { false}}]"
+	expected := "[{1 1 {0 false} {1 true} {0 false} {0 false} { false}} {2 1 {2 true} {0 false} {0 true} {1 true} { false}} {3 1 {0 false} {0 true} {0 false} {1 true} { false}} {4 1 {2 true} {0 false} {1 true} {3 true} { false}} {5 1 {3 true} {0 false} {0 true} {3 true} { false}}]"
 	s.Equal(expected, fmt.Sprintf("%v", actual))
 }
 
@@ -345,7 +358,7 @@ func (s *ServiceSuite) Test63() {
 	expectedRule := "{1 unit test {1 true} {0 true} {0 true}}"
 	s.Equal(expectedRule, fmt.Sprintf("%v", outrule))
 
-	expectedConds := "[{2 1 {2 true} {0 false} {0 false} {0 false} { false}}]"
+	expectedConds := "[{2 1 {2 true} {0 false} {0 true} {0 false} { false}}]"
 	s.Len(outconds, 1)
 	s.Equal(expectedConds, fmt.Sprintf("%v", outconds))
 

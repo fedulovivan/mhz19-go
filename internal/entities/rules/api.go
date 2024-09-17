@@ -47,7 +47,7 @@ func (api rulesApi) getOne(c *routing.Context) error {
 	if err != nil {
 		return err
 	}
-	rule, err := api.service.GetOne(int32(ruleId))
+	rule, err := api.service.GetOne(int(ruleId))
 	if err != nil {
 		return err
 	}
@@ -60,7 +60,7 @@ func (api rulesApi) delete(c *routing.Context) error {
 	if err != nil {
 		return err
 	}
-	err = api.service.Delete(int32(ruleId))
+	err = api.service.Delete(int(ruleId))
 	if err != nil {
 		return err
 	}

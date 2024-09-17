@@ -3,6 +3,7 @@ package types
 import (
 	"testing"
 
+	"github.com/fedulovivan/mhz19-go/pkg/utils"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -29,11 +30,11 @@ func (s *MessageSuite) Test20() {
 	m := Message{}
 
 	v, err := m.ExecDirective("$channelType")
-	s.Equal(CHANNEL_UNKNOWN, v)
+	s.Equal(ChannelType(0), v)
 	s.Nil(err)
 
 	v, err = m.ExecDirective("$deviceClass")
-	s.Equal(DEVICE_CLASS_UNKNOWN, v)
+	s.Equal(DeviceClass(0), v)
 	s.Nil(err)
 
 	v, err = m.ExecDirective("$deviceId")
@@ -45,7 +46,7 @@ func (s *MessageSuite) Test20() {
 func (s *MessageSuite) Test30() {
 
 	m := Message{
-		ChannelMeta: ChannelMeta{MqttTopic: "foo/111"},
+		ChannelMeta: &ChannelMeta{MqttTopic: "foo/111"},
 		ChannelType: CHANNEL_MQTT,
 		DeviceClass: DEVICE_CLASS_ZIGBEE_DEVICE,
 		DeviceId:    "0x00158d0004244bda",
@@ -106,6 +107,15 @@ func (s *MessageSuite) Test61() {
 	v, err := m.ExecDirective("$message.bar")
 	s.EqualError(err, `Message.ExecDirective(): Payload is expected to be map[string]any not 'int', reading field 'bar'`)
 	s.Nil(v)
+}
+
+func (s *MessageSuite) Test70() {
+	m := Message{}
+	s.Nil(m.Payload)
+	s.Nil(m.RawPayload)
+	s.Nil(m.ChannelMeta)
+	s.True(m.Timestamp.IsZero())
+	utils.Dump("m", m)
 }
 
 func TestMessage(t *testing.T) {

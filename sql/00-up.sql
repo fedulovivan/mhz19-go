@@ -97,18 +97,17 @@ CREATE TABLE messages (
     device_id TEXT,
 	timestamp DATETIME NOT NULL,
 	json TEXT NOT NULL,
+    from_end_device INTEGER NOT NULL,
     CONSTRAINT messages_fk_device FOREIGN KEY (device_id) REFERENCES devices(native_id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT messages_fk_dc FOREIGN KEY (device_class_id) REFERENCES device_classes(id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT messages_fk_channel FOREIGN KEY (channel_type_id) REFERENCES channel_types(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-INSERT INTO channel_types VALUES(0,'<unknown>');
 INSERT INTO channel_types VALUES(1,'mqtt');
 INSERT INTO channel_types VALUES(2,'telegram');
 INSERT INTO channel_types VALUES(3,'dns-sd');
 INSERT INTO channel_types VALUES(4,'system');
 
-INSERT INTO device_classes VALUES(0,'<unknown>');
 INSERT INTO device_classes VALUES(1,'zigbee-device');
 INSERT INTO device_classes VALUES(2,'device-pinger');
 INSERT INTO device_classes VALUES(3,'valve-manipulator');
@@ -134,10 +133,12 @@ INSERT INTO condition_functions VALUES(5,'NotNil');
 INSERT INTO condition_functions VALUES(6,'ZigbeeDevice');
 INSERT INTO condition_functions VALUES(7,'DeviceClass');
 INSERT INTO condition_functions VALUES(8,'Channel');
+INSERT INTO condition_functions VALUES(9,'FromEndDevice');
 
 INSERT INTO devices VALUES(1, '192.168.88.1', 2, 'MIKROTIK_ROUTER', NULL, NULL, NULL, NULL);
 INSERT INTO devices VALUES(2, '192.168.88.44', 2, 'IPHONE_15_PRO_IP', NULL, NULL, NULL, NULL);
 INSERT INTO devices VALUES(3, '192.168.0.11', 2, 'IPHONE_15_PRO_AP_IP', NULL, NULL, NULL, NULL);
 INSERT INTO devices VALUES(4, '192.168.88.62', 2, 'IPHONE_14_IP', NULL, NULL, NULL, NULL);
+INSERT INTO devices VALUES(5, 'buried-device', 7, NULL, NULL, NULL, NULL, NULL);
 
 COMMIT;

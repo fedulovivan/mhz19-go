@@ -135,7 +135,7 @@ func Init() {
 		slog.Debug(tag.F("server is running at " + addr))
 		server = http.Server{Addr: addr}
 		err := server.ListenAndServe()
-		slog.Warn(tag.F(err.Error()))
+		slog.Debug(tag.F(err.Error()))
 	}()
 }
 

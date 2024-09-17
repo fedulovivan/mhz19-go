@@ -24,8 +24,9 @@ func (s mockDevicesService) GetByDeviceClass(dc types.DeviceClass) ([]types.Devi
 }
 func (s mockDevicesService) GetOne(id types.DeviceId) (res types.Device, err error) {
 	if id == types.DeviceId("10011cec96") {
+		name := "My perfect name"
 		res = types.Device{
-			Name: "My perfect name",
+			Name: &name,
 			Json: map[string]any{
 				"Ip":   "192.168.88.60",
 				"Port": "8081",
@@ -55,8 +56,9 @@ func (p *mockprovider) Send(a ...any) error {
 func (p *mockprovider) Write(m types.Message) {
 
 }
+
 func (p *mockprovider) Channel() types.ChannelType {
-	return types.CHANNEL_UNKNOWN
+	return 0
 }
 
 func (p *mockprovider) Init() {

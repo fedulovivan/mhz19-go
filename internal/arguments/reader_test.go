@@ -184,7 +184,7 @@ func (s *ReaderSuite) Test122() {
 		DeviceId: "nullish-device-id",
 	}}}
 	r := NewReader(&m, args, nil, &tpayload, engine)
-	expected := "device name is 'Device of class <unknown> (id=0), with id nullish-device-id'"
+	expected := "device name is 'Device of class  (id=0), with id nullish-device-id'"
 	actual := r.Get("Foo5")
 	s.Equal(expected, actual)
 	s.Nil(r.Error())

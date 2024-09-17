@@ -52,10 +52,11 @@ func (p *parserBase) parse_base() (types.Message, bool) {
 	meta := types.ChannelMeta{MqttTopic: topic}
 
 	outMsg := types.Message{
-		ChannelType: types.CHANNEL_MQTT,
-		ChannelMeta: meta,
-		DeviceClass: p.dc,
-		Timestamp:   time.Now(),
+		ChannelType:   types.CHANNEL_MQTT,
+		ChannelMeta:   &meta,
+		DeviceClass:   p.dc,
+		Timestamp:     time.Now(),
+		FromEndDevice: false,
 	}
 
 	tt := strings.Split(strings.TrimLeft(topic, "/"), "/")

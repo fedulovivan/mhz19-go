@@ -3,6 +3,7 @@ package rules
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"slices"
 
 	"github.com/fedulovivan/mhz19-go/internal/db"
@@ -388,7 +389,17 @@ func ruleDeleteTx(
 func (r rulesRepository) Delete(ruleId int32) error {
 	ctx := context.Background()
 	return db.WithTx(r.database, func(tx *sql.Tx) (err error) {
-		_, err = ruleDeleteTx(ruleId, ctx, tx)
+		res, err := ruleDeleteTx(ruleId, ctx, tx)
+		if err != nil {
+			return
+		}
+		rowsAffected, err := res.RowsAffected()
+		if err != nil {
+			return
+		}
+		if rowsAffected == 0 {
+			err = fmt.Errorf("no one rule was deleted")
+		}
 		return
 	})
 }

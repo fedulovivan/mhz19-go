@@ -12,25 +12,25 @@ var _ json.Marshaler = (*CondFn)(nil)
 var _ json.Unmarshaler = (*CondFn)(nil)
 
 const (
-	COND_UNKNOWN       CondFn = 0
-	COND_CHANGED       CondFn = 1
-	COND_EQUAL         CondFn = 2
-	COND_IN_LIST       CondFn = 3
-	COND_NOT_NIL       CondFn = 5
-	COND_ZIGBEE_DEVICE CondFn = 6
-	COND_DEVICE_CLASS  CondFn = 7
-	COND_СHANNEL       CondFn = 8
+	COND_CHANGED         CondFn = 1
+	COND_EQUAL           CondFn = 2
+	COND_IN_LIST         CondFn = 3
+	COND_NOT_NIL         CondFn = 5
+	COND_ZIGBEE_DEVICE   CondFn = 6
+	COND_DEVICE_CLASS    CondFn = 7
+	COND_СHANNEL         CondFn = 8
+	COND_FROM_END_DEVICE CondFn = 9
 )
 
 var CONDITION_NAMES = map[CondFn]string{
-	COND_UNKNOWN:       "<unknown>",
-	COND_CHANGED:       "Changed",
-	COND_EQUAL:         "Equal",
-	COND_IN_LIST:       "InList",
-	COND_NOT_NIL:       "NotNil",
-	COND_ZIGBEE_DEVICE: "ZigbeeDevice",
-	COND_DEVICE_CLASS:  "DeviceClass",
-	COND_СHANNEL:       "Channel",
+	COND_CHANGED:         "Changed",
+	COND_EQUAL:           "Equal",
+	COND_IN_LIST:         "InList",
+	COND_NOT_NIL:         "NotNil",
+	COND_ZIGBEE_DEVICE:   "ZigbeeDevice",
+	COND_DEVICE_CLASS:    "DeviceClass",
+	COND_СHANNEL:         "Channel",
+	COND_FROM_END_DEVICE: "FromEndDevice",
 }
 
 func (fn CondFn) String() string {
