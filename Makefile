@@ -1,10 +1,10 @@
 CONF ?= .env
+include $(CONF)
+
 NAME ?= mhz19-go-backend
 GIT_REV ?= $(shell git rev-parse --short HEAD)
 DATE ?= $(shell date +%FT%T)
 NUM_MIGRATION ?= 00
-REST_API_PORT ?= 8888
-REST_API_PATH ?= /api
 REST_API_URL ?= http://localhost:$(REST_API_PORT)$(REST_API_PATH)
 API_LOAD_COUNT ?= 1000
 API_LOAD_THREADS ?= 10

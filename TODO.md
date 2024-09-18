@@ -1,7 +1,6 @@
 
 ### Prio 0
 - feat: enable throttle for "RecordMessage" action + implement batch insert + ensure there no misses with throttled handling 
-- `make docker-up` uses REST_API_PORT from Makefile, switch to .env - https://stackoverflow.com/questions/44628206/how-to-load-and-export-variables-from-an-env-file-in-makefile
 
 ### Prio 1
 - None
@@ -45,6 +44,7 @@
 
 ### Completed
 
+- (+) `make docker-up` uses REST_API_PORT from Makefile, switch to .env - https://stackoverflow.com/questions/44628206/how-to-load-and-export-variables-from-an-env-file-in-makefile
 - (+) arch: for rule_condition_or_action_arguments use value + data_type_id instead in addition to + device_id + device_class_id + channel_type_id
 - (+) uts: create tests for nested conditions
 - (+) arch: avoid "args=map[]" in logs - slog always writes nil map as "map[]", not "nil", see also Test20, Test21 in service_test.go, https://github.com/golang/go/issues/69496
