@@ -1,7 +1,7 @@
 
 ### Prio 0
-- uts: create tests for nested conditions
-- feat: make RecordMessage throttled + implement batch insert + ensure there no misses with throttled handling 
+- feat: enable throttle for "RecordMessage" action + implement batch insert + ensure there no misses with throttled handling 
+- `make docker-up` uses REST_API_PORT from Makefile, switch to .env - https://stackoverflow.com/questions/44628206/how-to-load-and-export-variables-from-an-env-file-in-makefile
 
 ### Prio 1
 - None
@@ -29,7 +29,8 @@
 - arch: get rid of any in Send(...any) - no ideas so far
 - arch: mapping rules could be pre-defined (system) and loaded from db (user-level) - think we need to store everything in db, even system rules
 - arch: split rest api and engine into different microservices
-- (?) arch: consider replacing sql.NullInt32 and sql.NullString with corresponding of pointer types - https://stackoverflow.com/questions/40092155/difference-between-string-and-sql-nullstring
+- (?) arch: looks like we need to compare values as srings in conditions
+- (?) arch: consider replacing sql.NullInt32 and sql.NullString with corresponding of pointer types - https://stackoverflow.com/questions/40092155/difference-between-string-and-sql-nullstring, for now stick with existing approach as more convenient
  
 
 ### Try
@@ -44,6 +45,8 @@
 
 ### Completed
 
+- (+) arch: for rule_condition_or_action_arguments use value + data_type_id instead in addition to + device_id + device_class_id + channel_type_id
+- (+) uts: create tests for nested conditions
 - (+) arch: avoid "args=map[]" in logs - slog always writes nil map as "map[]", not "nil", see also Test20, Test21 in service_test.go, https://github.com/golang/go/issues/69496
 - try: postgres instead of sqlite3
 - (+) bug: unable to start vscode debugging or unit tests with current implementation around SqliteFilename and SQLITE_FILENAME

@@ -225,7 +225,6 @@ func (s *ConditionsSuite) Test151() {
 }
 
 func (s *ConditionsSuite) Test104() {
-	// defer func() { _ = recover() }()
 	args := types.Args{
 		"Value": "some1",
 		"List":  "some2",
@@ -233,7 +232,6 @@ func (s *ConditionsSuite) Test104() {
 	res, err := InList(types.MessageTuple{}, args)
 	s.NotNil(err)
 	s.False(res)
-	// s.Fail("expected to panic")
 }
 
 func (s *ConditionsSuite) Test115() {

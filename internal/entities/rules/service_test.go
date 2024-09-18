@@ -53,22 +53,25 @@ var testDataTable = []TableRow{
 		},
 		ruleConditionOrActionArguments: []DbRuleConditionOrActionArgument{
 			{
-				Id:           1,
-				ConditionId:  db.NewNullInt32(1),
-				ArgumentName: "Left",
-				Value:        db.NewNullString("foo"),
+				Id:            1,
+				ConditionId:   db.NewNullInt32(1),
+				ArgumentName:  "Left",
+				Value:         db.NewNullString("foo"),
+				ValueDataType: db.NewNullString("string"),
 			},
 			{
-				Id:           2,
-				ConditionId:  db.NewNullInt32(1),
-				ArgumentName: "Right",
-				Value:        db.NewNullString("bar"),
+				Id:            2,
+				ConditionId:   db.NewNullInt32(1),
+				ArgumentName:  "Right",
+				Value:         db.NewNullString("bar"),
+				ValueDataType: db.NewNullString("string"),
 			},
 			{
-				Id:           3,
-				ConditionId:  db.NewNullInt32(1),
-				ArgumentName: "Third",
-				Value:        db.NewNullString("baz"),
+				Id:            3,
+				ConditionId:   db.NewNullInt32(1),
+				ArgumentName:  "Third",
+				Value:         db.NewNullString("baz"),
+				ValueDataType: db.NewNullString("string"),
 			},
 			{
 				Id:            4,
@@ -83,10 +86,11 @@ var testDataTable = []TableRow{
 				DeviceId:     db.NewNullString("0x00158d0004244bda"),
 			},
 			{
-				Id:           6,
-				ActionId:     db.NewNullInt32(1),
-				ArgumentName: "Value",
-				Value:        db.NewNullString("$message.action"),
+				Id:            6,
+				ActionId:      db.NewNullInt32(1),
+				ArgumentName:  "Value",
+				Value:         db.NewNullString("$message.action"),
+				ValueDataType: db.NewNullString("string"),
 			},
 			{
 				Id:           7,
@@ -108,7 +112,6 @@ var testDataTable = []TableRow{
 				Id:           1,
 				RuleId:       1,
 				FunctionType: db.NewNullInt32(1),
-				// DeviceId:     db.NewNullString("0x00158d0004244bda"),
 			},
 		},
 		ruleActionArgumentMappings: []DbRuleActionArgumentMapping{
@@ -220,11 +223,11 @@ func (s *ServiceSuite) Test12() {
 }
 
 func (s *ServiceSuite) Test20() {
-	defer func() { _ = recover() }()
-	BuildArguments([]DbRuleConditionOrActionArgument{
-		{},
+	s.PanicsWithValue("unexpected conditions", func() {
+		BuildArguments([]DbRuleConditionOrActionArgument{
+			{},
+		})
 	})
-	s.Fail("expected to panic")
 }
 
 func (s *ServiceSuite) Test21() {
@@ -232,12 +235,89 @@ func (s *ServiceSuite) Test21() {
 }
 
 func (s *ServiceSuite) Test22() {
-	s.NotNil(BuildArguments([]DbRuleConditionOrActionArgument{
+	actual := BuildArguments([]DbRuleConditionOrActionArgument{
 		{
-			ArgumentName: "Bar",
-			Value:        db.NewNullString("foo"),
+			ArgumentName:  "Bar",
+			Value:         db.NewNullString("foo"),
+			ValueDataType: db.NewNullString("string"),
 		},
-	}))
+	})
+	s.Equal("foo", actual["Bar"])
+}
+
+func (s *ServiceSuite) Test23() {
+	actual := BuildArguments([]DbRuleConditionOrActionArgument{
+		{
+			ArgumentName:  "Bar1",
+			Value:         db.NewNullString("123"),
+			ValueDataType: db.NewNullString("int"),
+		},
+	})
+	s.Equal(int(123), actual["Bar1"])
+}
+
+func (s *ServiceSuite) Test24() {
+	actual := BuildArguments([]DbRuleConditionOrActionArgument{
+		{
+			ArgumentName:  "Bar2",
+			Value:         db.NewNullString("111"),
+			ValueDataType: db.NewNullString("float64"),
+		},
+	})
+	s.Equal(float64(111), actual["Bar2"])
+}
+
+func (s *ServiceSuite) Test25() {
+	actual := BuildArguments([]DbRuleConditionOrActionArgument{
+		{
+			ArgumentName:  "Bar3",
+			Value:         db.NewNullString("true"),
+			ValueDataType: db.NewNullString("bool"),
+		},
+	})
+	s.Equal(true, actual["Bar3"])
+}
+
+func (s *ServiceSuite) Test26() {
+	s.PanicsWithValue("unexpected value data type types.Rule", func() {
+		BuildArguments([]DbRuleConditionOrActionArgument{
+			{
+				ArgumentName:  "Bar4",
+				Value:         db.NewNullString("{}"),
+				ValueDataType: db.NewNullString("types.Rule"),
+			},
+		})
+	})
+}
+
+func (s *ServiceSuite) Test27() {
+	actual := BuildArguments([]DbRuleConditionOrActionArgument{
+		{
+			ArgumentName: "Bar5",
+			DeviceId:     db.NewNullString("lorem111"),
+		},
+	})
+	s.Equal(types.DeviceId("lorem111"), actual["Bar5"])
+}
+
+func (s *ServiceSuite) Test28() {
+	actual := BuildArguments([]DbRuleConditionOrActionArgument{
+		{
+			ArgumentName:  "Bar6",
+			DeviceClassId: db.NewNullInt32(2),
+		},
+	})
+	s.Equal(types.DEVICE_CLASS_PINGER, actual["Bar6"])
+}
+
+func (s *ServiceSuite) Test29() {
+	actual := BuildArguments([]DbRuleConditionOrActionArgument{
+		{
+			ArgumentName:  "Bar7",
+			ChannelTypeId: db.NewNullInt32(3),
+		},
+	})
+	s.Equal(types.CHANNEL_DNS_SD, actual["Bar7"])
 }
 
 func (s *ServiceSuite) Test30() {
@@ -259,12 +339,12 @@ func (s *ServiceSuite) Test50() {
 }
 
 func (s *ServiceSuite) Test51() {
-	defer func() { _ = recover() }()
-	ToDbConditions(1, nil, types.Condition{
-		Fn:     types.COND_CHANGED,
-		Nested: []types.Condition{{Fn: types.COND_EQUAL}},
-	}, nil, nil)
-	s.Fail("expected to panic")
+	s.PanicsWithValue("unexpected conditions", func() {
+		ToDbConditions(1, nil, types.Condition{
+			Fn:     types.COND_CHANGED,
+			Nested: []types.Condition{{Fn: types.COND_EQUAL}},
+		}, nil, nil)
+	})
 }
 
 func (s *ServiceSuite) Test52() {
@@ -302,18 +382,10 @@ func (s *ServiceSuite) Test53() {
 }
 
 func (s *ServiceSuite) Test60() {
-	defer func() { _ = recover() }()
-	ToDb(types.Rule{}, nil)
-	s.Fail("expected to panic")
-	/* _, _, _, _, err :=  */
-	// s.Nil(err)
+	s.Panics(func() {
+		ToDb(types.Rule{}, nil)
+	})
 }
-
-// func (s *MappingsSuite) Test61() {
-// 	ToDb(types.Rule{}, utils.NewSeq(0))
-// 	/* _, _, _, _, err :=  */
-// 	// s.Nil(err)
-// }
 
 func (s *ServiceSuite) Test62() {
 	inrule := types.Rule{}
@@ -324,11 +396,6 @@ func (s *ServiceSuite) Test62() {
 	s.Len(outactions, 0)
 	s.Len(outargs, 0)
 	s.Len(mappings, 0)
-	// dump("outrule", outrule)
-	// dump("outconds", outconds)
-	// dump("outargs", outargs)
-	// dump("err", err)
-	// s.Nil(err)
 }
 
 func (s *ServiceSuite) Test63() {
@@ -452,7 +519,9 @@ func (s *ServiceSuite) Test80() {
 		false,
 	)
 	data, _ := json.Marshal(aa)
-	s.Equal(`[{"Id":1,"RuleId":1,"ConditionId":{"Int32":0,"Valid":true},"ActionId":{"Int32":0,"Valid":false},"ArgumentName":"key","IsList":{"Int32":0,"Valid":true},"Value":{"String":"111","Valid":true},"DeviceId":{"String":"","Valid":false},"DeviceClassId":{"Int32":0,"Valid":false}}]`, string(data))
+	// fmt.Println(string(data))
+	expected := `[{"Id":1,"RuleId":1,"ConditionId":{"Int32":0,"Valid":true},"ActionId":{"Int32":0,"Valid":false},"ArgumentName":"key","IsList":{"Int32":0,"Valid":true},"Value":{"String":"111","Valid":true},"ValueDataType":{"String":"int","Valid":true},"DeviceId":{"String":"","Valid":false},"DeviceClassId":{"Int32":0,"Valid":false},"ChannelTypeId":{"Int32":0,"Valid":false}}]`
+	s.Equal(expected, string(data))
 }
 
 func (s *ServiceSuite) Test81() {
@@ -466,7 +535,8 @@ func (s *ServiceSuite) Test81() {
 		false,
 	)
 	data, _ := json.Marshal(aa)
-	expected := `[{"Id":1,"RuleId":1,"ConditionId":{"Int32":0,"Valid":true},"ActionId":{"Int32":0,"Valid":false},"ArgumentName":"key2","IsList":{"Int32":1,"Valid":true},"Value":{"String":"222","Valid":true},"DeviceId":{"String":"","Valid":false},"DeviceClassId":{"Int32":0,"Valid":false}},{"Id":2,"RuleId":1,"ConditionId":{"Int32":0,"Valid":true},"ActionId":{"Int32":0,"Valid":false},"ArgumentName":"key2","IsList":{"Int32":1,"Valid":true},"Value":{"String":"333","Valid":true},"DeviceId":{"String":"","Valid":false},"DeviceClassId":{"Int32":0,"Valid":false}}]`
+	// fmt.Println(string(data))
+	expected := `[{"Id":1,"RuleId":1,"ConditionId":{"Int32":0,"Valid":true},"ActionId":{"Int32":0,"Valid":false},"ArgumentName":"key2","IsList":{"Int32":1,"Valid":true},"Value":{"String":"222","Valid":true},"ValueDataType":{"String":"int","Valid":true},"DeviceId":{"String":"","Valid":false},"DeviceClassId":{"Int32":0,"Valid":false},"ChannelTypeId":{"Int32":0,"Valid":false}},{"Id":2,"RuleId":1,"ConditionId":{"Int32":0,"Valid":true},"ActionId":{"Int32":0,"Valid":false},"ArgumentName":"key2","IsList":{"Int32":1,"Valid":true},"Value":{"String":"333","Valid":true},"ValueDataType":{"String":"int","Valid":true},"DeviceId":{"String":"","Valid":false},"DeviceClassId":{"Int32":0,"Valid":false},"ChannelTypeId":{"Int32":0,"Valid":false}}]`
 	s.Equal(expected, string(data))
 }
 
@@ -481,7 +551,8 @@ func (s *ServiceSuite) Test82() {
 		false,
 	)
 	data, _ := json.Marshal(aa)
-	expected := `[{"Id":1,"RuleId":1,"ConditionId":{"Int32":0,"Valid":true},"ActionId":{"Int32":0,"Valid":false},"ArgumentName":"key3","IsList":{"Int32":0,"Valid":true},"Value":{"String":"","Valid":false},"DeviceId":{"String":"0xqwe111111","Valid":true},"DeviceClassId":{"Int32":0,"Valid":false}}]`
+	// fmt.Println(string(data))
+	expected := `[{"Id":1,"RuleId":1,"ConditionId":{"Int32":0,"Valid":true},"ActionId":{"Int32":0,"Valid":false},"ArgumentName":"key3","IsList":{"Int32":0,"Valid":true},"Value":{"String":"","Valid":false},"ValueDataType":{"String":"","Valid":false},"DeviceId":{"String":"0xqwe111111","Valid":true},"DeviceClassId":{"Int32":0,"Valid":false},"ChannelTypeId":{"Int32":0,"Valid":false}}]`
 	s.Equal(expected, string(data))
 }
 
@@ -496,7 +567,8 @@ func (s *ServiceSuite) Test83() {
 		false,
 	)
 	data, _ := json.Marshal(aa)
-	expected := `[{"Id":1,"RuleId":1,"ConditionId":{"Int32":0,"Valid":true},"ActionId":{"Int32":0,"Valid":false},"ArgumentName":"key4","IsList":{"Int32":0,"Valid":true},"Value":{"String":"","Valid":false},"DeviceId":{"String":"","Valid":false},"DeviceClassId":{"Int32":1,"Valid":true}}]`
+	// fmt.Println(string(data))
+	expected := `[{"Id":1,"RuleId":1,"ConditionId":{"Int32":0,"Valid":true},"ActionId":{"Int32":0,"Valid":false},"ArgumentName":"key4","IsList":{"Int32":0,"Valid":true},"Value":{"String":"","Valid":false},"ValueDataType":{"String":"","Valid":false},"DeviceId":{"String":"","Valid":false},"DeviceClassId":{"Int32":1,"Valid":true},"ChannelTypeId":{"Int32":0,"Valid":false}}]`
 	s.Equal(expected, string(data))
 }
 

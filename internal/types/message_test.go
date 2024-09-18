@@ -18,11 +18,11 @@ func (s *MessageSuite) TeardownSuite() {
 }
 
 func (s *MessageSuite) Test10() {
-	defer func() { _ = recover() }()
-	m := Message{}
-	v, _ := m.ExecDirective("foo")
-	s.Nil(v)
-	s.Fail("expected to panic")
+	s.PanicsWithValue("unknown directive foo", func() {
+		m := Message{}
+		v, _ := m.ExecDirective("foo")
+		s.Nil(v)
+	})
 }
 
 func (s *MessageSuite) Test20() {

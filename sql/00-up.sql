@@ -70,13 +70,16 @@ CREATE TABLE rule_condition_or_action_arguments (
     argument_name TEXT NOT NULL,
     is_list INTEGER,
     value TEXT,
+    value_data_type TEXT,
     device_id TEXT,
     device_class_id INTEGER,
-    CONSTRAINT rule_actions_fk_rules FOREIGN KEY (rule_id) REFERENCES rules(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    channel_type_id INTEGER,
+    CONSTRAINT rule_ca_arguments_fk_rules FOREIGN KEY (rule_id) REFERENCES rules(id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT rule_ca_arguments_fk_conditions FOREIGN KEY (condition_id) REFERENCES rule_conditions(id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT rule_ca_arguments_fk_actions FOREIGN KEY (action_id) REFERENCES rule_actions(id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT rule_ca_arguments_fk_devices FOREIGN KEY (device_id) REFERENCES devices(native_id) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT rule_ca_arguments_fk_dc FOREIGN KEY (device_class_id) REFERENCES device_classes(id) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT rule_ca_arguments_fk_dc FOREIGN KEY (device_class_id) REFERENCES device_classes(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT rule_ca_arguments_fk_channels FOREIGN KEY (channel_type_id) REFERENCES channel_types(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE rule_action_argument_mappings (
@@ -96,9 +99,9 @@ CREATE TABLE messages (
     device_id TEXT,
 	timestamp DATETIME NOT NULL,
 	json TEXT NOT NULL,
-    CONSTRAINT messages_fk_device FOREIGN KEY (device_id) REFERENCES devices(native_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT messages_fk_devices FOREIGN KEY (device_id) REFERENCES devices(native_id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT messages_fk_dc FOREIGN KEY (device_class_id) REFERENCES device_classes(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT messages_fk_channel FOREIGN KEY (channel_type_id) REFERENCES channel_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT messages_fk_channels FOREIGN KEY (channel_type_id) REFERENCES channel_types(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 INSERT INTO channel_types VALUES(1,'mqtt');

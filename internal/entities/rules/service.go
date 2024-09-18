@@ -3,6 +3,8 @@ package rules
 import (
 	"database/sql"
 	"fmt"
+	"slices"
+	"strconv"
 	"time"
 
 	"github.com/fedulovivan/mhz19-go/internal/db"
@@ -18,6 +20,8 @@ type rulesService struct {
 }
 
 var instance types.RulesService
+
+var knownSimpleTypes = []string{"string", "int", "float64", "bool"}
 
 func NewService(r RulesRepository) types.RulesService {
 	return rulesService{
@@ -247,12 +251,25 @@ func BuildArguments(args []DbRuleConditionOrActionArgument) (result types.Args) 
 	for _, a := range args {
 		islist := a.IsList.Valid && a.IsList.Int32 == 1
 		var value any
-		if a.Value.Valid {
-			value = a.Value.String
+		if a.Value.Valid && a.ValueDataType.Valid {
+			switch a.ValueDataType.String {
+			case "string":
+				value = a.Value.String
+			case "int":
+				value, _ = strconv.Atoi(a.Value.String)
+			case "float64":
+				value, _ = strconv.ParseFloat(a.Value.String, 64)
+			case "bool":
+				value = a.Value.String == "true"
+			default:
+				panic(fmt.Sprintf("unexpected value data type %s", a.ValueDataType.String))
+			}
 		} else if a.DeviceId.Valid {
 			value = types.DeviceId(a.DeviceId.String)
 		} else if a.DeviceClassId.Valid {
 			value = types.DeviceClass(a.DeviceClassId.Int32)
+		} else if a.ChannelTypeId.Valid {
+			value = types.ChannelType(a.ChannelTypeId.Int32)
 		} else {
 			panic("unexpected conditions")
 		}
@@ -412,11 +429,12 @@ func ToDbArguments(
 	seq utils.Seq,
 	islist bool,
 ) (res []DbRuleConditionOrActionArgument) {
-	// fmt.Printf("%v, %v, %T\n", key, value, value)
 	if listArg, ok := value.([]any); ok {
 		for _, vi := range listArg {
-			args := ToDbArguments(ruleId, condition, action, key, vi, seq, true)
-			res = append(res, args...)
+			res = append(
+				res,
+				ToDbArguments(ruleId, condition, action, key, vi, seq, true)...,
+			)
 		}
 	} else {
 		arg := DbRuleConditionOrActionArgument{
@@ -425,6 +443,7 @@ func ToDbArguments(
 			ArgumentName: key,
 			IsList:       db.NewNullInt32FromBool(islist),
 		}
+		valueDataType := fmt.Sprintf("%T", value)
 		if condition != nil {
 			arg.ConditionId = db.NewNullInt32(condition.Id)
 		}
@@ -435,8 +454,13 @@ func ToDbArguments(
 			arg.DeviceId = db.NewNullString(string(deviceId))
 		} else if deviceClass, ok := value.(types.DeviceClass); ok {
 			arg.DeviceClassId = db.NewNullInt32(int32(deviceClass))
-		} else {
+		} else if channelType, ok := value.(types.ChannelType); ok {
+			arg.ChannelTypeId = db.NewNullInt32(int32(channelType))
+		} else if slices.Contains(knownSimpleTypes, valueDataType) {
 			arg.Value = db.NewNullString(fmt.Sprintf("%v", value))
+			arg.ValueDataType = db.NewNullString(valueDataType)
+		} else {
+			panic(fmt.Sprintf("unexpected value data type %s", valueDataType))
 		}
 		res = append(res, arg)
 	}

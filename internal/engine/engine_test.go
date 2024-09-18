@@ -71,9 +71,9 @@ func (s *EngineSuite) Test13() {
 }
 
 func (s *EngineSuite) Test20() {
-	defer func() { _ = recover() }()
-	s.False(s.e.InvokeConditionFunc(types.MessageTuple{}, 0, false, nil, s.tag))
-	s.Fail("expected to panic")
+	s.PanicsWithValue("Condition function [ (id=0)] not yet implemented", func() {
+		s.False(s.e.InvokeConditionFunc(types.MessageTuple{}, 0, false, nil, s.tag))
+	})
 }
 
 func (s *EngineSuite) Test30() {
@@ -107,10 +107,8 @@ func (s *EngineSuite) Test60() {
 }
 
 func (s *EngineSuite) Test70() {
-	// defer func() { _ = recover() }()
 	s.e.HandleMessage(types.Message{}, []types.Rule{})
 	s.e.HandleMessage(types.Message{DeviceClass: types.DEVICE_CLASS_ZIGBEE_BRIDGE}, []types.Rule{})
-	// s.Fail("expected to panic")
 }
 
 func (s *EngineSuite) Test72() {

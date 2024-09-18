@@ -53,9 +53,9 @@ func (s *ActionsSuite) Test20() {
 }
 
 func (s *ActionsSuite) Test30() {
-	defer func() { _ = recover() }()
-	Get(13)
-	s.Fail("expected to panic")
+	s.PanicsWithValue("Action function [ (id=13)] not yet implemented", func() {
+		Get(13)
+	})
 }
 
 func (s *ActionsSuite) Test40() {

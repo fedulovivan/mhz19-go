@@ -59,8 +59,10 @@ type DbRuleConditionOrActionArgument struct {
 	ArgumentName  string
 	IsList        sql.NullInt32
 	Value         sql.NullString
+	ValueDataType sql.NullString
 	DeviceId      sql.NullString
 	DeviceClassId sql.NullInt32
+	ChannelTypeId sql.NullInt32
 }
 
 type DbRuleActionArgumentMapping struct {
@@ -118,8 +120,28 @@ func argumentInsertTx(
 	return db.Exec(
 		tx,
 		ctx,
-		`INSERT INTO rule_condition_or_action_arguments(rule_id, condition_id, action_id, argument_name, is_list, value, device_id, device_class_id) VALUES(?,?,?,?,?,?,?,?)`,
-		arg.RuleId, arg.ConditionId, arg.ActionId, arg.ArgumentName, arg.IsList, arg.Value, arg.DeviceId, arg.DeviceClassId,
+		`INSERT INTO rule_condition_or_action_arguments(
+			rule_id, 
+			condition_id, 
+			action_id, 
+			argument_name, 
+			is_list, 
+			value, 
+			value_data_type,
+			device_id, 
+			device_class_id,
+			channel_type_id
+		) VALUES(?,?,?,?,?,?,?,?,?,?)`,
+		arg.RuleId,
+		arg.ConditionId,
+		arg.ActionId,
+		arg.ArgumentName,
+		arg.IsList,
+		arg.Value,
+		arg.ValueDataType,
+		arg.DeviceId,
+		arg.DeviceClassId,
+		arg.ChannelTypeId,
 	)
 }
 
@@ -209,13 +231,24 @@ func argsSelectTx(ctx context.Context, tx *sql.Tx, ruleId sql.NullInt32) ([]DbRu
 			argument_name,
 			is_list,
 			value,
+			value_data_type,
 			device_id,
-			device_class_id
+			device_class_id,
+			channel_type_id
 		FROM
 			rule_condition_or_action_arguments`,
 		func(rows *sql.Rows, m *DbRuleConditionOrActionArgument) error {
 			return rows.Scan(
-				&m.Id, &m.ConditionId, &m.ActionId, &m.ArgumentName, &m.IsList, &m.Value, &m.DeviceId, &m.DeviceClassId,
+				&m.Id,
+				&m.ConditionId,
+				&m.ActionId,
+				&m.ArgumentName,
+				&m.IsList,
+				&m.Value,
+				&m.ValueDataType,
+				&m.DeviceId,
+				&m.DeviceClassId,
+				&m.ChannelTypeId,
 			)
 		},
 		db.Where{

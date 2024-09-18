@@ -31,7 +31,7 @@ func errorHandler(c *routing.Context) (err error) {
 		if rerr := recover(); rerr != nil {
 			var ok bool
 			if err, ok = rerr.(error); !ok {
-				err = fmt.Errorf("%v", rerr)
+				err = fmt.Errorf("panic: %v", rerr)
 			}
 			slog.Error(tag.F("recovered from panic"))
 			fmt.Println(string(debug.Stack()))
