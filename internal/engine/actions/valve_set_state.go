@@ -4,11 +4,12 @@ import (
 	"fmt"
 
 	"github.com/fedulovivan/mhz19-go/internal/arguments"
+	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
 // Args: Data, DeviceId
-var ValveSetState types.ActionImpl = func(mm []types.Message, args types.Args, mapping types.Mapping, e types.EngineAsSupplier) (err error) {
+var ValveSetState types.ActionImpl = func(mm []types.Message, args types.Args, mapping types.Mapping, e types.EngineAsSupplier, tag logger.Tag) (err error) {
 	tpayload := types.TemplatePayload{
 		Messages: mm,
 	}
@@ -20,7 +21,7 @@ var ValveSetState types.ActionImpl = func(mm []types.Message, args types.Args, m
 		return
 	}
 	topic := fmt.Sprintf("/VALVE/%v/STATE/SET", deviceId)
-	p := e.Provider(types.CHANNEL_MQTT)
+	p := e.GetProvider(types.CHANNEL_MQTT)
 	err = p.Send(topic, data)
 	return
 }

@@ -5,15 +5,17 @@ import (
 
 	"github.com/SkYNewZ/go-yeelight"
 	"github.com/fedulovivan/mhz19-go/internal/arguments"
+	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
-// Args: ID, Cmd
+// Args: IP, Cmd
 var YeelightDeviceSetPower types.ActionImpl = func(
 	mm []types.Message,
 	args types.Args,
 	mapping types.Mapping,
 	e types.EngineAsSupplier,
+	tag logger.Tag,
 ) (err error) {
 	tpayload := types.TemplatePayload{
 		Messages: mm,

@@ -14,10 +14,10 @@ type dummyProvider struct {
 	ProviderBase
 }
 
-func (s *dummyProvider) Init() {
-	s.Out = make(types.MessageChan, 100)
+func (p *dummyProvider) Init() {
+	p.InitBase()
 	time.Sleep(time.Millisecond * 100)
-	s.Out <- types.Message{}
+	p.Push(types.Message{})
 }
 
 type MappingsSuite struct {

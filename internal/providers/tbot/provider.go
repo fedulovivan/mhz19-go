@@ -116,7 +116,7 @@ func (p *provider) StartBotClient(token string) (err error) {
 					Payload:       payload,
 					FromEndDevice: true,
 				}
-				p.Out <- outMsg
+				p.Push(outMsg)
 			}
 		}
 	}()
@@ -124,7 +124,7 @@ func (p *provider) StartBotClient(token string) (err error) {
 }
 
 func (p *provider) Init() {
-	p.Out = make(types.MessageChan, 100)
+	p.InitBase()
 	p.bots = make(map[string]*tgbotapi.BotAPI)
 	for _, token := range app.Config.TelegramTokens {
 		err := p.StartBotClient(token)

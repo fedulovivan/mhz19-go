@@ -13,6 +13,11 @@ type Message struct {
 	DeviceClass DeviceClass `json:"deviceClass"`
 	// device id, specific for the current channel and device class, eg ieee adress for zigbee device
 	DeviceId DeviceId `json:"deviceId"`
+	// indicates this is end device message,
+	// and not a thing like z2m bridge message with list of registered devices,
+	// or not a dns-sd channel message with sonoff device announcement
+	// or not system message from buried_devices/provider.go
+	FromEndDevice bool `json:"fromEndDevice"`
 	// time when message was received by backend
 	Timestamp time.Time `json:"timestamp"`
 	// message payload json specific for channel and device class
@@ -21,11 +26,29 @@ type Message struct {
 	RawPayload []byte `json:"-"`
 	// additional metadata specific for the current channel
 	ChannelMeta *ChannelMeta `json:"-"`
-	// indicates this is end device message,
-	// and not a thing like z2m bridge message with list of registered devices,
-	// or not a dns-sd channel message with sonoff device announcement
-	// or not system message from buried_devices/provider.go
-	FromEndDevice bool `json:"fromEndDevice"`
+}
+
+func NewMessage(
+	fromEndDevice bool,
+	ct ChannelType,
+	dc *DeviceClass,
+	id *DeviceId,
+) Message {
+	res := Message{
+		ChannelType:   ct,
+		Timestamp:     time.Now(),
+		FromEndDevice: fromEndDevice,
+	}
+	if fromEndDevice && dc == nil && id == nil {
+		panic("DeviceClass and DeviceId are mandatory for end device message")
+	}
+	if dc != nil {
+		res.DeviceClass = *dc
+	}
+	if id != nil {
+		res.DeviceId = *id
+	}
+	return res
 }
 
 type MessageChan chan Message

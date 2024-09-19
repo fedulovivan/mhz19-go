@@ -26,10 +26,16 @@ func ToDb(in []types.Device) (out []DbDevice) {
 		dbDevice := DbDevice{
 			NativeId:      string(d.DeviceId),
 			DeviceClassId: int32(d.DeviceClassId),
-			Name:          sql.NullString{String: *d.Name, Valid: d.Name != nil},
-			Comments:      sql.NullString{String: *d.Comments, Valid: d.Comments != nil},
-			Origin:        sql.NullString{String: *d.Origin, Valid: d.Origin != nil},
 			Json:          sql.NullString{String: string(mjson), Valid: err == nil},
+		}
+		if d.Name != nil {
+			dbDevice.Name = db.NewNullString(*d.Name)
+		}
+		if d.Comments != nil {
+			dbDevice.Comments = db.NewNullString(*d.Comments)
+		}
+		if d.Origin != nil {
+			dbDevice.Origin = db.NewNullString(*d.Origin)
 		}
 		if d.BuriedTimeout != nil {
 			dbDevice.BuriedTimeout = db.NewNullInt32(int32(d.BuriedTimeout.Duration.Seconds()))

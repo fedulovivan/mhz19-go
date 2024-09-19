@@ -9,7 +9,7 @@ import (
 // + extra goodies
 func TimeTrack(logTag func(format string, a ...any) string, start time.Time, name string) {
 	elapsed := time.Since(start)
-	wayFast := elapsed < time.Millisecond*10
+	wayFast := elapsed < time.Millisecond*5
 	badlySlow := elapsed > time.Second*1
 	badge := ""
 	if wayFast {

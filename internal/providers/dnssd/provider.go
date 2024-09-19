@@ -28,7 +28,7 @@ func (p *provider) Channel() types.ChannelType {
 
 func (p *provider) Init() {
 
-	p.Out = make(types.MessageChan, 100)
+	p.InitBase()
 
 	ctx := context.Background()
 
@@ -40,20 +40,20 @@ func (p *provider) Init() {
 			return
 		}
 		payload := map[string]any{
-			"Port": entry.Port,
+			"Id":   entry.Text["id"],
+			"Port": fmt.Sprintf("%v", entry.Port),
 			"Ip":   entry.IPs[0].String(),
 			"Text": entry.Text,
 			"Host": entry.Host,
 		}
 		outMsg := types.Message{
-			// DeviceId:    types.DeviceId(entry.Text["id"]),
 			ChannelType:   p.Channel(),
 			DeviceClass:   types.DEVICE_CLASS_SONOFF_ANNOUNCE,
 			Timestamp:     time.Now(),
 			Payload:       payload,
 			FromEndDevice: false,
 		}
-		p.Out <- outMsg
+		p.Push(outMsg)
 	}
 
 	// just swallow "onremoved" entry with no action

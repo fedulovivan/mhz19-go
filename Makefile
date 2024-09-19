@@ -43,6 +43,10 @@ api-load-read:
 api-load-write:
 	ab -T application/json -u ./assets/create-rule.json -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/rules
 
+.PHONY: api-load-write-2
+api-load-write-2:
+	ab -T application/json -u ./assets/push-message.json -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/push-message
+
 .PHONY: api-load-once
 api-load-once:
 	wget -O /dev/null $(REST_API_URL)/rules

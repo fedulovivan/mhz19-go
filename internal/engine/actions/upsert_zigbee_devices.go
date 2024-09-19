@@ -2,6 +2,7 @@ package actions
 
 import (
 	"github.com/Jeffail/gabs/v2"
+	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
@@ -9,7 +10,7 @@ import (
 // see https://www.zigbee2mqtt.io/guide/usage/mqtt_topics_and_messages.html#zigbee2mqtt-bridge-devices
 // and json example at assets/bridge-devices-message.json
 // Args: <none>
-var UpsertZigbeeDevices types.ActionImpl = func(mm []types.Message, args types.Args, mapping types.Mapping, e types.EngineAsSupplier) (err error) {
+var UpsertZigbeeDevices types.ActionImpl = func(mm []types.Message, args types.Args, mapping types.Mapping, e types.EngineAsSupplier, tag logger.Tag) (err error) {
 	devicesjson := gabs.Wrap(mm[0].Payload)
 	out := make([]types.Device, 0)
 	origin := "bridge-upsert"

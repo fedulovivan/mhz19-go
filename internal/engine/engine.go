@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"slices"
+	"strings"
 	"sync"
 
 	"github.com/fedulovivan/mhz19-go/internal/app"
@@ -12,6 +13,7 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/message_queue"
 	"github.com/fedulovivan/mhz19-go/internal/types"
+	"github.com/samber/lo"
 )
 
 var queuesContainer = message_queue.NewContainer()
@@ -40,8 +42,16 @@ func NewEngine() types.Engine {
 func (e *engine) SetLogTag(tag logger.Tag) {
 	e.tag = tag
 }
-func (e *engine) SetProviders(s ...types.ChannelProvider) {
-	e.providers = s
+func (e *engine) SetProviders(providers ...types.ChannelProvider) {
+	e.providers = providers
+	providerNames := lo.Map(providers, func(p types.ChannelProvider, index int) string {
+		return fmt.Sprintf("%T", p)
+	})
+	slog.Debug(e.tag.F(
+		"%d provider(s) were set: %s",
+		len(providers),
+		strings.Join(providerNames, ", "),
+	))
 }
 func (e *engine) SetMessagesService(s types.MessagesService) {
 	e.messageService = s
@@ -86,9 +96,10 @@ func (e *engine) Start() {
 			}
 		}(p)
 	}
+	slog.Debug(e.tag.F("Started"))
 }
 
-func (e *engine) Provider(ct types.ChannelType) types.ChannelProvider {
+func (e *engine) GetProvider(ct types.ChannelType) types.ChannelProvider {
 	for _, provider := range e.providers {
 		if provider.Channel() == ct {
 			return provider
@@ -105,26 +116,31 @@ func (e *engine) Stop() {
 
 func (e *engine) InvokeConditionFunc(mt types.MessageTuple, fn types.CondFn, not bool, args types.Args, tag logger.Tag) bool {
 	impl := conditions.Get(fn)
+	tagWithCondition := tag.With("condition=%s", fn.String())
+	slog.Debug(tagWithCondition.F("Start"), "args", args)
 	res, err := impl(mt, args)
-	fnString := fn.String()
-	if not {
-		res = !res
-		fnString = "Not " + fnString
+	if err == nil {
+		if not {
+			res = !res
+		}
+		slog.Debug(tagWithCondition.F("End"), "res", res)
+		return res
+	} else {
+		slog.Error(tagWithCondition.F("Fail"), "err", err)
+		return false
 	}
-	slog.Debug(tag.F("condition exec"), "fn", fnString, "args", args, "res", res)
-	if err != nil {
-		slog.Error(fmt.Sprintf("%s error: %s", fn, err))
-	}
-	return res
 }
 
 func (e *engine) InvokeActionFunc(mm []types.Message, a types.Action, tag logger.Tag) {
 	impl := actions.Get(a.Fn)
-	slog.Debug(tag.F("action exec"), "fn", a.Fn, "args", a.Args)
+	tagWithAction := tag.With("action=%s", a.Fn.String())
 	go func() {
-		err := impl(mm, a.Args, a.Mapping, e)
+		slog.Debug(tagWithAction.F("Start"), "args", a.Args)
+		err := impl(mm, a.Args, a.Mapping, e, tagWithAction)
 		if err != nil {
-			slog.Error(fmt.Sprintf("%s error: %s", a.Fn, err))
+			slog.Error(tagWithAction.F("Fail"), "err", err)
+		} else {
+			slog.Debug(tagWithAction.F("End"))
 		}
 	}()
 }
@@ -242,7 +258,7 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 			if r.Throttle.Duration == 0 {
 				e.ExecuteActions([]types.Message{m}, r, tag)
 			} else {
-				key := queuesContainer.MakeKey(m.DeviceClass, m.DeviceId, r.Id)
+				key := message_queue.NewKey(m.DeviceClass, m.DeviceId, r.Id)
 				if !queuesContainer.HasQueue(key) {
 					queuesContainer.CreateQueue(key, r.Throttle.Duration, func(mm []types.Message) {
 						slog.Debug(tag.F("messages queue is flushed now"))

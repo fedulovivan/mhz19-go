@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 
 	"github.com/fedulovivan/mhz19-go/internal/arguments"
+	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
 // Args: Text, BotName
-var TelegramBotMessage types.ActionImpl = func(mm []types.Message, args types.Args, mapping types.Mapping, e types.EngineAsSupplier) (err error) {
+var TelegramBotMessage types.ActionImpl = func(mm []types.Message, args types.Args, mapping types.Mapping, e types.EngineAsSupplier, tag logger.Tag) (err error) {
 	tpayload := types.TemplatePayload{
 		Message:  mm[0],
 		Messages: mm,
@@ -20,7 +21,7 @@ var TelegramBotMessage types.ActionImpl = func(mm []types.Message, args types.Ar
 	if err != nil {
 		return
 	}
-	p := e.Provider(types.CHANNEL_TELEGRAM)
+	p := e.GetProvider(types.CHANNEL_TELEGRAM)
 	if text == nil {
 		text, _ = json.Marshal(mm[0])
 	}

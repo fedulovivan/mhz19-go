@@ -75,31 +75,31 @@ func (p *parserBase) parse_base() (types.Message, bool) {
 
 func (p *provider) Init() {
 
-	p.Out = make(types.MessageChan, 100)
+	p.InitBase()
 
 	var handlers = TopicHandlers{
 		"zigbee2mqtt/+": func(client MqttLib.Client, msg MqttLib.Message) {
 			outMsg, ok := NewZigbeeDevice(msg).Parse()
 			if ok {
-				p.Out <- outMsg
+				p.Push(outMsg)
 			}
 		},
 		"device-pinger/+/status": func(c MqttLib.Client, msg MqttLib.Message) {
 			outMsg, ok := NewDevicePinger(msg).Parse()
 			if ok {
-				p.Out <- outMsg
+				p.Push(outMsg)
 			}
 		},
 		"/VALVE/#": func(c MqttLib.Client, msg MqttLib.Message) {
 			outMsg, ok := NewValveManipulator(msg).Parse()
 			if ok {
-				p.Out <- outMsg
+				p.Push(outMsg)
 			}
 		},
 		"zigbee2mqtt/bridge/devices": func(c MqttLib.Client, msg MqttLib.Message) {
 			outMsg, ok := NewZigbeeBridge(msg).Parse()
 			if ok {
-				p.Out <- outMsg
+				p.Push(outMsg)
 			}
 		},
 	}

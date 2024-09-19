@@ -7,8 +7,11 @@ import (
 	"log/slog"
 	"text/template"
 
+	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
+
+var tag = logger.NewTag(logger.ARGS)
 
 type reader struct {
 	args     types.Args
@@ -93,10 +96,10 @@ func (r *reader) Get(field string) any {
 		if fieldMap, ok := r.mapping[field]; ok {
 			outAsKey := fmt.Sprintf("%v", out)
 			if mapped, ok := fieldMap[outAsKey]; ok {
-				slog.Debug(
-					"ArgReader.Get() in=%v (out=%v, outAsKey=%v) was mapped to %v",
+				slog.Debug(tag.F(
+					"in=%v (out=%v, outAsKey=%v) was mapped to %v",
 					in, out, outAsKey, mapped,
-				)
+				))
 				out = mapped
 			}
 		}

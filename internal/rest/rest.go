@@ -15,6 +15,7 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/entities/rules"
 	"github.com/fedulovivan/mhz19-go/internal/entities/stats"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
+	"github.com/fedulovivan/mhz19-go/internal/types"
 	routing "github.com/go-ozzo/ozzo-routing/v2"
 	"github.com/go-ozzo/ozzo-routing/v2/content"
 	"github.com/go-ozzo/ozzo-routing/v2/slash"
@@ -57,7 +58,7 @@ func requestCounter(c *routing.Context) error {
 	return c.Next()
 }
 
-func Init() {
+func Init(providerInstance types.ChannelProvider) {
 
 	router := routing.New()
 	router.Use(
@@ -129,10 +130,24 @@ func Init() {
 		),
 	)
 
+	// push engine message received via rest
+	group := basegroup.Group("/push-message")
+	group.Put("", func(c *routing.Context) error {
+		dc := types.DEVICE_CLASS_SYSTEM
+		id := types.DEVICE_ID_FOR_THE_REST_PROVIDER_MESSAGE
+		m := types.NewMessage(false, types.CHANNEL_REST, &dc, &id)
+		err := c.Read(&m.Payload)
+		if err != nil {
+			return err
+		}
+		providerInstance.Push(m)
+		return c.Write(map[string]any{"ok": true})
+	})
+
 	http.Handle("/", router)
 	go func() {
 		addr := fmt.Sprintf(":%v", app.Config.RestApiPort)
-		slog.Debug(tag.F("server is running at " + addr))
+		slog.Debug(tag.F("Server is running at " + addr))
 		server = http.Server{Addr: addr}
 		err := server.ListenAndServe()
 		slog.Debug(tag.F(err.Error()))

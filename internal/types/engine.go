@@ -8,7 +8,7 @@ type EngineAsSupplier interface {
 	SetMessagesService(s MessagesService)
 	MessagesService() MessagesService
 	SetProviders(s ...ChannelProvider)
-	Provider(ct ChannelType) ChannelProvider
+	GetProvider(ct ChannelType) ChannelProvider
 }
 
 type Engine interface {

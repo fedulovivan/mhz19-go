@@ -3,7 +3,6 @@ package message_queue
 import (
 	"fmt"
 	"log/slog"
-	"strconv"
 	"sync"
 	"time"
 
@@ -18,7 +17,11 @@ type container struct {
 	qlist map[Key]Queue
 }
 
-type Key string
+type Key struct {
+	DeviceClass types.DeviceClass
+	DeviceId    types.DeviceId
+	RuleId      int
+}
 
 func NewContainer() *container {
 	return &container{
@@ -26,10 +29,12 @@ func NewContainer() *container {
 	}
 }
 
-func (c *container) MakeKey(deviceClass types.DeviceClass, deviceId types.DeviceId, ruleId int) (key Key) {
-	return Key(
-		types.DEVICE_CLASS_NAMES[deviceClass] + "-" + string(deviceId) + "-rule" + strconv.Itoa(int(ruleId)),
-	)
+func NewKey(deviceClass types.DeviceClass, deviceId types.DeviceId, ruleId int) (key Key) {
+	return Key{
+		DeviceClass: deviceClass,
+		DeviceId:    deviceId,
+		RuleId:      ruleId,
+	}
 }
 
 func (c *container) HasQueue(key Key) (flag bool) {

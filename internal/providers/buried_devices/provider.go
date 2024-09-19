@@ -69,23 +69,24 @@ func (p *provider) handleKey(key types.LdmKey) {
 		p.buriedTimers[key] = time.AfterFunc(
 			timeout,
 			func() {
-				p.Out <- types.Message{
+				outMsg := types.Message{
 					ChannelType: types.CHANNEL_SYSTEM,
 					DeviceClass: types.DEVICE_CLASS_SYSTEM,
-					DeviceId:    types.DeviceIdForTheBuriedDeviceMessage,
+					DeviceId:    types.DEVICE_ID_FOR_THE_BURIED_DEVICES_PROVIDER_MESSAGE,
 					Timestamp:   time.Now(),
 					Payload: map[string]any{
 						"BuriedDeviceId": key.DeviceId,
 					},
 					FromEndDevice: false,
 				}
+				p.Push(outMsg)
 			},
 		)
 	}
 }
 
 func (p *provider) Init() {
-	p.Out = make(types.MessageChan, 100)
+	p.InitBase()
 	go func() {
 		for key := range p.ldmService.OnSet() {
 			p.handleKey(key)

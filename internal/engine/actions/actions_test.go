@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/mocks"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 	"github.com/stretchr/testify/suite"
@@ -11,6 +12,7 @@ import (
 
 type ActionsSuite struct {
 	suite.Suite
+	tag logger.Tag
 }
 
 func (s *ActionsSuite) SetupSuite() {
@@ -36,7 +38,7 @@ func (s *ActionsSuite) Test10() {
 			"single_right": "off",
 		},
 	}
-	err := PostSonoffSwitchMessage([]types.Message{message}, args, mapping, engine)
+	err := PostSonoffSwitchMessage([]types.Message{message}, args, mapping, engine, s.tag)
 	s.Nil(err)
 }
 
@@ -47,7 +49,7 @@ func (s *ActionsSuite) Test20() {
 		"DeviceId": types.DeviceId("0xe0798dfffed39ed1"),
 		"Data":     "OFF",
 	}
-	err := Zigbee2MqttSetState([]types.Message{message}, args, nil, engine)
+	err := Zigbee2MqttSetState([]types.Message{message}, args, nil, engine, s.tag)
 	s.Nil(err)
 	fmt.Println(err)
 }
@@ -63,7 +65,7 @@ func (s *ActionsSuite) Test40() {
 	messages := []types.Message{{}}
 	mapping := types.Mapping{}
 	args := types.Args{}
-	err := YeelightDeviceSetPower(messages, args, mapping, engine)
+	err := YeelightDeviceSetPower(messages, args, mapping, engine, s.tag)
 	s.EqualError(err, "no such argument IP")
 }
 
@@ -74,7 +76,7 @@ func (s *ActionsSuite) Test41() {
 	args := types.Args{
 		"IP": "1.1.1.1",
 	}
-	err := YeelightDeviceSetPower(messages, args, mapping, engine)
+	err := YeelightDeviceSetPower(messages, args, mapping, engine, s.tag)
 	s.EqualError(err, "no such argument Cmd")
 }
 
@@ -86,7 +88,7 @@ func (s *ActionsSuite) Test42() {
 		"IP":  "1.1.1.1",
 		"Cmd": "foo",
 	}
-	err := YeelightDeviceSetPower(messages, args, mapping, engine)
+	err := YeelightDeviceSetPower(messages, args, mapping, engine, s.tag)
 	s.EqualError(err, "unsupported command 'foo'")
 }
 
@@ -101,10 +103,12 @@ func (s *ActionsSuite) Test43() {
 		"IP":  "192.168.88.169",
 		"Cmd": "Off",
 	}
-	err := YeelightDeviceSetPower(messages, args, mapping, engine)
+	err := YeelightDeviceSetPower(messages, args, mapping, engine, s.tag)
 	s.Nil(err)
 }
 
 func TestActions(t *testing.T) {
-	suite.Run(t, new(ActionsSuite))
+	suite.Run(t, &ActionsSuite{
+		tag: logger.NewTag("ActionsSuite"),
+	})
 }

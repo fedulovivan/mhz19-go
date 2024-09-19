@@ -9,6 +9,7 @@ const (
 	CHANNEL_TELEGRAM ChannelType = 2
 	CHANNEL_DNS_SD   ChannelType = 3
 	CHANNEL_SYSTEM   ChannelType = 4
+	CHANNEL_REST     ChannelType = 5
 )
 
 var CHANNEL_NAMES = map[ChannelType]string{
@@ -16,6 +17,7 @@ var CHANNEL_NAMES = map[ChannelType]string{
 	CHANNEL_TELEGRAM: "telegram",
 	CHANNEL_DNS_SD:   "dns-sd",
 	CHANNEL_SYSTEM:   "system",
+	CHANNEL_REST:     "rest",
 }
 
 func (s ChannelType) String() string {
@@ -46,4 +48,7 @@ type ChannelProvider interface {
 
 	Init()
 	Stop()
+
+	// api to push message to channel
+	Push(m Message)
 }

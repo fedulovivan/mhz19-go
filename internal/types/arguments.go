@@ -14,7 +14,7 @@ func Value(value any) Args {
 	}
 }
 
-func parseDeviceIdOrClass(in string) any {
+func parseSpecial(in string) any {
 	if strings.HasPrefix(in, "DeviceId(") {
 		deviceId := in[9 : len(in)-1]
 		return DeviceId(deviceId)
@@ -24,6 +24,10 @@ func parseDeviceIdOrClass(in string) any {
 		return DeviceClass(i)
 	} else if strings.HasPrefix(in, "ChannelType(") {
 		ct := in[12 : len(in)-1]
+		i, _ := strconv.Atoi(ct)
+		return ChannelType(i)
+	} else if strings.HasPrefix(in, "Channel(") { // same as ChannelType
+		ct := in[8 : len(in)-1]
 		i, _ := strconv.Atoi(ct)
 		return ChannelType(i)
 	}
@@ -43,12 +47,12 @@ func (a *Args) UnmarshalJSON(data []byte) (err error) {
 		case []any:
 			for i, listel := range vtyped {
 				if slistel, ok := listel.(string); ok {
-					vtyped[i] = parseDeviceIdOrClass(slistel)
+					vtyped[i] = parseSpecial(slistel)
 				}
 			}
 			(*a)[argName] = vtyped
 		case string:
-			(*a)[argName] = parseDeviceIdOrClass(vtyped)
+			(*a)[argName] = parseSpecial(vtyped)
 		default:
 			(*a)[argName] = vtyped
 		}

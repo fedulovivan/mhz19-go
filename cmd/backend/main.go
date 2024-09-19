@@ -19,6 +19,7 @@ import (
 	buried_devices "github.com/fedulovivan/mhz19-go/internal/providers/buried_devices"
 	dnssd "github.com/fedulovivan/mhz19-go/internal/providers/dnssd"
 	mqtt "github.com/fedulovivan/mhz19-go/internal/providers/mqtt"
+	p_rest "github.com/fedulovivan/mhz19-go/internal/providers/rest"
 	tbot "github.com/fedulovivan/mhz19-go/internal/providers/tbot"
 )
 
@@ -29,7 +30,6 @@ func main() {
 	// bootstrap application
 	app.InitConfig()
 	logger.Init()
-	rest.Init()
 
 	// configure engine dependencies and start it
 	rulesService := rules.ServiceSingleton(
@@ -44,6 +44,7 @@ func main() {
 	)
 	e := engine.NewEngine()
 	e.SetLogTag(logger.NewTag(logger.ENGINE))
+	restProvider := p_rest.NewProvider()
 	e.SetProviders(
 		mqtt.NewProvider(),
 		tbot.NewProvider(),
@@ -52,6 +53,7 @@ func main() {
 			ldm.NewService(ldm.RepoSingleton()),
 			devicesService,
 		),
+		restProvider,
 	)
 	e.SetMessagesService(
 		messages.NewService(
@@ -68,7 +70,6 @@ func main() {
 			ldm.RepoSingleton(),
 		),
 	)
-	// e.AppendRules(engine.GetStaticRules()...)
 	dbRules, err := rulesService.Get()
 	if err == nil {
 		if len(dbRules) > 0 {
@@ -90,6 +91,9 @@ func main() {
 		}
 	}()
 	e.Start()
+
+	// init rest
+	rest.Init(restProvider)
 
 	// notify we are in the development mode
 	if app.Config.IsDev {
@@ -116,3 +120,5 @@ func main() {
 
 	slog.Info(tag.F("All done, bye-bye"))
 }
+
+// e.AppendRules(engine.GetStaticRules()...)

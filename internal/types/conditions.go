@@ -34,7 +34,11 @@ var CONDITION_NAMES = map[CondFn]string{
 }
 
 func (fn CondFn) String() string {
-	return fmt.Sprintf("%v (id=%d)", CONDITION_NAMES[fn], fn)
+	return CONDITION_NAMES[fn]
+}
+
+func (fn CondFn) MarshalJSON() ([]byte, error) {
+	return []byte(fmt.Sprintf(`"%s"`, fn)), nil
 }
 
 func (fn *CondFn) UnmarshalJSON(b []byte) (err error) {
@@ -58,10 +62,6 @@ func (fn *CondFn) UnmarshalJSON(b []byte) (err error) {
 		}
 	}
 	return fmt.Errorf("failed to unmarshal %v(%T) to CondFn", v, v)
-}
-
-func (fn CondFn) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf(`"%v"`, CONDITION_NAMES[fn])), nil
 }
 
 type CondImpl func(mt MessageTuple, args Args) (bool, error)

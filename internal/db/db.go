@@ -27,7 +27,7 @@ func DbSingleton() *sql.DB {
 		return instance
 	}
 
-	slog.Debug(rootTag.F("instance created"))
+	slog.Debug(rootTag.F("Instance created"))
 
 	var err error
 	dbabspath, err := filepath.Abs(app.Config.SqliteFilename)

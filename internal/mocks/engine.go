@@ -53,7 +53,7 @@ func (p *mockprovider) Send(a ...any) error {
 	fmt.Println(a...)
 	return nil
 }
-func (p *mockprovider) Write(m types.Message) {
+func (p *mockprovider) Push(m types.Message) {
 
 }
 
@@ -90,7 +90,7 @@ func (e *mockengine) SetProviders(s ...types.ChannelProvider) {
 
 }
 
-func (e *mockengine) Provider(ct types.ChannelType) types.ChannelProvider {
+func (e *mockengine) GetProvider(ct types.ChannelType) types.ChannelProvider {
 	return &mockprovider{}
 }
 

@@ -3,6 +3,8 @@ package types
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/fedulovivan/mhz19-go/internal/logger"
 )
 
 type ActionFn byte
@@ -33,11 +35,11 @@ var ACTION_NAMES = map[ActionFn]string{
 }
 
 func (fn ActionFn) String() string {
-	return fmt.Sprintf("%v (id=%d)", ACTION_NAMES[fn], fn)
+	return ACTION_NAMES[fn]
 }
 
 func (fn ActionFn) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf(`"%v"`, ACTION_NAMES[fn])), nil
+	return []byte(fmt.Sprintf(`"%s"`, fn)), nil
 }
 
 func (fn *ActionFn) UnmarshalJSON(b []byte) (err error) {
@@ -63,6 +65,6 @@ func (fn *ActionFn) UnmarshalJSON(b []byte) (err error) {
 	return fmt.Errorf("failed to unmarshal %v(%T) to ActionFn", v, v)
 }
 
-type ActionImpl func(messages []Message, args Args, mapping Mapping, engine EngineAsSupplier) error
+type ActionImpl func(messages []Message, args Args, mapping Mapping, engine EngineAsSupplier, tag logger.Tag) error
 
 type ActionImpls map[ActionFn]ActionImpl

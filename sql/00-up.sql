@@ -108,6 +108,7 @@ INSERT INTO channel_types VALUES(1,'mqtt');
 INSERT INTO channel_types VALUES(2,'telegram');
 INSERT INTO channel_types VALUES(3,'dns-sd');
 INSERT INTO channel_types VALUES(4,'system');
+INSERT INTO channel_types VALUES(5,'rest');
 
 INSERT INTO device_classes VALUES(1,'zigbee-device');
 INSERT INTO device_classes VALUES(2,'device-pinger');
@@ -140,6 +141,8 @@ INSERT INTO devices VALUES(1, '192.168.88.1', 2, 'MIKROTIK_ROUTER', NULL, NULL, 
 INSERT INTO devices VALUES(2, '192.168.88.44', 2, 'IPHONE_15_PRO_IP', NULL, NULL, NULL, NULL);
 INSERT INTO devices VALUES(3, '192.168.0.11', 2, 'IPHONE_15_PRO_AP_IP', NULL, NULL, NULL, NULL);
 INSERT INTO devices VALUES(4, '192.168.88.62', 2, 'IPHONE_14_IP', NULL, NULL, NULL, NULL);
-INSERT INTO devices VALUES(5, 'buried-device', 7, NULL, NULL, NULL, NULL, NULL);
+
+INSERT INTO devices VALUES(5, 'buried-device-id', 7, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO devices VALUES(6, 'rest-device-id', 7, NULL, NULL, NULL, NULL, NULL);
 
 COMMIT;

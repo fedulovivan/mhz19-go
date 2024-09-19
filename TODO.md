@@ -1,11 +1,10 @@
 
 ### Prio 0
-- feat: enable throttle for "RecordMessage" action + implement batch insert + ensure there no misses with throttled handling 
+- feat: create simple frontend
 
 ### Prio 1
-- None
-
-### Prio 2
+- feat: enable throttle for "RecordMessage" action + implement batch insert + ensure there no misses with throttled handling 
+- bug: use host network to fix multicast in docker - https://github.com/flungo-docker/avahi
 - bug: no mqtt (re)connection if network was not available on app startup and returned online later
 - bug: "http: superfluous response.WriteHeader call from github.com/go-ozzo/ozzo-routing/v2.(*Router).handleError (router.go:131)" - appears after termination of stucked apache bench
 - bug: "apr_socket_recv: Operation timed out (60)" - https://stackoverflow.com/questions/30352725/why-is-my-hello-world-go-server-getting-crushed-by-apachebench
@@ -19,6 +18,8 @@
 - feat: create test service for sonoff wifi devices (poll them periodically to receive status updates)
 
 ### Arch
+- arch: align arg names across actions (like we have two spellings: Cmd and Command)
+- arch: Message, make fields DeviceClass and DeviceId optional
 - arch: think how to distinquish "end device" message from all "others" - just as new flag for the message Struct?
 - arch: think how we can construct/init "TemplatePayload" automatically, now we need to build it manually in action implementation
 - arch: "FOREIGN KEY (device_id) REFERENCES devices(native_id)" requires sole UNIQUE index for column devices.native_id, while we actually need UNIQUE(device_class_id, native_id) since its unreasonable to constraint native_id across devices off all classes
@@ -44,6 +45,8 @@
 
 ### Completed
 
+- (+) introduce new channel - rest
+- (+) bug: second request to sonoff hangs - not closed body reader
 - (+) `make docker-up` uses REST_API_PORT from Makefile, switch to .env - https://stackoverflow.com/questions/44628206/how-to-load-and-export-variables-from-an-env-file-in-makefile
 - (+) arch: for rule_condition_or_action_arguments use value + data_type_id instead in addition to + device_id + device_class_id + channel_type_id
 - (+) uts: create tests for nested conditions

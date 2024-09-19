@@ -21,7 +21,7 @@ func GetStaticRules() []types.Rule {
 						Fn: types.COND_IN_LIST,
 						Args: types.Args{
 							"Value": "$deviceId",
-							"List":  []any{types.DeviceIdForTheBuriedDeviceMessage},
+							"List":  []any{types.DEVICE_ID_FOR_THE_BURIED_DEVICES_PROVIDER_MESSAGE},
 						},
 					},
 				},
