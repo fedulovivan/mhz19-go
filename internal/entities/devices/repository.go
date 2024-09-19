@@ -3,6 +3,7 @@ package devices
 import (
 	"context"
 	"database/sql"
+	"strings"
 
 	"github.com/fedulovivan/mhz19-go/internal/db"
 )
@@ -46,23 +47,6 @@ func (r devicesRepository) UpsertAll(devices []DbDevice) (err error) {
 		}
 		return nil
 	})
-	// ctx := context.Background()
-	// tx, err := r.database.Begin()
-	// defer db.Rollback(tx)
-	// if err != nil {
-	// 	return
-	// }
-	// for _, device := range devices {
-	// 	_, err = DeviceUpsertTx(device, ctx, tx)
-	// 	if err != nil {
-	// 		return
-	// 	}
-	// }
-	// if err != nil {
-	// 	return
-	// }
-	// err = tx.Commit()
-	// return
 }
 
 func (r devicesRepository) Get(deviceId sql.NullString, deviceClass sql.NullInt32) (devices []DbDevice, err error) {
@@ -86,6 +70,38 @@ func CountTx(ctx context.Context, tx *sql.Tx) (int32, error) {
 		ctx,
 		`SELECT COUNT(*) FROM devices`,
 	)
+}
+
+func DeviceUpsertAllTx(dd []DbDevice, ctx context.Context, tx *sql.Tx) error {
+	mlen := len(dd)
+	cols := 6
+	p := "(?,?,?,?,?,?)"
+	placehoders := make([]string, mlen)
+	values := make([]any, mlen*cols)
+	for i, d := range dd {
+		placehoders[i] = p
+		values[cols*i+0] = d.NativeId
+		values[cols*i+1] = d.DeviceClassId
+		values[cols*i+2] = d.Name
+		values[cols*i+3] = d.Comments
+		values[cols*i+4] = d.Origin
+		values[cols*i+5] = d.Json
+	}
+	_, err := db.Exec(
+		tx,
+		ctx,
+		`INSERT INTO devices(
+			native_id, 
+			device_class_id, 
+			name, 
+			comments, 
+			origin, 
+			json
+		)
+		VALUES `+strings.Join(placehoders, ", "),
+		values...,
+	)
+	return err
 }
 
 func DevicesSelectTx(ctx context.Context, tx *sql.Tx, nativeId sql.NullString, deviceClass sql.NullInt32) ([]DbDevice, error) {

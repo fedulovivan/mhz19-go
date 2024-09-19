@@ -144,6 +144,19 @@ func Init(providerInstance types.ChannelProvider) {
 		return c.Write(map[string]any{"ok": true})
 	})
 
+	// random id for the load tests
+	// idspool := []types.DeviceId{
+	// 	types.DeviceId("lorem ipsum"),
+	// 	types.DeviceId("is simply dummy "),
+	// 	types.DeviceId("text of the "),
+	// 	types.DeviceId("printing and "),
+	// 	types.DeviceId("typesetting industry"),
+	// 	types.DeviceId("has been the industrys "),
+	// 	types.DeviceId("standard dummy text"),
+	// 	types.DeviceId("ever since the 1500s"),
+	// }
+	// id := idspool[rand.Intn(len(idspool))]
+
 	http.Handle("/", router)
 	go func() {
 		addr := fmt.Sprintf(":%v", app.Config.RestApiPort)

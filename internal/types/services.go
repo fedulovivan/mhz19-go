@@ -4,6 +4,7 @@ type MessagesService interface {
 	Get() ([]Message, error)
 	GetByDeviceId(deviceId string) ([]Message, error)
 	Create(message Message) error
+	CreateAll(messages []Message) error
 }
 
 type DevicesService interface {

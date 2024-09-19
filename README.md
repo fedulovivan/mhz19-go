@@ -71,6 +71,7 @@ No matter which channel was used to receive a message, or which certain device h
 - delve `go install -v github.com/go-delve/delve/cmd/dlv@latest`
 - sqlite3 `sudo apt-get install sqlite3`
 - ab (apache bench) `sudo apt install apache2-utils` 
+- hey `brew install hey`
 
 ### Usefull commands
 

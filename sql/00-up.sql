@@ -37,7 +37,7 @@ CREATE TABLE rules (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	name TEXT NOT NULL UNIQUE,
 	is_disabled INTEGER,
-	throttle INTEGER
+	throttle_ms INTEGER
 );
 
 CREATE TABLE rule_conditions (
@@ -142,7 +142,7 @@ INSERT INTO devices VALUES(2, '192.168.88.44', 2, 'IPHONE_15_PRO_IP', NULL, NULL
 INSERT INTO devices VALUES(3, '192.168.0.11', 2, 'IPHONE_15_PRO_AP_IP', NULL, NULL, NULL, NULL);
 INSERT INTO devices VALUES(4, '192.168.88.62', 2, 'IPHONE_14_IP', NULL, NULL, NULL, NULL);
 
-INSERT INTO devices VALUES(5, 'buried-device-id', 7, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO devices VALUES(6, 'rest-device-id', 7, NULL, NULL, NULL, NULL, NULL);
+-- INSERT INTO devices VALUES(5, 'buried-device-id', 7, NULL, NULL, NULL, NULL, NULL);
+-- INSERT INTO devices VALUES(6, 'rest-device-id', 7, NULL, NULL, NULL, NULL, NULL);
 
 COMMIT;

@@ -29,26 +29,38 @@ func (s *QueueSuite) Test10() {
 	time.Sleep(time.Millisecond * 110)
 	q.PushMessage(types.Message{})
 	q.PushMessage(types.Message{})
-	s.Equal(q.Cnt(), int64(1)) // not yet flushed for a second time
+	s.Equal(q.Flushes(), int64(1)) // not yet flushed for a second time
 	time.Sleep(time.Millisecond * 110)
-	s.Equal(q.Cnt(), int64(2)) // here flushed twice
+	s.Equal(q.Flushes(), int64(2)) // here flushed twice
 }
 
-func (s *QueueSuite) Test20() {
+func (s *QueueSuite) Test30() {
 	q := NewQueue(time.Millisecond*100, func(mm []types.Message) {
 		fmt.Printf("flushed with %v messages\n", len(mm))
 	})
 	q.PushMessage(types.Message{})
 	q.PushMessage(types.Message{})
-	time.Sleep(time.Millisecond * 50)
-	s.Equal(q.Cnt(), int64(0))
-	q.PushMessage(types.Message{})
-	q.PushMessage(types.Message{})
-	time.Sleep(time.Millisecond * 50)
-	s.Equal(q.Cnt(), int64(0))
-	q.PushMessage(types.Message{})
+	s.Equal(q.Flushes(), int64(0))
 	time.Sleep(time.Millisecond * 110)
-	s.Equal(q.Cnt(), int64(1))
+	s.Equal(q.Flushes(), int64(1))
+}
+
+func (s *QueueSuite) Test40() {
+	flushStats := make([]int, 0, 2)
+	q := NewQueue(time.Millisecond*100, func(mm []types.Message) {
+		flushStats = append(flushStats, len(mm))
+		fmt.Printf("flushed with %v messages\n", len(mm))
+	})
+	q.PushMessage(types.Message{})
+	time.Sleep(time.Millisecond * 55)
+	q.PushMessage(types.Message{})
+	time.Sleep(time.Millisecond * 55)
+	q.PushMessage(types.Message{})
+	time.Sleep(time.Millisecond * 55)
+	q.PushMessage(types.Message{})
+	time.Sleep(time.Millisecond * 55)
+	s.Equal(q.Flushes(), int64(2))
+	s.Equal([]int{2, 2}, flushStats)
 }
 
 func TestQueue(t *testing.T) {

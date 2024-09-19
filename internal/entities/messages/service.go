@@ -46,18 +46,39 @@ func BuildMessages(in []DbMessage) (out []types.Message) {
 	return
 }
 
-func (s messagesService) Create(message types.Message) (err error) {
+func ToDb(message types.Message) (res DbMessage, err error) {
 	mjson, err := json.Marshal(message.Payload)
 	if err != nil {
 		return
 	}
-	_, err = s.repository.Create(DbMessage{
+	res = DbMessage{
 		ChannelTypeId: int32(message.ChannelType),
 		DeviceClassId: int32(message.DeviceClass),
 		DeviceId:      string(message.DeviceId),
 		Timestamp:     message.Timestamp,
 		Json:          string(mjson),
-	})
+	}
+	return
+}
+
+func (s messagesService) CreateAll(messages []types.Message) error {
+	res := make([]DbMessage, 0, len(messages))
+	for _, message := range messages {
+		dbMessage, err := ToDb(message)
+		if err != nil {
+			return err
+		}
+		res = append(res, dbMessage)
+	}
+	return s.repository.CreateAll(res)
+}
+
+func (s messagesService) Create(message types.Message) (err error) {
+	dbMessage, err := ToDb(message)
+	if err != nil {
+		return
+	}
+	_, err = s.repository.Create(dbMessage)
 	return
 }
 

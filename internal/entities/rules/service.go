@@ -135,9 +135,9 @@ func Build(
 			cond = BuildCondition(rootCond.Id, allConditions, allArgs)
 		}
 		var throttle types.Throttle
-		if r.Throttle.Valid {
+		if r.ThrottleMs.Valid {
 			throttle = types.Throttle{
-				Duration: time.Duration(r.Throttle.Int32) * time.Second,
+				Duration: time.Duration(r.ThrottleMs.Int32) * time.Millisecond,
 			}
 		}
 		rule := types.Rule{
@@ -313,7 +313,7 @@ func ToDbRule(rule types.Rule, seq utils.Seq) DbRule {
 		Id:         int32(seq.Inc()),
 		Name:       rule.Name,
 		IsDisabled: db.NewNullInt32FromBool(rule.Disabled),
-		Throttle:   db.NewNullInt32(int32(rule.Throttle.Duration.Seconds())),
+		ThrottleMs: db.NewNullInt32(int32(rule.Throttle.Duration.Milliseconds())),
 	}
 }
 

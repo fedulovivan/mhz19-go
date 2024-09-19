@@ -110,7 +110,7 @@ func Exec(
 		res, err = tx.ExecContext(ctx, query, values...)
 		if err != nil {
 			err = fmt.Errorf(
-				"got an error \"%v\" executing %v, values %v",
+				"got an error \"%v\" executing %v values %v",
 				err, lquery, values,
 			)
 		}

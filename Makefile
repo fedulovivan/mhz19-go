@@ -6,7 +6,7 @@ GIT_REV ?= $(shell git rev-parse --short HEAD)
 DATE ?= $(shell date +%FT%T)
 NUM_MIGRATION ?= 00
 REST_API_URL ?= http://localhost:$(REST_API_PORT)$(REST_API_PATH)
-API_LOAD_COUNT ?= 1000
+API_LOAD_COUNT ?= 100
 API_LOAD_THREADS ?= 10
 
 default: lint test build
@@ -45,7 +45,14 @@ api-load-write:
 
 .PHONY: api-load-write-2
 api-load-write-2:
-	ab -T application/json -u ./assets/push-message.json -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/push-message
+	hey -T application/json -m PUT -D ./assets/create-rule.json -n 1000 -c 10 -q 50 $(REST_API_URL)/push-message
+
+# https://stackoverflow.com/questions/978142/how-to-benchmark-apache-with-delays
+# https://gist.github.com/ungoldman/11282441
+# watch -n 0.5 
+# .PHONY: api-load-write-3
+# api-load-write-3:
+# 	curl -X PUT -H "Content-Type: application/json" -d @assets/push-message.json $(REST_API_URL)/push-message
 
 .PHONY: api-load-once
 api-load-once:

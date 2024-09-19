@@ -27,7 +27,7 @@ func (s *ContainerSuite) Test10() {
 	s.True(c.HasQueue(key))
 	s.NotNil(c.GetQueue(key))
 	c.GetQueue(key).PushMessage(types.Message{})
-	s.Equal(c.GetQueue(key).Cnt(), int64(0))
+	s.Equal(c.GetQueue(key).Flushes(), int64(0))
 
 	key2 := NewKey(types.DEVICE_CLASS_ZIGBEE_DEVICE, types.DeviceId("foo2"), 111)
 	s.False(c.HasQueue(key2))

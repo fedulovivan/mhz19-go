@@ -32,7 +32,7 @@ type DbRule struct {
 	Id         int32
 	Name       string
 	IsDisabled sql.NullInt32
-	Throttle   sql.NullInt32
+	ThrottleMs sql.NullInt32
 }
 
 type DbRuleCondition struct {
@@ -153,8 +153,8 @@ func ruleInsertTx(
 	return db.Exec(
 		tx,
 		ctx,
-		`INSERT INTO rules(name, is_disabled, throttle) VALUES(?,?,?)`,
-		rule.Name, rule.IsDisabled, rule.Throttle,
+		`INSERT INTO rules(name, is_disabled, throttle_ms) VALUES(?,?,?)`,
+		rule.Name, rule.IsDisabled, rule.ThrottleMs,
 	)
 }
 
@@ -166,11 +166,11 @@ func rulesSelectTx(ctx context.Context, tx *sql.Tx, ruleId sql.NullInt32) ([]DbR
 			id,
 			name,
 			is_disabled,
-			throttle
+			throttle_ms
 		FROM 
 			rules`,
 		func(rows *sql.Rows, m *DbRule) error {
-			return rows.Scan(&m.Id, &m.Name, &m.IsDisabled, &m.Throttle)
+			return rows.Scan(&m.Id, &m.Name, &m.IsDisabled, &m.ThrottleMs)
 		},
 		db.Where{
 			"id": ruleId,

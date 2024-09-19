@@ -1,9 +1,9 @@
 
 ### Prio 0
 - feat: create simple frontend
+- bug: db Tid is not unique within transaction
 
 ### Prio 1
-- feat: enable throttle for "RecordMessage" action + implement batch insert + ensure there no misses with throttled handling 
 - bug: use host network to fix multicast in docker - https://github.com/flungo-docker/avahi
 - bug: no mqtt (re)connection if network was not available on app startup and returned online later
 - bug: "http: superfluous response.WriteHeader call from github.com/go-ozzo/ozzo-routing/v2.(*Router).handleError (router.go:131)" - appears after termination of stucked apache bench
@@ -45,6 +45,7 @@
 
 ### Completed
 
+- (+) feat: enable throttling for "RecordMessage" action + implement batch insert + ensure there no misses with throttled handling
 - (+) introduce new channel - rest
 - (+) bug: second request to sonoff hangs - not closed body reader
 - (+) `make docker-up` uses REST_API_PORT from Makefile, switch to .env - https://stackoverflow.com/questions/44628206/how-to-load-and-export-variables-from-an-env-file-in-makefile

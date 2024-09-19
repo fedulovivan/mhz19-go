@@ -41,7 +41,7 @@ var testDataTable = []TableRow{
 				Id:         1,
 				Name:       "case 2",
 				IsDisabled: db.NewNullInt32(0),
-				Throttle:   db.NewNullInt32(0),
+				ThrottleMs: db.NewNullInt32(0),
 			},
 		},
 		conditions: []DbRuleCondition{
@@ -138,7 +138,7 @@ var testDataTable = []TableRow{
 				Id:         2,
 				Name:       "case 3",
 				IsDisabled: db.NewNullInt32(0),
-				Throttle:   db.NewNullInt32(0),
+				ThrottleMs: db.NewNullInt32(0),
 			},
 		},
 		conditions: []DbRuleCondition{

@@ -260,8 +260,9 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 			} else {
 				key := message_queue.NewKey(m.DeviceClass, m.DeviceId, r.Id)
 				if !queuesContainer.HasQueue(key) {
+					slog.Warn(tag.F("messages queue created"), "key", key, "duration", r.Throttle.Duration)
 					queuesContainer.CreateQueue(key, r.Throttle.Duration, func(mm []types.Message) {
-						slog.Debug(tag.F("messages queue is flushed now"))
+						slog.Warn(tag.F("messages queue is flushed now"))
 						e.ExecuteActions(mm, r, tag)
 					})
 				}
