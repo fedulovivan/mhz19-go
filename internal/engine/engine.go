@@ -116,17 +116,17 @@ func (e *engine) Stop() {
 
 func (e *engine) InvokeConditionFunc(mt types.MessageTuple, fn types.CondFn, not bool, args types.Args, tag logger.Tag) bool {
 	impl := conditions.Get(fn)
-	tagWithCondition := tag.Add("condition=%s", fn.String())
-	slog.Debug(tagWithCondition.F("Start"), "args", args)
+	tag = tag.With("condition=%s", fn.String())
+	slog.Debug(tag.F("Start"), "args", args)
 	res, err := impl(mt, args)
 	if err == nil {
 		if not {
 			res = !res
 		}
-		slog.Debug(tagWithCondition.F("End"), "res", res)
+		slog.Debug(tag.F("End"), "res", res)
 		return res
 	} else {
-		slog.Error(tagWithCondition.F("Fail"), "err", err)
+		slog.Error(tag.F("Fail"), "err", err)
 		app.StatsSingleton().Errors.Inc()
 		return false
 	}
@@ -134,15 +134,15 @@ func (e *engine) InvokeConditionFunc(mt types.MessageTuple, fn types.CondFn, not
 
 func (e *engine) InvokeActionFunc(mm []types.Message, a types.Action, tag logger.Tag) {
 	impl := actions.Get(a.Fn)
-	tagWithAction := tag.Add("action=%s", a.Fn.String())
+	tag = tag.With("action=%s", a.Fn.String())
 	go func() {
-		slog.Debug(tagWithAction.F("Start"), "args", a.Args)
-		err := impl(mm, a.Args, a.Mapping, e, tagWithAction)
+		slog.Debug(tag.F("Start"), "args", a.Args)
+		err := impl(mm, a.Args, a.Mapping, e, tag)
 		if err != nil {
-			slog.Error(tagWithAction.F("Fail"), "err", err)
+			slog.Error(tag.F("Fail"), "err", err)
 			app.StatsSingleton().Errors.Inc()
 		} else {
-			slog.Debug(tagWithAction.F("End"))
+			slog.Debug(tag.F("End"))
 		}
 	}()
 }
@@ -201,7 +201,7 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 	e.rulesMu.RLock()
 	defer e.rulesMu.RUnlock()
 	app.StatsSingleton().EngineMessagesReceived.Inc()
-	tag := e.tag.AddTid("Msg")
+	tag := e.tag.WithTid("Msg")
 	p := m.Payload
 	isSystem := m.DeviceClass == types.DEVICE_CLASS_SYSTEM
 	isBridge := m.DeviceClass == types.DEVICE_CLASS_ZIGBEE_BRIDGE
@@ -226,7 +226,7 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 	slog.Debug(tag.F(fmt.Sprintf("Matching against %v rules", rulesCnt)))
 	matches := 0
 	for _, r := range rules {
-		tag := tag.Add("Rule#%v", r.Id)
+		tag := tag.With("Rule=%d", r.Id)
 		if r.Disabled {
 			slog.Debug(tag.F("is disabled, skipping"))
 			continue

@@ -20,11 +20,18 @@ import (
 
 var BaseTag = logger.NewTag(logger.DB)
 
+type ctxkey struct{}
+
+type ctxval struct {
+	Tx  *sql.Tx
+	Tag logger.Tag
+}
+
 // a key for context.WithValue to store initialised and enhanced logger.Tag
-type key_tag struct{}
+// type key_tag struct{}
 
 // a key for context.WithValue to store started transaction (*sql.Tx object)
-type key_tx struct{}
+// type key_tx struct{}
 
 type CtxEnhanced interface {
 	context.Context
@@ -84,10 +91,8 @@ func NewNullString(v string) sql.NullString {
 }
 
 func Rollback(ctx CtxEnhanced) {
-	if ctx.Value(key_tx{}) == nil {
-		return
-	}
-	tx := ctx.Value(key_tx{}).(*sql.Tx)
+	ctxpayload := ctx.Value(ctxkey{}).(ctxval)
+	tx := ctxpayload.Tx
 	_ = tx.Rollback()
 }
 
@@ -107,8 +112,14 @@ func Exec(
 	query string,
 	values ...any,
 ) (res sql.Result, err error) {
-	tx := ctx.Value(key_tx{}).(*sql.Tx)
-	tag := ctx.Value(key_tag{}).(logger.Tag).AddTid("Exec")
+
+	// tx := ctx.Value(key_tx{}).(*sql.Tx)
+	// tag := ctx.Value(key_tag{}).(logger.Tag).AddTid("Exec")
+
+	ctxpayload := ctx.Value(ctxkey{}).(ctxval)
+	tx := ctxpayload.Tx
+	tag := ctxpayload.Tag.WithTid("Exec")
+
 	if app.Config.DbDebug {
 		defer utils.TimeTrack(tag.F, time.Now(), "Exec")
 	}
@@ -212,8 +223,13 @@ func Select[T any](
 	scan func(rows *sql.Rows, model *T) error,
 	where Where,
 ) (result []T, err error) {
-	tx := ctx.Value(key_tx{}).(*sql.Tx)
-	tag := ctx.Value(key_tag{}).(logger.Tag).AddTid("Select")
+	// tx := ctx.Value(key_tx{}).(*sql.Tx)
+	// tag := ctx.Value(key_tag{}).(logger.Tag).AddTid("Select")
+
+	ctxpayload := ctx.Value(ctxkey{}).(ctxval)
+	tx := ctxpayload.Tx
+	tag := ctxpayload.Tag.WithTid("Select")
+
 	if app.Config.DbDebug {
 		defer utils.TimeTrack(tag.F, time.Now(), "Exec")
 	}
@@ -259,7 +275,7 @@ func Select[T any](
 // commits transation if callback returns no error
 // ctx consumers are local functions Select, Exec, Rollback
 func RunTx(db *sql.DB, fn func(ctx CtxEnhanced) error) error {
-	tag := BaseTag.AddTid("Tx")
+	tag := BaseTag.WithTid("Tx")
 	if app.Config.DbDebug {
 		defer utils.TimeTrack(tag.F, time.Now(), "Transaction")
 	}
@@ -270,15 +286,22 @@ func RunTx(db *sql.DB, fn func(ctx CtxEnhanced) error) error {
 	if err != nil {
 		return err
 	}
-	var ctx CtxEnhanced
-	ctx = context.WithValue(
+	var ctx CtxEnhanced = context.WithValue(
 		context.Background(),
-		key_tx{}, tx,
+		ctxkey{}, ctxval{
+			Tx:  tx,
+			Tag: tag,
+		},
 	)
-	ctx = context.WithValue(
-		ctx,
-		key_tag{}, tag,
-	)
+	// var ctx CtxEnhanced
+	// ctx = context.WithValue(
+	// 	context.Background(),
+	// 	key_tx{}, tx,
+	// )
+	// ctx = context.WithValue(
+	// 	ctx,
+	// 	key_tag{}, tag,
+	// )
 	defer Rollback(ctx)
 	err = fn(ctx)
 	if err != nil {

@@ -6,13 +6,15 @@ import (
 	"log/slog"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/fedulovivan/mhz19-go/internal/app"
 	"github.com/fedulovivan/mhz19-go/pkg/utils"
 	"github.com/lmittmann/tint"
 )
 
-var seq = utils.NewSeq(0)
+var nsSequences = make(map[string]utils.Seq)
+var secsMu = new(sync.Mutex)
 
 func Init() {
 	if app.Config.IsDev {
@@ -50,8 +52,8 @@ const (
 )
 
 type Tag interface {
-	Add(string, ...any) Tag
-	AddTid(string) Tag
+	With(string, ...any) Tag
+	WithTid(string) Tag
 	F(format string, a ...any) string
 }
 
@@ -65,14 +67,19 @@ func NewTag(first TagName) Tag {
 	}
 }
 
-func (t *tag) Add(format string, a ...any) Tag {
-	res := *t
-	res.tags = append(res.tags, fmt.Sprintf(format, a...))
-	return &res
+func (t *tag) With(format string, a ...any) Tag {
+	next := *t
+	next.tags = append(next.tags, fmt.Sprintf(format, a...))
+	return &next
 }
 
-func (t *tag) AddTid(prefix string) Tag {
-	return t.Add("%s#%v", prefix, seq.Inc())
+func (t *tag) WithTid(ns string) Tag {
+	secsMu.Lock()
+	defer secsMu.Unlock()
+	if _, exist := nsSequences[ns]; !exist {
+		nsSequences[ns] = utils.NewSeq(0)
+	}
+	return t.With("%s#%v", ns, nsSequences[ns].Inc())
 }
 
 func (t *tag) F(format string, a ...any) string {
