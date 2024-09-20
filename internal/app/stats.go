@@ -6,6 +6,7 @@ type AppStatCounters struct {
 	EngineMessagesReceived utils.Seq
 	EngineRulesMatched     utils.Seq
 	ApiRequests            utils.Seq
+	Errors                 utils.Seq
 }
 
 var instance *AppStatCounters
@@ -15,6 +16,7 @@ func NewStats() *AppStatCounters {
 		EngineMessagesReceived: utils.NewSeq(0),
 		EngineRulesMatched:     utils.NewSeq(0),
 		ApiRequests:            utils.NewSeq(0),
+		Errors:                 utils.NewSeq(0),
 	}
 }
 

@@ -42,8 +42,7 @@ func httpPost(ip string, port string, cmd string, tag logger.Tag) error {
 		return fmt.Errorf("%v", bodyParsed["error"])
 	}
 
-	slog.Debug(
-		tag.F("Success"),
+	slog.Debug(tag.F("Success"),
 		"url", url,
 		"request", string(payload),
 		"response", string(bodyRaw),

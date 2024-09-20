@@ -20,8 +20,7 @@ func PrintMemUsage() {
 	// fmt.Printf("\tSys = %v KiB", bToKb(m.Sys))
 	// fmt.Printf("\tNumGC = %v\n", m.NumGC)
 
-	slog.Debug(
-		"[MAIN] memory usage in KiB",
+	slog.Debug("[MAIN] memory usage in KiB",
 		"ALLOC", bToKb(m.Alloc),
 		"TOTAL_ALLOC", bToKb(m.TotalAlloc),
 		"SYS", bToKb(m.Sys),

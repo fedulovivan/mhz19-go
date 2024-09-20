@@ -3,11 +3,8 @@ package actions
 import (
 	"fmt"
 
-	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
-
-var tag = logger.NewTag(logger.ACTIONS)
 
 var actions = types.ActionImpls{
 	types.ACTION_POST_SONOFF_SWITCH_MESSAGE: PostSonoffSwitchMessage,
@@ -23,7 +20,7 @@ var actions = types.ActionImpls{
 func Get(fn types.ActionFn) (action types.ActionImpl) {
 	action, exist := actions[fn]
 	if !exist {
-		panic(fmt.Sprintf("Action function [%s] not yet implemented", fn))
+		panic(fmt.Sprintf("Action function %d not yet implemented", fn))
 	}
 	return
 }

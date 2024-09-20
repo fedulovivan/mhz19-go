@@ -1,7 +1,6 @@
 
 ### Prio 0
 - feat: create simple frontend
-- bug: db Tid is not unique within transaction
 
 ### Prio 1
 - bug: use host network to fix multicast in docker - https://github.com/flungo-docker/avahi
@@ -45,6 +44,7 @@
 
 ### Completed
 
+- (+) bug: db Tid is not unique within transaction
 - (+) feat: enable throttling for "RecordMessage" action + implement batch insert + ensure there no misses with throttled handling
 - (+) introduce new channel - rest
 - (+) bug: second request to sonoff hangs - not closed body reader

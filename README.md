@@ -46,6 +46,28 @@ No matter which channel was used to receive a message, or which certain device h
 - Payload - the message itself as a json. untyped, specific for the certain device and channel. e.g. zigbee wall switch message may look like `{"battery":100,"action":"single_left"}` or telegram-bot message as `{"Text":"/open-valves"}`
 - Timestamp - a time when message was received by the server, usefull when reading and visualizing historical data
 
+### Database schema
+
+- **rules** - TBD
+- **rule_conditions** - TBD
+- **rule_actions** - TBD
+- **rule_condition_or_action_arguments** - TBD
+- **rule_action_argument_mappings** - TBD
+- **condition_functions** - TBD
+- **action_functions** - TBD
+- **device_classes** - TBD
+- **channel_types** - TBD
+- **devices** - TBD
+- **messages** - TBD
+
+### Load tests
+
+TBD
+
+### Commands
+
+TBD
+
 ### Used technologies
 
 - [golang](https://go.dev/) as main app language

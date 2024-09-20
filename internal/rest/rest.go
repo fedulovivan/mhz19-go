@@ -18,6 +18,7 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/types"
 	routing "github.com/go-ozzo/ozzo-routing/v2"
 	"github.com/go-ozzo/ozzo-routing/v2/content"
+	"github.com/go-ozzo/ozzo-routing/v2/cors"
 	"github.com/go-ozzo/ozzo-routing/v2/slash"
 )
 
@@ -39,6 +40,7 @@ func errorHandler(c *routing.Context) (err error) {
 		}
 		if err != nil {
 			slog.Error(tag.F("errorHandler:"), "path", c.Request.URL.Path, "err", err.Error())
+			app.StatsSingleton().Errors.Inc()
 			res := map[string]any{
 				"is_error": true,
 				"error":    err.Error(),
@@ -75,16 +77,17 @@ func Init(providerInstance types.ChannelProvider) {
 		return ctx.Write("rest api root")
 	})
 
-	basegroup := router.Group(app.Config.RestApiPath)
-	basegroup.Use(
+	apibase := router.Group(app.Config.RestApiPath)
+	apibase.Use(
 		errorHandler,
 		content.TypeNegotiator(content.JSON),
 		requestCounter,
+		cors.Handler(cors.AllowAll),
 	)
 
 	// rules
 	rules.NewApi(
-		basegroup,
+		apibase,
 		rules.ServiceSingleton(
 			rules.NewRepository(
 				db.DbSingleton(),
@@ -94,7 +97,7 @@ func Init(providerInstance types.ChannelProvider) {
 
 	// stats
 	stats.NewApi(
-		basegroup,
+		apibase,
 		stats.NewService(
 			stats.NewRepository(
 				db.DbSingleton(),
@@ -104,7 +107,7 @@ func Init(providerInstance types.ChannelProvider) {
 
 	// devices
 	devices.NewApi(
-		basegroup,
+		apibase,
 		devices.NewService(
 			devices.NewRepository(
 				db.DbSingleton(),
@@ -114,7 +117,7 @@ func Init(providerInstance types.ChannelProvider) {
 
 	// messages
 	messages.NewApi(
-		basegroup,
+		apibase,
 		messages.NewService(
 			messages.NewRepository(
 				db.DbSingleton(),
@@ -124,14 +127,14 @@ func Init(providerInstance types.ChannelProvider) {
 
 	// last device message
 	ldm.NewApi(
-		basegroup,
+		apibase,
 		ldm.NewService(
 			ldm.RepoSingleton(),
 		),
 	)
 
 	// push engine message received via rest
-	group := basegroup.Group("/push-message")
+	group := apibase.Group("/push-message")
 	group.Put("", func(c *routing.Context) error {
 		dc := types.DEVICE_CLASS_SYSTEM
 		id := types.DEVICE_ID_FOR_THE_REST_PROVIDER_MESSAGE
@@ -172,5 +175,6 @@ func Stop() {
 	err := server.Shutdown(context.Background())
 	if err != nil {
 		slog.Error(tag.F(err.Error()))
+		app.StatsSingleton().Errors.Inc()
 	}
 }

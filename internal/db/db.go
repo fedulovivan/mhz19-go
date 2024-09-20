@@ -18,7 +18,17 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var rootTag = logger.NewTag(logger.DB)
+var BaseTag = logger.NewTag(logger.DB)
+
+// a key for context.WithValue to store initialised and enhanced logger.Tag
+type key_tag struct{}
+
+// a key for context.WithValue to store started transaction (*sql.Tx object)
+type key_tx struct{}
+
+type CtxEnhanced interface {
+	context.Context
+}
 
 var instance *sql.DB
 
@@ -27,7 +37,7 @@ func DbSingleton() *sql.DB {
 		return instance
 	}
 
-	slog.Debug(rootTag.F("Instance created"))
+	slog.Debug(BaseTag.F("Instance created"))
 
 	var err error
 	dbabspath, err := filepath.Abs(app.Config.SqliteFilename)
@@ -73,10 +83,11 @@ func NewNullString(v string) sql.NullString {
 	return sql.NullString{String: v, Valid: true}
 }
 
-func Rollback(tx *sql.Tx) {
-	if tx == nil {
+func Rollback(ctx CtxEnhanced) {
+	if ctx.Value(key_tx{}) == nil {
 		return
 	}
+	tx := ctx.Value(key_tx{}).(*sql.Tx)
 	_ = tx.Rollback()
 }
 
@@ -92,12 +103,12 @@ func Commit(tx *sql.Tx) error {
 }
 
 func Exec(
-	tx *sql.Tx,
-	ctx context.Context,
+	ctx CtxEnhanced,
 	query string,
 	values ...any,
 ) (res sql.Result, err error) {
-	tag := rootTag.WithTid()
+	tx := ctx.Value(key_tx{}).(*sql.Tx)
+	tag := ctx.Value(key_tag{}).(logger.Tag).AddTid("Exec")
 	if app.Config.DbDebug {
 		defer utils.TimeTrack(tag.F, time.Now(), "Exec")
 	}
@@ -163,12 +174,10 @@ func PickWhereValues(where Where) (out []any) {
 }
 
 func Count(
-	tx *sql.Tx,
-	ctx context.Context,
+	ctx CtxEnhanced,
 	query string,
 ) (res int32, err error) {
 	rows, err := Select(
-		tx,
 		ctx,
 		query,
 		func(rows *sql.Rows, m *DbCount) error {
@@ -198,13 +207,13 @@ func logQuery(tag logger.Tag, query string, values ...any) {
 }
 
 func Select[T any](
-	tx *sql.Tx,
-	ctx context.Context,
+	ctx CtxEnhanced,
 	query string,
 	scan func(rows *sql.Rows, model *T) error,
 	where Where,
 ) (result []T, err error) {
-	tag := rootTag.WithTid()
+	tx := ctx.Value(key_tx{}).(*sql.Tx)
+	tag := ctx.Value(key_tag{}).(logger.Tag).AddTid("Select")
 	if app.Config.DbDebug {
 		defer utils.TimeTrack(tag.F, time.Now(), "Exec")
 	}
@@ -244,17 +253,39 @@ func Select[T any](
 }
 
 // initially borrowed from https://www.reddit.com/r/golang/comments/18flz7z/comment/kcviej8/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
-func WithTx(db *sql.DB, callback func(tx *sql.Tx) error) error {
+// starts transaction
+// stores tx into created context
+// enhances BaseTag with unique transaction id and also stores it into created context
+// commits transation if callback returns no error
+// ctx consumers are local functions Select, Exec, Rollback
+func RunTx(db *sql.DB, fn func(ctx CtxEnhanced) error) error {
+	tag := BaseTag.AddTid("Tx")
+	if app.Config.DbDebug {
+		defer utils.TimeTrack(tag.F, time.Now(), "Transaction")
+	}
 	tx, err := db.Begin()
-	defer Rollback(tx)
+	if app.Config.DbDebug {
+		slog.Debug(tag.F("Transaction started"))
+	}
 	if err != nil {
 		return err
 	}
-	err = callback(tx)
+	var ctx CtxEnhanced
+	ctx = context.WithValue(
+		context.Background(),
+		key_tx{}, tx,
+	)
+	ctx = context.WithValue(
+		ctx,
+		key_tag{}, tag,
+	)
+	defer Rollback(ctx)
+	err = fn(ctx)
 	if err != nil {
 		return err
 	}
-	return tx.Commit()
+	err = tx.Commit()
+	return err
 }
 
 // func WithTx(db *sql.DB, fn func(tx *sql.Tx) error) error {
@@ -289,3 +320,7 @@ func WithTx(db *sql.DB, callback func(tx *sql.Tx) error) error {
 //     }
 //     return nil
 // })
+// if app.Config.DbDebug {
+// 	tag := ctx.Value(Ctxkey_tag{}).(logger.Tag)
+// 	slog.Error(tag.F("Rollback"))
+// }

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/brutella/dnssd"
+	"github.com/fedulovivan/mhz19-go/internal/app"
 	"github.com/fedulovivan/mhz19-go/internal/engine"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/types"
@@ -67,6 +68,7 @@ func (p *provider) Init() {
 		if err := dnssd.LookupType(ctx, service, addFn, rmvFn); err != nil {
 			fmt.Println(err)
 			slog.Error(tag.F(err.Error()))
+			app.StatsSingleton().Errors.Inc()
 			return
 		}
 	}()

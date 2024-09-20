@@ -106,6 +106,7 @@ func (p *provider) Init() {
 
 	var defaultMessageHandler = func(client MqttLib.Client, msg MqttLib.Message) {
 		slog.Error(tag.F("defaultMessageHandler is not expected to be reached"), "topic", msg.Topic())
+		app.StatsSingleton().Errors.Inc()
 	}
 
 	var connectHandler = func(client MqttLib.Client) {
@@ -122,6 +123,7 @@ func (p *provider) Init() {
 
 	var connectLostHandler = func(client MqttLib.Client, err error) {
 		slog.Error(tag.F("Connection lost"), "error", err)
+		app.StatsSingleton().Errors.Inc()
 	}
 
 	// build opts
@@ -157,6 +159,7 @@ func (p *provider) Init() {
 	slog.Debug(tag.F("Connecting..."))
 	if token := p.client.Connect(); token.Wait() && token.Error() != nil {
 		slog.Error(tag.F("Initial connect"), "error", token.Error())
+		app.StatsSingleton().Errors.Inc()
 	}
 
 }
@@ -173,6 +176,7 @@ func (p *provider) Stop() {
 func subscribe(client MqttLib.Client, topic string) {
 	if token := client.Subscribe(topic, 0, nil); token.Wait() && token.Error() != nil {
 		slog.Error(tag.F("client.Subscribe()"), "error", token.Error())
+		app.StatsSingleton().Errors.Inc()
 	}
 	slog.Info(tag.F("Subscribed to"), "topic", topic)
 }

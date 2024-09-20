@@ -20,7 +20,7 @@ var conditions = types.CondImpls{
 func Get(fn types.CondFn) (action types.CondImpl) {
 	action, exist := conditions[fn]
 	if !exist {
-		panic(fmt.Sprintf("Condition function [%v] not yet implemented", fn))
+		panic(fmt.Sprintf("Condition function %d not yet implemented", fn))
 	}
 	return
 }

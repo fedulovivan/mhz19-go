@@ -10,7 +10,7 @@ import (
 	routing "github.com/go-ozzo/ozzo-routing/v2"
 )
 
-var tag = logger.NewTag(logger.RULES)
+var baseTag = logger.NewTag(logger.RULES)
 
 type rulesApi struct {
 	service types.RulesService
@@ -28,7 +28,7 @@ func NewApi(base *routing.RouteGroup, service types.RulesService) {
 }
 
 func (api rulesApi) create(c *routing.Context) error {
-	defer utils.TimeTrack(tag.F, time.Now(), "api:create")
+	defer utils.TimeTrack(baseTag.F, time.Now(), "api:create")
 	rule := types.Rule{}
 	err := c.Read(&rule)
 	if err != nil {
@@ -42,7 +42,7 @@ func (api rulesApi) create(c *routing.Context) error {
 }
 
 func (api rulesApi) getOne(c *routing.Context) error {
-	defer utils.TimeTrack(tag.F, time.Now(), "api:getOne")
+	defer utils.TimeTrack(baseTag.F, time.Now(), "api:getOne")
 	ruleId, err := strconv.ParseInt(c.Param("id"), 10, 32)
 	if err != nil {
 		return err
@@ -55,7 +55,7 @@ func (api rulesApi) getOne(c *routing.Context) error {
 }
 
 func (api rulesApi) delete(c *routing.Context) error {
-	defer utils.TimeTrack(tag.F, time.Now(), "api:delete")
+	defer utils.TimeTrack(baseTag.F, time.Now(), "api:delete")
 	ruleId, err := strconv.ParseInt(c.Param("id"), 10, 32)
 	if err != nil {
 		return err
@@ -68,7 +68,7 @@ func (api rulesApi) delete(c *routing.Context) error {
 }
 
 func (api rulesApi) getAll(c *routing.Context) error {
-	defer utils.TimeTrack(tag.F, time.Now(), "api:getAll")
+	defer utils.TimeTrack(baseTag.F, time.Now(), "api:getAll")
 	rules, err := api.service.Get()
 	if err != nil {
 		return err

@@ -79,6 +79,7 @@ func main() {
 		}
 	} else {
 		slog.Error(tag.F("Failed to load rules from db"), "err", err.Error())
+		app.StatsSingleton().Errors.Inc()
 	}
 	go func() {
 		for rule := range rulesService.OnCreated() {

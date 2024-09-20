@@ -130,6 +130,7 @@ func (p *provider) Init() {
 		err := p.StartBotClient(token)
 		if err != nil {
 			slog.Error(tag.F("StartBotClient()"), "err", err.Error())
+			app.StatsSingleton().Errors.Inc()
 		}
 	}
 }

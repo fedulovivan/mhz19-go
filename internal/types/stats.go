@@ -12,6 +12,7 @@ type StatsGetResult struct {
 	EngineMessagesReceived int32      `json:"engineMessagesReceived"`
 	EngineRulesMatched     int32      `json:"engineRulesMatched"`
 	ApiRequests            int32      `json:"apiRequests"`
+	Errors                 int32      `json:"errors"`
 	Uptime                 app.Uptime `json:"uptime"`
 	Memory                 string     `json:"memory"`
 }
@@ -20,6 +21,7 @@ func (r *StatsGetResult) InjectAppStats(stats *app.AppStatCounters) {
 	r.EngineMessagesReceived = stats.EngineMessagesReceived.Value()
 	r.EngineRulesMatched = stats.EngineRulesMatched.Value()
 	r.ApiRequests = stats.ApiRequests.Value()
+	r.Errors = stats.Errors.Value()
 	r.Uptime = app.GetUptime()
 	r.Memory = utils.GetMemUsage()
 }

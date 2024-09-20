@@ -55,7 +55,7 @@ func (s *ActionsSuite) Test20() {
 }
 
 func (s *ActionsSuite) Test30() {
-	s.PanicsWithValue("Action function [ (id=13)] not yet implemented", func() {
+	s.PanicsWithValue("Action function 13 not yet implemented", func() {
 		Get(13)
 	})
 }

@@ -1,7 +1,6 @@
 package devices
 
 import (
-	"context"
 	"database/sql"
 	"strings"
 
@@ -37,10 +36,9 @@ func NewRepository(database *sql.DB) DevicesRepository {
 }
 
 func (r devicesRepository) UpsertAll(devices []DbDevice) (err error) {
-	return db.WithTx(r.database, func(tx *sql.Tx) error {
-		ctx := context.Background()
+	return db.RunTx(r.database, func(ctx db.CtxEnhanced) error {
 		for _, device := range devices {
-			_, err = DeviceUpsertTx(device, ctx, tx)
+			_, err = DeviceUpsertTx(device, ctx)
 			if err != nil {
 				return err
 			}
@@ -50,29 +48,21 @@ func (r devicesRepository) UpsertAll(devices []DbDevice) (err error) {
 }
 
 func (r devicesRepository) Get(deviceId sql.NullString, deviceClass sql.NullInt32) (devices []DbDevice, err error) {
-	ctx := context.Background()
-	tx, err := r.database.Begin()
-	defer db.Rollback(tx)
-	if err != nil {
+	err = db.RunTx(r.database, func(ctx db.CtxEnhanced) (err error) {
+		devices, err = DevicesSelectTx(ctx, deviceId, deviceClass)
 		return
-	}
-	devices, err = DevicesSelectTx(ctx, tx, deviceId, deviceClass)
-	if err != nil {
-		return
-	}
-	err = tx.Commit()
+	})
 	return
 }
 
-func CountTx(ctx context.Context, tx *sql.Tx) (int32, error) {
+func CountTx(ctx db.CtxEnhanced) (int32, error) {
 	return db.Count(
-		tx,
 		ctx,
 		`SELECT COUNT(*) FROM devices`,
 	)
 }
 
-func DeviceUpsertAllTx(dd []DbDevice, ctx context.Context, tx *sql.Tx) error {
+func DeviceUpsertAllTx(dd []DbDevice, ctx db.CtxEnhanced) error {
 	mlen := len(dd)
 	cols := 6
 	p := "(?,?,?,?,?,?)"
@@ -88,7 +78,6 @@ func DeviceUpsertAllTx(dd []DbDevice, ctx context.Context, tx *sql.Tx) error {
 		values[cols*i+5] = d.Json
 	}
 	_, err := db.Exec(
-		tx,
 		ctx,
 		`INSERT INTO devices(
 			native_id, 
@@ -104,9 +93,8 @@ func DeviceUpsertAllTx(dd []DbDevice, ctx context.Context, tx *sql.Tx) error {
 	return err
 }
 
-func DevicesSelectTx(ctx context.Context, tx *sql.Tx, nativeId sql.NullString, deviceClass sql.NullInt32) ([]DbDevice, error) {
+func DevicesSelectTx(ctx db.CtxEnhanced, nativeId sql.NullString, deviceClass sql.NullInt32) ([]DbDevice, error) {
 	return db.Select(
-		tx,
 		ctx,
 		`SELECT
 			id,
@@ -140,11 +128,9 @@ func DevicesSelectTx(ctx context.Context, tx *sql.Tx, nativeId sql.NullString, d
 
 func DeviceUpsertTx(
 	device DbDevice,
-	ctx context.Context,
-	tx *sql.Tx,
+	ctx db.CtxEnhanced,
 ) (sql.Result, error) {
 	return db.Exec(
-		tx,
 		ctx,
 		`INSERT INTO devices(native_id, device_class_id, name, comments, origin, json)
 		VALUES(?,?,?,?,?,?)

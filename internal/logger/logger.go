@@ -50,8 +50,8 @@ const (
 )
 
 type Tag interface {
-	With(string, ...any) Tag
-	WithTid() Tag
+	Add(string, ...any) Tag
+	AddTid(string) Tag
 	F(format string, a ...any) string
 }
 
@@ -65,14 +65,14 @@ func NewTag(first TagName) Tag {
 	}
 }
 
-func (t *tag) With(format string, a ...any) Tag {
+func (t *tag) Add(format string, a ...any) Tag {
 	res := *t
 	res.tags = append(res.tags, fmt.Sprintf(format, a...))
 	return &res
 }
 
-func (t *tag) WithTid() Tag {
-	return t.With("Tid#%v", seq.Inc())
+func (t *tag) AddTid(prefix string) Tag {
+	return t.Add("%s#%v", prefix, seq.Inc())
 }
 
 func (t *tag) F(format string, a ...any) string {

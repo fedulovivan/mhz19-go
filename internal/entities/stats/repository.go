@@ -1,7 +1,6 @@
 package stats
 
 import (
-	"context"
 	"database/sql"
 
 	"github.com/fedulovivan/mhz19-go/internal/db"
@@ -32,11 +31,11 @@ func (r statsRepository) Get() (
 	res types.StatsGetResult,
 	err error,
 ) {
-	err = db.WithTx(r.database, func(tx *sql.Tx) error {
-		g, ctx := errgroup.WithContext(context.Background())
-		g.Go(func() (e error) { res.Rules, e = rules.CountTx(ctx, tx); return })
-		g.Go(func() (e error) { res.Devices, e = devices.CountTx(ctx, tx); return })
-		g.Go(func() (e error) { res.Messages, e = messages.CountTx(ctx, tx); return })
+	err = db.RunTx(r.database, func(ctx db.CtxEnhanced) error {
+		g, ctx := errgroup.WithContext(ctx)
+		g.Go(func() (e error) { res.Rules, e = rules.CountTx(ctx); return })
+		g.Go(func() (e error) { res.Devices, e = devices.CountTx(ctx); return })
+		g.Go(func() (e error) { res.Messages, e = messages.CountTx(ctx); return })
 		return g.Wait()
 	})
 	return

@@ -71,8 +71,8 @@ func (s *EngineSuite) Test13() {
 }
 
 func (s *EngineSuite) Test20() {
-	s.PanicsWithValue("Condition function [ (id=0)] not yet implemented", func() {
-		s.False(s.e.InvokeConditionFunc(types.MessageTuple{}, 0, false, nil, s.tag))
+	s.PanicsWithValue("Condition function 66 not yet implemented", func() {
+		s.False(s.e.InvokeConditionFunc(types.MessageTuple{}, 66, false, nil, s.tag))
 	})
 }
 

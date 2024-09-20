@@ -20,8 +20,8 @@ func (s *TagSuite) Test1() {
 func (s *TagSuite) Test2() {
 	tag1 := NewTag("[main]")
 	tag2 := NewTag("[module]")
-	tag11 := tag1.With("Rule1")
-	tag22 := tag2.With("bar2")
+	tag11 := tag1.Add("Rule1")
+	tag22 := tag2.Add("bar2")
 	s.NotEqual(tag1, tag11)
 	s.NotEqual(tag2, tag22)
 	s.Equal("[main] one", tag1.F("one"))
@@ -32,8 +32,8 @@ func (s *TagSuite) Test2() {
 
 func (s *TagSuite) Test3() {
 	tag1 := NewTag("[main]")
-	tag11 := tag1.With("Rule1")
-	tag111 := tag11.WithTid()
+	tag11 := tag1.Add("Rule1")
+	tag111 := tag11.AddTid("Tid")
 	s.NotEqual(tag1, tag11)
 	s.NotEqual(tag11, tag111)
 	s.NotEqual(tag1, tag111)
@@ -45,7 +45,7 @@ func (s *TagSuite) Test3() {
 func (s *TagSuite) Test4() {
 	s.Equal(
 		"foo bar baz message",
-		NewTag("foo").With("bar").With("baz").F("message"),
+		NewTag("foo").Add("bar").Add("baz").F("message"),
 	)
 }
 
