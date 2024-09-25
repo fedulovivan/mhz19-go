@@ -25,7 +25,9 @@ docker-down:
 
 .PHONY: docker-up
 docker-up:
-	docker run -d --env-file=$(CONF) -v ./database.bin:/database.bin -p $(REST_API_PORT):$(REST_API_PORT) --name=$(NAME) $(NAME)
+	docker run -d --env-file=$(CONF) -v ./database.bin:/database.bin --network=host --name=$(NAME) $(NAME)
+	
+# docker run -d --env-file=$(CONF) -v ./database.bin:/database.bin -p $(REST_API_PORT):$(REST_API_PORT) --name=$(NAME) --network=host $(NAME)
 	
 .PHONY: docker-logs
 docker-logs:

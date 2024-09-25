@@ -1,10 +1,10 @@
 
 ### Prio 0
-- feat: create simple frontend
 - feat: introduce rules.comments column
+- feat: per-rule match counter
 
 ### Bugs
-- bug: use host network to fix multicast in docker - https://github.com/flungo-docker/avahi
+- feat: create simple frontend
 - bug: no mqtt (re)connection if network was not available on app startup and returned online later
 - bug: "http: superfluous response.WriteHeader call from github.com/go-ozzo/ozzo-routing/v2.(*Router).handleError (router.go:131)" - appears after interruption of progressing apache bench
 - bug: "apr_socket_recv: Operation timed out (60)" - https://stackoverflow.com/questions/30352725/why-is-my-hello-world-go-server-getting-crushed-by-apachebench
@@ -47,6 +47,7 @@
 
 ### Completed
 
+- (+) bug: use host network to fix multicast in docker - https://github.com/flungo-docker/avahi
 - (+) feat: migrate all rules from mhz19-next
 - (+) bug: avoid "%!,(MISSING)" in logs - caused by usage of tag.F with inner fmt.Sprintf
 - (+) bug: no DeviceId prefix in serialized json - https://stackoverflow.com/questions/39164471/marshaljson-not-called
