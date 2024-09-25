@@ -1,20 +1,17 @@
 package engine
 
 import (
-	"encoding/json"
-	"fmt"
 	"testing"
+	"time"
 
 	"github.com/fedulovivan/mhz19-go/internal/entities/ldm"
-	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 	"github.com/stretchr/testify/suite"
 )
 
 type EngineSuite struct {
 	suite.Suite
-	e   types.Engine
-	tag logger.Tag
+	e types.Engine
 }
 
 func (s *EngineSuite) SetupSuite() {
@@ -27,7 +24,7 @@ var dummy_mtcb types.MessageTupleFn = func(types.DeviceId) (res types.MessageTup
 }
 
 func (s *EngineSuite) Test10() {
-	actual := s.e.MatchesCondition(dummy_mtcb, types.Condition{}, s.tag)
+	actual := s.e.MatchesCondition(dummy_mtcb, types.Condition{}, BaseTag)
 	s.False(actual)
 }
 
@@ -38,7 +35,7 @@ func (s *EngineSuite) Test11() {
 			{Fn: types.COND_EQUAL, Args: types.Args{"Left": true, "Right": false}},
 			{Fn: types.COND_EQUAL, Args: types.Args{"Left": 1.11, "Right": 1.11}},
 		},
-	}, s.tag)
+	}, BaseTag)
 	s.True(actual)
 }
 
@@ -48,7 +45,7 @@ func (s *EngineSuite) Test12() {
 			{Fn: types.COND_EQUAL, Args: types.Args{"Left": true, "Right": false}},
 			{Fn: types.COND_EQUAL, Args: types.Args{"Left": 1.11, "Right": 1.11}},
 		},
-	}, s.tag)
+	}, BaseTag)
 	s.False(actual)
 }
 
@@ -66,18 +63,18 @@ func (s *EngineSuite) Test13() {
 				},
 			},
 		},
-	}, s.tag)
+	}, BaseTag)
 	s.True(actual)
 }
 
 func (s *EngineSuite) Test20() {
 	s.PanicsWithValue("Condition function 66 not yet implemented", func() {
-		s.False(s.e.InvokeConditionFunc(types.MessageTuple{}, 66, false, nil, s.tag))
+		s.False(s.e.InvokeConditionFunc(types.MessageTuple{}, 66, false, nil, BaseTag))
 	})
 }
 
 func (s *EngineSuite) Test30() {
-	actual := s.e.MatchesListSome(dummy_mtcb, []types.Condition{}, s.tag)
+	actual := s.e.MatchesListSome(dummy_mtcb, []types.Condition{}, BaseTag)
 	s.False(actual)
 }
 
@@ -85,12 +82,12 @@ func (s *EngineSuite) Test31() {
 	actual := s.e.MatchesListSome(dummy_mtcb, []types.Condition{
 		{Fn: types.COND_EQUAL, Args: types.Args{"Left": 1, "Right": 1}},
 		{Fn: types.COND_EQUAL, Args: types.Args{"Left": "foo", "Right": "bar"}},
-	}, s.tag)
+	}, BaseTag)
 	s.True(actual)
 }
 
 func (s *EngineSuite) Test40() {
-	actual := s.e.MatchesListEvery(dummy_mtcb, []types.Condition{}, s.tag)
+	actual := s.e.MatchesListEvery(dummy_mtcb, []types.Condition{}, BaseTag)
 	s.False(actual)
 }
 
@@ -98,21 +95,34 @@ func (s *EngineSuite) Test41() {
 	actual := s.e.MatchesListEvery(dummy_mtcb, []types.Condition{
 		{Fn: types.COND_EQUAL, Args: types.Args{"Left": 1, "Right": 1}},
 		{Fn: types.COND_EQUAL, Args: types.Args{"Left": "foo", "Right": "foo"}},
-	}, s.tag)
+	}, BaseTag)
 	s.True(actual)
 }
 
 func (s *EngineSuite) Test60() {
-	s.e.ExecuteActions([]types.Message{}, types.Rule{}, s.tag)
+	s.e.ExecuteActions([]types.Message{}, types.Rule{}, BaseTag)
 }
 
 func (s *EngineSuite) Test70() {
-	s.e.HandleMessage(types.Message{}, []types.Rule{})
-	s.e.HandleMessage(types.Message{DeviceClass: types.DEVICE_CLASS_ZIGBEE_BRIDGE}, []types.Rule{})
+	s.e.HandleMessage(types.Message{
+		Id:        types.MessageIdSeq.Inc(),
+		Timestamp: time.Now(),
+	}, []types.Rule{})
+}
+
+func (s *EngineSuite) Test71() {
+	s.e.HandleMessage(types.Message{
+		Id:          types.MessageIdSeq.Inc(),
+		Timestamp:   time.Now(),
+		DeviceClass: types.DEVICE_CLASS_ZIGBEE_BRIDGE,
+	}, []types.Rule{})
 }
 
 func (s *EngineSuite) Test72() {
-	s.e.HandleMessage(types.Message{}, []types.Rule{
+	s.e.HandleMessage(types.Message{
+		Id:        types.MessageIdSeq.Inc(),
+		Timestamp: time.Now(),
+	}, []types.Rule{
 		{
 			Condition: types.Condition{
 				Fn:   types.COND_EQUAL,
@@ -130,76 +140,6 @@ func (s *EngineSuite) Test141() {
 	s.e.Stop()
 }
 
-func (s *EngineSuite) Test160() {
-	input := []byte(`{"Foo":1}`)
-	args := types.Args{}
-	err := json.Unmarshal(input, &args)
-	s.Nil(err)
-	s.Contains(args, "Foo")
-}
-
-func (s *EngineSuite) Test161() {
-	input := []byte(`{"Foo":"bar"}`)
-	args := types.Args{}
-	err := json.Unmarshal(input, &args)
-	s.Nil(err)
-	s.Contains(args, "Foo")
-	s.Equal(args["Foo"], "bar")
-}
-
-func (s *EngineSuite) Test162() {
-	input := []byte(`{"Lorem":"DeviceId(bar-111)"}`)
-	args := types.Args{}
-	err := json.Unmarshal(input, &args)
-	s.Nil(err)
-	s.Contains(args, "Lorem")
-	s.Equal(args["Lorem"], types.DeviceId("bar-111"))
-	s.IsType(args["Lorem"], types.DeviceId(""))
-	fmt.Println(args)
-}
-
-func (s *EngineSuite) Test163() {
-	input := []byte(`{"ClassesList":["DeviceClass(1)","DeviceClass(2)"]}`)
-	args := types.Args{}
-	err := json.Unmarshal(input, &args)
-	s.Nil(err)
-	s.Contains(args, "ClassesList")
-	s.Len(args["ClassesList"], 2)
-	s.Equal("map[ClassesList:[zigbee-device (id=1) device-pinger (id=2)]]", fmt.Sprintf("%v", args))
-}
-
-func (s *EngineSuite) Test164() {
-	input := []byte(`{foo}`)
-	args := types.Args{}
-	err := json.Unmarshal(input, &args)
-	fmt.Println(args)
-	s.NotNil(err)
-}
-
-func (s *EngineSuite) Test165() {
-	input := []byte(`{"foo":"DeviceId"}`)
-	args := types.Args{}
-	err := json.Unmarshal(input, &args)
-	s.Nil(err)
-	s.Equal("DeviceId", args["foo"])
-}
-
-func (s *EngineSuite) Test170() {
-	args := types.Args{"Foo1": types.DEVICE_CLASS_BOT}
-	argsjson, err := json.Marshal(args)
-	s.Nil(err)
-	s.Equal(`{"Foo1":"telegram-bot"}`, string(argsjson))
-}
-
-func (s *EngineSuite) Test171() {
-	args := types.Args{"Foo2": types.DeviceId("some-111")}
-	argsjson, err := json.Marshal(args)
-	s.Nil(err)
-	s.Equal(`{"Foo2":"some-111"}`, string(argsjson))
-}
-
 func TestEngine(t *testing.T) {
-	suite.Run(t, &EngineSuite{
-		tag: logger.NewTag("EngineSuite"),
-	})
+	suite.Run(t, &EngineSuite{})
 }

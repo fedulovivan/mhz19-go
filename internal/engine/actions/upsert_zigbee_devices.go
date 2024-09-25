@@ -6,10 +6,10 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
+// args: <none>
 // system action to create devices upon receiving message from zigbee2mqtt bridge
 // see https://www.zigbee2mqtt.io/guide/usage/mqtt_topics_and_messages.html#zigbee2mqtt-bridge-devices
 // and json example at assets/bridge-devices-message.json
-// Args: <none>
 var UpsertZigbeeDevices types.ActionImpl = func(mm []types.Message, args types.Args, mapping types.Mapping, e types.EngineAsSupplier, tag logger.Tag) (err error) {
 	devicesjson := gabs.Wrap(mm[0].Payload)
 	out := make([]types.Device, 0)

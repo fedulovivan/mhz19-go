@@ -1,22 +1,25 @@
 
 ### Prio 0
 - feat: create simple frontend
+- feat: introduce rules.comments column
 
-### Prio 1
+### Bugs
 - bug: use host network to fix multicast in docker - https://github.com/flungo-docker/avahi
 - bug: no mqtt (re)connection if network was not available on app startup and returned online later
-- bug: "http: superfluous response.WriteHeader call from github.com/go-ozzo/ozzo-routing/v2.(*Router).handleError (router.go:131)" - appears after termination of stucked apache bench
+- bug: "http: superfluous response.WriteHeader call from github.com/go-ozzo/ozzo-routing/v2.(*Router).handleError (router.go:131)" - appears after interruption of progressing apache bench
 - bug: "apr_socket_recv: Operation timed out (60)" - https://stackoverflow.com/questions/30352725/why-is-my-hello-world-go-server-getting-crushed-by-apachebench
 - bug: "api:getAll took 3.451973917s" when reading 1k rules 1k times - try same scenario with postgres
+
+### Features
 - feat: new action to play alert
 - feat: create api to update rule
 - feat: create api to add/update/delete devices
-- feat: create api to read device classes (or unified api for any simple dict table?)
 - feat: merge Zigbee2MqttSetState and ValveSetState actions
 - feat: create meta which descibes expected args for conditions and actions and validate
 - feat: create test service for sonoff wifi devices (poll them periodically to receive status updates)
 
-### Arch
+### Arch changes/decisions
+- arch: think of good api for createing new message (NewMessage)
 - arch: align arg names across actions (like we have two spellings: Cmd and Command)
 - arch: Message, make fields DeviceClass and DeviceId optional
 - arch: think how to distinquish "end device" message from all "others" - just as new flag for the message Struct?
@@ -28,9 +31,9 @@
 - arch: get rid of any in Send(...any) - no ideas so far
 - arch: mapping rules could be pre-defined (system) and loaded from db (user-level) - think we need to store everything in db, even system rules
 - arch: split rest api and engine into different microservices
+- arch: consider replacing sql.NullInt32 and sql.NullString with corresponding of pointer types - https://stackoverflow.com/questions/40092155/difference-between-string-and-sql-nullstring, for now stick with existing approach as more convenient
+- arch: switch to nil instead of sql.NullInt32 - easy to MarshalJSON
 - (?) arch: looks like we need to compare values as srings in conditions
-- (?) arch: consider replacing sql.NullInt32 and sql.NullString with corresponding of pointer types - https://stackoverflow.com/questions/40092155/difference-between-string-and-sql-nullstring, for now stick with existing approach as more convenient
- 
 
 ### Try
 - try: validation https://github.com/asaskevich/govalidator OR https://github.com/go-ozzo/ozzo-validation
@@ -44,6 +47,12 @@
 
 ### Completed
 
+- (+) feat: migrate all rules from mhz19-next
+- (+) bug: avoid "%!,(MISSING)" in logs - caused by usage of tag.F with inner fmt.Sprintf
+- (+) bug: no DeviceId prefix in serialized json - https://stackoverflow.com/questions/39164471/marshaljson-not-called
+- (+) feat: create api to read device classes (or unified api for any simple dict table?)
+- (+) bug: cannot use "otherDeviceId" as "DeviceId(192.168.88.44)" need "192.168.88.44"
+- (+) queued message may be logged with initial message id - "23:30:12.390 DBG [engine] Msg#1004 Rule=3 action=RecordMessage End" - tag fn bound to msg and rule "captured" by queue flush callback
 - (+) bug: db Tid is not unique within transaction
 - (+) feat: enable throttling for "RecordMessage" action + implement batch insert + ensure there no misses with throttled handling
 - (+) introduce new channel - rest

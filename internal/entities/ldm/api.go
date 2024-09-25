@@ -32,8 +32,11 @@ func (api ldmApi) get(c *routing.Context) error {
 
 func (api ldmApi) getByDeviceId(c *routing.Context) error {
 	defer utils.TimeTrack(tag.F, time.Now(), "api:getByDeviceId")
-	data := api.service.GetByDeviceId(
+	data, err := api.service.GetByDeviceId(
 		types.DeviceId(c.Param("deviceId")),
 	)
+	if err != nil {
+		return err
+	}
 	return c.Write(data)
 }

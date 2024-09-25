@@ -52,10 +52,11 @@ func (p *parserBase) parse_base() (types.Message, bool) {
 	meta := types.ChannelMeta{MqttTopic: topic}
 
 	outMsg := types.Message{
+		Id:            types.MessageIdSeq.Inc(),
+		Timestamp:     time.Now(),
 		ChannelType:   types.CHANNEL_MQTT,
 		ChannelMeta:   &meta,
 		DeviceClass:   p.dc,
-		Timestamp:     time.Now(),
 		FromEndDevice: false,
 	}
 
@@ -90,7 +91,7 @@ func (p *provider) Init() {
 				p.Push(outMsg)
 			}
 		},
-		"/VALVE/#": func(c MqttLib.Client, msg MqttLib.Message) {
+		"/VALVE/+/STATE/STATUS": func(c MqttLib.Client, msg MqttLib.Message) {
 			outMsg, ok := NewValveManipulator(msg).Parse()
 			if ok {
 				p.Push(outMsg)

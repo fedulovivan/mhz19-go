@@ -72,7 +72,8 @@ func InitConfig() {
 	}
 	fmt.Printf("starting with config %v\n", string(configAsJson))
 	if Config.IsDev {
-		varsAsJson, _ := json.MarshalIndent(getExpectedEnvVars(), "", "  ")
+		varsAsJson, _ := json.Marshal(getExpectedEnvVars())
+		// varsAsJson, _ := json.MarshalIndent(getExpectedEnvVars(), "", "  ")
 		fmt.Println("known config variables", string(varsAsJson))
 	}
 }

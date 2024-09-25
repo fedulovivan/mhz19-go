@@ -4,9 +4,15 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/fedulovivan/mhz19-go/pkg/utils"
 )
 
+var MessageIdSeq = utils.NewSeq(0)
+
 type Message struct {
+	// unique id
+	Id int32 `json:"-"`
 	// channel, which was used to receive message
 	ChannelType ChannelType `json:"channelType"`
 	// device class, see DeviceClass
@@ -26,29 +32,6 @@ type Message struct {
 	RawPayload []byte `json:"-"`
 	// additional metadata specific for the current channel
 	ChannelMeta *ChannelMeta `json:"-"`
-}
-
-func NewMessage(
-	fromEndDevice bool,
-	ct ChannelType,
-	dc *DeviceClass,
-	id *DeviceId,
-) Message {
-	res := Message{
-		ChannelType:   ct,
-		Timestamp:     time.Now(),
-		FromEndDevice: fromEndDevice,
-	}
-	if fromEndDevice && dc == nil && id == nil {
-		panic("DeviceClass and DeviceId are mandatory for end device message")
-	}
-	if dc != nil {
-		res.DeviceClass = *dc
-	}
-	if id != nil {
-		res.DeviceId = *id
-	}
-	return res
 }
 
 type MessageChan chan Message
@@ -101,3 +84,27 @@ func (m *Message) ExecDirective(field string) (any, error) {
 		panic(fmt.Sprintf("unknown directive %s", field))
 	}
 }
+
+// func NewMessage(
+// 	ct ChannelType,
+// 	// fromEndDevice bool,
+// 	// dc *DeviceClass,
+// 	// deviceId *DeviceId,
+// ) Message {
+// 	res := Message{
+// 		Id:          IdSeq.Inc(),
+// 		Timestamp:   time.Now(),
+// 		ChannelType: ct,
+// 	}
+// 	// FromEndDevice: fromEndDevice,
+// 	// if fromEndDevice && dc == nil && deviceId == nil {
+// 	// 	panic("DeviceClass and DeviceId are mandatory for end device message")
+// 	// }
+// 	// if dc != nil {
+// 	// 	res.DeviceClass = *dc
+// 	// }
+// 	// if deviceId != nil {
+// 	// 	res.DeviceId = *deviceId
+// 	// }
+// 	return res
+// }

@@ -5,6 +5,7 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
+// args: Left, Right
 var Equal types.CondImpl = func(mt types.MessageTuple, args types.Args) (res bool, err error) {
 	c := arguments.NewReader(mt.Curr, args, nil, nil, nil)
 	left := c.Get("Left")

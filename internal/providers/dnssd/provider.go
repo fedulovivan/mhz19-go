@@ -37,7 +37,7 @@ func (p *provider) Init() {
 
 	addFn := func(entry dnssd.BrowseEntry) {
 		if entry.Text["type"] != "diy_plug" {
-			slog.Warn(tag.F(fmt.Sprintf("Unexpected entry data %+v", entry)))
+			slog.Warn(tag.F("Unexpected entry data %+v", entry))
 			return
 		}
 		payload := map[string]any{
@@ -48,9 +48,10 @@ func (p *provider) Init() {
 			"Host": entry.Host,
 		}
 		outMsg := types.Message{
+			Id:            types.MessageIdSeq.Inc(),
+			Timestamp:     time.Now(),
 			ChannelType:   p.Channel(),
 			DeviceClass:   types.DEVICE_CLASS_SONOFF_ANNOUNCE,
-			Timestamp:     time.Now(),
 			Payload:       payload,
 			FromEndDevice: false,
 		}

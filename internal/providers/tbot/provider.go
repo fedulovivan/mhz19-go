@@ -109,10 +109,11 @@ func (p *provider) StartBotClient(token string) (err error) {
 					"ChatId": update.Message.Chat.ID,
 				}
 				outMsg := types.Message{
+					Id:            types.MessageIdSeq.Inc(),
+					Timestamp:     time.Now(),
 					DeviceId:      types.DeviceId(bot.Self.UserName),
 					ChannelType:   types.CHANNEL_TELEGRAM,
 					DeviceClass:   types.DEVICE_CLASS_BOT,
-					Timestamp:     time.Now(),
 					Payload:       payload,
 					FromEndDevice: true,
 				}

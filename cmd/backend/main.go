@@ -43,7 +43,6 @@ func main() {
 		),
 	)
 	e := engine.NewEngine()
-	e.SetLogTag(logger.NewTag(logger.ENGINE))
 	restProvider := p_rest.NewProvider()
 	e.SetProviders(
 		mqtt.NewProvider(),

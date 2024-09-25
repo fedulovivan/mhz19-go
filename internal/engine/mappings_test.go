@@ -17,7 +17,10 @@ type dummyProvider struct {
 func (p *dummyProvider) Init() {
 	p.InitBase()
 	time.Sleep(time.Millisecond * 100)
-	p.Push(types.Message{})
+	p.Push(types.Message{
+		Id:        types.MessageIdSeq.Inc(),
+		Timestamp: time.Now(),
+	})
 }
 
 type MappingsSuite struct {
@@ -51,7 +54,7 @@ func (s *dummyldmservice) Set(key types.LdmKey, m types.Message) {
 func (s *dummyldmservice) GetAll() (res []types.Message) {
 	return
 }
-func (s *dummyldmservice) GetByDeviceId(deviceId types.DeviceId) (out types.Message) {
+func (s *dummyldmservice) GetByDeviceId(deviceId types.DeviceId) (out types.Message, err error) {
 	return
 }
 

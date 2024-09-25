@@ -2,6 +2,7 @@ package types
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -14,24 +15,43 @@ func Value(value any) Args {
 	}
 }
 
-func parseSpecial(in string) any {
+func parseSpecial(in string) (res any, err error) {
+
 	if strings.HasPrefix(in, "DeviceId(") {
-		deviceId := in[9 : len(in)-1]
-		return DeviceId(deviceId)
-	} else if strings.HasPrefix(in, "DeviceClass(") {
+		var typed DeviceId
+		err = json.Unmarshal(
+			[]byte(fmt.Sprintf(`"%s"`, in)),
+			&typed,
+		)
+		if err == nil {
+			res = typed
+		}
+		return
+	}
+
+	if strings.HasPrefix(in, "DeviceClass(") {
 		dc := in[12 : len(in)-1]
 		i, _ := strconv.Atoi(dc)
-		return DeviceClass(i)
-	} else if strings.HasPrefix(in, "ChannelType(") {
+		res = DeviceClass(i)
+		return
+	}
+
+	if strings.HasPrefix(in, "ChannelType(") {
 		ct := in[12 : len(in)-1]
 		i, _ := strconv.Atoi(ct)
-		return ChannelType(i)
-	} else if strings.HasPrefix(in, "Channel(") { // same as ChannelType
+		res = ChannelType(i)
+		return
+	}
+
+	if strings.HasPrefix(in, "Channel(") { // same as ChannelType
 		ct := in[8 : len(in)-1]
 		i, _ := strconv.Atoi(ct)
-		return ChannelType(i)
+		res = ChannelType(i)
+		return
 	}
-	return in
+
+	res = in
+	return
 }
 
 // TODO seems there is a room for optimization here
@@ -47,12 +67,12 @@ func (a *Args) UnmarshalJSON(data []byte) (err error) {
 		case []any:
 			for i, listel := range vtyped {
 				if slistel, ok := listel.(string); ok {
-					vtyped[i] = parseSpecial(slistel)
+					vtyped[i], err = parseSpecial(slistel)
 				}
 			}
 			(*a)[argName] = vtyped
 		case string:
-			(*a)[argName] = parseSpecial(vtyped)
+			(*a)[argName], err = parseSpecial(vtyped)
 		default:
 			(*a)[argName] = vtyped
 		}
@@ -61,6 +81,7 @@ func (a *Args) UnmarshalJSON(data []byte) (err error) {
 }
 
 type TemplatePayload struct {
+	IsFirst  bool
 	Message  Message
 	Messages []Message
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
-// Args: <none>
+// args: <none>
 var RecordMessage types.ActionImpl = func(
 	mm []types.Message,
 	args types.Args,
@@ -18,6 +18,3 @@ var RecordMessage types.ActionImpl = func(
 	slog.Debug(tag.F("Messages to save"), "len", len(mm))
 	return e.MessagesService().CreateAll(mm)
 }
-
-// return nil
-// return e.MessagesService().Create(mm[0])

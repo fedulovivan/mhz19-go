@@ -17,10 +17,10 @@ func (l slogAdapter) Println(v ...any) {
 		slog.Error(tag.F(v0.Error()), "more", len(v)-1)
 		app.StatsSingleton().Errors.Inc()
 	default:
-		slog.Error(tag.F(fmt.Sprintf(
+		slog.Error(tag.F(
 			"slogAdapter.Println() skipped, its first argument expected to be a string, but got %T with value %v",
 			v[0], v[0],
-		)))
+		))
 		app.StatsSingleton().Errors.Inc()
 	}
 }

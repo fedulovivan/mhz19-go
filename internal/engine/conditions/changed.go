@@ -7,6 +7,7 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
+// args: Value
 var Changed types.CondImpl = func(mt types.MessageTuple, args types.Args) (res bool, err error) {
 	if mt.Prev == nil && mt.Curr != nil {
 		return true, nil

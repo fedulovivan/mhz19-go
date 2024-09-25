@@ -137,7 +137,24 @@ func (r *reader) ExecTemplate(in string, field string) (string, error) {
 				} else if svalue == "1" {
 					return "ONLINE"
 				} else {
-					return "UNKNOWN"
+					return svalue
+				}
+			},
+			"openedClosed": func(contact any) string {
+				svalue := fmt.Sprintf("%v", contact)
+				if svalue == "1" || svalue == "true" {
+					return "closed"
+				} else if svalue == "0" || svalue == "false" {
+					return "opened"
+				} else {
+					return svalue
+				}
+			},
+			"leakage": func(leakage bool) string {
+				if leakage {
+					return "is leaking"
+				} else {
+					return "is dry"
 				}
 			},
 		},

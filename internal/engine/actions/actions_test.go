@@ -47,7 +47,7 @@ func (s *ActionsSuite) Test20() {
 	message := types.Message{}
 	args := types.Args{
 		"DeviceId": types.DeviceId("0xe0798dfffed39ed1"),
-		"Data":     "OFF",
+		"State":    "OFF",
 	}
 	err := Zigbee2MqttSetState([]types.Message{message}, args, nil, engine, s.tag)
 	s.Nil(err)

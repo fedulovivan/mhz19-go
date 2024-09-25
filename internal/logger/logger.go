@@ -45,6 +45,7 @@ const (
 	STATS    TagName = "[a_stats]   "
 	MESSAGES TagName = "[a_messages]"
 	DEVICES  TagName = "[a_devices] "
+	DICTS    TagName = "[a_dicts]   "
 	TBOT     TagName = "[p_tbot]    "
 	DNSSD    TagName = "[p_dnssd]   "
 	MQTT     TagName = "[p_mqtt]    "

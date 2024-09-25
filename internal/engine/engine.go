@@ -23,8 +23,9 @@ type GetProviderFn func(ch types.ChannelType) types.ChannelProvider
 var _ types.Engine = (*engine)(nil)
 var _ types.EngineAsSupplier = (*engine)(nil)
 
+var BaseTag = logger.NewTag(logger.ENGINE)
+
 type engine struct {
-	tag            logger.Tag
 	providers      []types.ChannelProvider
 	rules          []types.Rule
 	messageService types.MessagesService
@@ -34,20 +35,15 @@ type engine struct {
 }
 
 func NewEngine() types.Engine {
-	return &engine{
-		tag: logger.NewTag("default"),
-	}
+	return &engine{}
 }
 
-func (e *engine) SetLogTag(tag logger.Tag) {
-	e.tag = tag
-}
 func (e *engine) SetProviders(providers ...types.ChannelProvider) {
 	e.providers = providers
 	providerNames := lo.Map(providers, func(p types.ChannelProvider, index int) string {
 		return fmt.Sprintf("%T", p)
 	})
-	slog.Debug(e.tag.F(
+	slog.Debug(BaseTag.F(
 		"%d provider(s) were set: %s",
 		len(providers),
 		strings.Join(providerNames, ", "),
@@ -66,7 +62,7 @@ func (e *engine) AppendRules(rules ...types.Rule) {
 	e.rulesMu.Lock()
 	defer e.rulesMu.Unlock()
 	e.rules = append(e.rules, rules...)
-	slog.Debug(e.tag.F("AppendRules"), "appended", len(rules), "total", len(e.rules))
+	slog.Debug(BaseTag.F("AppendRules"), "appended", len(rules), "total", len(e.rules))
 }
 
 func (e *engine) DeleteRule(ruleId int) {
@@ -77,7 +73,7 @@ func (e *engine) DeleteRule(ruleId int) {
 		return r.Id == ruleId
 	})
 	after := len(e.rules)
-	slog.Debug(e.tag.F("DeleteRule"), "deleted", before-after, "total", after)
+	slog.Debug(BaseTag.F("DeleteRule"), "deleted", before-after, "total", after)
 }
 
 func (e *engine) MessagesService() types.MessagesService {
@@ -96,10 +92,10 @@ func (e *engine) Start() {
 			}
 		}(p)
 	}
-	slog.Debug(e.tag.F("Started"))
+	slog.Debug(BaseTag.F("Started"))
 }
 
-func (e *engine) GetProvider(ct types.ChannelType) types.ChannelProvider {
+func (e *engine) FindProvider(ct types.ChannelType) types.ChannelProvider {
 	for _, provider := range e.providers {
 		if provider.Channel() == ct {
 			return provider
@@ -189,7 +185,7 @@ func (e *engine) MatchesCondition(mtcb types.MessageTupleFn, c types.Condition, 
 }
 
 func (e *engine) ExecuteActions(mm []types.Message, r types.Rule, tag logger.Tag) {
-	slog.Debug(tag.F(fmt.Sprintf("going to execute %v actions", len(r.Actions))))
+	slog.Debug(tag.F("going to execute %v actions", len(r.Actions)))
 	for _, a := range r.Actions {
 		e.InvokeActionFunc(mm, a, tag)
 	}
@@ -200,8 +196,11 @@ func (e *engine) ExecuteActions(mm []types.Message, r types.Rule, tag logger.Tag
 func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 	e.rulesMu.RLock()
 	defer e.rulesMu.RUnlock()
+	if m.Id == 0 || m.Timestamp.IsZero() {
+		panic("message must have Id and Timestamp initialised")
+	}
 	app.StatsSingleton().EngineMessagesReceived.Inc()
-	tag := e.tag.WithTid("Msg")
+	tag := BaseTag.With("Msg=%d", m.Id)
 	p := m.Payload
 	isSystem := m.DeviceClass == types.DEVICE_CLASS_SYSTEM
 	isBridge := m.DeviceClass == types.DEVICE_CLASS_ZIGBEE_BRIDGE
@@ -223,7 +222,7 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 		return
 	}
 	ldmKey := e.ldmService.NewKey(m.DeviceClass, m.DeviceId)
-	slog.Debug(tag.F(fmt.Sprintf("Matching against %v rules", rulesCnt)))
+	slog.Debug(tag.F("Matching against %v rules", rulesCnt))
 	matches := 0
 	for _, r := range rules {
 		tag := tag.With("Rule=%d", r.Id)
@@ -235,7 +234,7 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 			tuple := types.MessageTuple{}
 			takeOtherDeviceMessage := len(otherDeviceId) > 0
 			if takeOtherDeviceMessage {
-				slog.Warn(tag.F(fmt.Sprintf("requesting message for otherDeviceId=%v", otherDeviceId)))
+				slog.Warn(tag.F("requesting message for otherDeviceId=%v", otherDeviceId))
 				otherLdmKey := e.ldmService.NewKey(m.DeviceClass, otherDeviceId)
 				if e.ldmService.Has(otherLdmKey) {
 					tmp := e.ldmService.Get(otherLdmKey)
@@ -254,28 +253,29 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 			if m.FromEndDevice {
 				app.StatsSingleton().EngineRulesMatched.Inc()
 			}
-			slog.Debug(tag.F("matches"), "name", r.Name)
+			slog.Debug(tag.F("matches👌"), "name", r.Name)
 			matches++
 			if r.Throttle.Duration == 0 {
 				e.ExecuteActions([]types.Message{m}, r, tag)
 			} else {
 				key := message_queue.NewKey(m.DeviceClass, m.DeviceId, r.Id)
+				queueTag := BaseTag.With("Rule=%d", r.Id)
 				if !queuesContainer.HasQueue(key) {
-					slog.Warn(tag.F("messages queue created"), "key", key, "duration", r.Throttle.Duration)
+					// slog.Debug(tag.F("message queue created"), "duration", r.Throttle.Duration)
 					queuesContainer.CreateQueue(key, r.Throttle.Duration, func(mm []types.Message) {
-						slog.Warn(tag.F("messages queue is flushed now"))
-						e.ExecuteActions(mm, r, tag)
+						slog.Debug(queueTag.F("message queue is flushed now"), "key", key)
+						e.ExecuteActions(mm, r, queueTag)
 					})
 				}
 				queuesContainer.GetQueue(key).PushMessage(m)
-				slog.Debug(tag.F(fmt.Sprintf("message was queued for %s", r.Throttle.Duration)))
+				slog.Debug(tag.F("message was queued for %s", r.Throttle.Duration))
 			}
 		}
 	}
 	if matches == 0 {
 		slog.Warn(tag.F("No one matching rule found"))
 	} else {
-		slog.Debug(tag.F(fmt.Sprintf("%v out of %v rules were matched", matches, len(rules))))
+		slog.Debug(tag.F("%v out of %v rules were matched", matches, len(rules)))
 	}
 	if !isBridge && !sonoffAnnounce && !isSystem {
 		e.ldmService.Set(ldmKey, m)

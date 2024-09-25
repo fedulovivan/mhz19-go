@@ -23,6 +23,10 @@ type Key struct {
 	RuleId      int
 }
 
+func (k Key) String() string {
+	return fmt.Sprintf("%v-%v-Rule%v", k.DeviceClass, k.DeviceId, k.RuleId)
+}
+
 func NewContainer() *container {
 	return &container{
 		qlist: make(map[Key]Queue),
@@ -49,11 +53,11 @@ func (c *container) CreateQueue(key Key, throttle time.Duration, flush FlushFn) 
 	defer c.mu.Unlock()
 	q = NewQueue(throttle, flush)
 	c.qlist[key] = q
-	slog.Debug(tag.F(fmt.Sprintf(
+	slog.Debug(tag.F(
 		"New Queue created for key='%v', total instances %v",
 		key,
 		len(c.qlist),
-	)))
+	))
 	return
 }
 

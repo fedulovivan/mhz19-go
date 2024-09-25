@@ -20,6 +20,8 @@ const (
 	COND_DEVICE_CLASS    CondFn = 7
 	COND_СHANNEL         CondFn = 8
 	COND_FROM_END_DEVICE CondFn = 9
+	COND_TRUE            CondFn = 10
+	COND_FALSE           CondFn = 11
 )
 
 var CONDITION_NAMES = map[CondFn]string{
@@ -31,6 +33,8 @@ var CONDITION_NAMES = map[CondFn]string{
 	COND_DEVICE_CLASS:    "DeviceClass",
 	COND_СHANNEL:         "Channel",
 	COND_FROM_END_DEVICE: "FromEndDevice",
+	COND_TRUE:            "True",
+	COND_FALSE:           "False",
 }
 
 func (fn CondFn) String() string {

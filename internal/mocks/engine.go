@@ -90,7 +90,7 @@ func (e *mockengine) SetProviders(s ...types.ChannelProvider) {
 
 }
 
-func (e *mockengine) GetProvider(ct types.ChannelType) types.ChannelProvider {
+func (e *mockengine) FindProvider(ct types.ChannelType) types.ChannelProvider {
 	return &mockprovider{}
 }
 

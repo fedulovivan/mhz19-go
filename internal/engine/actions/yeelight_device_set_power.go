@@ -9,7 +9,7 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
-// Args: IP, Cmd
+// args: IP, Cmd
 var YeelightDeviceSetPower types.ActionImpl = func(
 	mm []types.Message,
 	args types.Args,
@@ -17,11 +17,11 @@ var YeelightDeviceSetPower types.ActionImpl = func(
 	e types.EngineAsSupplier,
 	tag logger.Tag,
 ) (err error) {
-	tpayload := types.TemplatePayload{
-		Messages: mm,
-	}
+	// tpayload := types.TemplatePayload{
+	// 	Messages: mm,
+	// }
 	reader := arguments.NewReader(
-		&mm[0], args, mapping, &tpayload, e,
+		&mm[0], args, mapping /* &tpayload */, nil, e,
 	)
 	ip, err := arguments.GetTyped[string](&reader, "IP")
 	if err != nil {

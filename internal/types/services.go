@@ -14,6 +14,16 @@ type DevicesService interface {
 	UpsertAll(devices []Device) error
 }
 
+type DictItem struct {
+	Id   int    `json:"id"`
+	Name string `json:"name"`
+}
+
+type DictsService interface {
+	Get(DictType) ([]DictItem, error)
+	All() (map[DictType][]DictItem, error)
+}
+
 type LdmKey struct {
 	DeviceClass DeviceClass
 	DeviceId    DeviceId
@@ -25,7 +35,7 @@ type LdmService interface {
 	Has(key LdmKey) bool
 	Set(key LdmKey, m Message)
 	GetAll() []Message
-	GetByDeviceId(deviceId DeviceId) Message
+	GetByDeviceId(deviceId DeviceId) (Message, error)
 	OnSet() chan LdmKey
 }
 

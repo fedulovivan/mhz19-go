@@ -129,7 +129,7 @@ var testDataTable = []TableRow{
 			},
 		},
 		expectedLen:  1,
-		expectedJson: `[{"id":1,"name":"case 2","condition":{"fn":"Changed","args":{"Fifth":"0x00158d0004244bda","Fourth":"zigbee-device","Left":"foo","Right":"bar","Third":"baz"}},"actions":[{"fn":"PostSonoffSwitchMessage","args":{"ListIds":["10011cec96","78345aaa67"],"Value":"$message.action"},"mapping":{"Value":{"lorem-3":"dolor-4","sit-5":"amet-6"}}}],"throttle":null}]`,
+		expectedJson: `[{"id":1,"name":"case 2","condition":{"fn":"Changed","args":{"Fifth":"DeviceId(0x00158d0004244bda)","Fourth":"zigbee-device","Left":"foo","Right":"bar","Third":"baz"}},"actions":[{"fn":"PostSonoffSwitchMessage","args":{"ListIds":["DeviceId(10011cec96)","DeviceId(78345aaa67)"],"Value":"$message.action"},"mapping":{"Value":{"lorem-3":"dolor-4","sit-5":"amet-6"}}}],"throttle":null}]`,
 	},
 	// case 02
 	{

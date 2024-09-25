@@ -1,7 +1,6 @@
 package buried_devices_provider
 
 import (
-	"fmt"
 	"log/slog"
 	"sync"
 	"time"
@@ -47,16 +46,16 @@ func (p *provider) handleKey(key types.LdmKey) {
 	device, err := p.devicesService.GetOne(key.DeviceId)
 	if err == nil && device.BuriedTimeout != nil {
 		if device.BuriedTimeout.Duration == 0 {
-			slog.Debug(tag.F(fmt.Sprintf("%v device skipped (devices.buried_timeout == 0)", key.DeviceId)))
+			slog.Debug(tag.F("%v device skipped (devices.buried_timeout == 0)", key.DeviceId))
 			skipped = true
 		} else {
-			slog.Warn(tag.F(fmt.Sprintf("%v using custom BuriedTimeout value=%s", key.DeviceId, device.BuriedTimeout.Duration)))
+			slog.Warn(tag.F("%v using custom BuriedTimeout value=%s", key.DeviceId, device.BuriedTimeout.Duration))
 			timeout = device.BuriedTimeout.Duration
 		}
 	}
 	if timer, ok := p.buriedTimers[key]; ok {
 		if skipped {
-			slog.Warn(tag.F(fmt.Sprintf("%v is now skipped, stopping and deleting timer", key.DeviceId)))
+			slog.Warn(tag.F("%v is now skipped, stopping and deleting timer", key.DeviceId))
 			timer.Stop()
 			delete(p.buriedTimers, key)
 			return
@@ -70,10 +69,10 @@ func (p *provider) handleKey(key types.LdmKey) {
 			timeout,
 			func() {
 				outMsg := types.Message{
-					ChannelType: types.CHANNEL_SYSTEM,
+					Id:          types.MessageIdSeq.Inc(),
+					Timestamp:   time.Now(),
 					DeviceClass: types.DEVICE_CLASS_SYSTEM,
 					DeviceId:    types.DEVICE_ID_FOR_THE_BURIED_DEVICES_PROVIDER_MESSAGE,
-					Timestamp:   time.Now(),
 					Payload: map[string]any{
 						"BuriedDeviceId": key.DeviceId,
 					},

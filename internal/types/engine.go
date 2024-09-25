@@ -8,7 +8,7 @@ type EngineAsSupplier interface {
 	SetMessagesService(s MessagesService)
 	MessagesService() MessagesService
 	SetProviders(s ...ChannelProvider)
-	GetProvider(ct ChannelType) ChannelProvider
+	FindProvider(ct ChannelType) ChannelProvider
 }
 
 type Engine interface {
@@ -20,10 +20,9 @@ type Engine interface {
 	MatchesListEvery(mtcb MessageTupleFn, cc []Condition, tag logger.Tag) bool
 	ExecuteActions(mm []Message, r Rule, tag logger.Tag)
 	HandleMessage(m Message, rules []Rule)
-	Start()
-	Stop()
-	SetLogTag(f logger.Tag)
 	SetLdmService(r LdmService)
 	AppendRules(rules ...Rule)
 	DeleteRule(ruleId int)
+	Start()
+	Stop()
 }

@@ -8,20 +8,20 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
-// Args: Data, DeviceId
+// args: State, DeviceId
 var Zigbee2MqttSetState types.ActionImpl = func(mm []types.Message, args types.Args, mapping types.Mapping, e types.EngineAsSupplier, tag logger.Tag) (err error) {
-	tpayload := types.TemplatePayload{
-		Messages: mm,
-	}
-	areader := arguments.NewReader(&mm[0], args, mapping, &tpayload, e)
+	// tpayload := types.TemplatePayload{
+	// 	Messages: mm,
+	// }
+	areader := arguments.NewReader(&mm[0], args, mapping /* &tpayload */, nil, e)
 	deviceId := areader.Get("DeviceId")
-	data := areader.Get("Data")
+	state := areader.Get("State")
 	err = areader.Error()
 	if err != nil {
 		return
 	}
 	topic := fmt.Sprintf("zigbee2mqtt/%v/set/state", deviceId)
-	p := e.GetProvider(types.CHANNEL_MQTT)
-	err = p.Send(topic, data)
+	p := e.FindProvider(types.CHANNEL_MQTT)
+	err = p.Send(topic, state)
 	return
 }

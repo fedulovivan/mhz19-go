@@ -6,10 +6,12 @@ import (
 	"log/slog"
 	"net/http"
 	"runtime/debug"
+	"time"
 
 	"github.com/fedulovivan/mhz19-go/internal/app"
 	"github.com/fedulovivan/mhz19-go/internal/db"
 	"github.com/fedulovivan/mhz19-go/internal/entities/devices"
+	"github.com/fedulovivan/mhz19-go/internal/entities/dicts"
 	"github.com/fedulovivan/mhz19-go/internal/entities/ldm"
 	"github.com/fedulovivan/mhz19-go/internal/entities/messages"
 	"github.com/fedulovivan/mhz19-go/internal/entities/rules"
@@ -136,29 +138,31 @@ func Init(providerInstance types.ChannelProvider) {
 	// push engine message received via rest
 	group := apibase.Group("/push-message")
 	group.Put("", func(c *routing.Context) error {
-		dc := types.DEVICE_CLASS_SYSTEM
-		id := types.DEVICE_ID_FOR_THE_REST_PROVIDER_MESSAGE
-		m := types.NewMessage(false, types.CHANNEL_REST, &dc, &id)
-		err := c.Read(&m.Payload)
+		outMsg := types.Message{
+			Id:            types.MessageIdSeq.Inc(),
+			Timestamp:     time.Now(),
+			ChannelType:   types.CHANNEL_REST,
+			DeviceClass:   types.DEVICE_CLASS_SYSTEM,
+			DeviceId:      types.DEVICE_ID_FOR_THE_REST_PROVIDER_MESSAGE,
+			FromEndDevice: false,
+		}
+		err := c.Read(&outMsg.Payload)
 		if err != nil {
 			return err
 		}
-		providerInstance.Push(m)
+		providerInstance.Push(outMsg)
 		return c.Write(map[string]any{"ok": true})
 	})
 
-	// random id for the load tests
-	// idspool := []types.DeviceId{
-	// 	types.DeviceId("lorem ipsum"),
-	// 	types.DeviceId("is simply dummy "),
-	// 	types.DeviceId("text of the "),
-	// 	types.DeviceId("printing and "),
-	// 	types.DeviceId("typesetting industry"),
-	// 	types.DeviceId("has been the industrys "),
-	// 	types.DeviceId("standard dummy text"),
-	// 	types.DeviceId("ever since the 1500s"),
-	// }
-	// id := idspool[rand.Intn(len(idspool))]
+	// dictionaries
+	dicts.NewApi(
+		apibase,
+		dicts.NewService(
+			dicts.NewRepository(
+				db.DbSingleton(),
+			),
+		),
+	)
 
 	http.Handle("/", router)
 	go func() {
@@ -178,3 +182,16 @@ func Stop() {
 		app.StatsSingleton().Errors.Inc()
 	}
 }
+
+// random id for the load tests
+// idspool := []types.DeviceId{
+// 	types.DeviceId("lorem ipsum"),
+// 	types.DeviceId("is simply dummy "),
+// 	types.DeviceId("text of the "),
+// 	types.DeviceId("printing and "),
+// 	types.DeviceId("typesetting industry"),
+// 	types.DeviceId("has been the industrys "),
+// 	types.DeviceId("standard dummy text"),
+// 	types.DeviceId("ever since the 1500s"),
+// }
+// id := idspool[rand.Intn(len(idspool))]

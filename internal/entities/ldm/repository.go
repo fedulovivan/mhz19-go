@@ -18,7 +18,7 @@ type LdmRepository interface {
 	Set(key types.LdmKey, m types.Message)
 	GetAll() []types.Message
 	OnSet() chan types.LdmKey
-	GetByDeviceId(deviceId types.DeviceId) types.Message
+	GetByDeviceId(deviceId types.DeviceId) (types.Message, error)
 }
 
 var _ LdmRepository = (*repository)(nil)
@@ -63,11 +63,15 @@ func (r *repository) GetAll() (result []types.Message) {
 	return
 }
 
-func (r *repository) GetByDeviceId(deviceId types.DeviceId) types.Message {
+func (r *repository) GetByDeviceId(deviceId types.DeviceId) (res types.Message, err error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	key := r.device_id_to_key_unsafemap[deviceId]
-	return r.get_unsafe(key)
+	key, exist := r.device_id_to_key_unsafemap[deviceId]
+	if !exist {
+		err = fmt.Errorf("no last message for %s", deviceId)
+		return
+	}
+	return r.get_unsafe(key), nil
 }
 
 func (r *repository) Get(key types.LdmKey) types.Message {
@@ -86,26 +90,31 @@ func (r *repository) Has(key types.LdmKey) (flag bool) {
 // "private" getter not protected by lock
 func (r *repository) get_unsafe(key types.LdmKey) types.Message {
 	return r.data[key]
+	// res, exist := r.data[key]
+	// if !exist {
+	// 	panic(fmt.Sprintf("no message for key %s", key))
+	// }
+	// return res
 }
 
 func (r *repository) OnSet() chan types.LdmKey {
 	return r.onset
 }
 
-func (r *repository) Set(key types.LdmKey, m types.Message) {
+func (r *repository) Set(newkey types.LdmKey, m types.Message) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	existingkey, alreadyexist := r.device_id_to_key_unsafemap[m.DeviceId]
-	if alreadyexist && existingkey != key {
+	if alreadyexist && existingkey != newkey {
 		panic(fmt.Sprintf(
-			"unsafemap key collision: same device id %v is referred by different keys: %v and %v",
+			"device_id_to_key_unsafemap key collision: device id %v is referred by several keys: %v and %v",
 			m.DeviceId,
 			existingkey,
-			key,
+			newkey,
 		))
 	} else if !alreadyexist {
-		r.device_id_to_key_unsafemap[m.DeviceId] = key
+		r.device_id_to_key_unsafemap[m.DeviceId] = newkey
 	}
-	r.data[key] = m
-	r.onset <- key
+	r.data[newkey] = m
+	r.onset <- newkey
 }

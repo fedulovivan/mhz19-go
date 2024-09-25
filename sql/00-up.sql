@@ -136,6 +136,8 @@ INSERT INTO condition_functions VALUES(6,'ZigbeeDevice');
 INSERT INTO condition_functions VALUES(7,'DeviceClass');
 INSERT INTO condition_functions VALUES(8,'Channel');
 INSERT INTO condition_functions VALUES(9,'FromEndDevice');
+INSERT INTO condition_functions VALUES(10,'True');
+INSERT INTO condition_functions VALUES(11,'False');
 
 INSERT INTO devices VALUES(1, '192.168.88.1', 2, 'MIKROTIK_ROUTER', NULL, NULL, NULL, NULL);
 INSERT INTO devices VALUES(2, '192.168.88.44', 2, 'IPHONE_15_PRO_IP', NULL, NULL, NULL, NULL);
@@ -144,5 +146,8 @@ INSERT INTO devices VALUES(4, '192.168.88.62', 2, 'IPHONE_14_IP', NULL, NULL, NU
 
 INSERT INTO devices VALUES(5, 'buried-device-id', 7, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO devices VALUES(6, 'rest-device-id', 7, NULL, NULL, NULL, NULL, NULL);
+
+INSERT INTO devices VALUES(7, '10012db92b', 6, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO devices VALUES(8, '10011cec96', 6, NULL, NULL, NULL, NULL, NULL);
 
 COMMIT;

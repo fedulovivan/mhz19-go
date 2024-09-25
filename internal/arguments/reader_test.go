@@ -160,7 +160,7 @@ func (s *ReaderSuite) Test120() {
 		DeviceId: "10011cec96",
 	}}}
 	r := NewReader(&m, args, nil, &tpayload, engine)
-	s.Equal("10011cec96 - My perfect name", r.Get("Foo5"))
+	s.Equal("DeviceId(10011cec96) - My perfect name", r.Get("Foo5"))
 	s.Nil(r.Error())
 }
 
@@ -172,7 +172,7 @@ func (s *ReaderSuite) Test121() {
 		DeviceId: "lorem111",
 	}}}
 	r := NewReader(&m, args, nil, &tpayload, engine)
-	s.Equal("lorem111 - lorem111", r.Get("Foo5"))
+	s.Equal("DeviceId(lorem111) - lorem111", r.Get("Foo5"))
 	// s.EqualError(r.Error(), `template: Foo5:1:42: executing "Foo5" at <deviceName .DeviceId>: error calling deviceName: no such device`)
 }
 
@@ -184,7 +184,7 @@ func (s *ReaderSuite) Test122() {
 		DeviceId: "nullish-device-id",
 	}}}
 	r := NewReader(&m, args, nil, &tpayload, engine)
-	expected := "device name is 'Device of class  (id=0), with id nullish-device-id'"
+	expected := "device name is 'Device of class , with id nullish-device-id'"
 	actual := r.Get("Foo5")
 	s.Equal(expected, actual)
 	s.Nil(r.Error())
@@ -226,7 +226,7 @@ func (s *ReaderSuite) Test125() {
 	}
 	tpayload := types.TemplatePayload{}
 	r := NewReader(&m, args, nil, &tpayload, engine)
-	expected := "UNKNOWN"
+	expected := "333"
 	actual := r.Get("Foo5")
 	s.Equal(expected, actual)
 	s.Nil(r.Error())

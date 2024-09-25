@@ -28,7 +28,7 @@ func (s ldmService) GetAll() []types.Message {
 	return s.repository.GetAll()
 }
 
-func (s ldmService) GetByDeviceId(deviceId types.DeviceId) types.Message {
+func (s ldmService) GetByDeviceId(deviceId types.DeviceId) (types.Message, error) {
 	return s.repository.GetByDeviceId(deviceId)
 }
 

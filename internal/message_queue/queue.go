@@ -49,9 +49,6 @@ func (q *queue) PushMessage(m types.Message) {
 	if q.timer == nil {
 		q.timer = time.AfterFunc(q.throttle, q.onFlushed)
 	}
-	//  else {
-	// 	q.timer.Reset(q.throttle)
-	// }
 }
 
 func NewQueue(throttle time.Duration, flush FlushFn) Queue {

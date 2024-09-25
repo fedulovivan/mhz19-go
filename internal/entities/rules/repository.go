@@ -43,6 +43,11 @@ type DbRuleCondition struct {
 	Not               sql.NullInt32
 	ParentConditionId sql.NullInt32
 	OtherDeviceId     sql.NullString
+	// FunctionType      *int32
+	// LogicOr           *int32
+	// Not               *int32
+	// ParentConditionId *int32
+	// OtherDeviceId     *string
 }
 
 type DbRuleAction struct {

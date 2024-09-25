@@ -8,8 +8,8 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
+// args: <none>
 // system action to create device upon receiving dns-sd message with _ewelink._tcp service
-// Args: <none>
 var UpsertSonoffDevice = func(mm []types.Message, args types.Args, mapping types.Mapping, e types.EngineAsSupplier, tag logger.Tag) (err error) {
 	m := mm[0]
 	gjson := gabs.Wrap(m.Payload)

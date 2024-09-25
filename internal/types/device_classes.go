@@ -33,11 +33,12 @@ var DEVICE_CLASS_NAMES = map[DeviceClass]string{
 }
 
 func (dc DeviceClass) String() string {
-	return fmt.Sprintf("%v (id=%d)", DEVICE_CLASS_NAMES[dc], dc)
+	return DEVICE_CLASS_NAMES[dc]
 }
 
 func (dc DeviceClass) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf(`"%v"`, DEVICE_CLASS_NAMES[dc])), nil
+	return []byte(fmt.Sprintf(`"%s"`, DEVICE_CLASS_NAMES[dc])), nil
 }
 
+// return fmt.Sprintf("%s", DEVICE_CLASS_NAMES[dc])
 // return []byte(fmt.Sprintf(`"DeviceClass(%d)"`, dc)), nil

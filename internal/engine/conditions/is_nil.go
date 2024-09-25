@@ -5,6 +5,7 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
+// args: Value
 // return false for nil and empty strings
 // return true for the rest
 var IsNil types.CondImpl = func(mt types.MessageTuple, args types.Args) (bool, error) {

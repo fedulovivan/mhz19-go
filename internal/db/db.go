@@ -27,12 +27,6 @@ type ctxval struct {
 	Tag logger.Tag
 }
 
-// a key for context.WithValue to store initialised and enhanced logger.Tag
-// type key_tag struct{}
-
-// a key for context.WithValue to store started transaction (*sql.Tx object)
-// type key_tx struct{}
-
 type CtxEnhanced interface {
 	context.Context
 }
@@ -64,7 +58,7 @@ func DbSingleton() *sql.DB {
 		Panic(err)
 	}
 
-	// aid for "database is locked"
+	// aid for "database is locked" issue
 	// https://github.com/mattn/go-sqlite3/issues/274#issuecomment-191597862
 	instance.SetMaxOpenConns(1)
 
@@ -128,12 +122,13 @@ func Exec(
 		return
 	default:
 		lquery := utils.OneLineTrim(query)
-		logQuery(tag, lquery, values)
+		// valuesj, _ := json.Marshal(values)
+		logQuery(tag, lquery /* string(valuesj) */, values...)
 		res, err = tx.ExecContext(ctx, query, values...)
 		if err != nil {
 			err = fmt.Errorf(
 				"got an error \"%v\" executing %v values %v",
-				err, lquery, values,
+				err, lquery /* string(valuesj) */, values,
 			)
 		}
 		return
@@ -209,11 +204,9 @@ func logQuery(tag logger.Tag, query string, values ...any) {
 		return
 	}
 	slog.Debug(tag.F(
-		fmt.Sprintf(
-			"executing query %v, values %v",
-			query,
-			values,
-		),
+		"executing query %v, values %v",
+		query,
+		values,
 	))
 }
 
