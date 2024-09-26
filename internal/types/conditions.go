@@ -22,6 +22,7 @@ const (
 	COND_FROM_END_DEVICE CondFn = 9
 	COND_TRUE            CondFn = 10
 	COND_FALSE           CondFn = 11
+	COND_DEVICE_ID       CondFn = 12
 )
 
 var CONDITION_NAMES = map[CondFn]string{
@@ -35,6 +36,7 @@ var CONDITION_NAMES = map[CondFn]string{
 	COND_FROM_END_DEVICE: "FromEndDevice",
 	COND_TRUE:            "True",
 	COND_FALSE:           "False",
+	COND_DEVICE_ID:       "DeviceId",
 }
 
 func (fn CondFn) String() string {
@@ -65,7 +67,7 @@ func (fn *CondFn) UnmarshalJSON(b []byte) (err error) {
 			}
 		}
 	}
-	return fmt.Errorf("failed to unmarshal %v(%T) to CondFn", v, v)
+	return fmt.Errorf("failed to unmarshal %v (type=%T) to CondFn", v, v)
 }
 
 type CondImpl func(mt MessageTuple, args Args) (bool, error)

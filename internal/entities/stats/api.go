@@ -3,6 +3,9 @@ package stats
 import (
 	"time"
 
+	"github.com/fedulovivan/mhz19-go/internal/app"
+
+	"github.com/fedulovivan/mhz19-go/internal/counters"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 	"github.com/fedulovivan/mhz19-go/pkg/utils"
@@ -25,9 +28,15 @@ func NewApi(base *routing.RouteGroup, service types.StatsService) {
 
 func (api statsApi) get(c *routing.Context) error {
 	defer utils.TimeTrack(tag.F, time.Now(), "api:get")
-	data, err := api.service.Get()
+	tables, err := api.service.Get()
 	if err != nil {
 		return err
 	}
-	return c.Write(data)
+	counters := counters.Data()
+	return c.Write(map[string]any{
+		"tables":   tables,
+		"counters": counters,
+		"uptime":   app.GetUptime(),
+		"memory":   utils.GetMemUsage(),
+	})
 }

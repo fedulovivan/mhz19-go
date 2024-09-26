@@ -6,7 +6,7 @@ GIT_REV ?= $(shell git rev-parse --short HEAD)
 DATE ?= $(shell date +%FT%T)
 NUM_MIGRATION ?= 00
 REST_API_URL ?= http://localhost:$(REST_API_PORT)$(REST_API_PATH)
-API_LOAD_COUNT ?= 100
+API_LOAD_COUNT ?= 1000
 API_LOAD_THREADS ?= 10
 
 default: lint test build
@@ -91,6 +91,10 @@ migrate-dump:
 test:
 	CGO_ENABLED=1 go test -cover -race ./...
 # CGO_ENABLED=1 go test -cover -race -count 1 ./...
+
+# .PHONY: bench
+# bench:
+# 	CGO_ENABLED=1 go test -benchmem ./...
 
 .PHONY: test-one
 test-one:

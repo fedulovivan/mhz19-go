@@ -17,6 +17,7 @@ var conditions = types.CondImpls{
 	types.COND_FROM_END_DEVICE: FromEndDevice,
 	types.COND_TRUE:            True,
 	types.COND_FALSE:           False,
+	types.COND_DEVICE_ID:       DeviceId,
 }
 
 func Get(fn types.CondFn) (action types.CondImpl) {

@@ -40,7 +40,7 @@ type LdmService interface {
 }
 
 type StatsService interface {
-	Get() (StatsGetResult, error)
+	Get() (TableStats, error)
 }
 
 type RulesService interface {

@@ -85,6 +85,20 @@ func (m *Message) ExecDirective(field string) (any, error) {
 	}
 }
 
+func NewSystemMessage(text string) Message {
+	return Message{
+		Id:            MessageIdSeq.Inc(),
+		Timestamp:     time.Now(),
+		ChannelType:   CHANNEL_SYSTEM,
+		DeviceClass:   DEVICE_CLASS_SYSTEM,
+		DeviceId:      DEVICE_ID_FOR_THE_APPLICATION_MESSAGE,
+		FromEndDevice: false,
+		Payload: map[string]any{
+			"text": text,
+		},
+	}
+}
+
 // func NewMessage(
 // 	ct ChannelType,
 // 	// fromEndDevice bool,

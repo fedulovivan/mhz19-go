@@ -1,6 +1,9 @@
 package utils
 
-import "sync"
+import (
+	"fmt"
+	"sync"
+)
 
 type Seq interface {
 	Inc() int32
@@ -14,6 +17,10 @@ type sequence struct {
 
 func NewSeq(start int32) Seq {
 	return &sequence{value: start}
+}
+
+func (a *sequence) MarshalJSON() (b []byte, err error) {
+	return []byte(fmt.Sprintf(`%d`, a.Value())), nil
 }
 
 func (a *sequence) Value() int32 {

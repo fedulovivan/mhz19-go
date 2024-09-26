@@ -65,15 +65,14 @@ func InitConfig() {
 		panic("failed loading env variables into struct: " + err.Error())
 	}
 	var configAsJson []byte
-	if Config.IsDev {
-		configAsJson, _ = json.MarshalIndent(Config, "", "  ")
-	} else {
-		configAsJson, _ = json.Marshal(Config)
-	}
+	// if Config.IsDev {
+	// 	configAsJson, _ = json.MarshalIndent(Config, "", "  ")
+	// } else {
+	configAsJson, _ = json.Marshal(Config)
+	// }
 	fmt.Printf("starting with config %v\n", string(configAsJson))
 	if Config.IsDev {
 		varsAsJson, _ := json.Marshal(getExpectedEnvVars())
-		// varsAsJson, _ := json.MarshalIndent(getExpectedEnvVars(), "", "  ")
 		fmt.Println("known config variables", string(varsAsJson))
 	}
 }

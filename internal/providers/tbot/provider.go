@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/fedulovivan/mhz19-go/internal/app"
+	"github.com/fedulovivan/mhz19-go/internal/counters"
 	"github.com/fedulovivan/mhz19-go/internal/engine"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/types"
@@ -131,7 +132,7 @@ func (p *provider) Init() {
 		err := p.StartBotClient(token)
 		if err != nil {
 			slog.Error(tag.F("StartBotClient()"), "err", err.Error())
-			app.StatsSingleton().Errors.Inc()
+			counters.Inc(counters.ERRORS)
 		}
 	}
 }

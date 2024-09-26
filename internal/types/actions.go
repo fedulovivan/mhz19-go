@@ -62,7 +62,7 @@ func (fn *ActionFn) UnmarshalJSON(b []byte) (err error) {
 			}
 		}
 	}
-	return fmt.Errorf("failed to unmarshal %v(%T) to ActionFn", v, v)
+	return fmt.Errorf("failed to unmarshal %v (type=%T) to ActionFn", v, v)
 }
 
 type ActionImpl func(messages []Message, args Args, mapping Mapping, engine EngineAsSupplier, tag logger.Tag) error

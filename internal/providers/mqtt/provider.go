@@ -9,6 +9,7 @@ import (
 
 	MqttLib "github.com/eclipse/paho.mqtt.golang"
 	"github.com/fedulovivan/mhz19-go/internal/app"
+	"github.com/fedulovivan/mhz19-go/internal/counters"
 	"github.com/fedulovivan/mhz19-go/internal/engine"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/types"
@@ -107,7 +108,7 @@ func (p *provider) Init() {
 
 	var defaultMessageHandler = func(client MqttLib.Client, msg MqttLib.Message) {
 		slog.Error(tag.F("defaultMessageHandler is not expected to be reached"), "topic", msg.Topic())
-		app.StatsSingleton().Errors.Inc()
+		counters.Inc(counters.ERRORS)
 	}
 
 	var connectHandler = func(client MqttLib.Client) {
@@ -124,7 +125,7 @@ func (p *provider) Init() {
 
 	var connectLostHandler = func(client MqttLib.Client, err error) {
 		slog.Error(tag.F("Connection lost"), "error", err)
-		app.StatsSingleton().Errors.Inc()
+		counters.Inc(counters.ERRORS)
 	}
 
 	// build opts
@@ -160,7 +161,7 @@ func (p *provider) Init() {
 	slog.Debug(tag.F("Connecting..."))
 	if token := p.client.Connect(); token.Wait() && token.Error() != nil {
 		slog.Error(tag.F("Initial connect"), "error", token.Error())
-		app.StatsSingleton().Errors.Inc()
+		counters.Inc(counters.ERRORS)
 	}
 
 }
@@ -177,7 +178,7 @@ func (p *provider) Stop() {
 func subscribe(client MqttLib.Client, topic string) {
 	if token := client.Subscribe(topic, 0, nil); token.Wait() && token.Error() != nil {
 		slog.Error(tag.F("client.Subscribe()"), "error", token.Error())
-		app.StatsSingleton().Errors.Inc()
+		counters.Inc(counters.ERRORS)
 	}
 	slog.Info(tag.F("Subscribed to"), "topic", topic)
 }

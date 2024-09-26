@@ -5,8 +5,10 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/fedulovivan/mhz19-go/internal/app"
+	"github.com/fedulovivan/mhz19-go/internal/counters"
 	"github.com/fedulovivan/mhz19-go/internal/db"
 	"github.com/fedulovivan/mhz19-go/internal/engine"
 	"github.com/fedulovivan/mhz19-go/internal/entities/devices"
@@ -15,11 +17,12 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/entities/rules"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/rest"
+	"github.com/fedulovivan/mhz19-go/internal/types"
 
 	buried_devices "github.com/fedulovivan/mhz19-go/internal/providers/buried_devices"
 	dnssd "github.com/fedulovivan/mhz19-go/internal/providers/dnssd"
 	mqtt "github.com/fedulovivan/mhz19-go/internal/providers/mqtt"
-	p_rest "github.com/fedulovivan/mhz19-go/internal/providers/rest"
+	"github.com/fedulovivan/mhz19-go/internal/providers/shim_provider"
 	tbot "github.com/fedulovivan/mhz19-go/internal/providers/tbot"
 )
 
@@ -31,7 +34,7 @@ func main() {
 	app.InitConfig()
 	logger.Init()
 
-	// configure engine dependencies and start it
+	// configure various engine dependencies and start it
 	rulesService := rules.ServiceSingleton(
 		rules.NewRepository(
 			db.DbSingleton(),
@@ -43,7 +46,7 @@ func main() {
 		),
 	)
 	e := engine.NewEngine()
-	restProvider := p_rest.NewProvider()
+	shimProvider := shim_provider.NewProvider()
 	e.SetProviders(
 		mqtt.NewProvider(),
 		tbot.NewProvider(),
@@ -52,7 +55,7 @@ func main() {
 			ldm.NewService(ldm.RepoSingleton()),
 			devicesService,
 		),
-		restProvider,
+		shimProvider,
 	)
 	e.SetMessagesService(
 		messages.NewService(
@@ -78,7 +81,7 @@ func main() {
 		}
 	} else {
 		slog.Error(tag.F("Failed to load rules from db"), "err", err.Error())
-		app.StatsSingleton().Errors.Inc()
+		counters.Inc(counters.ERRORS)
 	}
 	go func() {
 		for rule := range rulesService.OnCreated() {
@@ -93,12 +96,18 @@ func main() {
 	e.Start()
 
 	// init rest
-	rest.Init(restProvider)
+	rest.Init(shimProvider)
 
 	// notify we are in the development mode
 	if app.Config.IsDev {
 		slog.Debug(tag.F("Running in developlment mode"))
 	}
+
+	// publish "Application started" message
+	// TODO detect bot(s) are connected, instead of using dumb timeout
+	time.AfterFunc(time.Second*5, func() {
+		shimProvider.Push(types.NewSystemMessage("Application started"))
+	})
 
 	// handle shutdown
 	stopped := make(chan struct{})

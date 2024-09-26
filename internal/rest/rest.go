@@ -6,16 +6,17 @@ import (
 	"log/slog"
 	"net/http"
 	"runtime/debug"
-	"time"
 
 	"github.com/fedulovivan/mhz19-go/internal/app"
+	"github.com/fedulovivan/mhz19-go/internal/counters"
 	"github.com/fedulovivan/mhz19-go/internal/db"
 	"github.com/fedulovivan/mhz19-go/internal/entities/devices"
 	"github.com/fedulovivan/mhz19-go/internal/entities/dicts"
 	"github.com/fedulovivan/mhz19-go/internal/entities/ldm"
 	"github.com/fedulovivan/mhz19-go/internal/entities/messages"
+	push_message "github.com/fedulovivan/mhz19-go/internal/entities/push-message"
 	"github.com/fedulovivan/mhz19-go/internal/entities/rules"
-	"github.com/fedulovivan/mhz19-go/internal/entities/stats"
+	stats_e "github.com/fedulovivan/mhz19-go/internal/entities/stats"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 	routing "github.com/go-ozzo/ozzo-routing/v2"
@@ -42,7 +43,7 @@ func errorHandler(c *routing.Context) (err error) {
 		}
 		if err != nil {
 			slog.Error(tag.F("errorHandler:"), "path", c.Request.URL.Path, "err", err.Error())
-			app.StatsSingleton().Errors.Inc()
+			counters.Inc(counters.ERRORS)
 			res := map[string]any{
 				"is_error": true,
 				"error":    err.Error(),
@@ -58,11 +59,11 @@ func errorHandler(c *routing.Context) (err error) {
 }
 
 func requestCounter(c *routing.Context) error {
-	go app.StatsSingleton().ApiRequests.Inc()
+	go counters.Inc(counters.API_REQUESTS)
 	return c.Next()
 }
 
-func Init(providerInstance types.ChannelProvider) {
+func Init(shimProvider types.ChannelProvider) {
 
 	router := routing.New()
 	router.Use(
@@ -98,10 +99,10 @@ func Init(providerInstance types.ChannelProvider) {
 	)
 
 	// stats
-	stats.NewApi(
+	stats_e.NewApi(
 		apibase,
-		stats.NewService(
-			stats.NewRepository(
+		stats_e.NewService(
+			stats_e.NewRepository(
 				db.DbSingleton(),
 			),
 		),
@@ -136,23 +137,10 @@ func Init(providerInstance types.ChannelProvider) {
 	)
 
 	// push engine message received via rest
-	group := apibase.Group("/push-message")
-	group.Put("", func(c *routing.Context) error {
-		outMsg := types.Message{
-			Id:            types.MessageIdSeq.Inc(),
-			Timestamp:     time.Now(),
-			ChannelType:   types.CHANNEL_REST,
-			DeviceClass:   types.DEVICE_CLASS_SYSTEM,
-			DeviceId:      types.DEVICE_ID_FOR_THE_REST_PROVIDER_MESSAGE,
-			FromEndDevice: false,
-		}
-		err := c.Read(&outMsg.Payload)
-		if err != nil {
-			return err
-		}
-		providerInstance.Push(outMsg)
-		return c.Write(map[string]any{"ok": true})
-	})
+	push_message.NewApi(
+		apibase,
+		shimProvider,
+	)
 
 	// dictionaries
 	dicts.NewApi(
@@ -179,7 +167,7 @@ func Stop() {
 	err := server.Shutdown(context.Background())
 	if err != nil {
 		slog.Error(tag.F(err.Error()))
-		app.StatsSingleton().Errors.Inc()
+		counters.Inc(counters.ERRORS)
 	}
 }
 

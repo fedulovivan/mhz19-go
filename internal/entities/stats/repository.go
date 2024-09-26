@@ -12,7 +12,7 @@ import (
 )
 
 type StatsRepository interface {
-	Get() (res types.StatsGetResult, err error)
+	Get() (res types.TableStats, err error)
 }
 
 var _ StatsRepository = (*statsRepository)(nil)
@@ -28,7 +28,7 @@ func NewRepository(database *sql.DB) StatsRepository {
 }
 
 func (r statsRepository) Get() (
-	res types.StatsGetResult,
+	res types.TableStats,
 	err error,
 ) {
 	err = db.RunTx(r.database, func(ctx db.CtxEnhanced) error {

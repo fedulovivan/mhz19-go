@@ -11,7 +11,7 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
-var tag = logger.NewTag(logger.ARGS)
+var baseTag = logger.NewTag(logger.ARGS)
 
 type reader struct {
 	args     types.Args
@@ -60,6 +60,11 @@ func GetTyped[T any](r *reader, field string) (res T, err error) {
 	return
 }
 
+func (r *reader) Has(field string) (has bool) {
+	_, has = r.args[field]
+	return
+}
+
 func (r *reader) Get(field string) any {
 
 	// stage 1: check if requested arg exist in map
@@ -96,8 +101,8 @@ func (r *reader) Get(field string) any {
 		if fieldMap, ok := r.mapping[field]; ok {
 			outAsKey := fmt.Sprintf("%v", out)
 			if mapped, ok := fieldMap[outAsKey]; ok {
-				slog.Debug(tag.F(
-					"in=%v (out=%v, outAsKey=%v) was mapped to %v",
+				slog.Debug(baseTag.F(
+					`in="%v" (out="%v", outAsKey="%v") was mapped to "%v"`,
 					in, out, outAsKey, mapped,
 				))
 				out = mapped
@@ -136,6 +141,8 @@ func (r *reader) ExecTemplate(in string, field string) (string, error) {
 					return "OFFLINE"
 				} else if svalue == "1" {
 					return "ONLINE"
+				} else if svalue == "-1" {
+					return "UNKNOWN"
 				} else {
 					return svalue
 				}

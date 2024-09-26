@@ -22,6 +22,10 @@ func (s *ActionsSuite) TeardownSuite() {
 }
 
 func (s *ActionsSuite) Test10() {
+
+	// using this for design tests only
+	s.T().Skip()
+
 	engine := mocks.NewEngineMock()
 	message := types.Message{
 		Payload: map[string]any{

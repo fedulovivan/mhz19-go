@@ -1,7 +1,14 @@
 package types
 
-const DEVICE_ID_FOR_THE_BURIED_DEVICES_PROVIDER_MESSAGE DeviceId = DeviceId("buried-device-id")
-const DEVICE_ID_FOR_THE_REST_PROVIDER_MESSAGE DeviceId = DeviceId("rest-device-id")
+const DEVICE_ID_FOR_THE_BURIED_DEVICES_PROVIDER_MESSAGE = DeviceId(
+	"device-id-for-the-buried-devices-provider-message",
+)
+const DEVICE_ID_FOR_THE_REST_PROVIDER_MESSAGE = DeviceId(
+	"device-id-for-the-rest-provider-message",
+)
+const DEVICE_ID_FOR_THE_APPLICATION_MESSAGE = DeviceId(
+	"device-id-for-the-application-message",
+)
 
 type DictType string
 

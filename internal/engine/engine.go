@@ -6,13 +6,16 @@ import (
 	"slices"
 	"strings"
 	"sync"
+	"time"
 
-	"github.com/fedulovivan/mhz19-go/internal/app"
+	"github.com/fedulovivan/mhz19-go/internal/counters"
+
 	"github.com/fedulovivan/mhz19-go/internal/engine/actions"
 	"github.com/fedulovivan/mhz19-go/internal/engine/conditions"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/message_queue"
 	"github.com/fedulovivan/mhz19-go/internal/types"
+	"github.com/fedulovivan/mhz19-go/pkg/utils"
 	"github.com/samber/lo"
 )
 
@@ -123,7 +126,7 @@ func (e *engine) InvokeConditionFunc(mt types.MessageTuple, fn types.CondFn, not
 		return res
 	} else {
 		slog.Error(tag.F("Fail"), "err", err)
-		app.StatsSingleton().Errors.Inc()
+		counters.Inc(counters.ERRORS)
 		return false
 	}
 }
@@ -131,16 +134,14 @@ func (e *engine) InvokeConditionFunc(mt types.MessageTuple, fn types.CondFn, not
 func (e *engine) InvokeActionFunc(mm []types.Message, a types.Action, tag logger.Tag) {
 	impl := actions.Get(a.Fn)
 	tag = tag.With("action=%s", a.Fn.String())
-	go func() {
-		slog.Debug(tag.F("Start"), "args", a.Args)
-		err := impl(mm, a.Args, a.Mapping, e, tag)
-		if err != nil {
-			slog.Error(tag.F("Fail"), "err", err)
-			app.StatsSingleton().Errors.Inc()
-		} else {
-			slog.Debug(tag.F("End"))
-		}
-	}()
+	slog.Debug(tag.F("Start"), "args", a.Args)
+	err := impl(mm, a.Args, a.Mapping, e, tag)
+	if err != nil {
+		slog.Error(tag.F("Fail"), "err", err)
+		counters.Inc(counters.ERRORS)
+	} else {
+		slog.Debug(tag.F("End"))
+	}
 }
 
 func (e *engine) MatchesListSome(mtcb types.MessageTupleFn, cc []types.Condition, tag logger.Tag) bool {
@@ -187,19 +188,20 @@ func (e *engine) MatchesCondition(mtcb types.MessageTupleFn, c types.Condition, 
 func (e *engine) ExecuteActions(mm []types.Message, r types.Rule, tag logger.Tag) {
 	slog.Debug(tag.F("going to execute %v actions", len(r.Actions)))
 	for _, a := range r.Actions {
-		e.InvokeActionFunc(mm, a, tag)
+		go e.InvokeActionFunc(mm, a, tag)
 	}
 }
 
 // called simultaneusly upon receiving messages from all providers
 // should have thread-safe implementation
 func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
+	defer utils.TimeTrack(BaseTag.F, time.Now(), "HandleMessage")
 	e.rulesMu.RLock()
 	defer e.rulesMu.RUnlock()
 	if m.Id == 0 || m.Timestamp.IsZero() {
 		panic("message must have Id and Timestamp initialised")
 	}
-	app.StatsSingleton().EngineMessagesReceived.Inc()
+	counters.Inc(counters.MESSAGES_RECEIVED)
 	tag := BaseTag.With("Msg=%d", m.Id)
 	p := m.Payload
 	isSystem := m.DeviceClass == types.DEVICE_CLASS_SYSTEM
@@ -250,9 +252,7 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 			return tuple
 		}
 		if e.MatchesCondition(mtcb, r.Condition, tag) {
-			if m.FromEndDevice {
-				app.StatsSingleton().EngineRulesMatched.Inc()
-			}
+			counters.IncRule(r.Id)
 			slog.Debug(tag.F("matches👌"), "name", r.Name)
 			matches++
 			if r.Throttle.Duration == 0 {
@@ -261,9 +261,8 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 				key := message_queue.NewKey(m.DeviceClass, m.DeviceId, r.Id)
 				queueTag := BaseTag.With("Rule=%d", r.Id)
 				if !queuesContainer.HasQueue(key) {
-					// slog.Debug(tag.F("message queue created"), "duration", r.Throttle.Duration)
 					queuesContainer.CreateQueue(key, r.Throttle.Duration, func(mm []types.Message) {
-						slog.Debug(queueTag.F("message queue is flushed now"), "key", key)
+						slog.Debug(queueTag.F("message queue is flushed now"), "key", key, "mm", len(mm))
 						e.ExecuteActions(mm, r, queueTag)
 					})
 				}

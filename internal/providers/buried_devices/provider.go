@@ -71,6 +71,7 @@ func (p *provider) handleKey(key types.LdmKey) {
 				outMsg := types.Message{
 					Id:          types.MessageIdSeq.Inc(),
 					Timestamp:   time.Now(),
+					ChannelType: types.CHANNEL_SYSTEM,
 					DeviceClass: types.DEVICE_CLASS_SYSTEM,
 					DeviceId:    types.DEVICE_ID_FOR_THE_BURIED_DEVICES_PROVIDER_MESSAGE,
 					Payload: map[string]any{

@@ -1,27 +1,31 @@
 
 ### Prio 0
-- feat: introduce rules.comments column
-- feat: per-rule match counter
+- arch: avoid postman as a dependency for creating rules. create them via curl script
+- feat: create simple frontend
+- feat: implement new action to play alert
+
+### Prio 1
+none
 
 ### Bugs
-- feat: create simple frontend
+- bug: at present moment there is no "previous message info" in ExecuteActions. we call with ONE message for non-throttled rule, and with ARRAY of messages if throttling is enabled. so flag IsFirst is implemented and handled incorrectly
 - bug: no mqtt (re)connection if network was not available on app startup and returned online later
 - bug: "http: superfluous response.WriteHeader call from github.com/go-ozzo/ozzo-routing/v2.(*Router).handleError (router.go:131)" - appears after interruption of progressing apache bench
 - bug: "apr_socket_recv: Operation timed out (60)" - https://stackoverflow.com/questions/30352725/why-is-my-hello-world-go-server-getting-crushed-by-apachebench
 - bug: "api:getAll took 3.451973917s" when reading 1k rules 1k times - try same scenario with postgres
 
 ### Features
-- feat: new action to play alert
+- feat: avoid inserts into "devices" table in sql-up script
+- feat: introduce rules.comments column
 - feat: create api to update rule
 - feat: create api to add/update/delete devices
 - feat: merge Zigbee2MqttSetState and ValveSetState actions
 - feat: create meta which descibes expected args for conditions and actions and validate
-- feat: create test service for sonoff wifi devices (poll them periodically to receive status updates)
 
 ### Arch changes/decisions
-- arch: think of good api for createing new message (NewMessage)
-- arch: align arg names across actions (like we have two spellings: Cmd and Command)
 - arch: Message, make fields DeviceClass and DeviceId optional
+- arch: think of good api for createing new message (NewMessage) Id, Timestamp, ChannelType, DeviceClass, DeviceId -  are mandatory
+- arch: align arg names across actions (like we have two spellings: Cmd and Command)
 - arch: think how to distinquish "end device" message from all "others" - just as new flag for the message Struct?
 - arch: think how we can construct/init "TemplatePayload" automatically, now we need to build it manually in action implementation
 - arch: "FOREIGN KEY (device_id) REFERENCES devices(native_id)" requires sole UNIQUE index for column devices.native_id, while we actually need UNIQUE(device_class_id, native_id) since its unreasonable to constraint native_id across devices off all classes
@@ -33,7 +37,6 @@
 - arch: split rest api and engine into different microservices
 - arch: consider replacing sql.NullInt32 and sql.NullString with corresponding of pointer types - https://stackoverflow.com/questions/40092155/difference-between-string-and-sql-nullstring, for now stick with existing approach as more convenient
 - arch: switch to nil instead of sql.NullInt32 - easy to MarshalJSON
-- (?) arch: looks like we need to compare values as srings in conditions
 
 ### Try
 - try: validation https://github.com/asaskevich/govalidator OR https://github.com/go-ozzo/ozzo-validation
@@ -47,6 +50,11 @@
 
 ### Completed
 
+- (+) feat: find a place for "Application started" message
+- (+) arch: reworked counters module / per-rule match counter
+- (+) arch: try benchmark tests
+- (+) bug: fixed logging/execution issue for InvokeActionFunc
+- (+) feat: creted all "legacy" rules
 - (+) bug: use host network to fix multicast in docker - https://github.com/flungo-docker/avahi
 - (+) feat: migrate all rules from mhz19-next
 - (+) bug: avoid "%!,(MISSING)" in logs - caused by usage of tag.F with inner fmt.Sprintf
@@ -144,8 +152,12 @@
 - (+) wrap internal/mqtt/client.go and internal/tbot/tbot.go into structs
 - (+) for mqtt client, rather than hardocding in defaultMessageHandler, define rules/adapters for transforming topic and payload into final message per device class
 - (+) consider replacing hand-written adapters with mqttClient.AddRoute() API, also add warning for messages captured by defaultMessageHandler (assuming all topics we subscribe should have own handlers and default one should not be reached)
+
+### Discarded
 - (?) introduce intermediate layer between named args and function implementation using regular args (more robust, simplify things like ZigbeeDeviceFn)
-- (?) think about "first match" strategy in handleMessage - we do not need this, since we to execute RecordMessage and some other action
+- (?) think about "first match" strategy in handleMessage - we do not need this, since we to execute RecordMessage and some other action 
+- (?) feat: create test service for sonoff wifi devices (poll them periodically to receive status updates)
+- (?) arch: looks like we need to compare values as srings in conditions
 
 ### new mapping rule structure
 ```golang
