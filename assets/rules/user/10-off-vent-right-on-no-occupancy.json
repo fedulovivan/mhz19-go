@@ -1,0 +1,30 @@
+{
+    "name": "off vent right after movement sensor has reported no occupancy",
+    "condition": {
+        "nested": [
+            {
+                "fn": "ZigbeeDevice",
+                "args": {
+                    "List": [
+                        "DeviceId(0x00158d0000c2fa6e)"
+                    ]
+                }
+            },
+            {
+                "fn": "False",
+                "args": {
+                    "Value": "$message.occupancy"
+                }
+            }
+        ]
+    },
+    "actions": [
+        {
+            "fn": "PostSonoffSwitchMessage",
+            "args": {
+                "DeviceId": "DeviceId(10012db92b)",
+                "Command": "off"
+            }
+        }
+    ]
+}

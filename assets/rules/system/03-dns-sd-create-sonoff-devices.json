@@ -1,0 +1,14 @@
+{
+    "name": "create sonoff devices upon receiving dns-sd message with _ewelink._tcp service",
+    "condition": {
+        "nested": [
+            {
+                "fn": "Channel",
+                "args": {
+                    "Value": "ChannelType(3)"
+                }
+            }
+        ]
+    },
+    "actions": [{"fn": "UpsertSonoffDevice"}]
+}

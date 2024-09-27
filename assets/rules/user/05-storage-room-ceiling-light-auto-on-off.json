@@ -1,0 +1,40 @@
+{
+    "name": "storage room ceiling light auto on/off",
+    "condition": {
+        "nested": [
+            {
+                "fn": "ZigbeeDevice",
+                "args": {
+                    "List": [
+                        "DeviceId(0x00158d000a823bb0)"
+                    ]
+                }
+            },
+            {
+                "fn": "InList",
+                "args": {
+                    "Value": "$message.occupancy",
+                    "List": [
+                        true,
+                        false
+                    ]
+                }
+            }
+        ]
+    },
+    "actions": [
+        {
+            "fn": "Zigbee2MqttSetState",
+            "args": {
+                "DeviceId": "DeviceId(0xe0798dfffed39ed1)",
+                "State": "$message.occupancy"
+            },
+            "mapping": {
+                "State": {
+                    "true": "ON",
+                    "false": "OFF"
+                }
+            }
+        }
+    ]
+}

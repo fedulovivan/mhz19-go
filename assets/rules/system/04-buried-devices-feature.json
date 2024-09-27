@@ -1,0 +1,30 @@
+{
+    "name": "buried devices feature",
+    "condition": {
+        "nested": [
+            {
+                "fn": "Channel",
+                "args": {
+                    "Value": "ChannelType(4)"
+                }
+            },
+            {
+                "fn": "InList",
+                "args": {
+                    "Value": "$deviceId",
+                    "List": [
+                        "DeviceId(device-id-for-the-buried-devices-provider-message)"
+                    ]
+                }
+            }
+        ]
+    },
+    "actions": [
+        {
+            "fn": "TelegramBotMessage",
+            "args": {
+                "Text": "Have not seen «{{ deviceName .Message.Payload.BuriedDeviceId }}» for a while..."
+            }
+        }
+    ]
+}

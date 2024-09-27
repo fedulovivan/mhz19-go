@@ -115,7 +115,11 @@ func (e *engine) Stop() {
 
 func (e *engine) InvokeConditionFunc(mt types.MessageTuple, fn types.CondFn, not bool, args types.Args, tag logger.Tag) bool {
 	impl := conditions.Get(fn)
-	tag = tag.With("condition=%s", fn.String())
+	fnString := fn.String()
+	if not {
+		fnString = "Not" + fnString
+	}
+	tag = tag.With("condition=%s", fnString)
 	slog.Debug(tag.F("Start"), "args", args)
 	res, err := impl(mt, args)
 	if err == nil {

@@ -64,9 +64,19 @@ No matter which channel was used to receive a message, or which certain device h
 
 TBD
 
-### Commands
+### Starting development instance
 
-TBD
+- create db with `make migrate-up`
+- create config file `cp .env.sample .env`
+- run application `make run`
+
+### Starting production instance in docker
+
+- create db with `make migrate-up`
+- create config file `cp .env.sample .env`
+- build image with `make docker-build`
+- create and run container `make docker-up`
+- view logs with `make docker-logs`
 
 ### Used technologies
 

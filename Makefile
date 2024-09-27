@@ -8,6 +8,7 @@ NUM_MIGRATION ?= 00
 REST_API_URL ?= http://localhost:$(REST_API_PORT)$(REST_API_PATH)
 API_LOAD_COUNT ?= 1000
 API_LOAD_THREADS ?= 10
+OS_NAME := $(shell uname -s | tr A-Z a-z)
 
 default: lint test build
 
@@ -25,7 +26,11 @@ docker-down:
 
 .PHONY: docker-up
 docker-up:
+ifeq ($(OS_NAME), linux)
+	docker run -d --env-file=$(CONF) -v ./database.bin:/database.bin --network=host --device /dev/snd:/dev/snd --name=$(NAME) $(NAME)
+else
 	docker run -d --env-file=$(CONF) -v ./database.bin:/database.bin --network=host --name=$(NAME) $(NAME)
+endif
 	
 # docker run -d --env-file=$(CONF) -v ./database.bin:/database.bin -p $(REST_API_PORT):$(REST_API_PORT) --name=$(NAME) --network=host $(NAME)
 	
@@ -33,21 +38,25 @@ docker-up:
 docker-logs:
 	docker logs --follow $(NAME)
 
+.PHONY: docker-logs-save
+docker-logs-save:
+	docker logs $(NAME) 2>&1 | cat > log.txt
+
 .PHONY: clean
 clean:
 	rm ./bin/backend
 
-.PHONY: api-load-read
-api-load-read:
+.PHONY: api-load-read-rules
+api-load-read-rules:
 	ab -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/rules
 
-.PHONY: api-load-write
-api-load-write:
+.PHONY: api-load-write-rules
+api-load-write-rules:
 	ab -T application/json -u ./assets/create-rule.json -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/rules
 
-.PHONY: api-load-write-2
-api-load-write-2:
-	hey -T application/json -m PUT -D ./assets/create-rule.json -n 1000 -c 10 -q 50 $(REST_API_URL)/push-message
+.PHONY: api-load-push-messages
+api-load-push-messages:
+	hey -T application/json -m PUT -D ./assets/push-message.json -n 1000 -c 10 -q 50 $(REST_API_URL)/push-message
 
 # https://stackoverflow.com/questions/978142/how-to-benchmark-apache-with-delays
 # https://gist.github.com/ungoldman/11282441
@@ -63,6 +72,10 @@ api-load-once:
 .PHONY: run
 run:
 	go run ./cmd/backend
+
+.PHONY: provision
+provision:
+	go run ./cmd/provision
 
 .PHONY: tidy
 tidy:

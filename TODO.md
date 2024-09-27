@@ -1,21 +1,27 @@
 
+### Project milestones
+
+- (+) 26 sep 2024, DONE. Initial launch - All features from mhz19-next plus storing mapping rules in database
+- Implement simple frontend
+- Interactive zigbee device join - End-to-end scenario with new device device join, confuguring rules, with no app retart
+
 ### Prio 0
-- arch: avoid postman as a dependency for creating rules. create them via curl script
-- feat: create simple frontend
-- feat: implement new action to play alert
+- bug: at present moment there is no "previous message info" in ExecuteActions. we call with ONE message for non-throttled rule, and with ARRAY of messages if throttling is enabled. so flag IsFirst is implemented and handled incorrectly
+- feat: simple frontend
 
 ### Prio 1
 none
 
 ### Bugs
-- bug: at present moment there is no "previous message info" in ExecuteActions. we call with ONE message for non-throttled rule, and with ARRAY of messages if throttling is enabled. so flag IsFirst is implemented and handled incorrectly
+- bug: check why docker build always takes 200s on macmini (Building 202.9s (17/17) FINISHED)
 - bug: no mqtt (re)connection if network was not available on app startup and returned online later
 - bug: "http: superfluous response.WriteHeader call from github.com/go-ozzo/ozzo-routing/v2.(*Router).handleError (router.go:131)" - appears after interruption of progressing apache bench
 - bug: "apr_socket_recv: Operation timed out (60)" - https://stackoverflow.com/questions/30352725/why-is-my-hello-world-go-server-getting-crushed-by-apachebench
 - bug: "api:getAll took 3.451973917s" when reading 1k rules 1k times - try same scenario with postgres
 
 ### Features
-- feat: avoid inserts into "devices" table in sql-up script
+- nice: use two telegram channels for notifications: for CRITICAL messages and all the rest.
+- feat: avoid provisioning "devices" from sql-up script
 - feat: introduce rules.comments column
 - feat: create api to update rule
 - feat: create api to add/update/delete devices
@@ -39,6 +45,7 @@ none
 - arch: switch to nil instead of sql.NullInt32 - easy to MarshalJSON
 
 ### Try
+- try: some interactive cli framework, like cobra
 - try: validation https://github.com/asaskevich/govalidator OR https://github.com/go-ozzo/ozzo-validation
 - try: find out why cli command "make test" and "vscode" report different coverage statistics: 86.9% vs 100%. vscode syntax - `Running tool: /opt/homebrew/bin/go test -timeout 30s -coverprofile=/var/folders/5v/0wjs9g1948ddpdqkgf1h31q80000gn/T/vscode-go7lC7ip/go-code-cover github.com/fedulovivan/mhz19-go/internal/engine`
 - try: separate di library https://pkg.go.dev/go.uber.org/fx
@@ -50,6 +57,14 @@ none
 
 ### Completed
 
+- (+) nice: do concurrent execution of processFile in cmd/provisioning/main.go
+- (+) nice: switch from $deviceId to fn=DeviceId in all conditions
+- (+) feat: implement new action to play alert
+- (+) bug: lots of erorrs: `ERR [engine]     Msg=1906 Rule=6 condition=InList Fail err="Message.ExecDirective(): Payload 'map[string]interface {}, map[battery:100 device_temperature:30 linkquality:90 power_outage_count:24 voltage:3025]' has no field 'action'"` - for now fixed with supressing message "has no field", look redundant
+- (+) feat: issue zigbee2mqtt/bridge/config/devices/get periodically - not supported by z2m now, zigbee2mqtt/bridge/devices is retained message, updated by z2m with list of devices
+- (+) arch: avoid postman as a dependency for provisioning system/user rules. create them via curl script - introduced appropriate requests json in assets + new makefile command "provisioning"
+- (+) bug: `requesting message for otherDeviceId=192.168.88.44` Not Equal gives wrong result - added more logging, probably caused by recent app restart and missing data to execute otherDeviceId logic and get actual pinger status for 192.168.88.44
+- (+) arch: make BotName optional for the TelegramBotMessage, take it from config
 - (+) feat: find a place for "Application started" message
 - (+) arch: reworked counters module / per-rule match counter
 - (+) arch: try benchmark tests

@@ -1,0 +1,61 @@
+{
+    "name": "open/close valves via telegram",
+    "condition": {
+        "nested": [
+            {
+                "fn": "DeviceClass",
+                "args": {
+                    "Value": "DeviceClass(5)"
+                }
+            },
+            {
+                "fn": "InList",
+                "args": {
+                    "Value": "$deviceId",
+                    "List": ["DeviceId(Mhz19Bot)", "DeviceId(Mhz19ToGoBot)"]
+                }
+            },
+            {
+                "fn": "InList",
+                "args": {
+                    "Value": "$message.Text",
+                    "List": ["/open","/close"]
+                }
+            }
+        ]
+    },
+    "actions": [
+        {
+            "fn": "ValveSetState",
+            "args": {
+                "DeviceId": "DeviceId(6613075)",
+                "State": "$message.Text"
+            },
+            "mapping": {
+                "State": {
+                    "/open": "open",
+                    "/close": "close"
+                }
+            }
+        },
+        {
+            "fn": "ValveSetState",
+            "args": {
+                "DeviceId": "DeviceId(18225)",
+                "State": "$message.Text"
+            },
+            "mapping": {
+                "State": {
+                    "/open": "open",
+                    "/close": "close"
+                }
+            }
+        },        
+        {
+            "fn": "TelegramBotMessage",
+            "args": {
+                "Text": "Handled"
+            }
+        }
+    ]
+}

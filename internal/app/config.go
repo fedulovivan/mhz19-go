@@ -29,9 +29,10 @@ type ConfigStorage struct {
 	// SqliteFilename string `env:"SQLITE_FILENAME,default=/Users/ivanf/Desktop/Projects/go/mhz19-go/database.bin"`
 
 	// telegram
-	TelegramDebug  bool     `env:"TELEGRAM_DEBUG,default=false"`
-	TelegramTokens []string `env:"TELEGRAM_TOKENS"`
-	TelegramChatId int64    `env:"TELEGRAM_CHAT_ID"`
+	TelegramDebug         bool     `env:"TELEGRAM_DEBUG,default=false"`
+	TelegramTokens        []string `env:"TELEGRAM_TOKENS"`
+	TelegramChatId        int64    `env:"TELEGRAM_CHAT_ID"`
+	TelegramDefaultOutBot string   `env:"TELEGRAM_DEFAULT_OUT_BOT"`
 
 	// mqtt
 	MqttDebug    bool   `env:"MQTT_DEBUG,default=false"`
@@ -47,6 +48,7 @@ type ConfigStorage struct {
 	DefaultBuriedTimeout time.Duration `env:"BURIED_TIMEOUT,default=90m"`
 	RestApiPort          int           `env:"REST_API_PORT,default=8888"`
 	RestApiPath          string        `env:"REST_API_PATH,default=/api"`
+	ArgsDebug            bool          `env:"ARGS_DEBUG,default=false"`
 }
 
 func InitConfig() {

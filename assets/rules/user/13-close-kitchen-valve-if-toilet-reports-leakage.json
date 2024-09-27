@@ -1,0 +1,43 @@
+{
+    "name": "close kitchen valve if toilet reports leakage",
+    "condition": {
+        "nested": [
+            {
+                "fn": "DeviceClass",
+                "args": {
+                    "Value": "DeviceClass(3)"
+                }
+            },
+            {
+                "fn": "DeviceId",
+                "args": {
+                    "Value": "DeviceId(18225)"
+                }
+            },            
+            {
+                "fn": "True",
+                "args": {
+                    "Value": "$message.leakage"
+                }
+            }          
+        ]
+    },
+    "actions": [
+        {
+            "fn": "ValveSetState",
+            "args": {
+                "DeviceId": "DeviceId(6613075)",
+                "State": "close"
+            }
+        },        
+        {
+            "fn": "TelegramBotMessage",
+            "args": {
+                "Text": "Leakage detected by toilet valves-manipulator. Closing kitchen as well..."
+            }
+        },
+        {
+            "fn": "PlayAlert"
+        }
+    ]
+}

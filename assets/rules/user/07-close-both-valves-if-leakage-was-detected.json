@@ -1,0 +1,49 @@
+{
+    "name": "close both valves if leakage was detected for any sensor and send telegram notification",
+    "disabled": false,
+    "condition": {
+        "nested": [
+            {
+                "fn": "ZigbeeDevice",
+                "args": {
+                    "List": [
+                        "DeviceId(0x00158d00040356af)",
+                        "DeviceId(0x00158d000405811b)",
+                        "DeviceId(0x00158d0004035e3e)"
+                    ]
+                }
+            },
+            {
+                "fn": "True",
+                "args": {
+                    "Value": "$message.water_leak"
+                }
+            }
+        ]
+    },
+    "actions": [
+        {
+            "fn": "ValveSetState",
+            "args": {
+                "DeviceId": "DeviceId(6613075)",
+                "State": "close"
+            }
+        },
+        {
+            "fn": "ValveSetState",
+            "args": {
+                "DeviceId": "DeviceId(18225)",
+                "State": "close"
+            }
+        },
+        {
+            "fn": "TelegramBotMessage",
+            "args": {
+                "Text": "Leakage sensor «{{ deviceName .Message.DeviceId }}» reports leakage is detected. Closing valves now..."
+            }
+        },
+        {
+            "fn": "PlayAlert"
+        }
+    ]
+}

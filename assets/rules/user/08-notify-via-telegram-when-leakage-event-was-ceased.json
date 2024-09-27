@@ -1,0 +1,38 @@
+{
+    "name": "notify via telegram, when leakage event was ceased",
+    "disabled": false,
+    "condition": {
+        "nested": [
+            {
+                "fn": "ZigbeeDevice",
+                "args": {
+                    "List": [
+                        "DeviceId(0x00158d00040356af)",
+                        "DeviceId(0x00158d000405811b)",
+                        "DeviceId(0x00158d0004035e3e)"
+                    ]
+                }
+            },
+            {
+                "fn": "False",
+                "args": {
+                    "Value": "$message.water_leak"
+                }
+            },
+            {
+                "fn": "Changed",
+                "args": {
+                    "Value": "$message.water_leak"
+                }
+            }
+        ]
+    },
+    "actions": [
+        {
+            "fn": "TelegramBotMessage",
+            "args": {
+                "Text": "{{ if .IsFirst }}Leakage sensor «{{ deviceName .Message.DeviceId }}» is online, no leakage.{{ else }}Leakage sensor «{{ deviceName .Message.DeviceId }}» reports leakage is ceased. You can open valves now.{{ end }}"
+            }
+        }
+    ]
+}

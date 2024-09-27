@@ -1,0 +1,32 @@
+{
+    "name": "trigger PlayAlert action",
+    "condition": {
+        "nested": [
+            {
+                "fn": "DeviceClass",
+                "args": {
+                    "Value": "DeviceClass(5)"
+                }
+            },
+            {
+                "fn": "InList",
+                "args": {
+                    "Value": "$deviceId",
+                    "List": ["DeviceId(Mhz19Bot)", "DeviceId(Mhz19ToGoBot)"]
+                }
+            },
+            {
+                "fn": "Equal",
+                "args": {
+                    "Left": "$message.Text",
+                    "Right": "/play"
+                }
+            }
+        ]
+    },
+    "actions": [
+        {
+            "fn": "PlayAlert"
+        }
+    ]
+}

@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"text/template"
 
+	"github.com/fedulovivan/mhz19-go/internal/app"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
@@ -67,6 +68,8 @@ func (r *reader) Has(field string) (has bool) {
 
 func (r *reader) Get(field string) any {
 
+	tag := baseTag.With("reader.Get(\"%s\"):", field)
+
 	// stage 1: check if requested arg exist in map
 	in, exist := r.args[field]
 	if !exist {
@@ -101,13 +104,19 @@ func (r *reader) Get(field string) any {
 		if fieldMap, ok := r.mapping[field]; ok {
 			outAsKey := fmt.Sprintf("%v", out)
 			if mapped, ok := fieldMap[outAsKey]; ok {
-				slog.Debug(baseTag.F(
-					`in="%v" (out="%v", outAsKey="%v") was mapped to "%v"`,
-					in, out, outAsKey, mapped,
-				))
+				if app.Config.ArgsDebug {
+					slog.Debug(tag.F(
+						`in="%v" (out="%v", outAsKey="%v") was mapped to "%v"`,
+						in, out, outAsKey, mapped,
+					))
+				}
 				out = mapped
 			}
 		}
+	}
+
+	if app.Config.ArgsDebug {
+		slog.Debug(tag.F("in=%v (%T), out=%v (%T)", in, in, out, out))
 	}
 
 	return out
@@ -170,7 +179,9 @@ func (r *reader) ExecTemplate(in string, field string) (string, error) {
 		return in, err
 	}
 	out := bytes.NewBufferString("")
-	slog.Debug(fmt.Sprintf("executing template '%v' with data %+v", in, r.tpayload))
+	if app.Config.ArgsDebug {
+		slog.Debug(fmt.Sprintf("executing template '%v' with data %+v", in, r.tpayload))
+	}
 	err = tmpl.Execute(out, r.tpayload)
 	if err != nil {
 		return in, err

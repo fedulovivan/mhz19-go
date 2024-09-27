@@ -1,0 +1,14 @@
+{
+    "name": "create zigbee2mqtt devices",
+    "condition": {
+        "nested": [
+            {
+                "fn": "DeviceClass",
+                "args": {
+                    "Value": "DeviceClass(4)"
+                }
+            }
+        ]
+    },
+    "actions": [{"fn": "UpsertZigbeeDevices"}]
+}

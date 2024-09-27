@@ -1,0 +1,40 @@
+{
+    "name": "toggle bedroom ceiling light",
+    "condition": {
+        "nested": [
+            {
+                "fn": "ZigbeeDevice",
+                "args": {
+                    "List": [
+                        "DeviceId(0x00158d00042446ec)"
+                    ]
+                }
+            },
+            {
+                "fn": "InList",
+                "args": {
+                    "Value": "$message.action",
+                    "List": [
+                        "single_left",
+                        "single_right"
+                    ]
+                }
+            }
+        ]
+    },
+    "actions": [
+        {
+            "fn": "YeelightDeviceSetPower",
+            "args": {
+                "Cmd": "$message.action",
+                "IP": "192.168.88.169"
+            },
+            "mapping": {
+                "Cmd": {
+                    "single_left": "On",
+                    "single_right": "Off"
+                }
+            }
+        }
+    ]
+}

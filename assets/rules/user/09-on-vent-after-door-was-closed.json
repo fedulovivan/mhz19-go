@@ -1,0 +1,45 @@
+{
+    "name": "on vent after door was closed and movement sensor is reporting occupancy and ceiling light is on",
+    "condition": {
+        "nested": [
+            {
+                "fn": "ZigbeeDevice",
+                "args": {
+                    "List": [
+                        "DeviceId(0x00158d0000c2fa6e)"
+                    ]
+                }
+            },
+            {
+                "fn": "True",
+                "args": {
+                    "Value": "$message.contact"
+                }
+            },
+            {
+                "otherDeviceId": "DeviceId(0x00158d000a823bb0)",
+                "fn": "True",
+                "args": {
+                    "Value": "$message.occupancy"
+                }                
+            },
+            {
+                "otherDeviceId": "DeviceId(0xe0798dfffed39ed1)",
+                "fn": "Equal",
+                "args": {
+                    "Left": "$message.state",
+                    "Right": "ON"
+                }
+            }
+        ]
+    },
+    "actions": [
+        {
+            "fn": "PostSonoffSwitchMessage",
+            "args": {
+                "DeviceId": "DeviceId(10012db92b)",
+                "Command": "on"
+            }
+        }
+    ]
+}

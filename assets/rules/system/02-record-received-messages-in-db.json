@@ -1,0 +1,30 @@
+{
+    "name": "record received messages in db",
+    "throttle": "30s",
+    "condition": {
+        "nested": [
+            {
+                "fn": "DeviceClass",
+                "not": true,
+                "args": {
+                    "Value": "DeviceClass(4)"
+                }
+            },            
+            {
+                "or": true,
+                "nested": [
+                    {
+                        "fn": "FromEndDevice"
+                    },
+                    {
+                        "fn": "Channel",
+                        "args": {
+                            "Value": "ChannelType(5)"
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    "actions": [{"fn": "RecordMessage"}]
+}

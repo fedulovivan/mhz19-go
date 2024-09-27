@@ -1,0 +1,34 @@
+{
+    "name": "toggle storage room vent manually",
+    "condition": {
+        "nested": [
+            {
+                "fn": "ZigbeeDevice",
+                "args": {
+                    "List": [
+                        "DeviceId(0x50325ffffe6ca5da)"
+                    ]
+                }
+            },
+            {
+                "fn": "InList",
+                "args": {
+                    "Value": "$message.action",
+                    "List": [
+                        "on",
+                        "off"
+                    ]
+                }
+            }
+        ]
+    },
+    "actions": [
+        {
+            "fn": "PostSonoffSwitchMessage",
+            "args": {
+                "Command": "$message.action",
+                "DeviceId": "DeviceId(10012db92b)"
+            }
+        }
+    ]
+}

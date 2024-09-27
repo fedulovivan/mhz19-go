@@ -15,6 +15,7 @@ var actions = types.ActionImpls{
 	types.ACTION_RECORD_MESSAGE:             RecordMessage,
 	types.ACTION_UPSERT_ZIGBEE_DEVICES:      UpsertZigbeeDevices,
 	types.ACTION_UPSERT_SONOFF_DEVICE:       UpsertSonoffDevice,
+	types.ACTION_PLAY_ALERT:                 PlayAlert,
 }
 
 func Get(fn types.ActionFn) (action types.ActionImpl) {

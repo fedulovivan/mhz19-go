@@ -1,0 +1,37 @@
+{
+    "name": "off vent right after switching ceiling lights off",
+    "condition": {
+        "nested": [
+            {
+                "fn": "ZigbeeDevice",
+                "args": {
+                    "List": [
+                        "DeviceId(0xe0798dfffed39ed1)"
+                    ]
+                }
+            },
+            {
+                "fn": "Equal",
+                "args": {
+                    "Left": "$message.state",
+                    "Right": "OFF"
+                }
+            },
+            {
+                "fn": "Changed",
+                "args": {
+                    "Value": "$message.state"
+                }
+            }            
+        ]
+    },
+    "actions": [
+        {
+            "fn": "PostSonoffSwitchMessage",
+            "args": {
+                "DeviceId": "DeviceId(10012db92b)",
+                "Command": "off"
+            }
+        }
+    ]
+}

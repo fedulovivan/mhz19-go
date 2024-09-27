@@ -1,0 +1,114 @@
+package main
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io"
+	"io/fs"
+	"net/http"
+	"os"
+	"path"
+	"strings"
+	"sync"
+	"time"
+
+	"github.com/fedulovivan/mhz19-go/pkg/utils"
+)
+
+const basePath = "./assets"
+const restApiPort = 8080
+const restApiPath = "/api"
+
+func main() {
+	fmt.Println("Hello from provisioning tool")
+	if dir, ok := os.LookupEnv("DIR"); ok {
+		processDir(dir)
+	} else {
+		fmt.Println("error: use 'DIR=rules/system make provision' or 'DIR=rules/user make provision'")
+	}
+}
+
+func timeTrack(start time.Time, name string) {
+	elapsed := time.Since(start)
+	fmt.Printf("%stook %s\n", name, elapsed)
+}
+
+func processDir(dir string) {
+	defer timeTrack(time.Now(), "")
+	succeeded := utils.NewSeq(0)
+	failed := utils.NewSeq(0)
+	dirPath := path.Join(basePath, dir)
+	entries, err := os.ReadDir(dirPath)
+	if err != nil {
+		panic(err.Error())
+	}
+	var wg sync.WaitGroup
+	for _, e := range entries {
+		wg.Add(1)
+		go func(e fs.DirEntry) {
+			defer wg.Done()
+			fmt.Printf("%s IsDir=%v\n", e.Name(), e.IsDir())
+			if !e.IsDir() {
+				filePath := fmt.Sprintf("%s/%s", dirPath, e.Name())
+				res, err := processFile(filePath)
+				if err == nil {
+					succeeded.Inc()
+					fmt.Println("success:", res)
+				} else {
+					failed.Inc()
+					fmt.Println("fail:", err.Error())
+				}
+			}
+		}(e)
+	}
+	wg.Wait()
+	fmt.Println("---")
+	fmt.Println("succeeded", succeeded.Value())
+	fmt.Println("failed", failed.Value())
+}
+
+func processFile(filePath string) (res string, err error) {
+	file, err := os.ReadFile(filePath)
+	if err != nil {
+		panic(err.Error())
+	}
+	url := fmt.Sprintf(
+		"http://localhost:%d%s/rules",
+		restApiPort,
+		restApiPath,
+	)
+	req, err := http.NewRequest(
+		http.MethodPut,
+		url,
+		bytes.NewBuffer(file),
+	)
+	if err != nil {
+		return
+	}
+	req.Header.Set("Content-Type", "application/json")
+	client := &http.Client{}
+	rsp, err := client.Do(req)
+	if err != nil {
+		return
+	}
+	defer rsp.Body.Close()
+	var bodyRaw []byte
+	var bodyParsed map[string]any
+	bodyRaw, err = io.ReadAll(rsp.Body)
+	if err != nil {
+		return
+	}
+	err = json.Unmarshal(bodyRaw, &bodyParsed)
+	if err != nil {
+		return
+	}
+	if v, ok := bodyParsed["is_error"]; ok {
+		if vv, ok := v.(bool); ok && vv {
+			err = fmt.Errorf(bodyParsed["error"].(string))
+			return
+		}
+	}
+	res = strings.Trim(string(bodyRaw), "\n")
+	return
+}

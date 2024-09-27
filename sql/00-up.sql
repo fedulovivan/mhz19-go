@@ -127,6 +127,7 @@ INSERT INTO action_functions VALUES(5,'Zigbee2MqttSetState');
 INSERT INTO action_functions VALUES(6,'RecordMessage');
 INSERT INTO action_functions VALUES(7,'UpsertZigbeeDevices');
 INSERT INTO action_functions VALUES(8,'UpsertSonoffDevice');
+INSERT INTO action_functions VALUES(9,'PlayAlert');
 
 INSERT INTO condition_functions VALUES(1,'Changed');
 INSERT INTO condition_functions VALUES(2,'Equal');
@@ -149,5 +150,9 @@ INSERT INTO devices VALUES(6, 'device-id-for-the-rest-provider-message', 7, NULL
 INSERT INTO devices VALUES(7, 'device-id-for-the-application-message', 7, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO devices VALUES(8,'10012db92b',6,NULL,NULL,NULL,'{"Host":"eWeLink_10012db92b","Id":"10012db92b","Ip":"192.168.88.72","Port":"8081","Text":{"apivers":"1","data1":"{\\\"switch\\\":\\\"off\\\",\\\"startup\\\":\\\"off\\\",\\\"pulse\\\":\\\"off\\\",\\\"sledOnline\\\":\\\"on\\\",\\\"fwVersion\\\":\\\"3.6.0\\\",\\\"pulseWidth\\\":500,\\\"rssi\\\":-24}","id":"10012db92b","seq":"73","txtvers":"1","type":"diy_plug"}}',NULL);
 INSERT INTO devices VALUES(9,'10011cec96',6,NULL,NULL,NULL,'{"Host":"eWeLink_10011cec96","Id":"10011cec96","Ip":"192.168.88.60","Port":"8081","Text":{"apivers":"1","data1":"{\\\"switch\\\":\\\"off\\\",\\\"startup\\\":\\\"off\\\",\\\"pulse\\\":\\\"off\\\",\\\"sledOnline\\\":\\\"on\\\",\\\"fwVersion\\\":\\\"3.6.0\\\",\\\"pulseWidth\\\":500,\\\"rssi\\\":-69}","id":"10011cec96","seq":"259","txtvers":"1","type":"diy_plug"}}',NULL);
+INSERT INTO devices VALUES(10, 'Mhz19Bot', 5, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO devices VALUES(11, 'Mhz19ToGoBot', 5, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO devices VALUES(12, '18225', 3, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO devices VALUES(13, '6613075', 3, NULL, NULL, NULL, NULL, NULL);
 
 COMMIT;

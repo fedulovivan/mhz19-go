@@ -77,7 +77,8 @@ func (m *Message) ExecDirective(field string) (any, error) {
 		}
 		v, ok := p[field]
 		if !ok {
-			return nil, fmt.Errorf("Message.ExecDirective(): Payload '%T, %+v' has no field '%v'", m.Payload, m.Payload, field)
+			// return nil, fmt.Errorf("Message.ExecDirective(): Payload '%T, %+v' has no field '%v'", m.Payload, m.Payload, field)
+			return nil, nil
 		}
 		return v, nil
 	} else {

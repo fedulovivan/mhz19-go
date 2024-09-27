@@ -21,6 +21,7 @@ const (
 	ACTION_RECORD_MESSAGE             ActionFn = 6
 	ACTION_UPSERT_ZIGBEE_DEVICES      ActionFn = 7
 	ACTION_UPSERT_SONOFF_DEVICE       ActionFn = 8
+	ACTION_PLAY_ALERT                 ActionFn = 9
 )
 
 var ACTION_NAMES = map[ActionFn]string{
@@ -32,6 +33,7 @@ var ACTION_NAMES = map[ActionFn]string{
 	ACTION_RECORD_MESSAGE:             "RecordMessage",
 	ACTION_UPSERT_ZIGBEE_DEVICES:      "UpsertZigbeeDevices",
 	ACTION_UPSERT_SONOFF_DEVICE:       "UpsertSonoffDevice",
+	ACTION_PLAY_ALERT:                 "PlayAlert",
 }
 
 func (fn ActionFn) String() string {

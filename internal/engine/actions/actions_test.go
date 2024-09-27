@@ -111,6 +111,18 @@ func (s *ActionsSuite) Test43() {
 	s.Nil(err)
 }
 
+func (s *ActionsSuite) Test50() {
+
+	s.T().Skip()
+
+	mm := []types.Message{{}}
+	args := types.Args{}
+	mapping := types.Mapping{}
+	engine := mocks.NewEngineMock()
+	err := PlayAlert(mm, args, mapping, engine, s.tag)
+	s.Nil(err)
+}
+
 func TestActions(t *testing.T) {
 	suite.Run(t, &ActionsSuite{
 		tag: logger.NewTag("ActionsSuite"),

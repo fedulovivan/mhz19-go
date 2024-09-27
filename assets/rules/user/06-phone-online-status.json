@@ -1,0 +1,28 @@
+{
+    "name": "phone online status",
+    "throttle": "30s",
+    "condition": {
+        "nested": [
+            {
+                "fn": "DeviceClass",
+                "args": {
+                    "Value": "DeviceClass(2)"
+                }
+            },
+            {
+                "fn": "Changed",
+                "args": {
+                    "Value": "$message.status"
+                }
+            }
+        ]
+    },
+    "actions": [
+        {
+            "fn": "TelegramBotMessage",
+            "args": {
+                "Text": "messages:\n{{ range .Messages }}{{ deviceName .DeviceId }} status is {{ pingerStatusName .Payload.status }}\n{{ end }}"
+            }
+        }
+    ]
+}
