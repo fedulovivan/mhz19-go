@@ -108,3 +108,4 @@ TBD
 ### Usefull commands
 
 run and view logs for selected module only `make run 2>&1 >/dev/null | grep "engine"`
+scp log `scp ivanf@192.168.88.188:/home/ivanf/Projects/mhz19-go/log.txt ~/Desktop`

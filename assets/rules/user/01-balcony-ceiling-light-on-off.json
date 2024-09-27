@@ -19,6 +19,12 @@
                         "single_right"
                     ]
                 }
+            },
+            {
+                "fn": "Changed",
+                "args": {
+                    "Value": "$message.action"
+                }
             }
         ]
     },

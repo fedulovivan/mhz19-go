@@ -16,16 +16,23 @@ import (
 	"github.com/fedulovivan/mhz19-go/pkg/utils"
 )
 
-const basePath = "./assets"
-const restApiPort = 8080
-const restApiPath = "/api"
+const (
+	basePath = "./assets"
+)
+
+var (
+	host = "localhost:8080"
+)
 
 func main() {
 	fmt.Println("Hello from provisioning tool")
+	if value, ok := os.LookupEnv("HOST"); ok {
+		host = value
+	}
 	if dir, ok := os.LookupEnv("DIR"); ok {
 		processDir(dir)
 	} else {
-		fmt.Println("error: use 'DIR=rules/system make provision' or 'DIR=rules/user make provision'")
+		fmt.Println("not enough options..\nusage examples:\nDIR=rules/system make provision\nDIR=rules/user make provision\nHOST=macmini:7070 DIR=rules/system make provision")
 	}
 }
 
@@ -74,9 +81,8 @@ func processFile(filePath string) (res string, err error) {
 		panic(err.Error())
 	}
 	url := fmt.Sprintf(
-		"http://localhost:%d%s/rules",
-		restApiPort,
-		restApiPath,
+		"http://%v/api/rules",
+		host,
 	)
 	req, err := http.NewRequest(
 		http.MethodPut,

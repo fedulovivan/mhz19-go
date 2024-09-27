@@ -6,6 +6,8 @@
 - Interactive zigbee device join - End-to-end scenario with new device device join, confuguring rules, with no app retart
 
 ### Prio 0
+- bug: add tag to the args reader logs
+- bug: reader.Get("Value"): in=$message.occupancy (string), out=<nil> (<nil>) -> Msg=14 Rule=6 condition=False Fail -> cannot cast to bool
 - bug: at present moment there is no "previous message info" in ExecuteActions. we call with ONE message for non-throttled rule, and with ARRAY of messages if throttling is enabled. so flag IsFirst is implemented and handled incorrectly
 - feat: simple frontend
 
