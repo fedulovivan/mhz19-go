@@ -151,31 +151,31 @@ func (s *ConditionsSuite) Test105() {
 }
 
 func (s *ConditionsSuite) Test110() {
-	actual, err := IsNil(types.MessageTuple{}, types.Args{})
+	actual, err := Nil(types.MessageTuple{}, types.Args{})
 	s.NotNil(err)
 	s.True(actual)
 }
 
 func (s *ConditionsSuite) Test111() {
-	actual, err := IsNil(types.MessageTuple{}, types.Args{"Value": "foo"})
+	actual, err := Nil(types.MessageTuple{}, types.Args{"Value": "foo"})
 	s.Nil(err)
 	s.False(actual)
 }
 
 func (s *ConditionsSuite) Test112() {
-	actual, err := IsNil(types.MessageTuple{}, types.Args{"Value": false})
+	actual, err := Nil(types.MessageTuple{}, types.Args{"Value": false})
 	s.Nil(err)
 	s.False(actual)
 }
 
 func (s *ConditionsSuite) Test113() {
-	actual, err := IsNil(types.MessageTuple{}, types.Args{"Value": 0})
+	actual, err := Nil(types.MessageTuple{}, types.Args{"Value": 0})
 	s.Nil(err)
 	s.False(actual)
 }
 
 func (s *ConditionsSuite) Test114() {
-	actual, err := IsNil(types.MessageTuple{}, types.Args{"Value": 100500})
+	actual, err := Nil(types.MessageTuple{}, types.Args{"Value": 100500})
 	s.Nil(err)
 	s.False(actual)
 }
@@ -246,28 +246,26 @@ func (s *ConditionsSuite) Test115() {
 			},
 		},
 	}
-
 	var res bool
 	var err error
-
-	res, err = IsNil(mt, types.Args{"Value": "$message.action"})
+	res, err = Nil(mt, types.Args{"Value": "$message.action"})
 	s.False(res)
 	s.Nil(err)
-	res, err = IsNil(mt, types.Args{"Value": "$message.double"})
+	res, err = Nil(mt, types.Args{"Value": "$message.double"})
 	s.False(res)
 	s.Nil(err)
-	res, err = IsNil(mt, types.Args{"Value": "$message.int"})
+	res, err = Nil(mt, types.Args{"Value": "$message.int"})
 	s.False(res)
 	s.Nil(err)
-	res, err = IsNil(mt, types.Args{"Value": "$message.boolean"})
+	res, err = Nil(mt, types.Args{"Value": "$message.boolean"})
 	s.False(res)
 	s.Nil(err)
-	res, err = IsNil(mt, types.Args{"Value": "$message.voltage"})
+	res, err = Nil(mt, types.Args{"Value": "$message.voltage"})
 	s.True(res)
 	s.Nil(err)
-	res, err = IsNil(mt, types.Args{"Value": "$message.nonexisting"})
+	res, err = Nil(mt, types.Args{"Value": "$message.nonexisting"})
 	s.True(res)
-	s.NotNil(err)
+	s.Nil(err)
 }
 
 func (s *ConditionsSuite) Test160() {

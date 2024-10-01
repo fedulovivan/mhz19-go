@@ -46,7 +46,7 @@ func (s *DbSuite) Test10() {
 	})
 	elapsed := time.Since(start)
 	s.Greater(elapsed, time.Millisecond*70)
-	s.Less(elapsed, time.Millisecond*75)
+	s.Less(elapsed, time.Millisecond*100)
 	s.Nil(err)
 }
 

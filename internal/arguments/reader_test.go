@@ -77,8 +77,8 @@ func (s *ReaderSuite) Test60() {
 	}
 	r := NewReader(&m, args, nil, nil, nil)
 	actual := r.Get("Lorem3")
-	s.Equal("$message.bar", actual)
-	s.NotEmpty(r.Error())
+	s.Nil(actual)
+	s.Nil(r.Error())
 }
 
 func (s *ReaderSuite) Test70() {
@@ -232,14 +232,15 @@ func (s *ReaderSuite) Test125() {
 	s.Nil(r.Error())
 }
 
+func (s *ReaderSuite) Test130() {
+	m := types.Message{DeviceClass: types.DEVICE_CLASS_ZIGBEE_DEVICE}
+	args := types.Args{"Left": "$message.occupancy"}
+	r := NewReader(&m, args, nil, nil, nil)
+	left, err := GetTyped[bool](&r, "Left")
+	s.ErrorContains(err, "cannot cast <nil> to bool")
+	s.False(left)
+}
+
 func TestReader(t *testing.T) {
 	suite.Run(t, new(ReaderSuite))
 }
-
-// func (s *ReaderSuite) Test20() {
-// 	r := NewReader(&types.Message{DeviceId: "foo2"}, types.Args{"Lorem": "$message.DeviceId"}, nil, nil, nil)
-// 	actual := r.Get("Lorem")
-// 	expected := types.DeviceId("foo2")
-// 	s.Equal(expected, actual)
-// 	s.Nil(r.Error())
-// }

@@ -11,6 +11,13 @@
                 }
             },
             {
+                "fn": "Nil",
+                "not": true,
+                "args": {
+                    "Value": "$message.occupancy"
+                }
+            },
+            {
                 "fn": "False",
                 "args": {
                     "Value": "$message.occupancy"

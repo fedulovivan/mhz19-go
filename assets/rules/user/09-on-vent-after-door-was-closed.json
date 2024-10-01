@@ -11,9 +11,24 @@
                 }
             },
             {
+                "fn": "Nil",
+                "not": true,
+                "args": {
+                    "Value": "$message.contact"
+                }
+            },
+            {
                 "fn": "True",
                 "args": {
                     "Value": "$message.contact"
+                }
+            },
+            {
+                "otherDeviceId": "DeviceId(0x00158d000a823bb0)",
+                "fn": "Nil",
+                "not": true,
+                "args": {
+                    "Value": "$message.occupancy"
                 }
             },
             {

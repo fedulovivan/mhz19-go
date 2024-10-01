@@ -21,7 +21,7 @@ const (
 )
 
 var (
-	host = "localhost:8080"
+	host = "localhost:7070"
 )
 
 func main() {

@@ -15,6 +15,7 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/entities/ldm"
 	"github.com/fedulovivan/mhz19-go/internal/entities/messages"
 	"github.com/fedulovivan/mhz19-go/internal/entities/rules"
+	schema_version "github.com/fedulovivan/mhz19-go/internal/entities/schema-version"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/rest"
 	"github.com/fedulovivan/mhz19-go/internal/types"
@@ -33,6 +34,16 @@ func main() {
 	// bootstrap application
 	app.InitConfig()
 	logger.Init()
+
+	// acquire and validate schema version
+	repo := schema_version.NewRepository(
+		db.DbSingleton(),
+	)
+	version, err := repo.GetVersion()
+	if err != nil {
+		panic(err.Error())
+	}
+	app.ValidateSchemaVersion(version)
 
 	// configure various engine dependencies and start it
 	rulesService := rules.ServiceSingleton(

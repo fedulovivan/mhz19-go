@@ -54,9 +54,12 @@ func GetTyped[T any](r *reader, field string) (res T, err error) {
 	if err != nil {
 		return
 	}
+	// if v == nil {
+	// 	return
+	// }
 	res, ok := v.(T)
 	if !ok {
-		err = fmt.Errorf("cannot cast to %T", res)
+		err = fmt.Errorf("cannot cast %T to %T", v, res)
 	}
 	return
 }
@@ -68,7 +71,7 @@ func (r *reader) Has(field string) (has bool) {
 
 func (r *reader) Get(field string) any {
 
-	tag := baseTag.With("reader.Get(\"%s\"):", field)
+	tag := baseTag.With(`reader.Get("%s"):`, field)
 
 	// stage 1: check if requested arg exist in map
 	in, exist := r.args[field]

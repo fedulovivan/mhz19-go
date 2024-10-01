@@ -7,7 +7,11 @@ import (
 	"github.com/fedulovivan/mhz19-go/pkg/utils"
 )
 
-var data = make(map[Key]utils.Seq)
+var data = map[Key]utils.Seq{
+	MESSAGES_RECEIVED: utils.NewSeq(0),
+	API_REQUESTS:      utils.NewSeq(0),
+	ERRORS:            utils.NewSeq(0),
+}
 var lock sync.Mutex
 
 type Key = string

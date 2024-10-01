@@ -53,7 +53,7 @@ func (s *EngineSuite) Test13() {
 	actual := s.e.MatchesCondition(dummy_mtcb, types.Condition{
 		Nested: []types.Condition{
 			{
-				Fn:   types.COND_IS_NIL,
+				Fn:   types.COND_NIL,
 				Args: types.Args{"Value": nil},
 			},
 			{

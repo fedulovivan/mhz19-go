@@ -4,7 +4,6 @@ include $(CONF)
 NAME ?= mhz19-go-backend
 GIT_REV ?= $(shell git rev-parse --short HEAD)
 DATE ?= $(shell date +%FT%T)
-NUM_MIGRATION ?= 00
 REST_API_URL ?= http://localhost:$(REST_API_PORT)$(REST_API_PATH)
 API_LOAD_COUNT ?= 1000
 API_LOAD_THREADS ?= 10
@@ -88,13 +87,23 @@ lint:
 .PHONY: migrate-reset
 migrate-reset: migrate-down migrate-up
 
-.PHONY: migrate-up
-migrate-up:
-	sqlite3 ./database.bin < ./sql/$(NUM_MIGRATION)-up.sql
-
 .PHONY: migrate-down
 migrate-down:
-	sqlite3 ./database.bin < ./sql/$(NUM_MIGRATION)-down.sql
+	export DB_REV=01 && make migrate-down-single
+	export DB_REV=00 && make migrate-down-single
+
+.PHONY: migrate-up
+migrate-up:
+	export DB_REV=00 && make migrate-up-single
+	export DB_REV=01 && make migrate-up-single
+
+.PHONY: migrate-up-single
+migrate-up-single:
+	sqlite3 ./database.bin < ./sql/$(DB_REV)-up.sql
+
+.PHONY: migrate-down-single
+migrate-down-single:
+	sqlite3 ./database.bin < ./sql/$(DB_REV)-down.sql
 
 .PHONY: migrate-dump
 migrate-dump:

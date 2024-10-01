@@ -1,18 +1,16 @@
-
-### Project milestones
-
-- (+) 26 sep 2024, DONE. Initial launch - All features from mhz19-next plus storing mapping rules in database
-- Implement simple frontend
-- Interactive zigbee device join - End-to-end scenario with new device device join, confuguring rules, with no app retart
-
 ### Prio 0
-- bug: add tag to the args reader logs
-- bug: reader.Get("Value"): in=$message.occupancy (string), out=<nil> (<nil>) -> Msg=14 Rule=6 condition=False Fail -> cannot cast to bool
+- bug: add tag to the args reader logger
+- (+) bug: reader.Get("Value"): in=$message.occupancy (string), out=<nil> (<nil>) -> Msg=14 Rule=6 condition=False Fail -> cannot cast to bool - fixed error message, added extra condition = !Nil to avoid error
 - bug: at present moment there is no "previous message info" in ExecuteActions. we call with ONE message for non-throttled rule, and with ARRAY of messages if throttling is enabled. so flag IsFirst is implemented and handled incorrectly
-- feat: simple frontend
+- arch: introduce new table "schema version" and validate migration number during startup
 
 ### Prio 1
-none
+- api: toggle rule on/off
+- api: rename rule
+- api: toggle rule buried_timeout on/off
+- api: delete rule
+- api: update rule
+- api: add/update/delete devices
 
 ### Bugs
 - bug: check why docker build always takes 200s on macmini (Building 202.9s (17/17) FINISHED)
@@ -22,15 +20,16 @@ none
 - bug: "api:getAll took 3.451973917s" when reading 1k rules 1k times - try same scenario with postgres
 
 ### Features
-- nice: use two telegram channels for notifications: for CRITICAL messages and all the rest.
+- feat: simple frontend
 - feat: avoid provisioning "devices" from sql-up script
 - feat: introduce rules.comments column
-- feat: create api to update rule
-- feat: create api to add/update/delete devices
 - feat: merge Zigbee2MqttSetState and ValveSetState actions
 - feat: create meta which descibes expected args for conditions and actions and validate
 
 ### Arch changes/decisions
+- arch: store outgoing messages as well
+- arch: instroduce same approach for handling outgoing messages: action only submits new message to out channel, and corresponding provider handles it asynchronously
+- arch: use two telegram channels for notifications: for CRITICAL messages and all the rest.
 - arch: Message, make fields DeviceClass and DeviceId optional
 - arch: think of good api for createing new message (NewMessage) Id, Timestamp, ChannelType, DeviceClass, DeviceId -  are mandatory
 - arch: align arg names across actions (like we have two spellings: Cmd and Command)
@@ -51,11 +50,17 @@ none
 - try: validation https://github.com/asaskevich/govalidator OR https://github.com/go-ozzo/ozzo-validation
 - try: find out why cli command "make test" and "vscode" report different coverage statistics: 86.9% vs 100%. vscode syntax - `Running tool: /opt/homebrew/bin/go test -timeout 30s -coverprofile=/var/folders/5v/0wjs9g1948ddpdqkgf1h31q80000gn/T/vscode-go7lC7ip/go-code-cover github.com/fedulovivan/mhz19-go/internal/engine`
 - try: separate di library https://pkg.go.dev/go.uber.org/fx
-- try: opentelemetry https://opentelemetry.io/docs/languages/go/getting-started/   
+- try: opentelemetry https://opentelemetry.io/docs/languages/go/getting-started/
 - try: openapi or swagger https://en.wikipedia.org/wiki/OpenAPI_Specification or https://swagger.io/
 - try: https://github.com/julienschmidt/httprouter istead of ozzo-routing
 - try: prometheus
 - try: grpc
+
+### Milestones
+
+- (+) 26 sep 2024, DONE. Initial launch - All features from mhz19-next plus storing mapping rules in database
+- Implement simple frontend
+- Interactive zigbee device join - End-to-end scenario with new device device join, confuguring rules, with no app retart
 
 ### Completed
 
