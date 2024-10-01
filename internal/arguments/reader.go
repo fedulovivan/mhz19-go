@@ -12,7 +12,7 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
-var baseTag = logger.NewTag(logger.ARGS)
+// var baseTag = logger.NewTag(logger.ARGS)
 
 type reader struct {
 	args     types.Args
@@ -21,6 +21,7 @@ type reader struct {
 	mapping  types.Mapping
 	tpayload *types.TemplatePayload
 	engine   types.EngineAsSupplier
+	baseTag  logger.Tag
 }
 
 func NewReader(
@@ -29,6 +30,7 @@ func NewReader(
 	mapping types.Mapping,
 	tpayload *types.TemplatePayload,
 	engine types.EngineAsSupplier,
+	baseTag logger.Tag,
 ) reader {
 	return reader{
 		message:  message,
@@ -37,6 +39,7 @@ func NewReader(
 		tpayload: tpayload,
 		engine:   engine,
 		errors:   make([]error, 0),
+		baseTag:  baseTag,
 	}
 }
 
@@ -71,7 +74,7 @@ func (r *reader) Has(field string) (has bool) {
 
 func (r *reader) Get(field string) any {
 
-	tag := baseTag.With(`reader.Get("%s"):`, field)
+	tag := r.baseTag.With(`reader.Get("%s"):`, field)
 
 	// stage 1: check if requested arg exist in map
 	in, exist := r.args[field]

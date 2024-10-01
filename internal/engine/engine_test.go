@@ -19,7 +19,7 @@ func (s *EngineSuite) SetupSuite() {
 	s.e.SetLdmService(ldm.NewService(ldm.RepoSingleton()))
 }
 
-var dummy_mtcb types.MessageTupleFn = func(types.DeviceId) (res types.MessageTuple) {
+var dummy_mtcb types.GetCompoundForOtherDeviceId = func(types.DeviceId) (res types.MessageCompound) {
 	return
 }
 
@@ -69,7 +69,7 @@ func (s *EngineSuite) Test13() {
 
 func (s *EngineSuite) Test20() {
 	s.PanicsWithValue("Condition function 66 not yet implemented", func() {
-		s.False(s.e.InvokeConditionFunc(types.MessageTuple{}, 66, false, nil, BaseTag))
+		s.False(s.e.InvokeConditionFunc(types.MessageCompound{}, 66, false, nil, BaseTag))
 	})
 }
 
@@ -100,7 +100,7 @@ func (s *EngineSuite) Test41() {
 }
 
 func (s *EngineSuite) Test60() {
-	s.e.ExecuteActions([]types.Message{}, types.Rule{}, BaseTag)
+	s.e.ExecuteActions(types.MessageCompound{}, types.Rule{}, BaseTag)
 }
 
 func (s *EngineSuite) Test70() {

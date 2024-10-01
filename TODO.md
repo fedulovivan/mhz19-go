@@ -1,8 +1,5 @@
 ### Prio 0
-- bug: add tag to the args reader logger
-- (+) bug: reader.Get("Value"): in=$message.occupancy (string), out=<nil> (<nil>) -> Msg=14 Rule=6 condition=False Fail -> cannot cast to bool - fixed error message, added extra condition = !Nil to avoid error
-- bug: at present moment there is no "previous message info" in ExecuteActions. we call with ONE message for non-throttled rule, and with ARRAY of messages if throttling is enabled. so flag IsFirst is implemented and handled incorrectly
-- arch: introduce new table "schema version" and validate migration number during startup
+- none
 
 ### Prio 1
 - api: toggle rule on/off
@@ -13,7 +10,7 @@
 - api: add/update/delete devices
 
 ### Bugs
-- bug: check why docker build always takes 200s on macmini (Building 202.9s (17/17) FINISHED)
+- bug: check why docker build always takes 203s on macmini (Building 202.9s (17/17) FINISHED)
 - bug: no mqtt (re)connection if network was not available on app startup and returned online later
 - bug: "http: superfluous response.WriteHeader call from github.com/go-ozzo/ozzo-routing/v2.(*Router).handleError (router.go:131)" - appears after interruption of progressing apache bench
 - bug: "apr_socket_recv: Operation timed out (60)" - https://stackoverflow.com/questions/30352725/why-is-my-hello-world-go-server-getting-crushed-by-apachebench
@@ -21,10 +18,10 @@
 
 ### Features
 - feat: simple frontend
-- feat: avoid provisioning "devices" from sql-up script
+- feat: avoid provisioning "devices" from 00-sql-up script
 - feat: introduce rules.comments column
 - feat: merge Zigbee2MqttSetState and ValveSetState actions
-- feat: create meta which descibes expected args for conditions and actions and validate
+- feat: create meta which descibes expected args for conditions and actions and validate in rest api
 
 ### Arch changes/decisions
 - arch: store outgoing messages as well
@@ -50,7 +47,6 @@
 - try: validation https://github.com/asaskevich/govalidator OR https://github.com/go-ozzo/ozzo-validation
 - try: find out why cli command "make test" and "vscode" report different coverage statistics: 86.9% vs 100%. vscode syntax - `Running tool: /opt/homebrew/bin/go test -timeout 30s -coverprofile=/var/folders/5v/0wjs9g1948ddpdqkgf1h31q80000gn/T/vscode-go7lC7ip/go-code-cover github.com/fedulovivan/mhz19-go/internal/engine`
 - try: separate di library https://pkg.go.dev/go.uber.org/fx
-- try: opentelemetry https://opentelemetry.io/docs/languages/go/getting-started/
 - try: openapi or swagger https://en.wikipedia.org/wiki/OpenAPI_Specification or https://swagger.io/
 - try: https://github.com/julienschmidt/httprouter istead of ozzo-routing
 - try: prometheus
@@ -64,6 +60,10 @@
 
 ### Completed
 
+- (+) bug: at present moment there is no "previous message info" in ExecuteActions. we call with ONE message for non-throttled rule, and with ARRAY of messages if throttling is enabled. so flag IsFirst is implemented and handled incorrectly
+- (+) arch: introduce new table "schema version" and validate migration number during startup
+- (+) bug: add tag to the args reader logger
+- (+) bug: reader.Get("Value"): in=$message.occupancy (string), out=<nil> (<nil>) -> Msg=14 Rule=6 condition=False Fail -> cannot cast to bool - fixed error message, added extra condition = !Nil to avoid error
 - (+) nice: do concurrent execution of processFile in cmd/provisioning/main.go
 - (+) nice: switch from $deviceId to fn=DeviceId in all conditions
 - (+) feat: implement new action to play alert
@@ -176,6 +176,7 @@
 - (+) consider replacing hand-written adapters with mqttClient.AddRoute() API, also add warning for messages captured by defaultMessageHandler (assuming all topics we subscribe should have own handlers and default one should not be reached)
 
 ### Discarded
+- (?) try: opentelemetry https://opentelemetry.io/docs/languages/go/getting-started/, https://www.reddit.com/r/devops/comments/nxrbqa/opentelemetry_is_great_but_why_is_it_so_bloody/ - no need now, due to overcomplicated api
 - (?) introduce intermediate layer between named args and function implementation using regular args (more robust, simplify things like ZigbeeDeviceFn)
 - (?) think about "first match" strategy in handleMessage - we do not need this, since we to execute RecordMessage and some other action 
 - (?) feat: create test service for sonoff wifi devices (poll them periodically to receive status updates)

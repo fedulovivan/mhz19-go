@@ -11,7 +11,7 @@ import (
 
 // args: IP, Cmd
 var YeelightDeviceSetPower types.ActionImpl = func(
-	mm []types.Message,
+	compound types.MessageCompound,
 	args types.Args,
 	mapping types.Mapping,
 	e types.EngineAsSupplier,
@@ -21,7 +21,7 @@ var YeelightDeviceSetPower types.ActionImpl = func(
 	// 	Messages: mm,
 	// }
 	reader := arguments.NewReader(
-		&mm[0], args, mapping /* &tpayload */, nil, e,
+		compound.Curr, args, mapping /* &tpayload */, nil, e, tag,
 	)
 	ip, err := arguments.GetTyped[string](&reader, "IP")
 	if err != nil {

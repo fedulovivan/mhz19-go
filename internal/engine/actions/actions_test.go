@@ -32,6 +32,9 @@ func (s *ActionsSuite) Test10() {
 			"action": "single_right",
 		},
 	}
+	compound := types.MessageCompound{
+		Curr: &message,
+	}
 	args := types.Args{
 		"Command":  "$message.action",
 		"DeviceId": types.DeviceId("10011cec96"),
@@ -42,18 +45,22 @@ func (s *ActionsSuite) Test10() {
 			"single_right": "off",
 		},
 	}
-	err := PostSonoffSwitchMessage([]types.Message{message}, args, mapping, engine, s.tag)
+	err := PostSonoffSwitchMessage(compound, args, mapping, engine, s.tag)
 	s.Nil(err)
 }
 
 func (s *ActionsSuite) Test20() {
 	engine := mocks.NewEngineMock()
 	message := types.Message{}
+	compound := types.MessageCompound{
+		Curr: &message,
+	}
+
 	args := types.Args{
 		"DeviceId": types.DeviceId("0xe0798dfffed39ed1"),
 		"State":    "OFF",
 	}
-	err := Zigbee2MqttSetState([]types.Message{message}, args, nil, engine, s.tag)
+	err := Zigbee2MqttSetState(compound, args, nil, engine, s.tag)
 	s.Nil(err)
 	fmt.Println(err)
 }
@@ -66,33 +73,42 @@ func (s *ActionsSuite) Test30() {
 
 func (s *ActionsSuite) Test40() {
 	engine := mocks.NewEngineMock()
-	messages := []types.Message{{}}
+	message := types.Message{}
+	compound := types.MessageCompound{
+		Curr: &message,
+	}
 	mapping := types.Mapping{}
 	args := types.Args{}
-	err := YeelightDeviceSetPower(messages, args, mapping, engine, s.tag)
+	err := YeelightDeviceSetPower(compound, args, mapping, engine, s.tag)
 	s.EqualError(err, "no such argument IP")
 }
 
 func (s *ActionsSuite) Test41() {
 	engine := mocks.NewEngineMock()
-	messages := []types.Message{{}}
+	message := types.Message{}
+	compound := types.MessageCompound{
+		Curr: &message,
+	}
 	mapping := types.Mapping{}
 	args := types.Args{
 		"IP": "1.1.1.1",
 	}
-	err := YeelightDeviceSetPower(messages, args, mapping, engine, s.tag)
+	err := YeelightDeviceSetPower(compound, args, mapping, engine, s.tag)
 	s.EqualError(err, "no such argument Cmd")
 }
 
 func (s *ActionsSuite) Test42() {
 	engine := mocks.NewEngineMock()
-	messages := []types.Message{{}}
+	message := types.Message{}
+	compound := types.MessageCompound{
+		Curr: &message,
+	}
 	mapping := types.Mapping{}
 	args := types.Args{
 		"IP":  "1.1.1.1",
 		"Cmd": "foo",
 	}
-	err := YeelightDeviceSetPower(messages, args, mapping, engine, s.tag)
+	err := YeelightDeviceSetPower(compound, args, mapping, engine, s.tag)
 	s.EqualError(err, "unsupported command 'foo'")
 }
 
@@ -101,13 +117,16 @@ func (s *ActionsSuite) Test43() {
 	s.T().Skip()
 
 	engine := mocks.NewEngineMock()
-	messages := []types.Message{{}}
+	message := types.Message{}
+	compound := types.MessageCompound{
+		Curr: &message,
+	}
 	mapping := types.Mapping{}
 	args := types.Args{
 		"IP":  "192.168.88.169",
 		"Cmd": "Off",
 	}
-	err := YeelightDeviceSetPower(messages, args, mapping, engine, s.tag)
+	err := YeelightDeviceSetPower(compound, args, mapping, engine, s.tag)
 	s.Nil(err)
 }
 
@@ -115,11 +134,14 @@ func (s *ActionsSuite) Test50() {
 
 	s.T().Skip()
 
-	mm := []types.Message{{}}
+	message := types.Message{}
+	compound := types.MessageCompound{
+		Curr: &message,
+	}
 	args := types.Args{}
 	mapping := types.Mapping{}
 	engine := mocks.NewEngineMock()
-	err := PlayAlert(mm, args, mapping, engine, s.tag)
+	err := PlayAlert(compound, args, mapping, engine, s.tag)
 	s.Nil(err)
 }
 

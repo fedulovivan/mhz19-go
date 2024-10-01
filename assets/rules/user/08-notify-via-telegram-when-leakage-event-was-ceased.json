@@ -1,6 +1,5 @@
 {
     "name": "notify via telegram, when leakage event was ceased",
-    "disabled": false,
     "condition": {
         "nested": [
             {
@@ -31,7 +30,7 @@
         {
             "fn": "TelegramBotMessage",
             "args": {
-                "Text": "{{ if .IsFirst }}Leakage sensor «{{ deviceName .Message.DeviceId }}» is online, no leakage.{{ else }}Leakage sensor «{{ deviceName .Message.DeviceId }}» reports leakage is ceased. You can open valves now.{{ end }}"
+                "Text": "{{ if .WithPrev }}Leakage sensor «{{ deviceName .Message.DeviceId }}» reports leakage is ceased. You can open valves now.{{ else }}Leakage sensor «{{ deviceName .Message.DeviceId }}» is online, no leakage.{{ end }}"
             }
         }
     ]

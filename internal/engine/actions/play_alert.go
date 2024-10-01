@@ -9,7 +9,7 @@ import (
 
 // args: <none>
 var PlayAlert types.ActionImpl = func(
-	mm []types.Message,
+	compound types.MessageCompound,
 	args types.Args,
 	mapping types.Mapping,
 	e types.EngineAsSupplier,

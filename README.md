@@ -10,6 +10,8 @@ This project is backend for the home automation server, written on golang. Evolu
 - Play loud alert sound, notify owner via telegram and cut off home water supply upon receiving message from one of water leakage sensors
 - Notify owner then some guarded door (equipped with smart sensor) was opened/closed and user is not at home
 
+See full list of configured rules: [user rules](https://github.com/fedulovivan/mhz19-go/tree/main/assets/rules/system), [system rules](https://github.com/fedulovivan/mhz19-go/tree/main/assets/rules/system)
+
 ### Project goal
 
 - Create pure offline, vendor agnostic and fully controlled local home automation server
@@ -59,6 +61,15 @@ No matter which channel was used to receive a message, or which certain device h
 - **channel_types** - TBD
 - **devices** - TBD
 - **messages** - TBD
+- **schema_version** - since v1, TBD
+
+### Migrations, schema version validation
+
+TBD
+
+### Provisioning
+
+TBD
 
 ### Load tests
 
@@ -102,7 +113,7 @@ TBD
 - gcc `sudo apt install gcc`
 - delve `go install -v github.com/go-delve/delve/cmd/dlv@latest`
 - sqlite3 `sudo apt-get install sqlite3`
-- ab (apache bench) `sudo apt install apache2-utils` 
+- ab `sudo apt install apache2-utils` 
 - hey `brew install hey`
 
 ### Usefull commands

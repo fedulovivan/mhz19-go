@@ -39,6 +39,7 @@ const (
 	DB       TagName = "[db]        "
 	REST     TagName = "[rest]      "
 	ACTIONS  TagName = "[actions]   "
+	CONDS    TagName = "[conds]     "
 	ARGS     TagName = "[args]      "
 	LDM      TagName = "[a_ldm]     "
 	RULES    TagName = "[a_rules]   "

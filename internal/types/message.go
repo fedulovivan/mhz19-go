@@ -36,17 +36,19 @@ type Message struct {
 
 type MessageChan chan Message
 
-// tuple of current and previous messages
+// container to pass current, previous messages and contents of queue messages for throttled rules
 // when its normal handling, Curr is always specified, while Prev could be empty
 // (if this is first message for such device class and device id and LdmService.Has() returns false)
 // however, when Condition.OtherDeviceId is set, only Curr may be filled if exists in LdmService
 // (but also could be not filled, meaning both may be nil)
-type MessageTuple struct {
-	Curr *Message
-	Prev *Message
+// Throttled - TBD
+type MessageCompound struct {
+	Curr   *Message
+	Prev   *Message
+	Queued []Message
 }
 
-type MessageTupleFn = func(otherDeviceId DeviceId) MessageTuple
+type GetCompoundForOtherDeviceId = func(otherDeviceId DeviceId) MessageCompound
 
 func IsSpecialDirective(field string) bool {
 	return field == "$deviceId" || field == "$deviceClass" || field == "$channelType" || field == "$fromEndDevice" || strings.HasPrefix(field, "$message.")

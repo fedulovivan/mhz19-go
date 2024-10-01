@@ -21,7 +21,7 @@
         {
             "fn": "TelegramBotMessage",
             "args": {
-                "Text": "messages:\n{{ range .Messages }}{{ deviceName .DeviceId }} status is {{ pingerStatusName .Payload.status }}\n{{ end }}"
+                "Text": "messages:\n{{ range .Queued }}{{ deviceName .DeviceId }} status is {{ pingerStatusName .Payload.status }}\n{{ end }}"
             }
         }
     ]

@@ -10,8 +10,8 @@ import (
 
 // args: <none>
 // system action to create device upon receiving dns-sd message with _ewelink._tcp service
-var UpsertSonoffDevice = func(mm []types.Message, args types.Args, mapping types.Mapping, e types.EngineAsSupplier, tag logger.Tag) (err error) {
-	m := mm[0]
+var UpsertSonoffDevice = func(compound types.MessageCompound, args types.Args, mapping types.Mapping, e types.EngineAsSupplier, tag logger.Tag) (err error) {
+	m := compound.Curr
 	gjson := gabs.Wrap(m.Payload)
 	name, ok := gjson.Path("Host").Data().(string)
 	if !ok {

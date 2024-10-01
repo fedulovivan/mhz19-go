@@ -9,12 +9,12 @@ import (
 
 // args: <none>
 var RecordMessage types.ActionImpl = func(
-	mm []types.Message,
+	compound types.MessageCompound,
 	args types.Args,
 	mapping types.Mapping,
 	e types.EngineAsSupplier,
 	tag logger.Tag,
 ) error {
-	slog.Debug(tag.F("Messages to save"), "len", len(mm))
-	return e.MessagesService().CreateAll(mm)
+	slog.Debug(tag.F("Messages to save"), "len", len(compound.Queued))
+	return e.MessagesService().CreateAll(compound.Queued)
 }

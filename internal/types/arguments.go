@@ -81,7 +81,7 @@ func (a *Args) UnmarshalJSON(data []byte) (err error) {
 }
 
 type TemplatePayload struct {
-	IsFirst  bool
+	WithPrev bool
 	Message  Message
-	Messages []Message
+	Queued   []Message
 }

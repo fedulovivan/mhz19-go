@@ -9,11 +9,11 @@ import (
 )
 
 // args: State, DeviceId
-var Zigbee2MqttSetState types.ActionImpl = func(mm []types.Message, args types.Args, mapping types.Mapping, e types.EngineAsSupplier, tag logger.Tag) (err error) {
+var Zigbee2MqttSetState types.ActionImpl = func(compound types.MessageCompound, args types.Args, mapping types.Mapping, e types.EngineAsSupplier, tag logger.Tag) (err error) {
 	// tpayload := types.TemplatePayload{
 	// 	Messages: mm,
 	// }
-	areader := arguments.NewReader(&mm[0], args, mapping /* &tpayload */, nil, e)
+	areader := arguments.NewReader(compound.Curr, args, mapping /* &tpayload */, nil, e, tag)
 	deviceId := areader.Get("DeviceId")
 	state := areader.Get("State")
 	err = areader.Error()

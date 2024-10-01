@@ -13,12 +13,12 @@ type EngineAsSupplier interface {
 
 type Engine interface {
 	EngineAsSupplier
-	InvokeActionFunc(mm []Message, a Action, tag logger.Tag)
-	MatchesCondition(mtcb MessageTupleFn, c Condition, tag logger.Tag) bool
-	InvokeConditionFunc(mt MessageTuple, fn CondFn, not bool, args Args, tag logger.Tag) bool
-	MatchesListSome(mtcb MessageTupleFn, cc []Condition, tag logger.Tag) bool
-	MatchesListEvery(mtcb MessageTupleFn, cc []Condition, tag logger.Tag) bool
-	ExecuteActions(mm []Message, r Rule, tag logger.Tag)
+	InvokeActionFunc(compound MessageCompound, a Action, tag logger.Tag)
+	MatchesCondition(mtcb GetCompoundForOtherDeviceId, c Condition, tag logger.Tag) bool
+	InvokeConditionFunc(mt MessageCompound, fn CondFn, not bool, args Args, tag logger.Tag) bool
+	MatchesListSome(mtcb GetCompoundForOtherDeviceId, cc []Condition, tag logger.Tag) bool
+	MatchesListEvery(mtcb GetCompoundForOtherDeviceId, cc []Condition, tag logger.Tag) bool
+	ExecuteActions(compound MessageCompound, r Rule, tag logger.Tag)
 	HandleMessage(m Message, rules []Rule)
 	SetLdmService(r LdmService)
 	AppendRules(rules ...Rule)

@@ -10,13 +10,15 @@ import (
 )
 
 // args: Text?, BotName?
-var TelegramBotMessage types.ActionImpl = func(mm []types.Message, args types.Args, mapping types.Mapping, e types.EngineAsSupplier, tag logger.Tag) (err error) {
+var TelegramBotMessage types.ActionImpl = func(compound types.MessageCompound, args types.Args, mapping types.Mapping, e types.EngineAsSupplier, tag logger.Tag) (err error) {
 	tpayload := types.TemplatePayload{
-		IsFirst:  len(mm) == 1,
-		Message:  mm[0],
-		Messages: mm,
+		WithPrev: compound.Prev != nil,
+		Queued:   compound.Queued,
 	}
-	reader := arguments.NewReader(&mm[0], args, mapping, &tpayload, e)
+	if compound.Curr != nil {
+		tpayload.Message = *compound.Curr
+	}
+	reader := arguments.NewReader(compound.Curr, args, mapping, &tpayload, e, tag)
 	var botName string
 	if reader.Has("BotName") {
 		botName, err = arguments.GetTyped[string](&reader, "BotName")
@@ -34,7 +36,7 @@ var TelegramBotMessage types.ActionImpl = func(mm []types.Message, args types.Ar
 		}
 	} else {
 		var mjson []byte
-		mjson, err = json.Marshal(mm[0])
+		mjson, err = json.Marshal(compound.Curr)
 		if err != nil {
 			return
 		}

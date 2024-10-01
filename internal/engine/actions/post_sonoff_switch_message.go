@@ -17,7 +17,7 @@ import (
 
 // args: DeviceId, Command (on,off)
 var PostSonoffSwitchMessage types.ActionImpl = func(
-	mm []types.Message,
+	compound types.MessageCompound,
 	args types.Args,
 	mapping types.Mapping,
 	e types.EngineAsSupplier,
@@ -27,7 +27,7 @@ var PostSonoffSwitchMessage types.ActionImpl = func(
 	// 	Messages: mm,
 	// }
 	reader := arguments.NewReader(
-		&mm[0], args, mapping /* &tpayload */, nil, e,
+		compound.Curr, args, mapping /* &tpayload */, nil, e, tag,
 	)
 	deviceId, err := arguments.GetTyped[types.DeviceId](&reader, "DeviceId")
 	if err != nil {

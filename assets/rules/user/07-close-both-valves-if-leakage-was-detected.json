@@ -1,6 +1,5 @@
 {
     "name": "close both valves if leakage was detected for any sensor and send telegram notification",
-    "disabled": false,
     "condition": {
         "nested": [
             {
