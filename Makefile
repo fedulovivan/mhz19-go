@@ -26,9 +26,9 @@ docker-down:
 .PHONY: docker-up
 docker-up:
 ifeq ($(OS_NAME), linux)
-	docker run -d --env-file=$(CONF) -v ./database.bin:/database.bin --network=host --device /dev/snd:/dev/snd --name=$(NAME) $(NAME)
+	docker run -d --restart=always --env-file=$(CONF) -v ./database.bin:/database.bin --network=host --device /dev/snd:/dev/snd --name=$(NAME) $(NAME)
 else
-	docker run -d --env-file=$(CONF) -v ./database.bin:/database.bin --network=host --name=$(NAME) $(NAME)
+	docker run -d --restart=always --env-file=$(CONF) -v ./database.bin:/database.bin --network=host --name=$(NAME) $(NAME)
 endif
 	
 # docker run -d --env-file=$(CONF) -v ./database.bin:/database.bin -p $(REST_API_PORT):$(REST_API_PORT) --name=$(NAME) --network=host $(NAME)
@@ -36,6 +36,10 @@ endif
 .PHONY: docker-logs
 docker-logs:
 	docker logs --follow $(NAME)
+
+.PHONY: update
+update:
+	git pull && make docker-build && make docker-down && make docker-up && make docker-logs
 
 .PHONY: docker-logs-save
 docker-logs-save:
