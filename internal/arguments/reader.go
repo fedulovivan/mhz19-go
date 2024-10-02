@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"text/template"
+	"time"
 
 	"github.com/fedulovivan/mhz19-go/internal/app"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
@@ -178,6 +179,9 @@ func (r *reader) ExecTemplate(in string, field string) (string, error) {
 				} else {
 					return "is dry"
 				}
+			},
+			"time": func(t time.Time) string {
+				return t.Format("15:04:05")
 			},
 		},
 	).Parse(in)
