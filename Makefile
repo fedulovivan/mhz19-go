@@ -39,7 +39,7 @@ docker-logs:
 
 .PHONY: docker-logs-save
 docker-logs-save:
-	docker logs $(NAME) 2>&1 | cat > log.txt
+	docker logs --timestamps $(NAME) 2>&1 | cat > log.txt
 
 .PHONY: clean
 clean:

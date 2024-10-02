@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/fedulovivan/mhz19-go/internal/entities/ldm"
+	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 	"github.com/stretchr/testify/suite"
 )
@@ -68,8 +69,11 @@ func (s *EngineSuite) Test13() {
 }
 
 func (s *EngineSuite) Test20() {
+	c := types.Condition{
+		Fn: 66,
+	}
 	s.PanicsWithValue("Condition function 66 not yet implemented", func() {
-		s.False(s.e.InvokeConditionFunc(types.MessageCompound{}, 66, false, nil, BaseTag))
+		s.False(s.e.InvokeConditionFunc(types.MessageCompound{}, c, BaseTag))
 	})
 }
 
@@ -101,6 +105,22 @@ func (s *EngineSuite) Test41() {
 
 func (s *EngineSuite) Test60() {
 	s.e.ExecuteActions(types.MessageCompound{}, types.Rule{}, BaseTag)
+}
+
+func (s *EngineSuite) Test61() {
+	mc := types.MessageCompound{}
+	rule := types.Rule{
+		Actions: []types.Action{
+			{
+				Fn: types.ACTION_YEELIGHT_DEVICE_SET_POWER,
+			},
+			{
+				Fn: types.ACTION_PLAY_ALERT,
+			},
+		},
+	}
+	tag := logger.NewTag("[Test61]")
+	s.e.ExecuteActions(mc, rule, tag)
 }
 
 func (s *EngineSuite) Test70() {

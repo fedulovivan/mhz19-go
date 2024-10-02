@@ -19,5 +19,6 @@ var PlayAlert types.ActionImpl = func(
 		"mpg123",
 		"./assets/siren.mp3",
 	).Output()
+	// slog.Debug(tag.F(string(out)))
 	return
 }

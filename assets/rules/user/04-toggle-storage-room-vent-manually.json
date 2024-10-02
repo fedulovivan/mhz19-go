@@ -19,7 +19,13 @@
                         "off"
                     ]
                 }
-            }
+            },
+            {
+                "fn": "Changed",
+                "args": {
+                    "Value": "$message.action"
+                }
+            }            
         ]
     },
     "actions": [

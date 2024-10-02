@@ -113,38 +113,46 @@ func (e *engine) Stop() {
 	}
 }
 
-func (e *engine) InvokeConditionFunc(mt types.MessageCompound, fn types.CondFn, not bool, args types.Args, tag logger.Tag) bool {
-	impl := conditions.Get(fn)
-	fnString := fn.String()
-	if not {
+func (e *engine) InvokeConditionFunc(
+	mt types.MessageCompound,
+	c types.Condition,
+	baseTag logger.Tag,
+) bool {
+	// start := time.Now()
+	impl := conditions.Get(c.Fn)
+	fnString := c.Fn.String()
+	if c.Not {
 		fnString = "Not" + fnString
 	}
-	tag = tag.With("condition=%s", fnString)
-	slog.Debug(tag.F("Start"), "args", args)
-	res, err := impl(mt, args, tag)
+	tag := baseTag.With("Condition=%d %s", c.Id, fnString)
+	slog.Debug(tag.F("Started"), "args", c.Args)
+	res, err := impl(mt, c.Args, tag)
+	// elapsed := time.Since(start)
 	if err == nil {
-		if not {
+		if c.Not {
 			res = !res
 		}
-		slog.Debug(tag.F("End"), "res", res)
+		slog.Debug(tag.F("Completed" /* , elapsed */), "res", res)
 		return res
 	} else {
-		slog.Error(tag.F("Fail"), "err", err)
+		slog.Error(tag.F("Failed" /* , elapsed */), "err", err)
 		counters.Inc(counters.ERRORS)
 		return false
 	}
 }
 
 func (e *engine) InvokeActionFunc(compound types.MessageCompound, a types.Action, tag logger.Tag) {
+	start := time.Now()
 	impl := actions.Get(a.Fn)
-	tag = tag.With("action=%s", a.Fn.String())
-	slog.Debug(tag.F("Start"), "args", a.Args)
-	err := impl(compound, a.Args, a.Mapping, e, tag)
+	atag := tag.With("Action=%d %s", a.Id, a.Fn.String())
+	slog.Debug(atag.F("Started"), "args", a.Args)
+	err := impl(compound, a.Args, a.Mapping, e, atag)
+	elapsed := time.Since(start)
 	if err != nil {
-		slog.Error(tag.F("Fail"), "err", err)
+		slog.Error(atag.F("Failed in %s", elapsed), "err", err)
 		counters.Inc(counters.ERRORS)
 	} else {
-		slog.Debug(tag.F("End"))
+		slog.Debug(atag.F("Completed in %s", elapsed))
 	}
 }
 
@@ -176,7 +184,7 @@ func (e *engine) MatchesCondition(mtcb types.GetCompoundForOtherDeviceId, c type
 		return false
 	} else if withFn && !withList {
 		return e.InvokeConditionFunc(
-			mtcb(c.OtherDeviceId), c.Fn, c.Not, c.Args, tag,
+			mtcb(c.OtherDeviceId), c, tag,
 		)
 	} else if withList && !withFn {
 		if c.Or {
@@ -196,17 +204,21 @@ func (e *engine) ExecuteActions(compound types.MessageCompound, r types.Rule, ta
 	}
 }
 
+// TODO do we really need "go func" wrapper?
+// go func(compound types.MessageCompound, action types.Action, tag logger.Tag) {
+// }(compound, a, tag)
+
 // called simultaneusly upon receiving messages from all providers
 // should have thread-safe implementation
 func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
-	defer utils.TimeTrack(BaseTag.F, time.Now(), "HandleMessage")
+	mtag := BaseTag.With("Msg=%d", m.Id)
+	defer utils.TimeTrack(mtag.F, time.Now(), "HandleMessage")
 	e.rulesMu.RLock()
 	defer e.rulesMu.RUnlock()
 	if m.Id == 0 || m.Timestamp.IsZero() {
 		panic("message must have Id and Timestamp initialised")
 	}
 	counters.Inc(counters.MESSAGES_RECEIVED)
-	tag := BaseTag.With("Msg=%d", m.Id)
 	p := m.Payload
 	isSystem := m.DeviceClass == types.DEVICE_CLASS_SYSTEM
 	isBridge := m.DeviceClass == types.DEVICE_CLASS_ZIGBEE_BRIDGE
@@ -214,7 +226,7 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 	if isBridge {
 		p = "<too big to render>"
 	}
-	slog.Debug(tag.F("New message"),
+	slog.Debug(mtag.F("New message"),
 		"ChannelType", m.ChannelType,
 		"ChannelMeta", m.ChannelMeta,
 		"DeviceClass", m.DeviceClass,
@@ -224,23 +236,23 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 	)
 	rulesCnt := len(rules)
 	if rulesCnt == 0 {
-		slog.Warn(tag.F("No rules"))
+		slog.Warn(mtag.F("No rules"))
 		return
 	}
 	ldmKey := e.ldmService.NewKey(m.DeviceClass, m.DeviceId)
-	slog.Debug(tag.F("Matching against %v rules", rulesCnt))
+	slog.Debug(mtag.F("Matching against %v rules", rulesCnt))
 	matches := 0
 	for _, r := range rules {
-		tag := tag.With("Rule=%d", r.Id)
+		rtag := mtag.With("Rule=%d", r.Id)
 		if r.Disabled {
-			slog.Debug(tag.F("is disabled, skipping"))
+			slog.Debug(rtag.F("is disabled, skipping"))
 			continue
 		}
 		var mtcb = func(otherDeviceId types.DeviceId) types.MessageCompound {
 			compound := types.MessageCompound{}
 			takeOtherDeviceMessage := len(otherDeviceId) > 0
 			if takeOtherDeviceMessage {
-				slog.Warn(tag.F("requesting message for otherDeviceId=%v", otherDeviceId))
+				slog.Debug(rtag.F("requesting message for otherDeviceId=%v", otherDeviceId))
 				otherLdmKey := e.ldmService.NewKey(m.DeviceClass, otherDeviceId)
 				if e.ldmService.Has(otherLdmKey) {
 					tmp := e.ldmService.Get(otherLdmKey)
@@ -255,31 +267,31 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 			}
 			return compound
 		}
-		if e.MatchesCondition(mtcb, r.Condition, tag) {
+		if e.MatchesCondition(mtcb, r.Condition, rtag) {
 			counters.IncRule(r.Id)
-			slog.Debug(tag.F("matches👌"), "name", r.Name)
+			slog.Debug(rtag.F("matches👌"), "name", r.Name)
 			matches++
 			if r.Throttle.Duration == 0 {
 				compound := mtcb("")
-				e.ExecuteActions(compound, r, tag)
+				e.ExecuteActions(compound, r, rtag)
 			} else {
 				key := message_queue.NewKey(m.DeviceClass, m.DeviceId, r.Id)
-				queueTag := BaseTag.With("Rule=%d", r.Id)
+				qtag := BaseTag.With("Rule=%d", r.Id)
 				if !queuesContainer.HasQueue(key) {
 					queuesContainer.CreateQueue(key, r.Throttle.Duration, func(mm []types.Message) {
-						slog.Debug(queueTag.F("message queue is flushed now"), "key", key, "mm", len(mm))
-						e.ExecuteActions(types.MessageCompound{Queued: mm}, r, queueTag)
+						slog.Debug(qtag.F("message queue is flushed now"), "key", key, "mm", len(mm))
+						e.ExecuteActions(types.MessageCompound{Queued: mm}, r, qtag)
 					})
 				}
 				queuesContainer.GetQueue(key).PushMessage(m)
-				slog.Debug(tag.F("message was queued for %s", r.Throttle.Duration))
+				slog.Debug(rtag.F("message was queued for %s", r.Throttle.Duration))
 			}
 		}
 	}
 	if matches == 0 {
-		slog.Warn(tag.F("No one matching rule found"))
+		slog.Warn(mtag.F("No one matching rule found"))
 	} else {
-		slog.Debug(tag.F("%v out of %v rules were matched", matches, len(rules)))
+		slog.Debug(mtag.F("%v out of %v rules were matched", matches, len(rules)))
 	}
 	if !isBridge && !sonoffAnnounce && !isSystem {
 		e.ldmService.Set(ldmKey, m)

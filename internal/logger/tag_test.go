@@ -1,7 +1,10 @@
 package logger
 
 import (
+	"fmt"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/suite"
 )
@@ -57,6 +60,30 @@ func (s *TagSuite) Test50() {
 	s.Equal("[main] Bar#1 msg1", tag1.F("msg1"))
 	s.Equal("[main] Bar#2 msg2", tag2.F("msg2"))
 	s.Equal("[main] Foo#1 msg3", tag3.F("msg3"))
+}
+
+func (s *TagSuite) Test60() {
+
+	s.T().Skip()
+
+	base := NewTag("[main]")
+	res := make([]string, 5)
+	mu := new(sync.Mutex)
+
+	for i := 0; i < 5; i++ {
+		go func(i int) {
+			mu.Lock()
+			defer mu.Unlock()
+			atag := base.With(fmt.Sprintf("action=%d", i))
+			res[i] = atag.F("test %d", i)
+		}(i)
+	}
+	time.Sleep(time.Millisecond * 10)
+	s.Equal("[main] action=0 test 0", res[0])
+	s.Equal("[main] action=1 test 1", res[1])
+	s.Equal("[main] action=2 test 2", res[2])
+	s.Equal("[main] action=3 test 3", res[3])
+	s.Equal("[main] action=4 test 4", res[4])
 }
 
 func TestTag(t *testing.T) {

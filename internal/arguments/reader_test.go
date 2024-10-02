@@ -175,7 +175,7 @@ func (s *ReaderSuite) Test121() {
 	}}}
 	r := NewReader(&m, args, nil, &tpayload, engine, s.tag)
 	s.Equal("DeviceId(lorem111) - lorem111", r.Get("Foo5"))
-	// s.EqualError(r.Error(), `template: Foo5:1:42: executing "Foo5" at <deviceName .DeviceId>: error calling deviceName: no such device`)
+	s.Nil(r.Error())
 }
 
 func (s *ReaderSuite) Test122() {
@@ -232,6 +232,51 @@ func (s *ReaderSuite) Test125() {
 	actual := r.Get("Foo5")
 	s.Equal(expected, actual)
 	s.Nil(r.Error())
+}
+
+func (s *ReaderSuite) Test126() {
+	engine := mocks.NewEngineMock()
+	m := types.Message{}
+
+	template := "{{ if gt (len .Queued) 1 }}{{ deviceName (index .Queued 0).DeviceId }}:\n{{ range .Queued }}{{ time .Timestamp }} {{ pingerStatusName .Payload.status }}\n{{ end }}{{ else }}{{ deviceName (index .Queued 0).DeviceId }} is {{ pingerStatusName (index .Queued 0).Payload.status }}{{ end }}"
+
+	args := types.Args{"Foo6": template}
+
+	tpayload1 := types.TemplatePayload{
+		Queued: []types.Message{
+			{
+				DeviceId: "lorem111",
+				Payload: map[string]any{
+					"status": 1,
+				},
+			},
+			{
+				DeviceId: "ipsum222",
+				Payload: map[string]any{
+					"status": 0,
+				},
+			},
+		},
+	}
+	r1 := NewReader(&m, args, nil, &tpayload1, engine, s.tag)
+	actual1 := r1.Get("Foo6")
+	s.Nil(r1.Error())
+	s.Equal("lorem111:\n00:00:00 ONLINE\n00:00:00 OFFLINE\n", actual1)
+
+	tpayload2 := types.TemplatePayload{
+		Queued: []types.Message{
+			{
+				DeviceId: "lorem111",
+				Payload: map[string]any{
+					"status": 1,
+				},
+			},
+		},
+	}
+	r2 := NewReader(&m, args, nil, &tpayload2, engine, s.tag)
+	actual2 := r2.Get("Foo6")
+	s.Nil(r2.Error())
+	s.Equal("lorem111 is ONLINE", actual2)
 }
 
 func (s *ReaderSuite) Test130() {

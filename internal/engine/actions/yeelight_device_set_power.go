@@ -20,6 +20,7 @@ var YeelightDeviceSetPower types.ActionImpl = func(
 	// tpayload := types.TemplatePayload{
 	// 	Messages: mm,
 	// }
+	// time.Sleep(time.Second)
 	reader := arguments.NewReader(
 		compound.Curr, args, mapping /* &tpayload */, nil, e, tag,
 	)

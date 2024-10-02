@@ -15,7 +15,7 @@ type Engine interface {
 	EngineAsSupplier
 	InvokeActionFunc(compound MessageCompound, a Action, tag logger.Tag)
 	MatchesCondition(mtcb GetCompoundForOtherDeviceId, c Condition, tag logger.Tag) bool
-	InvokeConditionFunc(mt MessageCompound, fn CondFn, not bool, args Args, tag logger.Tag) bool
+	InvokeConditionFunc(mt MessageCompound, c Condition, tag logger.Tag) bool
 	MatchesListSome(mtcb GetCompoundForOtherDeviceId, cc []Condition, tag logger.Tag) bool
 	MatchesListEvery(mtcb GetCompoundForOtherDeviceId, cc []Condition, tag logger.Tag) bool
 	ExecuteActions(compound MessageCompound, r Rule, tag logger.Tag)

@@ -1,5 +1,5 @@
 ### Prio 0
-- none
+none
 
 ### Prio 1
 - api: toggle rule on/off
@@ -17,6 +17,10 @@
 - bug: "api:getAll took 3.451973917s" when reading 1k rules 1k times - try same scenario with postgres
 
 ### Features
+- feat: detect bot(s) are connected, instead of using dumb timeout before publishing "Application started" message
+- feat: do auto db backup before running any migration
+- feat: disable condition and action
+- feat: log rule/condition/action execution to the db table
 - feat: simple frontend
 - feat: avoid provisioning "devices" from 00-sql-up script
 - feat: introduce rules.comments column
@@ -43,6 +47,9 @@
 - arch: switch to nil instead of sql.NullInt32 - easy to MarshalJSON
 
 ### Try
+- try: compile with "race" flag - https://www.youtube.com/watch?v=mvUiw9ilqn8&list=WL&index=4
+- try: to deploy on old rpi/raspberrypi with ram disk enabled
+- try: hcl - https://github.com/hashicorp/hcl
 - try: some interactive cli framework, like cobra
 - try: validation https://github.com/asaskevich/govalidator OR https://github.com/go-ozzo/ozzo-validation
 - try: find out why cli command "make test" and "vscode" report different coverage statistics: 86.9% vs 100%. vscode syntax - `Running tool: /opt/homebrew/bin/go test -timeout 30s -coverprofile=/var/folders/5v/0wjs9g1948ddpdqkgf1h31q80000gn/T/vscode-go7lC7ip/go-code-cover github.com/fedulovivan/mhz19-go/internal/engine`
@@ -60,6 +67,8 @@
 
 ### Completed
 
+- (+) bug: avoid "PostSonoffSwitchMessage Start args="map[Command:off DeviceId:10012db92b]"", check the status? use change?
+- (+) bug: debug logging issues: log-level-1.txt, log-level-2.txt, log-level-3.txt, see new test internal/logger/tag_test.go - wrong approach for cloning structure with underlying slice in Tag::With()
 - (+) bug: at present moment there is no "previous message info" in ExecuteActions. we call with ONE message for non-throttled rule, and with ARRAY of messages if throttling is enabled. so flag IsFirst is implemented and handled incorrectly
 - (+) arch: introduce new table "schema version" and validate migration number during startup
 - (+) bug: add tag to the args reader logger

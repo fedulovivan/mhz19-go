@@ -70,9 +70,12 @@ func NewTag(first TagName) Tag {
 }
 
 func (t *tag) With(format string, a ...any) Tag {
-	next := *t
-	next.tags = append(next.tags, fmt.Sprintf(format, a...))
-	return &next
+	tagscopy := make([]string, len(t.tags)+1)
+	copy(tagscopy, t.tags)
+	tagscopy[len(t.tags)] = fmt.Sprintf(format, a...)
+	return &tag{
+		tags: tagscopy,
+	}
 }
 
 func (t *tag) WithTid(ns string) Tag {
@@ -85,6 +88,7 @@ func (t *tag) WithTid(ns string) Tag {
 }
 
 func (t *tag) F(format string, a ...any) string {
+	// fmt.Println("tags:", t.tags)
 	return strings.Join(
 		append(t.tags, fmt.Sprintf(format, a...)),
 		" ",

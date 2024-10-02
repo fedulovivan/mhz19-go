@@ -38,7 +38,7 @@
         {
             "fn": "TelegramBotMessage",
             "args": {
-                "Text": "Leakage sensor «{{ deviceName .Message.DeviceId }}» reports leakage is detected. Closing valves now..."
+                "Text": "⚠️ Leakage sensor «{{ deviceName .Message.DeviceId }}» reports leakage is detected. Closing valves now..."
             }
         },
         {

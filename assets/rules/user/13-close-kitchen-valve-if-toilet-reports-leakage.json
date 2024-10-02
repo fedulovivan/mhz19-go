@@ -33,7 +33,7 @@
         {
             "fn": "TelegramBotMessage",
             "args": {
-                "Text": "Leakage detected by toilet valves-manipulator. Closing kitchen as well..."
+                "Text": "⚠️ Leakage detected by toilet valves-manipulator. Closing kitchen as well..."
             }
         },
         {

@@ -116,7 +116,7 @@ func main() {
 
 	// publish "Application started" message
 	// TODO detect bot(s) are connected, instead of using dumb timeout
-	time.AfterFunc(time.Second*5, func() {
+	time.AfterFunc(time.Second*10, func() {
 		shimProvider.Push(types.NewSystemMessage("Application started"))
 	})
 
