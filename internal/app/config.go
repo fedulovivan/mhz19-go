@@ -26,7 +26,6 @@ type ConfigStorage struct {
 	DbDebug bool `env:"DB_DEBUG,default=false"`
 
 	SqliteFilename string `env:"SQLITE_FILENAME,default=database.bin"`
-	// SqliteFilename string `env:"SQLITE_FILENAME,default=/Users/ivanf/Desktop/Projects/go/mhz19-go/database.bin"`
 
 	// telegram
 	TelegramDebug         bool     `env:"TELEGRAM_DEBUG,default=false"`
