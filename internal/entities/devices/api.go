@@ -1,6 +1,7 @@
 package devices
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 
@@ -25,6 +26,7 @@ func NewApi(base *routing.RouteGroup, service types.DevicesService) {
 	group.Get("", api.get)
 	group.Get("/class/<deviceClass>", api.getByDeviceClass)
 	group.Get("/<deviceId>", api.getByDeviceId)
+	group.Post("/<deviceId>", api.update)
 }
 
 func (api devicesApi) get(c *routing.Context) (err error) {
@@ -47,6 +49,10 @@ func (api devicesApi) getByDeviceClass(c *routing.Context) (err error) {
 		return
 	}
 	return c.Write(data)
+}
+
+func (api devicesApi) update(c *routing.Context) (err error) {
+	return fmt.Errorf("not yet implemented")
 }
 
 func (api devicesApi) getByDeviceId(c *routing.Context) (err error) {

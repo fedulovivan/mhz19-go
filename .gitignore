@@ -4,3 +4,4 @@ bin/
 .env.debug
 database*.bin
 sql/*dump.sql
+log.txt

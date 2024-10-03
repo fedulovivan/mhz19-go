@@ -30,7 +30,7 @@
         {
             "fn": "TelegramBotMessage",
             "args": {
-                "Text": "{{ if .WithPrev }}Leakage sensor «{{ deviceName .Message.DeviceId }}» reports leakage is ceased. You can open valves now.{{ else }}Leakage sensor «{{ deviceName .Message.DeviceId }}» is online, no leakage.{{ end }}"
+                "Text": "{{ if .WithPrev }}Leakage sensor «{{ deviceName .Message.DeviceId }}» reports leakage is ceased. You can /open valves now.{{ else }}Leakage sensor «{{ deviceName .Message.DeviceId }}» is online, no leakage.{{ end }}"
             }
         }
     ]
