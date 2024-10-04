@@ -23,6 +23,7 @@ type DevicesRepository interface {
 	UpsertAll(devices []DbDevice) (int64, error)
 	Get(deviceId sql.NullString, deviceClass sql.NullInt32) ([]DbDevice, error)
 	Update(device DbDevice) error
+	Delete(int64) error
 }
 
 var _ DevicesRepository = (*devicesRepository)(nil)
@@ -62,6 +63,25 @@ func (r devicesRepository) Get(deviceId sql.NullString, deviceClass sql.NullInt3
 		return
 	})
 	return
+}
+
+func (r devicesRepository) Delete(id int64) (err error) {
+	err = db.RunTx(r.database, func(ctx db.CtxEnhanced) (err error) {
+		_, err = deleteTx(id, ctx)
+		return
+	})
+	return
+}
+
+func deleteTx(
+	id int64,
+	ctx db.CtxEnhanced,
+) (sql.Result, error) {
+	return db.Exec(
+		ctx,
+		`DELETE FROM devices WHERE id = ?`,
+		id,
+	)
 }
 
 func CountTx(ctx db.CtxEnhanced) (int32, error) {

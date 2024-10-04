@@ -204,31 +204,39 @@ func (e *engine) ExecuteActions(compound types.MessageCompound, r types.Rule, ta
 	}
 }
 
-// TODO do we really need "go func" wrapper?
-// go func(compound types.MessageCompound, action types.Action, tag logger.Tag) {
-// }(compound, a, tag)
-
 // called simultaneusly upon receiving messages from all providers
 // should have thread-safe implementation
 func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
+
+	if m.Id == 0 || m.Timestamp.IsZero() {
+		panic("message must have Id and Timestamp initialised")
+	}
+
+	e.rulesMu.RLock()
+	defer e.rulesMu.RUnlock()
+
 	mtag := BaseTag.With("Msg=%d", m.Id)
+
 	defer func(start time.Time) {
 		elapsed := utils.TimeTrack(mtag.F, start, "HandleMessage")
 		counters.Time(elapsed, counters.MESSAGES_HANDLED)
 	}(time.Now())
 	defer counters.Inc(counters.MESSAGES_HANDLED)
-	e.rulesMu.RLock()
-	defer e.rulesMu.RUnlock()
-	if m.Id == 0 || m.Timestamp.IsZero() {
-		panic("message must have Id and Timestamp initialised")
-	}
-	p := m.Payload
+
 	isSystem := m.DeviceClass == types.DEVICE_CLASS_SYSTEM
 	isBridge := m.DeviceClass == types.DEVICE_CLASS_ZIGBEE_BRIDGE
 	sonoffAnnounce := m.DeviceClass == types.DEVICE_CLASS_SONOFF_ANNOUNCE
+
+	ldmKey := e.ldmService.NewKey(m.DeviceClass, m.DeviceId)
+	if !isBridge && !sonoffAnnounce && !isSystem {
+		e.ldmService.Set(ldmKey, m)
+	}
+
+	p := m.Payload
 	if isBridge {
 		p = "<too big to render>"
 	}
+
 	slog.Debug(mtag.F("New message"),
 		"ChannelType", m.ChannelType,
 		"ChannelMeta", m.ChannelMeta,
@@ -237,12 +245,13 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 		"Payload", p,
 		"FromEndDevice", m.FromEndDevice,
 	)
+
 	rulesCnt := len(rules)
 	if rulesCnt == 0 {
 		slog.Warn(mtag.F("No rules"))
 		return
 	}
-	ldmKey := e.ldmService.NewKey(m.DeviceClass, m.DeviceId)
+
 	slog.Debug(mtag.F("Matching against %v rules", rulesCnt))
 	matches := 0
 	for _, r := range rules {
@@ -291,12 +300,10 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 			}
 		}
 	}
+
 	if matches == 0 {
 		slog.Warn(mtag.F("No one matching rule found"))
 	} else {
 		slog.Debug(mtag.F("%v out of %v rules were matched", matches, len(rules)))
-	}
-	if !isBridge && !sonoffAnnounce && !isSystem {
-		e.ldmService.Set(ldmKey, m)
 	}
 }

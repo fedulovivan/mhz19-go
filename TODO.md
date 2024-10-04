@@ -14,6 +14,7 @@ none
 - bug: "api:getAll took 3.451973917s" when reading 1k rules 1k times - try same scenario with postgres
 
 ### Features
+- feat: add room entity, attach it to device
 - feat: better api for counters.Time()
 - feat: detect bot(s) are connected, instead of using dumb timeout before publishing "Application started" message
 - feat: do auto db backup before running any migration
@@ -63,6 +64,9 @@ none
 
 ### Completed
 
+- (+) bug: "no last message for.." should not be recorded as ERROR
+- (+) bug: last device message is not recorded if no rules are configured
+- (+) api: delete device
 - (+) try: compile with "race" flag - https://www.youtube.com/watch?v=mvUiw9ilqn8&list=WL&index=4
 - (+) arch: use two telegram channels for notifications: for CRITICAL messages and all the rest.
 - (+) arch: think how to distinquish "end device" message from all "others" - just as new flag for the message Struct?

@@ -13,6 +13,7 @@ type DevicesService interface {
 	GetOne(id DeviceId) (Device, error)
 	UpsertAll(devices []Device) (int64, error)
 	Update(device Device) error
+	Delete(int64) error
 }
 
 type DictItem struct {

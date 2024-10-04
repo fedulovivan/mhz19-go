@@ -35,8 +35,8 @@ func (api ldmApi) getByDeviceId(c *routing.Context) error {
 	data, err := api.service.GetByDeviceId(
 		types.DeviceId(c.Param("deviceId")),
 	)
-	if err != nil {
-		return err
+	if err == nil {
+		return c.Write(data)
 	}
-	return c.Write(data)
+	return c.Write(nil)
 }

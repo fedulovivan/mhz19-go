@@ -124,6 +124,11 @@ func (s devicesService) GetOne(id types.DeviceId) (res types.Device, err error) 
 	return
 }
 
+func (s devicesService) Delete(id int64) (err error) {
+	err = s.repository.Delete(id)
+	return
+}
+
 func NewService(r DevicesRepository) types.DevicesService {
 	return devicesService{
 		repository: r,

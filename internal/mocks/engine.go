@@ -16,13 +16,16 @@ var (
 type mockDevicesService struct {
 }
 
-func (s mockDevicesService) Update(device types.Device) error {
+func (s mockDevicesService) Delete(int64) error {
+	return nil
+}
+func (s mockDevicesService) Update(types.Device) error {
 	return nil
 }
 func (s mockDevicesService) Get() ([]types.Device, error) {
 	return nil, nil
 }
-func (s mockDevicesService) GetByDeviceClass(dc types.DeviceClass) ([]types.Device, error) {
+func (s mockDevicesService) GetByDeviceClass(types.DeviceClass) ([]types.Device, error) {
 	return nil, nil
 }
 func (s mockDevicesService) GetOne(id types.DeviceId) (res types.Device, err error) {
