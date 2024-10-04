@@ -64,6 +64,7 @@ none
 
 ### Completed
 
+- (+) bug: Msg=40 Rule=13 Condition=48 Changed Started args=map[Value:$message.action] res=false - regression
 - (+) bug: "no last message for.." should not be recorded as ERROR
 - (+) bug: last device message is not recorded if no rules are configured
 - (+) api: delete device

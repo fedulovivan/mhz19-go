@@ -226,11 +226,7 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 	isSystem := m.DeviceClass == types.DEVICE_CLASS_SYSTEM
 	isBridge := m.DeviceClass == types.DEVICE_CLASS_ZIGBEE_BRIDGE
 	sonoffAnnounce := m.DeviceClass == types.DEVICE_CLASS_SONOFF_ANNOUNCE
-
 	ldmKey := e.ldmService.NewKey(m.DeviceClass, m.DeviceId)
-	if !isBridge && !sonoffAnnounce && !isSystem {
-		e.ldmService.Set(ldmKey, m)
-	}
 
 	p := m.Payload
 	if isBridge {
@@ -249,10 +245,10 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 	rulesCnt := len(rules)
 	if rulesCnt == 0 {
 		slog.Warn(mtag.F("No rules"))
-		return
+	} else {
+		slog.Debug(mtag.F("Matching against %v rules", rulesCnt))
 	}
 
-	slog.Debug(mtag.F("Matching against %v rules", rulesCnt))
 	matches := 0
 	for _, r := range rules {
 		rtag := mtag.With("Rule=%d", r.Id)
@@ -301,9 +297,15 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 		}
 	}
 
-	if matches == 0 {
-		slog.Warn(mtag.F("No one matching rule found"))
-	} else {
-		slog.Debug(mtag.F("%v out of %v rules were matched", matches, len(rules)))
+	if rulesCnt > 0 {
+		if matches == 0 {
+			slog.Warn(mtag.F("No one matching rule found"))
+		} else {
+			slog.Debug(mtag.F("%v out of %v rules were matched", matches, len(rules)))
+		}
+	}
+
+	if !isBridge && !sonoffAnnounce && !isSystem {
+		e.ldmService.Set(ldmKey, m)
 	}
 }
