@@ -26,13 +26,13 @@ var UpsertSonoffDevice = func(compound types.MessageCompound, args types.Args, m
 	origin := "dnssd-upsert"
 	out := []types.Device{
 		{
-			DeviceId:      types.DeviceId(id),
-			DeviceClassId: types.DEVICE_CLASS_SONOFF_DIY_PLUG,
-			Name:          &name,
-			Origin:        &origin,
-			Json:          gjson.Data(),
+			DeviceId:    types.DeviceId(id),
+			DeviceClass: types.DEVICE_CLASS_SONOFF_DIY_PLUG,
+			Name:        &name,
+			Origin:      &origin,
+			Json:        gjson.Data(),
 		},
 	}
-	err = e.DevicesService().UpsertAll(out)
+	_, err = e.DevicesService().UpsertAll(out)
 	return
 }

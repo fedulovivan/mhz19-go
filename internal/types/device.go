@@ -40,7 +40,7 @@ func (a *DeviceId) UnmarshalJSON(data []byte) (err error) {
 type Device struct {
 	Id            int            `json:"id,omitempty"`
 	DeviceId      DeviceId       `json:"deviceId,omitempty"`
-	DeviceClassId DeviceClass    `json:"deviceClassId,omitempty"`
+	DeviceClass   DeviceClass    `json:"deviceClass,omitempty"`
 	Name          *string        `json:"name,omitempty"`
 	Comments      *string        `json:"comments,omitempty"`
 	Origin        *string        `json:"origin,omitempty"`

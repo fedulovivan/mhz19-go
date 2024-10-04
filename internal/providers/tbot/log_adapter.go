@@ -15,13 +15,13 @@ func (l slogAdapter) Println(v ...any) {
 		slog.Debug(tag.F(v0), "more", len(v)-1)
 	case error:
 		slog.Error(tag.F(v0.Error()), "more", len(v)-1)
-		counters.Inc(counters.ERRORS)
+		counters.Inc(counters.ERRORS_ALL)
 	default:
 		slog.Error(tag.F(
 			"slogAdapter.Println() skipped, its first argument expected to be a string, but got %T with value %v",
 			v[0], v[0],
 		))
-		counters.Inc(counters.ERRORS)
+		counters.Inc(counters.ERRORS_ALL)
 	}
 }
 func (l slogAdapter) Printf(format string, v ...any) {

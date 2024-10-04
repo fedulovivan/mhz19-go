@@ -14,6 +14,7 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/logger"
 
 	"github.com/fedulovivan/mhz19-go/internal/app"
+	"github.com/fedulovivan/mhz19-go/internal/counters"
 	"github.com/fedulovivan/mhz19-go/pkg/utils"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -109,6 +110,7 @@ func Exec(
 
 	// tx := ctx.Value(key_tx{}).(*sql.Tx)
 	// tag := ctx.Value(key_tag{}).(logger.Tag).AddTid("Exec")
+	counters.Inc(counters.QUERIES)
 
 	ctxpayload := ctx.Value(ctxkey{}).(ctxval)
 	tx := ctxpayload.Tx
@@ -116,6 +118,10 @@ func Exec(
 
 	if app.Config.DbDebug {
 		defer utils.TimeTrack(tag.F, time.Now(), "Exec")
+		// defer func(start time.Time) {
+		// 	elapsed := utils.TimeTrack(tag.F, start, "Exec")
+		// 	counters.Time(elapsed, counters.QUERY)
+		// }(time.Now())
 	}
 	select {
 	case <-ctx.Done():
@@ -130,6 +136,9 @@ func Exec(
 				"got an error \"%v\" executing %v values %v",
 				err, lquery /* string(valuesj) */, values,
 			)
+		} else if app.Config.DbDebug {
+			rows, _ := res.RowsAffected()
+			slog.Debug(tag.F("Affected"), "rows", rows)
 		}
 		return
 	}
@@ -219,12 +228,14 @@ func Select[T any](
 	// tx := ctx.Value(key_tx{}).(*sql.Tx)
 	// tag := ctx.Value(key_tag{}).(logger.Tag).AddTid("Select")
 
+	counters.Inc(counters.QUERIES)
+
 	ctxpayload := ctx.Value(ctxkey{}).(ctxval)
 	tx := ctxpayload.Tx
 	tag := ctxpayload.Tag.WithTid("Select")
 
 	if app.Config.DbDebug {
-		defer utils.TimeTrack(tag.F, time.Now(), "Exec")
+		defer utils.TimeTrack(tag.F, time.Now(), "Select")
 	}
 	select {
 	case <-ctx.Done():
@@ -265,12 +276,16 @@ func Select[T any](
 // starts transaction
 // stores tx into created context
 // enhances BaseTag with unique transaction id and also stores it into created context
-// commits transation if callback returns no error
+// commits transaction if callback returns no error
 // ctx consumers are local functions Select, Exec, Rollback
 func RunTx(db *sql.DB, fn func(ctx CtxEnhanced) error) error {
 	tag := BaseTag.WithTid("Tx")
 	if app.Config.DbDebug {
-		defer utils.TimeTrack(tag.F, time.Now(), "Transaction")
+		defer func(start time.Time) {
+			elapsed := utils.TimeTrack(tag.F, start, "Transaction")
+			counters.Time(elapsed, counters.QUERIES)
+		}(time.Now())
+		// defer utils.TimeTrack(tag.F, time.Now(), "Transaction")
 	}
 	tx, err := db.Begin()
 	if app.Config.DbDebug {

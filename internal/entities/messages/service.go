@@ -78,7 +78,7 @@ func (s messagesService) Create(message types.Message) (err error) {
 	if err != nil {
 		return
 	}
-	_, err = s.repository.Create(dbMessage)
+	err = s.repository.CreateAll([]DbMessage{dbMessage})
 	return
 }
 

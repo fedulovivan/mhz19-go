@@ -14,9 +14,13 @@ type provider struct {
 // - internal/entities/push-message/api.go to push message reveived via Rest
 // - cmd/backend/main.go to push system messages like "Application started"
 func NewProvider() types.ChannelProvider {
-	return &provider{}
+	return &provider{
+		ProviderBase: engine.ProviderBase{
+			MessagesChan: make(types.MessageChan, 100),
+		},
+	}
 }
 
 func (p *provider) Init() {
-	p.InitBase()
+	// noop
 }

@@ -144,7 +144,7 @@ func (r *reader) ExecTemplate(in string, field string) (string, error) {
 					if device.Comments != nil {
 						return *device.Comments, nil
 					}
-					return fmt.Sprintf("Device of class %s, with id %v", device.DeviceClassId, deviceId), nil
+					return fmt.Sprintf("Device of class %s, with id %v", device.DeviceClass, deviceId), nil
 				} else {
 					return fmt.Sprintf("%v", deviceId), fmt.Errorf(
 						"deviceName accepts only types.DeviceId as an argument",

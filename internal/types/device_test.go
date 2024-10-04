@@ -82,12 +82,12 @@ func (s *DeviceSuite) Test50() {
 	comments := "iprum dolorovi4"
 	origin := "unit-test"
 	device := Device{
-		Id:            13,
-		DeviceId:      DeviceId("foo"),
-		DeviceClassId: DEVICE_CLASS_BOT,
-		Name:          &name,
-		Comments:      &comments,
-		Origin:        &origin,
+		Id:          13,
+		DeviceId:    DeviceId("foo"),
+		DeviceClass: DEVICE_CLASS_BOT,
+		Name:        &name,
+		Comments:    &comments,
+		Origin:      &origin,
 		Json: map[string]any{
 			"foo": 666,
 		},
@@ -95,7 +95,7 @@ func (s *DeviceSuite) Test50() {
 	}
 	bytes, err := json.Marshal(device)
 	s.Nil(err)
-	expected := `{"id":13,"deviceId":"DeviceId(foo)","deviceClassId":"telegram-bot","name":"lorem","comments":"iprum dolorovi4","origin":"unit-test","json":{"foo":666},"buriedTimeout":"1s"}`
+	expected := `{"id":13,"deviceId":"DeviceId(foo)","deviceClass":"telegram-bot","name":"lorem","comments":"iprum dolorovi4","origin":"unit-test","json":{"foo":666},"buriedTimeout":"1s"}`
 	s.Equal(expected, string(bytes))
 }
 

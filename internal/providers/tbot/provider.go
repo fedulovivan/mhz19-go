@@ -24,7 +24,12 @@ type provider struct {
 }
 
 func NewProvider() types.ChannelProvider {
-	return new(provider)
+	return &provider{
+		ProviderBase: engine.ProviderBase{
+			MessagesChan: make(types.MessageChan, 100),
+		},
+		bots: make(map[string]*tgbotapi.BotAPI),
+	}
 }
 
 func (p *provider) Channel() types.ChannelType {
@@ -44,17 +49,20 @@ func (p *provider) Send(a ...any) error {
 }
 
 func (p *provider) Stop() {
-	botsLen := len(p.bots)
-	if botsLen == 0 {
+	p.botsMu.Lock()
+	defer p.botsMu.Unlock()
+	if len(p.bots) == 0 {
 		return
 	}
-	slog.Debug(tag.F("Stopping %d bot(s)...", botsLen))
+	slog.Debug(tag.F("Stopping %d bot(s)...", len(p.bots)))
 	for _, bot := range p.bots {
 		bot.StopReceivingUpdates()
 	}
 }
 
 func (p *provider) SendNewMessage(text string, botName string) (err error) {
+	p.botsMu.RLock()
+	defer p.botsMu.RUnlock()
 	bot, found := p.bots[botName]
 	if !found {
 		err = fmt.Errorf("No such bot %v", botName)
@@ -126,13 +134,11 @@ func (p *provider) StartBotClient(token string) (err error) {
 }
 
 func (p *provider) Init() {
-	p.InitBase()
-	p.bots = make(map[string]*tgbotapi.BotAPI)
 	for _, token := range app.Config.TelegramTokens {
 		err := p.StartBotClient(token)
 		if err != nil {
 			slog.Error(tag.F("StartBotClient()"), "err", err.Error())
-			counters.Inc(counters.ERRORS)
+			counters.Inc(counters.ERRORS_ALL)
 		}
 	}
 }

@@ -8,6 +8,7 @@
             "request": "launch",
             "envFile": "${workspaceFolder}/.env.debug",
             "mode": "debug",
+            // "args": ["-mod vendor"]
         }
     ]
 }

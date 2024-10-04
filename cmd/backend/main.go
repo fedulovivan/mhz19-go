@@ -83,17 +83,27 @@ func main() {
 			ldm.RepoSingleton(),
 		),
 	)
-	dbRules, err := rulesService.Get()
-	if err == nil {
-		if len(dbRules) > 0 {
-			e.AppendRules(dbRules...)
+	go func() {
+		slog.Debug(tag.F("Fetching rules..."))
+		var timer *time.Timer
+		timer = time.AfterFunc(app.Config.RulesFetchingLimit, func() {
+			slog.Error(tag.F("Fetching rules is still running..."))
+			timer.Reset(app.Config.RulesFetchingLimit)
+		})
+		dbRules, err := rulesService.Get()
+		timer.Stop()
+		if err == nil {
+			if len(dbRules) > 0 {
+				slog.Debug(tag.F("Rules fetching done"), "rules", len(dbRules))
+				e.AppendRules(dbRules...)
+			} else {
+				slog.Warn(tag.F("No mapping rules in database"))
+			}
 		} else {
-			slog.Warn(tag.F("No mapping rules in database"))
+			slog.Error(tag.F("Failed to load rules from db"), "err", err.Error())
+			counters.Inc(counters.ERRORS_ALL)
 		}
-	} else {
-		slog.Error(tag.F("Failed to load rules from db"), "err", err.Error())
-		counters.Inc(counters.ERRORS)
-	}
+	}()
 	go func() {
 		for rule := range rulesService.OnCreated() {
 			e.AppendRules(rule)

@@ -3,11 +3,8 @@ none
 
 ### Prio 1
 - api: toggle rule on/off
-- api: rename rule
 - api: toggle rule buried_timeout on/off
-- api: delete rule
 - api: update rule
-- api: add/update/delete devices
 
 ### Bugs
 - bug: check why docker build always takes 203s on macmini (Building 202.9s (17/17) FINISHED)
@@ -17,12 +14,12 @@ none
 - bug: "api:getAll took 3.451973917s" when reading 1k rules 1k times - try same scenario with postgres
 
 ### Features
+- feat: better api for counters.Time()
 - feat: detect bot(s) are connected, instead of using dumb timeout before publishing "Application started" message
 - feat: do auto db backup before running any migration
 - feat: disable condition and action
-- feat: log rule/condition/action execution to the db table
+- feat: log rule/condition/action executions to the db table
 - feat: simple frontend
-- feat: avoid provisioning "devices" from 00-sql-up script
 - feat: introduce rules.comments column
 - feat: merge Zigbee2MqttSetState and ValveSetState actions
 - feat: create meta which descibes expected args for conditions and actions and validate in rest api
@@ -30,34 +27,33 @@ none
 ### Arch changes/decisions
 - arch: store outgoing messages as well
 - arch: instroduce same approach for handling outgoing messages: action only submits new message to out channel, and corresponding provider handles it asynchronously
-- arch: use two telegram channels for notifications: for CRITICAL messages and all the rest.
 - arch: Message, make fields DeviceClass and DeviceId optional
-- arch: think of good api for createing new message (NewMessage) Id, Timestamp, ChannelType, DeviceClass, DeviceId -  are mandatory
+- arch: think of good api (constructor) for creating new message (NewMessage) Id, Timestamp, ChannelType, DeviceClass, DeviceId -  are mandatory
 - arch: align arg names across actions (like we have two spellings: Cmd and Command)
-- arch: think how to distinquish "end device" message from all "others" - just as new flag for the message Struct?
-- arch: think how we can construct/init "TemplatePayload" automatically, now we need to build it manually in action implementation
+- arch: think how (where?) we can construct/init "TemplatePayload" automatically, now we need to build it manually in action implementation
 - arch: "FOREIGN KEY (device_id) REFERENCES devices(native_id)" requires sole UNIQUE index for column devices.native_id, while we actually need UNIQUE(device_class_id, native_id) since its unreasonable to constraint native_id across devices off all classes
 - arch: in addition to "native_id" problem see also "unsafemap" in internal/entities/ldm/repository.go
 - arch: make logger and logTag a dependency of service, api and repository
 - arch: in NewEngine create mocks for all services, which will panic with friendly message if user forgot to set that service
 - arch: get rid of any in Send(...any) - no ideas so far
-- arch: mapping rules could be pre-defined (system) and loaded from db (user-level) - think we need to store everything in db, even system rules
 - arch: split rest api and engine into different microservices
 - arch: consider replacing sql.NullInt32 and sql.NullString with corresponding of pointer types - https://stackoverflow.com/questions/40092155/difference-between-string-and-sql-nullstring, for now stick with existing approach as more convenient
 - arch: switch to nil instead of sql.NullInt32 - easy to MarshalJSON
 
 ### Try
-- try: compile with "race" flag - https://www.youtube.com/watch?v=mvUiw9ilqn8&list=WL&index=4
 - try: to deploy on old rpi/raspberrypi with ram disk enabled
 - try: hcl - https://github.com/hashicorp/hcl
-- try: some interactive cli framework, like cobra
+- try: some interactive cli framework for provision tool like cobra
 - try: validation https://github.com/asaskevich/govalidator OR https://github.com/go-ozzo/ozzo-validation
 - try: find out why cli command "make test" and "vscode" report different coverage statistics: 86.9% vs 100%. vscode syntax - `Running tool: /opt/homebrew/bin/go test -timeout 30s -coverprofile=/var/folders/5v/0wjs9g1948ddpdqkgf1h31q80000gn/T/vscode-go7lC7ip/go-code-cover github.com/fedulovivan/mhz19-go/internal/engine`
 - try: separate di library https://pkg.go.dev/go.uber.org/fx
 - try: openapi or swagger https://en.wikipedia.org/wiki/OpenAPI_Specification or https://swagger.io/
-- try: https://github.com/julienschmidt/httprouter istead of ozzo-routing
-- try: prometheus
+- try: http router https://github.com/julienschmidt/httprouter istead of ozzo-routing
+- try: prometheus https://prometheus.io/docs/guides/go-application/, https://habr.com/ru/articles/709204/
 - try: grpc
+- try: benchmarking tool https://github.com/sharkdp/hyperfine
+- try: postgres instead of sqlite3
+- try: mongodb instead of sqlite3
 
 ### Milestones
 
@@ -67,6 +63,17 @@ none
 
 ### Completed
 
+- (+) try: compile with "race" flag - https://www.youtube.com/watch?v=mvUiw9ilqn8&list=WL&index=4
+- (+) arch: use two telegram channels for notifications: for CRITICAL messages and all the rest.
+- (+) arch: think how to distinquish "end device" message from all "others" - just as new flag for the message Struct?
+- (+) arch: mapping rules could be pre-defined (system) and loaded from db (user-level) - think we need to store everything in db, even system rules
+- (+) feat: min/max time metrics
+- (+) api: rename device, add device, delete rule
+- (+) bug: DevicesService.UpsertAll return ids
+- (+) feat: avoid provisioning "devices" from 00-sql-up script, leave only system devices or get rid even from them
+- (+) bug: a lots of rules created after load tests block application slow down app startup, with no details in logs - for now wrap in goroutine and added more logging
+- (+) switched to oha for load testing, fixed "rules-write" scenario, eliminated "ab" and "hey"
+- (+) try: https://github.com/hatoo/oha
 - (+) bug: avoid "PostSonoffSwitchMessage Start args="map[Command:off DeviceId:10012db92b]"", check the status? use change?
 - (+) bug: debug logging issues: log-level-1.txt, log-level-2.txt, log-level-3.txt, see new test internal/logger/tag_test.go - wrong approach for cloning structure with underlying slice in Tag::With()
 - (+) bug: at present moment there is no "previous message info" in ExecuteActions. we call with ONE message for non-throttled rule, and with ARRAY of messages if throttling is enabled. so flag IsFirst is implemented and handled incorrectly
@@ -101,7 +108,6 @@ none
 - (+) arch: for rule_condition_or_action_arguments use value + data_type_id instead in addition to + device_id + device_class_id + channel_type_id
 - (+) uts: create tests for nested conditions
 - (+) arch: avoid "args=map[]" in logs - slog always writes nil map as "map[]", not "nil", see also Test20, Test21 in service_test.go, https://github.com/golang/go/issues/69496
-- try: postgres instead of sqlite3
 - (+) bug: unable to start vscode debugging or unit tests with current implementation around SqliteFilename and SQLITE_FILENAME
 - (+) arch: support several bots
 - (+) try: gorm - /Users/ivanf/Desktop/Projects/go/gorm-test/main.go
@@ -169,7 +175,7 @@ none
 - (+) "transaction has already been committed or rolled back" on load test - refuse from using BeginTx with ctx from errgroup
 - (+) refactor FetchAll to concurrent call, use contexts
 - (+) try https://github.com/jmoiron/sqlx, https://jmoiron.github.io/sqlx/ - library has lots of issues (300 open, 370 closed) and , for now using own lightweight wrappers
-- (+) no new mqtt messages after mqtt disconnect/autoreconnect (`Connection lost error="pingresp not received, disconnecting"` and later `Connected broker=tcp://macmini:1883`) + same issue for device-pinger which impacts its service - subscribtions should be settled in connect handler
+- (+) no new mqtt messages after mqtt disconnect/autoreconnect (`Connection lost error="pingresp not received, disconnecting"` and later `Connected broker=tcp://macmini:1883`) + same issue for device-pinger which impacts its service - subscriptions should be settled in connect handler
 - (+) schema, use same approach to check fk for device_classes and function_name (either CHECK constraint of FK to separate table)
 - (+) add transaction id to handleMessage log records
 - (+) execute actions asyncronously in goroutine

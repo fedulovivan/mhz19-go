@@ -20,7 +20,11 @@ type provider struct {
 var tag = logger.NewTag(logger.DNSSD)
 
 func NewProvider() types.ChannelProvider {
-	return new(provider)
+	return &provider{
+		ProviderBase: engine.ProviderBase{
+			MessagesChan: make(types.MessageChan, 100),
+		},
+	}
 }
 
 func (p *provider) Channel() types.ChannelType {
@@ -28,8 +32,6 @@ func (p *provider) Channel() types.ChannelType {
 }
 
 func (p *provider) Init() {
-
-	p.InitBase()
 
 	ctx := context.Background()
 
@@ -69,7 +71,7 @@ func (p *provider) Init() {
 		if err := dnssd.LookupType(ctx, service, addFn, rmvFn); err != nil {
 			fmt.Println(err)
 			slog.Error(tag.F(err.Error()))
-			counters.Inc(counters.ERRORS)
+			counters.Inc(counters.ERRORS_ALL)
 			return
 		}
 	}()

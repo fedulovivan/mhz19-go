@@ -1,7 +1,6 @@
 package devices
 
 import (
-	"fmt"
 	"strconv"
 	"time"
 
@@ -24,6 +23,7 @@ func NewApi(base *routing.RouteGroup, service types.DevicesService) {
 	}
 	group := base.Group("/devices")
 	group.Get("", api.get)
+	group.Put("", api.create)
 	group.Get("/class/<deviceClass>", api.getByDeviceClass)
 	group.Get("/<deviceId>", api.getByDeviceId)
 	group.Post("/<deviceId>", api.update)
@@ -51,8 +51,37 @@ func (api devicesApi) getByDeviceClass(c *routing.Context) (err error) {
 	return c.Write(data)
 }
 
-func (api devicesApi) update(c *routing.Context) (err error) {
-	return fmt.Errorf("not yet implemented")
+func (api devicesApi) create(c *routing.Context) error {
+	defer utils.TimeTrack(api.tag.F, time.Now(), "api:create")
+	origin := "api"
+	device := types.Device{
+		Origin: &origin,
+	}
+	err := c.Read(&device)
+	if err != nil {
+		return err
+	}
+	id, err := api.service.UpsertAll([]types.Device{device})
+	if err != nil {
+		return err
+	}
+	return c.Write(map[string]any{"ok": true, "deviceId": id})
+}
+
+func (api devicesApi) update(c *routing.Context) error {
+	defer utils.TimeTrack(api.tag.F, time.Now(), "api:update")
+	device := types.Device{
+		DeviceId: types.DeviceId(c.Param("deviceId")),
+	}
+	err := c.Read(&device)
+	if err != nil {
+		return err
+	}
+	err = api.service.Update(device)
+	if err != nil {
+		return err
+	}
+	return c.Write(map[string]any{"ok": true})
 }
 
 func (api devicesApi) getByDeviceId(c *routing.Context) (err error) {

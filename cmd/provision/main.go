@@ -32,7 +32,7 @@ func main() {
 	if dir, ok := os.LookupEnv("DIR"); ok {
 		processDir(dir)
 	} else {
-		fmt.Println("not enough options..\nusage examples:\nDIR=rules/system make provision\nDIR=rules/user make provision\nHOST=macmini:7070 DIR=rules/system make provision")
+		fmt.Println("not enough options..\nusage examples:\nDIR=devices make provision\nDIR=rules/system make provision\nDIR=rules/user make provision\nHOST=macmini:7070 DIR=rules/system make provision")
 	}
 }
 
@@ -47,6 +47,8 @@ func processDir(dir string) {
 	failed := utils.NewSeq(0)
 	dirPath := path.Join(basePath, dir)
 	entries, err := os.ReadDir(dirPath)
+	dd := strings.Split(dir, "/")
+	apiEntityPath := dd[0]
 	if err != nil {
 		panic(err.Error())
 	}
@@ -58,7 +60,7 @@ func processDir(dir string) {
 			fmt.Printf("%s IsDir=%v\n", e.Name(), e.IsDir())
 			if !e.IsDir() {
 				filePath := fmt.Sprintf("%s/%s", dirPath, e.Name())
-				res, err := processFile(filePath)
+				res, err := processFile(filePath, apiEntityPath)
 				if err == nil {
 					succeeded.Inc()
 					fmt.Println("success:", res)
@@ -75,14 +77,15 @@ func processDir(dir string) {
 	fmt.Println("failed", failed.Value())
 }
 
-func processFile(filePath string) (res string, err error) {
+func processFile(filePath string, apiEntityPath string) (res string, err error) {
 	file, err := os.ReadFile(filePath)
 	if err != nil {
 		panic(err.Error())
 	}
 	url := fmt.Sprintf(
-		"http://%v/api/rules",
+		"http://%v/api/%s",
 		host,
+		apiEntityPath,
 	)
 	req, err := http.NewRequest(
 		http.MethodPut,

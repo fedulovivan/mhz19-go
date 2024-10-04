@@ -25,6 +25,7 @@ func NewApi(base *routing.RouteGroup, service types.RulesService) {
 	group.Get("/<id>", api.getOne)
 	group.Delete("/<id>", api.delete)
 	group.Put("", api.create)
+	group.Put("/<name>", api.create)
 }
 
 func (api rulesApi) create(c *routing.Context) error {
@@ -34,6 +35,14 @@ func (api rulesApi) create(c *routing.Context) error {
 	if err != nil {
 		return err
 	}
+
+	// a trick for the oha load test
+	// see https://github.com/hatoo/oha/issues/586
+	name := c.Param("name")
+	if name != "" {
+		rule.Name = name
+	}
+
 	ruleId, err := api.service.Create(rule)
 	if err != nil {
 		return err

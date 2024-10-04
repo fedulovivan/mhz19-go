@@ -117,7 +117,7 @@ func (s rulesService) Get() ([]types.Rule, error) {
 	), nil
 }
 
-// takes flat db representaion of buils hierarchic [types.Rule]
+// takes flat db representation of buils hierarchic [types.Rule]
 // (opposite to ToDb)
 func Build(
 	allRules []DbRule,

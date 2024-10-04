@@ -15,7 +15,7 @@ type CountersSuite struct {
 
 func (s *CountersSuite) Test10() {
 	Inc("foo10")
-	data := Data()
+	data := Counters()
 	s.Equal(int32(1), data["foo10"].Value())
 }
 
@@ -23,7 +23,7 @@ func (s *CountersSuite) Test20() {
 	Inc("foo20")
 	Inc("bar20")
 	Inc("bar20")
-	bytes, err := json.Marshal(Data())
+	bytes, err := json.Marshal(Counters())
 	s.Nil(err)
 	s.Contains(string(bytes), `"bar20":2`)
 	s.Contains(string(bytes), `"foo20":1`)
@@ -34,7 +34,7 @@ func (s *CountersSuite) Test30() {
 		Inc("foo30")
 		Inc("bar30")
 	}
-	data := Data()
+	data := Counters()
 	s.Equal(int32(1000), data["foo30"].Value())
 	s.Equal(int32(1000), data["bar30"].Value())
 }
@@ -50,14 +50,14 @@ func (s *CountersSuite) Test31() {
 			Inc("foo31")
 		}
 	}()
-	data := Data()
+	data := Counters()
 	time.Sleep(time.Millisecond * 100)
 	s.Equal(int32(2000), data["foo31"].Value())
 }
 
 func (s *CountersSuite) Test40() {
 	s.NotPanics(func() {
-		data := Data()
+		data := Counters()
 		fmt.Println(data)
 	})
 }
@@ -65,7 +65,7 @@ func (s *CountersSuite) Test40() {
 func (s *CountersSuite) Test50() {
 	IncRule(1)
 	IncRule(2)
-	data := Data()
+	data := Counters()
 	s.Equal(int32(1), data["rule-1"].Value())
 	s.Equal(int32(1), data["rule-2"].Value())
 }

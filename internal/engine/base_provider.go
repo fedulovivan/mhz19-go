@@ -1,19 +1,17 @@
 package engine
 
-import "github.com/fedulovivan/mhz19-go/internal/types"
+import (
+	"github.com/fedulovivan/mhz19-go/internal/types"
+)
 
 var _ types.ChannelProvider = (*ProviderBase)(nil)
 
 type ProviderBase struct {
-	messagesChan types.MessageChan
+	MessagesChan types.MessageChan
 }
 
 func (p *ProviderBase) Messages() types.MessageChan {
-	return p.messagesChan
-}
-
-func (p *ProviderBase) InitBase() {
-	p.messagesChan = make(types.MessageChan, 100)
+	return p.MessagesChan
 }
 
 func (p *ProviderBase) Init() {
@@ -29,7 +27,7 @@ func (p *ProviderBase) Stop() {
 }
 
 func (p *ProviderBase) Push(m types.Message) {
-	p.messagesChan <- m
+	p.MessagesChan <- m
 }
 
 func (s *ProviderBase) Channel() types.ChannelType {

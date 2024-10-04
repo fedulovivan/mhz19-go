@@ -2,6 +2,8 @@
 
 This project is backend for the home automation server, written on golang. Evolution of another myne project [mhz19-next](https://github.com/fedulovivan/mhz19-next) which was a typescript-based. 
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/fedulovivan/mhz19-go)](https://goreportcard.com/report/github.com/fedulovivan/mhz19-go)
+
 ### Real use cases
 
 - Switch smart ceiling light on/off upon receiving message from smart wall switch
@@ -65,29 +67,39 @@ No matter which channel was used to receive a message, or which certain device h
 
 ### Migrations, schema version validation
 
-TBD
-
-### Provisioning
-
-TBD
+- `migrate-reset` - execute all down migrations and then all up migrations, basically reset schema to its default empty state
+- `migrate-down` - execute all down migrations
+- `migrate-up` - execute all up migrations
+- `migrate-up-single` - run certain migration up
+- `migrate-down-single` - run certain migration down
+- `migrate-dump` - create current schema dump
 
 ### Load tests
 
-TBD
+- `make api-load-rules-read`
+- `make api-load-rules-write`
+- `make api-load-push-message-write`
 
 ### Starting development instance
 
-- create db with `make migrate-up`
-- create config file `cp .env.sample .env`
+- create db and run all migrations `make migrate-up` or reset to inital state with `make migrate-reset`
+- create config file from sample `cp .env.sample .env`
+- optionally: run tests with `make test`
 - run application `make run`
 
-### Starting production instance in docker
+### Deploying production instance
 
-- create db with `make migrate-up`
-- create config file `cp .env.sample .env`
+- create db and run all migrations `make migrate-up`
+- create config file from sample `cp .env.sample .env`
 - build image with `make docker-build`
 - create and run container `make docker-up`
-- view logs with `make docker-logs`
+- optionally: check logs with `make docker-logs`
+
+### Entities provisioning
+
+DIR=devices make provision
+DIR=rules/system make provision
+DIR=rules/user make provision
 
 ### Used technologies
 
@@ -113,8 +125,7 @@ TBD
 - gcc `sudo apt install gcc`
 - delve `go install -v github.com/go-delve/delve/cmd/dlv@latest`
 - sqlite3 `sudo apt-get install sqlite3`
-- ab `sudo apt install apache2-utils` 
-- hey `brew install hey`
+- oha `brew install oha`
 
 ### Usefull commands
 

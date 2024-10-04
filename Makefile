@@ -7,6 +7,7 @@ DATE ?= $(shell date +%FT%T)
 REST_API_URL ?= http://localhost:$(REST_API_PORT)$(REST_API_PATH)
 API_LOAD_COUNT ?= 1000
 API_LOAD_THREADS ?= 10
+API_RPS ?= 50
 OS_NAME := $(shell uname -s | tr A-Z a-z)
 
 default: lint test build
@@ -55,24 +56,19 @@ docker-logs-save:
 clean:
 	rm ./bin/backend
 
-.PHONY: api-load-read-rules
-api-load-read-rules:
-	ab -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/rules
+.PHONY: api-load-rules-read
+api-load-rules-read:
+	oha -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/rules
 
-.PHONY: api-load-write-rules
-api-load-write-rules:
-	ab -T application/json -u ./assets/create-rule.json -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/rules
+.PHONY: api-load-rules-write
+api-load-rules-write:
+	curl -H 'Content-Type: application/json' -X PUT -d '{"deviceId":"DeviceId(0x00158d0004244bda)","deviceClass":1}' $(REST_API_URL)/devices
+	curl -H 'Content-Type: application/json' -X PUT -d '{"deviceId":"DeviceId(10011cec96)","deviceClass":6}' $(REST_API_URL)/devices
+	oha --method PUT -H 'Content-Type: application/json' -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) -D ./assets/load/create-rule.json --rand-regex-url $(REST_API_URL)/rules/name-[a-z0-9]{16}
 
-.PHONY: api-load-push-messages
-api-load-push-messages:
-	hey -T application/json -m PUT -D ./assets/push-message.json -n 1000 -c 10 -q 50 $(REST_API_URL)/push-message
-
-# https://stackoverflow.com/questions/978142/how-to-benchmark-apache-with-delays
-# https://gist.github.com/ungoldman/11282441
-# watch -n 0.5 
-# .PHONY: api-load-write-3
-# api-load-write-3:
-# 	curl -X PUT -H "Content-Type: application/json" -d @assets/push-message.json $(REST_API_URL)/push-message
+.PHONY: api-load-push-message-write
+api-load-push-message-write:
+	oha --method PUT -H 'Content-Type: application/json' -D ./assets/load/push-message.json -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) -q $(API_RPS) $(REST_API_URL)/push-message
 
 .PHONY: api-load-once
 api-load-once:
@@ -80,7 +76,7 @@ api-load-once:
 
 .PHONY: run
 run:
-	go run ./cmd/backend
+	GORACE="halt_on_error=1" go run -race ./cmd/backend
 
 .PHONY: provision
 provision:
@@ -122,12 +118,22 @@ migrate-dump:
 .PHONY: test
 test:
 	CGO_ENABLED=1 go test -cover -race ./...
-# CGO_ENABLED=1 go test -cover -race -count 1 ./...
-
-# .PHONY: bench
-# bench:
-# 	CGO_ENABLED=1 go test -benchmem ./...
 
 .PHONY: test-one
 test-one:
 	go test -v github.com/fedulovivan/mhz19-go/internal/engine -run "TestMappings"
+
+# ab -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/rules
+# oha --method PUT -H 'Content-Type: application/json' -d "{\"name\":\"name-`uuidgen`\"}" -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/rules
+# oha --method PUT -H 'Content-Type: application/json' -D ./assets/load/create-rule.json $(REST_API_URL)/rules
+# ab -T application/json -u ./assets/load/create-rule.json -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/rules
+# CGO_ENABLED=1 go test -cover -race -count 1 ./...
+# .PHONY: bench
+# bench:
+# 	CGO_ENABLED=1 go test -benchmem ./...
+# https://stackoverflow.com/questions/978142/how-to-benchmark-apache-with-delays
+# https://gist.github.com/ungoldman/11282441
+# watch -n 0.5 
+# .PHONY: api-load-write-3
+# api-load-write-3:
+# 	curl -X PUT -H "Content-Type: application/json" -d @assets/push-message.json $(REST_API_URL)/push-message

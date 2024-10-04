@@ -3,8 +3,6 @@ package messages
 import (
 	"context"
 	"database/sql"
-	"fmt"
-	"log/slog"
 	"slices"
 	"strings"
 	"time"
@@ -24,7 +22,7 @@ type DbMessage struct {
 
 type MessagesRepository interface {
 	Get(deviceId sql.NullString) ([]DbMessage, error)
-	Create(message DbMessage) (messageId int64, err error)
+	// Create(message DbMessage) (messageId int64, err error)
 	CreateAll(messages []DbMessage) error
 }
 
@@ -71,26 +69,26 @@ func messageInsertAllTx(
 	return err
 }
 
-func messageInsertTx(
-	m DbMessage,
-	ctx context.Context,
-) (sql.Result, error) {
-	return db.Exec(
-		ctx,
-		`INSERT INTO messages(
-			channel_type_id,
-			device_class_id,
-			device_id,
-			timestamp,
-			json
-		) VALUES(?,?,?,?,?)`,
-		m.ChannelTypeId,
-		m.DeviceClassId,
-		m.DeviceId,
-		m.Timestamp,
-		m.Json,
-	)
-}
+// func messageInsertTx(
+// 	m DbMessage,
+// 	ctx context.Context,
+// ) (sql.Result, error) {
+// 	return db.Exec(
+// 		ctx,
+// 		`INSERT INTO messages(
+// 			channel_type_id,
+// 			device_class_id,
+// 			device_id,
+// 			timestamp,
+// 			json
+// 		) VALUES(?,?,?,?,?)`,
+// 		m.ChannelTypeId,
+// 		m.DeviceClassId,
+// 		m.DeviceId,
+// 		m.Timestamp,
+// 		m.Json,
+// 	)
+// }
 
 func messagesSelectTx(ctx context.Context, deviceId sql.NullString) ([]DbMessage, error) {
 	return db.Select(
@@ -153,7 +151,7 @@ func (r messagesRepository) CreateAll(messages []DbMessage) error {
 			}
 		}
 		if len(missingDevices) > 0 {
-			err := devices.DeviceUpsertAllTx(missingDevices, ctx)
+			_, err := devices.UpsertAllTx(missingDevices, ctx)
 			if err != nil {
 				return err
 			}
@@ -162,43 +160,43 @@ func (r messagesRepository) CreateAll(messages []DbMessage) error {
 	})
 }
 
-func (r messagesRepository) Create(message DbMessage) (messageId int64, err error) {
-	err = db.RunTx(r.database, func(ctx db.CtxEnhanced) (err error) {
-		existingdevices, err := devices.DevicesSelectTx(
-			ctx,
-			db.NewNullString(message.DeviceId),
-			sql.NullInt32{},
-		)
-		if err != nil {
-			return
-		}
-		if len(existingdevices) == 0 {
-			slog.Warn(fmt.Sprintf(
-				"No device with class=%v id=%v in db, creating it automatically...",
-				message.DeviceClassId,
-				message.DeviceId,
-			))
-			_, err = devices.DeviceUpsertTx(devices.DbDevice{
-				NativeId:      message.DeviceId,
-				DeviceClassId: message.DeviceClassId,
-				Origin:        db.NewNullString("message-autoinsert"),
-			}, ctx)
-			if err != nil {
-				return
-			}
-		}
-		result, err := messageInsertTx(message, ctx)
-		if err != nil {
-			return
-		}
-		messageId, err = result.LastInsertId()
-		if err != nil {
-			return
-		}
-		return
-	})
-	return
-}
+// func (r messagesRepository) Create(message DbMessage) (messageId int64, err error) {
+// 	err = db.RunTx(r.database, func(ctx db.CtxEnhanced) (err error) {
+// 		existingdevices, err := devices.DevicesSelectTx(
+// 			ctx,
+// 			db.NewNullString(message.DeviceId),
+// 			sql.NullInt32{},
+// 		)
+// 		if err != nil {
+// 			return
+// 		}
+// 		if len(existingdevices) == 0 {
+// 			slog.Warn(fmt.Sprintf(
+// 				"No device with class=%v id=%v in db, creating it automatically...",
+// 				message.DeviceClassId,
+// 				message.DeviceId,
+// 			))
+// 			_, err = devices.DeviceUpsertTx(devices.DbDevice{
+// 				NativeId:      message.DeviceId,
+// 				DeviceClassId: message.DeviceClassId,
+// 				Origin:        db.NewNullString("message-autoinsert"),
+// 			}, ctx)
+// 			if err != nil {
+// 				return
+// 			}
+// 		}
+// 		result, err := messageInsertTx(message, ctx)
+// 		if err != nil {
+// 			return
+// 		}
+// 		messageId, err = result.LastInsertId()
+// 		if err != nil {
+// 			return
+// 		}
+// 		return
+// 	})
+// 	return
+// }
 
 // ctx := context.Background()
 // tx, err := r.database.Begin()

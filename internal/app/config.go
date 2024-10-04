@@ -48,6 +48,7 @@ type ConfigStorage struct {
 	RestApiPort          int           `env:"REST_API_PORT,default=8888"`
 	RestApiPath          string        `env:"REST_API_PATH,default=/api"`
 	ArgsDebug            bool          `env:"ARGS_DEBUG,default=false"`
+	RulesFetchingLimit   time.Duration `env:"RULES_FETCHING_LIMIT,default=10s"`
 }
 
 func InitConfig() {

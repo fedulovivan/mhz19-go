@@ -28,6 +28,9 @@ func NewProvider(
 	devicesService types.DevicesService,
 ) types.ChannelProvider {
 	return &provider{
+		ProviderBase: engine.ProviderBase{
+			MessagesChan: make(types.MessageChan, 100),
+		},
 		ldmService:     ldmService,
 		devicesService: devicesService,
 		buriedTimers:   make(BuriedTimers),
@@ -86,7 +89,6 @@ func (p *provider) handleKey(key types.LdmKey) {
 }
 
 func (p *provider) Init() {
-	p.InitBase()
 	go func() {
 		for key := range p.ldmService.OnSet() {
 			p.handleKey(key)

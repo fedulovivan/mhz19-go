@@ -136,7 +136,7 @@ func (e *engine) InvokeConditionFunc(
 		return res
 	} else {
 		slog.Error(tag.F("Failed" /* , elapsed */), "err", err)
-		counters.Inc(counters.ERRORS)
+		counters.Inc(counters.ERRORS_ALL)
 		return false
 	}
 }
@@ -150,7 +150,7 @@ func (e *engine) InvokeActionFunc(compound types.MessageCompound, a types.Action
 	elapsed := time.Since(start)
 	if err != nil {
 		slog.Error(atag.F("Failed in %s", elapsed), "err", err)
-		counters.Inc(counters.ERRORS)
+		counters.Inc(counters.ERRORS_ALL)
 	} else {
 		slog.Debug(atag.F("Completed in %s", elapsed))
 	}
@@ -212,13 +212,16 @@ func (e *engine) ExecuteActions(compound types.MessageCompound, r types.Rule, ta
 // should have thread-safe implementation
 func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 	mtag := BaseTag.With("Msg=%d", m.Id)
-	defer utils.TimeTrack(mtag.F, time.Now(), "HandleMessage")
+	defer func(start time.Time) {
+		elapsed := utils.TimeTrack(mtag.F, start, "HandleMessage")
+		counters.Time(elapsed, counters.MESSAGES_HANDLED)
+	}(time.Now())
+	defer counters.Inc(counters.MESSAGES_HANDLED)
 	e.rulesMu.RLock()
 	defer e.rulesMu.RUnlock()
 	if m.Id == 0 || m.Timestamp.IsZero() {
 		panic("message must have Id and Timestamp initialised")
 	}
-	counters.Inc(counters.MESSAGES_RECEIVED)
 	p := m.Payload
 	isSystem := m.DeviceClass == types.DEVICE_CLASS_SYSTEM
 	isBridge := m.DeviceClass == types.DEVICE_CLASS_ZIGBEE_BRIDGE

@@ -2,6 +2,7 @@ package devices
 
 import (
 	"database/sql"
+	"fmt"
 	"strings"
 
 	"github.com/fedulovivan/mhz19-go/internal/db"
@@ -19,8 +20,9 @@ type DbDevice struct {
 }
 
 type DevicesRepository interface {
-	UpsertAll(devices []DbDevice) error
+	UpsertAll(devices []DbDevice) (int64, error)
 	Get(deviceId sql.NullString, deviceClass sql.NullInt32) ([]DbDevice, error)
+	Update(device DbDevice) error
 }
 
 var _ DevicesRepository = (*devicesRepository)(nil)
@@ -35,16 +37,23 @@ func NewRepository(database *sql.DB) DevicesRepository {
 	}
 }
 
-func (r devicesRepository) UpsertAll(devices []DbDevice) (err error) {
-	return db.RunTx(r.database, func(ctx db.CtxEnhanced) error {
-		for _, device := range devices {
-			_, err = DeviceUpsertTx(device, ctx)
-			if err != nil {
-				return err
-			}
-		}
-		return nil
+func (r devicesRepository) Update(device DbDevice) error {
+	return db.RunTx(r.database, func(ctx db.CtxEnhanced) (err error) {
+		_, err = UpdateTx(ctx, device)
+		return
 	})
+}
+
+func (r devicesRepository) UpsertAll(devices []DbDevice) (id int64, err error) {
+	err = db.RunTx(r.database, func(ctx db.CtxEnhanced) (err error) {
+		res, err := UpsertAllTx(devices, ctx)
+		if err != nil {
+			return
+		}
+		id, _ = res.LastInsertId()
+		return
+	})
+	return
 }
 
 func (r devicesRepository) Get(deviceId sql.NullString, deviceClass sql.NullInt32) (devices []DbDevice, err error) {
@@ -62,13 +71,13 @@ func CountTx(ctx db.CtxEnhanced) (int32, error) {
 	)
 }
 
-func DeviceUpsertAllTx(dd []DbDevice, ctx db.CtxEnhanced) error {
-	mlen := len(dd)
+func UpsertAllTx(devices []DbDevice, ctx db.CtxEnhanced) (sql.Result, error) {
+	mlen := len(devices)
 	cols := 6
 	p := "(?,?,?,?,?,?)"
 	placehoders := make([]string, mlen)
 	values := make([]any, mlen*cols)
-	for i, d := range dd {
+	for i, d := range devices {
 		placehoders[i] = p
 		values[cols*i+0] = d.NativeId
 		values[cols*i+1] = d.DeviceClassId
@@ -77,20 +86,22 @@ func DeviceUpsertAllTx(dd []DbDevice, ctx db.CtxEnhanced) error {
 		values[cols*i+4] = d.Origin
 		values[cols*i+5] = d.Json
 	}
-	_, err := db.Exec(
+	return db.Exec(
 		ctx,
-		`INSERT INTO devices(
-			native_id, 
-			device_class_id, 
-			name, 
-			comments, 
-			origin, 
-			json
-		)
-		VALUES `+strings.Join(placehoders, ", "),
+		fmt.Sprintf(
+			`INSERT INTO devices(
+				native_id, 
+				device_class_id, 
+				name, 
+				comments, 
+				origin, 
+				json
+			)
+			VALUES %s ON CONFLICT(native_id) DO UPDATE SET json = excluded.json`,
+			strings.Join(placehoders, ", "),
+		),
 		values...,
 	)
-	return err
 }
 
 func DevicesSelectTx(ctx db.CtxEnhanced, nativeId sql.NullString, deviceClass sql.NullInt32) ([]DbDevice, error) {
@@ -126,16 +137,44 @@ func DevicesSelectTx(ctx db.CtxEnhanced, nativeId sql.NullString, deviceClass sq
 	)
 }
 
-func DeviceUpsertTx(
-	device DbDevice,
+func UpdateTx(
 	ctx db.CtxEnhanced,
+	device DbDevice,
 ) (sql.Result, error) {
 	return db.Exec(
 		ctx,
-		`INSERT INTO devices(native_id, device_class_id, name, comments, origin, json)
-		VALUES(?,?,?,?,?,?)
-		ON CONFLICT(native_id)
-		DO UPDATE SET json = excluded.json`,
-		device.NativeId, device.DeviceClassId, device.Name, device.Comments, device.Origin, device.Json,
+		`UPDATE devices SET name = ? WHERE native_id = ?`,
+		device.Name,
+		device.NativeId,
 	)
 }
+
+// for _, device := range devices {
+// 	_, err = DeviceUpsertTx(device, ctx)
+// 	if err != nil {
+// 		return err
+// 	}
+// }
+// return nil
+
+// func (r devicesRepository) Create(device DbDevice) (deviceId int32, err error) {
+// 	err = db.RunTx(r.database, func(ctx db.CtxEnhanced) (err error) {
+// 		// insertTx
+// 		// _, err = updateTx(ctx, device)
+// 		// return
+// 	})
+// }
+
+// func DeviceUpsertTx(
+// 	device DbDevice,
+// 	ctx db.CtxEnhanced,
+// ) (sql.Result, error) {
+// 	return db.Exec(
+// 		ctx,
+// 		`INSERT INTO devices(native_id, device_class_id, name, comments, origin, json)
+// 		VALUES(?,?,?,?,?,?)
+// 		ON CONFLICT(native_id)
+// 		DO UPDATE SET json = excluded.json`,
+// 		device.NativeId, device.DeviceClassId, device.Name, device.Comments, device.Origin, device.Json,
+// 	)
+// }

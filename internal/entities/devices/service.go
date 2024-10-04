@@ -16,31 +16,35 @@ type devicesService struct {
 	repository DevicesRepository
 }
 
-func (s devicesService) UpsertAll(devices []types.Device) (err error) {
-	return s.repository.UpsertAll(ToDb(devices))
+func (s devicesService) UpsertAll(devices []types.Device) (int64, error) {
+	return s.repository.UpsertAll(ToDbAll(devices))
 }
 
-func ToDb(in []types.Device) (out []DbDevice) {
+func ToDb(d types.Device) DbDevice {
+	mjson, err := json.Marshal(d.Json)
+	out := DbDevice{
+		NativeId:      string(d.DeviceId),
+		DeviceClassId: int32(d.DeviceClass),
+		Json:          sql.NullString{String: string(mjson), Valid: err == nil},
+	}
+	if d.Name != nil {
+		out.Name = db.NewNullString(*d.Name)
+	}
+	if d.Comments != nil {
+		out.Comments = db.NewNullString(*d.Comments)
+	}
+	if d.Origin != nil {
+		out.Origin = db.NewNullString(*d.Origin)
+	}
+	if d.BuriedTimeout != nil {
+		out.BuriedTimeout = db.NewNullInt32(int32(d.BuriedTimeout.Duration.Seconds()))
+	}
+	return out
+}
+
+func ToDbAll(in []types.Device) (out []DbDevice) {
 	for _, d := range in {
-		mjson, err := json.Marshal(d.Json)
-		dbDevice := DbDevice{
-			NativeId:      string(d.DeviceId),
-			DeviceClassId: int32(d.DeviceClassId),
-			Json:          sql.NullString{String: string(mjson), Valid: err == nil},
-		}
-		if d.Name != nil {
-			dbDevice.Name = db.NewNullString(*d.Name)
-		}
-		if d.Comments != nil {
-			dbDevice.Comments = db.NewNullString(*d.Comments)
-		}
-		if d.Origin != nil {
-			dbDevice.Origin = db.NewNullString(*d.Origin)
-		}
-		if d.BuriedTimeout != nil {
-			dbDevice.BuriedTimeout = db.NewNullInt32(int32(d.BuriedTimeout.Duration.Seconds()))
-		}
-		out = append(out, dbDevice)
+		out = append(out, ToDb(d))
 	}
 	return
 }
@@ -52,10 +56,10 @@ func BuildDevices(in []DbDevice) (out []types.Device) {
 			_ = json.Unmarshal([]byte(d.Json.String), &payload)
 		}
 		device := types.Device{
-			Id:            int(d.Id),
-			DeviceId:      types.DeviceId(d.NativeId),
-			DeviceClassId: types.DeviceClass(d.DeviceClassId),
-			Json:          payload,
+			Id:          int(d.Id),
+			DeviceId:    types.DeviceId(d.NativeId),
+			DeviceClass: types.DeviceClass(d.DeviceClassId),
+			Json:        payload,
 		}
 		if d.Name.Valid {
 			device.Name = &d.Name.String
@@ -74,6 +78,16 @@ func BuildDevices(in []DbDevice) (out []types.Device) {
 		out = append(out, device)
 	}
 	return
+}
+
+// func (s devicesService) Create(device types.Device) (int32, error) {
+// 	s.repository.UpsertAll()
+// 	// return s.repository.Create(ToDb(device))
+// 	// s.repository.UpsertAll()
+// }
+
+func (s devicesService) Update(device types.Device) error {
+	return s.repository.Update(ToDb(device))
 }
 
 func (s devicesService) GetByDeviceClass(dc types.DeviceClass) (devices []types.Device, err error) {

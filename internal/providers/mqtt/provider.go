@@ -23,7 +23,11 @@ type provider struct {
 }
 
 func NewProvider() types.ChannelProvider {
-	return new(provider)
+	return &provider{
+		ProviderBase: engine.ProviderBase{
+			MessagesChan: make(types.MessageChan, 100),
+		},
+	}
 }
 
 func (p *provider) Send(a ...any) (err error) {
@@ -76,9 +80,6 @@ func (p *parserBase) parse_base() (types.Message, bool) {
 }
 
 func (p *provider) Init() {
-
-	p.InitBase()
-
 	var handlers = TopicHandlers{
 		"zigbee2mqtt/+": func(client MqttLib.Client, msg MqttLib.Message) {
 			outMsg, ok := NewZigbeeDevice(msg).Parse()
@@ -108,7 +109,7 @@ func (p *provider) Init() {
 
 	var defaultMessageHandler = func(client MqttLib.Client, msg MqttLib.Message) {
 		slog.Error(tag.F("defaultMessageHandler is not expected to be reached"), "topic", msg.Topic())
-		counters.Inc(counters.ERRORS)
+		counters.Inc(counters.ERRORS_ALL)
 	}
 
 	var connectHandler = func(client MqttLib.Client) {
@@ -116,7 +117,7 @@ func (p *provider) Init() {
 		for t := range handlers {
 			subscribe(client, t)
 		}
-		slog.Debug(tag.F("All subscribtions are settled"))
+		slog.Debug(tag.F("All subscriptions are settled"))
 	}
 
 	var reconnectHandler = func(client MqttLib.Client, opts *MqttLib.ClientOptions) {
@@ -125,7 +126,7 @@ func (p *provider) Init() {
 
 	var connectLostHandler = func(client MqttLib.Client, err error) {
 		slog.Error(tag.F("Connection lost"), "error", err)
-		counters.Inc(counters.ERRORS)
+		counters.Inc(counters.ERRORS_ALL)
 	}
 
 	// build opts
@@ -161,7 +162,7 @@ func (p *provider) Init() {
 	slog.Debug(tag.F("Connecting..."))
 	if token := p.client.Connect(); token.Wait() && token.Error() != nil {
 		slog.Error(tag.F("Initial connect"), "error", token.Error())
-		counters.Inc(counters.ERRORS)
+		counters.Inc(counters.ERRORS_ALL)
 	}
 
 }
@@ -178,7 +179,7 @@ func (p *provider) Stop() {
 func subscribe(client MqttLib.Client, topic string) {
 	if token := client.Subscribe(topic, 0, nil); token.Wait() && token.Error() != nil {
 		slog.Error(tag.F("client.Subscribe()"), "error", token.Error())
-		counters.Inc(counters.ERRORS)
+		counters.Inc(counters.ERRORS_ALL)
 	}
 	slog.Info(tag.F("Subscribed to"), "topic", topic)
 }

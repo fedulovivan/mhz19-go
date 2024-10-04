@@ -1,0 +1,46 @@
+{
+    "name": "balcony ceiling light on/off",
+    "condition": {
+        "nested": [
+            {
+                "fn": "ZigbeeDevice",
+                "args": {
+                    "List": [
+                        "DeviceId(0x00158d0004244bda)"
+                    ]
+                }
+            },
+            {
+                "fn": "InList",
+                "args": {
+                    "Value": "$message.action",
+                    "List": [
+                        "single_left",
+                        "single_right"
+                    ]
+                }
+            },
+            {
+                "fn": "Changed",
+                "args": {
+                    "Value": "$message.action"
+                }
+            }
+        ]
+    },
+    "actions": [
+        {
+            "fn": "PostSonoffSwitchMessage",
+            "args": {
+                "Command": "$message.action",
+                "DeviceId": "DeviceId(10011cec96)"
+            },
+            "mapping": {
+                "Command": {
+                    "single_left": "on",
+                    "single_right": "off"
+                }
+            }
+        }
+    ]
+}

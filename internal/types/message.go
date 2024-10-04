@@ -17,7 +17,7 @@ type Message struct {
 	ChannelType ChannelType `json:"channelType"`
 	// device class, see DeviceClass
 	DeviceClass DeviceClass `json:"deviceClass"`
-	// device id, specific for the current channel and device class, eg ieee adress for zigbee device
+	// device id, specific for the current channel and device class, eg ieee address for zigbee device
 	DeviceId DeviceId `json:"deviceId"`
 	// indicates this is end device message,
 	// and not a thing like z2m bridge message with list of registered devices,

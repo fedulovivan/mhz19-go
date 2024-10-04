@@ -16,6 +16,9 @@ var (
 type mockDevicesService struct {
 }
 
+func (s mockDevicesService) Update(device types.Device) error {
+	return nil
+}
 func (s mockDevicesService) Get() ([]types.Device, error) {
 	return nil, nil
 }
@@ -39,8 +42,8 @@ func (s mockDevicesService) GetOne(id types.DeviceId) (res types.Device, err err
 	}
 	return
 }
-func (s mockDevicesService) UpsertAll(devices []types.Device) error {
-	return nil
+func (s mockDevicesService) UpsertAll(devices []types.Device) (int64, error) {
+	return 0, nil
 }
 
 type mockprovider struct {

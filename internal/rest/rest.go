@@ -43,12 +43,12 @@ func errorHandler(c *routing.Context) (err error) {
 		}
 		if err != nil {
 			slog.Error(tag.F("errorHandler:"), "path", c.Request.URL.Path, "err", err.Error())
-			counters.Inc(counters.ERRORS)
+			counters.Inc(counters.ERRORS_ALL)
 			res := map[string]any{
 				"is_error": true,
 				"error":    err.Error(),
 			}
-			if err = c.Write(res); err != nil {
+			if err = c.WriteWithStatus(res, http.StatusInternalServerError); err != nil {
 				slog.Error(tag.F("failed writing error response"), "err", err)
 			}
 			c.Abort()
@@ -68,6 +68,7 @@ func Init(shimProvider types.ChannelProvider) {
 	router := routing.New()
 	router.Use(
 		slash.Remover(http.StatusMovedPermanently),
+		cors.Handler(cors.AllowAll),
 	)
 
 	router.Get("/", func(ctx *routing.Context) error {
@@ -85,7 +86,6 @@ func Init(shimProvider types.ChannelProvider) {
 		errorHandler,
 		content.TypeNegotiator(content.JSON),
 		requestCounter,
-		cors.Handler(cors.AllowAll),
 	)
 
 	// rules
@@ -167,7 +167,7 @@ func Stop() {
 	err := server.Shutdown(context.Background())
 	if err != nil {
 		slog.Error(tag.F(err.Error()))
-		counters.Inc(counters.ERRORS)
+		counters.Inc(counters.ERRORS_ALL)
 	}
 }
 
