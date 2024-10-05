@@ -36,13 +36,15 @@ func (p *provider) Channel() types.ChannelType {
 	return types.CHANNEL_TELEGRAM
 }
 
+// args: botName, text, chatId
 func (p *provider) Send(a ...any) error {
 	botName := a[0].(string)
+	chatId := a[2].(int64)
 	switch text := a[1].(type) {
 	case string:
-		return p.SendNewMessage(text /* 114333844,  */, botName)
+		return p.SendNewMessage(text, botName, chatId)
 	case []byte:
-		return p.SendNewMessage(string(text) /* 114333844,  */, botName)
+		return p.SendNewMessage(string(text), botName, chatId)
 	default:
 		panic(fmt.Sprintf("expected type %T", text))
 	}
@@ -60,7 +62,7 @@ func (p *provider) Stop() {
 	}
 }
 
-func (p *provider) SendNewMessage(text string, botName string) (err error) {
+func (p *provider) SendNewMessage(text string, botName string, chatId int64) (err error) {
 	p.botsMu.RLock()
 	defer p.botsMu.RUnlock()
 	bot, found := p.bots[botName]
@@ -68,22 +70,18 @@ func (p *provider) SendNewMessage(text string, botName string) (err error) {
 		err = fmt.Errorf("No such bot %v", botName)
 		return
 	}
-	chatId := app.Config.TelegramChatId
-	slog.Debug(tag.F("SendNewMessage()"), "text", text, "chatId", chatId, "botName", botName)
+	slog.Debug(tag.F("SendNewMessage()"), "text", text, "botName", botName, "chatId", chatId)
 	msg := tgbotapi.NewMessage(chatId, text)
 	_, err = bot.Send(msg)
 	return
 }
 
+// chatId := app.Config.TelegramChatId
 // msg.ReplyToMessageID = update.Message.MessageID
 // if chatId == 0 {
 // 	chatId = app.Config.TelegramChatId
 // }
 // chatId = int64(114333844)
-// if err != nil {
-// 	return err
-// 	// slog.Error(tag.F("SendNewMessage()"), "err", err.Error())
-// }
 
 func (p *provider) StartBotClient(token string) (err error) {
 	p.botsMu.Lock()

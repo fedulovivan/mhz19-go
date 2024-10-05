@@ -3,6 +3,7 @@ package actions
 import (
 	"encoding/json"
 
+	"github.com/Jeffail/gabs/v2"
 	"github.com/fedulovivan/mhz19-go/internal/app"
 	"github.com/fedulovivan/mhz19-go/internal/arguments"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
@@ -15,8 +16,16 @@ var TelegramBotMessage types.ActionImpl = func(compound types.MessageCompound, a
 		WithPrev: compound.Prev != nil,
 		Queued:   compound.Queued,
 	}
+	chatId := app.Config.TelegramChatId
 	if compound.Curr != nil {
 		tpayload.Message = *compound.Curr
+		if compound.Curr.ChannelType == types.CHANNEL_TELEGRAM {
+			gjson := gabs.Wrap(compound.Curr.Payload)
+			replyTo, ok := gjson.Path("ChatId").Data().(int64)
+			if ok {
+				chatId = replyTo
+			}
+		}
 	}
 	reader := arguments.NewReader(compound.Curr, args, mapping, &tpayload, e, tag)
 	var botName string
@@ -43,5 +52,5 @@ var TelegramBotMessage types.ActionImpl = func(compound types.MessageCompound, a
 		text = string(mjson)
 	}
 	p := e.FindProvider(types.CHANNEL_TELEGRAM)
-	return p.Send(botName, text)
+	return p.Send(botName, text, chatId)
 }

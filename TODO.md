@@ -1,5 +1,5 @@
 ### Prio 0
-(+) bug: `requesting message for otherDeviceId=192.168.88.44` Not Equal gives wrong result (added more logging, probably caused by recent app restart and missing data to execute otherDeviceId logic and get actual pinger status for 192.168.88.44) real reason was in using ldm service Get(m.DeviceClass, otherDeviceId) instead of GetByDeviceId(otherDeviceId)
+none
 
 ### Prio 1
 - api: toggle rule on/off
@@ -14,6 +14,8 @@
 - bug: "api:getAll took 3.451973917s" when reading 1k rules 1k times - try same scenario with postgres
 
 ### Features
+- feat: parse DeviceClass(telegram-bot) as well as DeviceClass(5)
+- feat: parse DeviceClass(mqtt) as well as ChannelType(1)
 - feat: add room entity, connect it with devices
 - feat: better api for counters.Time()
 - feat: detect bot(s) are connected, instead of using dumb timeout before publishing "Application started" message
@@ -67,6 +69,9 @@
 
 ### Completed
 
+- (+) bug: DATA RACE when strarting with incorrect mqtt settings
+- (+) feat: think how to design "bot reply feature" - TelegramBotMessage has access to initial message from 'telegram-bot' channel which contains ChatId in payload
+- (+) bug: `requesting message for otherDeviceId=192.168.88.44` Not Equal gives wrong result (added more logging, probably caused by recent app restart and missing data to execute otherDeviceId logic and get actual pinger status for 192.168.88.44) real reason was in using ldm service Get(m.DeviceClass, otherDeviceId) instead of GetByDeviceId(otherDeviceId)
 - (+) bug: Msg=40 Rule=13 Condition=48 Changed Started args=map[Value:$message.action] res=false - regression
 - (+) bug: "no last message for.." should not be recorded as ERROR
 - (+) bug: last device message is not recorded if no rules are configured

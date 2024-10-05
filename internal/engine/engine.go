@@ -91,7 +91,9 @@ func (e *engine) Start() {
 		go func(provider types.ChannelProvider) {
 			provider.Init()
 			for message := range provider.Messages() {
+				e.rulesMu.RLock()
 				e.HandleMessage(message, e.rules)
+				e.rulesMu.RUnlock()
 			}
 		}(p)
 	}
