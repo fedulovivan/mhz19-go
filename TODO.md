@@ -1,10 +1,10 @@
 ### Prio 0
-none
+(+) bug: `requesting message for otherDeviceId=192.168.88.44` Not Equal gives wrong result (added more logging, probably caused by recent app restart and missing data to execute otherDeviceId logic and get actual pinger status for 192.168.88.44) real reason was in using ldm service Get(m.DeviceClass, otherDeviceId) instead of GetByDeviceId(otherDeviceId)
 
 ### Prio 1
 - api: toggle rule on/off
 - api: toggle rule buried_timeout on/off
-- api: update rule
+- api: update rule? looks its better to use delete/create strategy
 
 ### Bugs
 - bug: check why docker build always takes 203s on macmini (Building 202.9s (17/17) FINISHED)
@@ -14,11 +14,11 @@ none
 - bug: "api:getAll took 3.451973917s" when reading 1k rules 1k times - try same scenario with postgres
 
 ### Features
-- feat: add room entity, attach it to device
+- feat: add room entity, connect it with devices
 - feat: better api for counters.Time()
 - feat: detect bot(s) are connected, instead of using dumb timeout before publishing "Application started" message
 - feat: do auto db backup before running any migration
-- feat: disable condition and action
+- feat: ability to disable certain condition or action
 - feat: log rule/condition/action executions to the db table
 - feat: simple frontend
 - feat: introduce rules.comments column
@@ -28,13 +28,14 @@ none
 ### Arch changes/decisions
 - arch: store outgoing messages as well
 - arch: instroduce same approach for handling outgoing messages: action only submits new message to out channel, and corresponding provider handles it asynchronously
-- arch: Message, make fields DeviceClass and DeviceId optional
 - arch: think of good api (constructor) for creating new message (NewMessage) Id, Timestamp, ChannelType, DeviceClass, DeviceId -  are mandatory
 - arch: align arg names across actions (like we have two spellings: Cmd and Command)
 - arch: think how (where?) we can construct/init "TemplatePayload" automatically, now we need to build it manually in action implementation
-- arch: "FOREIGN KEY (device_id) REFERENCES devices(native_id)" requires sole UNIQUE index for column devices.native_id, while we actually need UNIQUE(device_class_id, native_id) since its unreasonable to constraint native_id across devices off all classes
-- arch: in addition to "native_id" problem see also "unsafemap" in internal/entities/ldm/repository.go
-- arch: make logger and logTag a dependency of service, api and repository
+- mile: device_id + device_class adressing issue:
+    - "FOREIGN KEY (device_id) REFERENCES devices(native_id)" requires sole UNIQUE index for column devices.native_id, while we actually need UNIQUE(device_class_id, native_id) since its unreasonable to constraint native_id across devices off all classes
+    - in addition to "native_id" problem see also "unsafemap" in internal/entities/ldm/repository.go
+    - a solution could be to keep ids as strings like "ZigbeeDevice(0x00158d000a823bb0)" or "Pinger(192.168.88.44)"
+    - Message, make fields DeviceClass and DeviceId optional
 - arch: in NewEngine create mocks for all services, which will panic with friendly message if user forgot to set that service
 - arch: get rid of any in Send(...any) - no ideas so far
 - arch: split rest api and engine into different microservices
@@ -55,12 +56,14 @@ none
 - try: benchmarking tool https://github.com/sharkdp/hyperfine
 - try: postgres instead of sqlite3
 - try: mongodb instead of sqlite3
+- try: chatgpt or copilot to review code https://www.reddit.com/r/vscode/comments/14upva0/how_to_use_chatgptcopilot_for_code_review/
 
 ### Milestones
 
 - (+) 26 sep 2024, DONE. Initial launch - All features from mhz19-next plus storing mapping rules in database
 - Implement simple frontend
 - Interactive zigbee device join - End-to-end scenario with new device device join, confuguring rules, with no app retart
+- device_id + device_class adressing issue
 
 ### Completed
 
@@ -91,7 +94,6 @@ none
 - (+) bug: lots of erorrs: `ERR [engine]     Msg=1906 Rule=6 condition=InList Fail err="Message.ExecDirective(): Payload 'map[string]interface {}, map[battery:100 device_temperature:30 linkquality:90 power_outage_count:24 voltage:3025]' has no field 'action'"` - for now fixed with supressing message "has no field", look redundant
 - (+) feat: issue zigbee2mqtt/bridge/config/devices/get periodically - not supported by z2m now, zigbee2mqtt/bridge/devices is retained message, updated by z2m with list of devices
 - (+) arch: avoid postman as a dependency for provisioning system/user rules. create them via curl script - introduced appropriate requests json in assets + new makefile command "provisioning"
-- (+) bug: `requesting message for otherDeviceId=192.168.88.44` Not Equal gives wrong result - added more logging, probably caused by recent app restart and missing data to execute otherDeviceId logic and get actual pinger status for 192.168.88.44
 - (+) arch: make BotName optional for the TelegramBotMessage, take it from config
 - (+) feat: find a place for "Application started" message
 - (+) arch: reworked counters module / per-rule match counter
@@ -196,6 +198,7 @@ none
 - (+) consider replacing hand-written adapters with mqttClient.AddRoute() API, also add warning for messages captured by defaultMessageHandler (assuming all topics we subscribe should have own handlers and default one should not be reached)
 
 ### Discarded
+- (?) arch: make logger and logTag a dependency of service, api and repository - no urgent need, everything is easily testable with current approach
 - (?) try: opentelemetry https://opentelemetry.io/docs/languages/go/getting-started/, https://www.reddit.com/r/devops/comments/nxrbqa/opentelemetry_is_great_but_why_is_it_so_bloody/ - no need now, due to overcomplicated api
 - (?) introduce intermediate layer between named args and function implementation using regular args (more robust, simplify things like ZigbeeDeviceFn)
 - (?) think about "first match" strategy in handleMessage - we do not need this, since we to execute RecordMessage and some other action 

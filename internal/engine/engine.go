@@ -261,11 +261,18 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 			takeOtherDeviceMessage := len(otherDeviceId) > 0
 			if takeOtherDeviceMessage {
 				slog.Debug(rtag.F("requesting message for otherDeviceId=%v", otherDeviceId))
-				otherLdmKey := e.ldmService.NewKey(m.DeviceClass, otherDeviceId)
-				if e.ldmService.Has(otherLdmKey) {
-					tmp := e.ldmService.Get(otherLdmKey)
+				tmp, err := e.ldmService.GetByDeviceId(otherDeviceId)
+				if err == nil {
+					slog.Debug(rtag.F("fetched", "message", tmp))
 					compound.Curr = &tmp
+				} else {
+					slog.Warn(rtag.F(err.Error()))
 				}
+				// otherLdmKey := e.ldmService.NewKey(m.DeviceClass, otherDeviceId)
+				// if e.ldmService.Has(otherLdmKey) {
+				// 	tmp := e.ldmService.Get(otherLdmKey)
+				// 	compound.Curr = &tmp
+				// }
 			} else {
 				compound.Curr = &m
 				if e.ldmService.Has(ldmKey) {

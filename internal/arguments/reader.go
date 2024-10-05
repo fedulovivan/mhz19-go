@@ -154,11 +154,11 @@ func (r *reader) ExecTemplate(in string, field string) (string, error) {
 			"pingerStatusName": func(statusId any) string {
 				svalue := fmt.Sprintf("%v", statusId)
 				if svalue == "0" {
-					return "OFFLINE"
+					return "offline"
 				} else if svalue == "1" {
-					return "ONLINE"
+					return "online"
 				} else if svalue == "-1" {
-					return "UNKNOWN"
+					return "unknown"
 				} else {
 					return svalue
 				}
