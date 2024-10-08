@@ -120,7 +120,7 @@ func (e *engine) InvokeConditionFunc(
 	c types.Condition,
 	baseTag logger.Tag,
 ) bool {
-	// start := time.Now()
+	start := time.Now()
 	impl := conditions.Get(c.Fn)
 	fnString := c.Fn.String()
 	if c.Not {
@@ -129,15 +129,15 @@ func (e *engine) InvokeConditionFunc(
 	tag := baseTag.With("Condition=%d %s", c.Id, fnString)
 	slog.Debug(tag.F("Started"), "args", c.Args)
 	res, err := impl(mt, c.Args, tag)
-	// elapsed := time.Since(start)
+	elapsed := time.Since(start)
 	if err == nil {
 		if c.Not {
 			res = !res
 		}
-		slog.Debug(tag.F("Completed" /* , elapsed */), "res", res)
+		slog.Debug(tag.F("Completed in %s", elapsed), "res", res)
 		return res
 	} else {
-		slog.Error(tag.F("Failed" /* , elapsed */), "err", err)
+		slog.Error(tag.F("Failed in %s", elapsed), "err", err)
 		counters.Inc(counters.ERRORS_ALL)
 		return false
 	}
@@ -200,7 +200,7 @@ func (e *engine) MatchesCondition(mtcb types.GetCompoundForOtherDeviceId, c type
 }
 
 func (e *engine) ExecuteActions(compound types.MessageCompound, r types.Rule, tag logger.Tag) {
-	slog.Debug(tag.F("going to execute %v actions", len(r.Actions)))
+	slog.Debug(tag.F("going to execute %d actions", len(r.Actions)))
 	for _, a := range r.Actions {
 		go e.InvokeActionFunc(compound, a, tag)
 	}
@@ -223,7 +223,6 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 		elapsed := utils.TimeTrack(mtag.F, start, "HandleMessage")
 		counters.Time(elapsed, counters.MESSAGES_HANDLED)
 	}(time.Now())
-	defer counters.Inc(counters.MESSAGES_HANDLED)
 
 	isSystem := m.DeviceClass == types.DEVICE_CLASS_SYSTEM
 	isBridge := m.DeviceClass == types.DEVICE_CLASS_ZIGBEE_BRIDGE
@@ -244,14 +243,15 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 		"FromEndDevice", m.FromEndDevice,
 	)
 
+	matches := 0
 	rulesCnt := len(rules)
-	if rulesCnt == 0 {
-		slog.Warn(mtag.F("No rules"))
-	} else {
+	withRules := rulesCnt > 0
+	if withRules {
 		slog.Debug(mtag.F("Matching against %v rules", rulesCnt))
+	} else {
+		slog.Warn(mtag.F("No rules"))
 	}
 
-	matches := 0
 	for _, r := range rules {
 		rtag := mtag.With("Rule=%d", r.Id)
 		if r.Disabled {
@@ -301,16 +301,20 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 					})
 				}
 				queuesContainer.GetQueue(key).PushMessage(m)
-				slog.Debug(rtag.F("message was queued for %s", r.Throttle.Duration))
+				slog.Debug(rtag.F(
+					"message and execution of %d actions were queued for %s",
+					len(r.Actions),
+					r.Throttle.Duration,
+				))
 			}
 		}
 	}
 
-	if rulesCnt > 0 {
+	if withRules {
 		if matches == 0 {
 			slog.Warn(mtag.F("No one matching rule found"))
 		} else {
-			slog.Debug(mtag.F("%v out of %v rules were matched", matches, len(rules)))
+			slog.Debug(mtag.F("%v out of %v rules were matched", matches, rulesCnt))
 		}
 	}
 

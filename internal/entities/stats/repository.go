@@ -34,6 +34,10 @@ func (r statsRepository) Get() (
 	err = db.RunTx(r.database, func(ctx db.CtxEnhanced) error {
 		g, ctx := errgroup.WithContext(ctx)
 		g.Go(func() (e error) { res.Rules, e = rules.CountTx(ctx); return })
+		g.Go(func() (e error) { res.Actions, e = rules.CountActionsTx(ctx); return })
+		g.Go(func() (e error) { res.Conds, e = rules.CountCondsTx(ctx); return })
+		g.Go(func() (e error) { res.Args, e = rules.CountArgsTx(ctx); return })
+		g.Go(func() (e error) { res.Mappings, e = rules.CountMappingsTx(ctx); return })
 		g.Go(func() (e error) { res.Devices, e = devices.CountTx(ctx); return })
 		g.Go(func() (e error) { res.Messages, e = messages.CountTx(ctx); return })
 		return g.Wait()

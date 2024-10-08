@@ -11,10 +11,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/fedulovivan/mhz19-go/internal/counters"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
 
 	"github.com/fedulovivan/mhz19-go/internal/app"
-	"github.com/fedulovivan/mhz19-go/internal/counters"
 	"github.com/fedulovivan/mhz19-go/pkg/utils"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -59,7 +59,7 @@ func DbSingleton() *sql.DB {
 		Panic(err)
 	}
 
-	// aid for "database is locked" issue
+	// aid for the "database is locked" issue
 	// https://github.com/mattn/go-sqlite3/issues/274#issuecomment-191597862
 	instance.SetMaxOpenConns(1)
 
@@ -108,9 +108,7 @@ func Exec(
 	values ...any,
 ) (res sql.Result, err error) {
 
-	// tx := ctx.Value(key_tx{}).(*sql.Tx)
-	// tag := ctx.Value(key_tag{}).(logger.Tag).AddTid("Exec")
-	counters.Inc(counters.QUERIES)
+	defer counters.TimeSince(time.Now(), counters.QUERIES)
 
 	ctxpayload := ctx.Value(ctxkey{}).(ctxval)
 	tx := ctxpayload.Tx
@@ -118,11 +116,8 @@ func Exec(
 
 	if app.Config.DbDebug {
 		defer utils.TimeTrack(tag.F, time.Now(), "Exec")
-		// defer func(start time.Time) {
-		// 	elapsed := utils.TimeTrack(tag.F, start, "Exec")
-		// 	counters.Time(elapsed, counters.QUERY)
-		// }(time.Now())
 	}
+
 	select {
 	case <-ctx.Done():
 		return
@@ -225,10 +220,8 @@ func Select[T any](
 	scan func(rows *sql.Rows, model *T) error,
 	where Where,
 ) (result []T, err error) {
-	// tx := ctx.Value(key_tx{}).(*sql.Tx)
-	// tag := ctx.Value(key_tag{}).(logger.Tag).AddTid("Select")
 
-	counters.Inc(counters.QUERIES)
+	defer counters.TimeSince(time.Now(), counters.QUERIES)
 
 	ctxpayload := ctx.Value(ctxkey{}).(ctxval)
 	tx := ctxpayload.Tx
@@ -237,6 +230,7 @@ func Select[T any](
 	if app.Config.DbDebug {
 		defer utils.TimeTrack(tag.F, time.Now(), "Select")
 	}
+
 	select {
 	case <-ctx.Done():
 		return
@@ -279,14 +273,15 @@ func Select[T any](
 // commits transaction if callback returns no error
 // ctx consumers are local functions Select, Exec, Rollback
 func RunTx(db *sql.DB, fn func(ctx CtxEnhanced) error) error {
+
+	defer counters.TimeSince(time.Now(), counters.TRANSACTIONS)
+
 	tag := BaseTag.WithTid("Tx")
+
 	if app.Config.DbDebug {
-		defer func(start time.Time) {
-			elapsed := utils.TimeTrack(tag.F, start, "Transaction")
-			counters.Time(elapsed, counters.QUERIES)
-		}(time.Now())
-		// defer utils.TimeTrack(tag.F, time.Now(), "Transaction")
+		defer utils.TimeTrack(tag.F, time.Now(), "Transaction")
 	}
+
 	tx, err := db.Begin()
 	if app.Config.DbDebug {
 		slog.Debug(tag.F("Transaction started"))
@@ -301,15 +296,6 @@ func RunTx(db *sql.DB, fn func(ctx CtxEnhanced) error) error {
 			Tag: tag,
 		},
 	)
-	// var ctx CtxEnhanced
-	// ctx = context.WithValue(
-	// 	context.Background(),
-	// 	key_tx{}, tx,
-	// )
-	// ctx = context.WithValue(
-	// 	ctx,
-	// 	key_tag{}, tag,
-	// )
 	defer Rollback(ctx)
 	err = fn(ctx)
 	if err != nil {
@@ -319,6 +305,30 @@ func RunTx(db *sql.DB, fn func(ctx CtxEnhanced) error) error {
 	return err
 }
 
+// if app.Config.DbDebug {
+// defer func(start time.Time) {
+// 	elapsed := utils.TimeTrack(tag.F, start, "Transaction")
+// 	counters.Time(elapsed, counters.QUERIES)
+// }(time.Now())
+// }
+// tx := ctx.Value(key_tx{}).(*sql.Tx)
+// tag := ctx.Value(key_tag{}).(logger.Tag).AddTid("Select")
+// counters.Inc(counters.QUERIES)
+// if app.Config.DbDebug {
+// defer func(start time.Time) {
+// 	counters.Time(time.Since(start), counters.QUERIES)
+// }(time.Now())
+// }
+// var ctx CtxEnhanced
+// ctx = context.WithValue(
+// 	context.Background(),
+// 	key_tx{}, tx,
+// )
+// ctx = context.WithValue(
+// 	ctx,
+// 	key_tag{}, tag,
+// )
+// counters.Inc(counters.QUERIES)
 // func WithTx(db *sql.DB, fn func(tx *sql.Tx) error) error {
 //     txn, err := db.Begin()
 //     if err != nil {

@@ -23,10 +23,11 @@ func (a *sequence) MarshalJSON() (b []byte, err error) {
 	return []byte(fmt.Sprintf(`%d`, a.Value())), nil
 }
 
-func (a *sequence) Value() int32 {
+func (a *sequence) Value() (res int32) {
 	a.RLock()
+	res = a.value
 	defer a.RUnlock()
-	return a.value
+	return
 }
 
 func (a *sequence) Inc() (res int32) {

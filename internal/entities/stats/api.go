@@ -32,26 +32,30 @@ func (api statsApi) get(c *routing.Context) error {
 	if err != nil {
 		return err
 	}
-	countersdata := counters.Counters()
-	minmax := counters.MinMax()
-	res := map[string]any{
+	app := map[string]any{
 		"uptime": app.GetUptime(),
 		"memory": utils.GetMemUsage(),
-		// "tables":   tables,
-		// "counters": countersdata,
 	}
-	for key, v := range countersdata {
-		res[key] = v.Value()
+	res := map[string]any{
+		"app":      app,
+		"tables":   tables,
+		"counters": counters.Counters(),
+		"timings":  counters.Timings(),
 	}
-	res["devices"] = tables.Devices
-	res["rules"] = tables.Rules
-	res["messages"] = tables.Messages
+	// countersdata := counters.Counters()
+	// minmax := counters.MinMaxAvg()
+	// for key, v := range countersdata {
+	// 	res[key] = v.Value()
+	// }
+	// res["devices"] = tables.Devices
+	// res["rules"] = tables.Rules
+	// res["messages"] = tables.Messages
 	// for key, v := range tables {
 	// 	res[key] = v
 	// }
-	for key, time := range minmax {
-		res[key+"Min"] = time[0].String()
-		res[key+"Max"] = time[1].String()
-	}
+	// for key, time := range minmax {
+	// 	res[key+"Min"] = time[0].String()
+	// 	res[key+"Max"] = time[1].String()
+	// }
 	return c.Write(res)
 }

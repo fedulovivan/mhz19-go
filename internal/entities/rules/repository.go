@@ -270,6 +270,34 @@ func CountTx(ctx context.Context) (int32, error) {
 	)
 }
 
+func CountActionsTx(ctx db.CtxEnhanced) (int32, error) {
+	return db.Count(
+		ctx,
+		`SELECT COUNT(*) FROM rule_actions`,
+	)
+}
+
+func CountCondsTx(ctx db.CtxEnhanced) (int32, error) {
+	return db.Count(
+		ctx,
+		`SELECT COUNT(*) FROM rule_conditions`,
+	)
+}
+
+func CountArgsTx(ctx db.CtxEnhanced) (int32, error) {
+	return db.Count(
+		ctx,
+		`SELECT COUNT(*) FROM rule_condition_or_action_arguments`,
+	)
+}
+
+func CountMappingsTx(ctx db.CtxEnhanced) (int32, error) {
+	return db.Count(
+		ctx,
+		`SELECT COUNT(*) FROM rule_action_argument_mappings`,
+	)
+}
+
 func (r rulesRepository) Create(
 	rule DbRule,
 	conditions []DbRuleCondition,

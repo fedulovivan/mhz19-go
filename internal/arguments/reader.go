@@ -154,9 +154,9 @@ func (r *reader) ExecTemplate(in string, field string) (string, error) {
 			"pingerStatusName": func(statusId any) string {
 				svalue := fmt.Sprintf("%v", statusId)
 				if svalue == "0" {
-					return "offline"
+					return "offline 🔴"
 				} else if svalue == "1" {
-					return "online"
+					return "online 🟢"
 				} else if svalue == "-1" {
 					return "unknown"
 				} else {
@@ -166,18 +166,18 @@ func (r *reader) ExecTemplate(in string, field string) (string, error) {
 			"openedClosed": func(contact any) string {
 				svalue := fmt.Sprintf("%v", contact)
 				if svalue == "1" || svalue == "true" {
-					return "closed"
+					return "closed 🟢"
 				} else if svalue == "0" || svalue == "false" {
-					return "opened"
+					return "opened 🔴"
 				} else {
 					return svalue
 				}
 			},
 			"leakage": func(leakage bool) string {
 				if leakage {
-					return "is leaking"
+					return "is leaking 🔴"
 				} else {
-					return "is dry"
+					return "is dry 🟢"
 				}
 			},
 			"time": func(t time.Time) string {

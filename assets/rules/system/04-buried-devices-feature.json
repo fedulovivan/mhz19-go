@@ -23,7 +23,7 @@
         {
             "fn": "TelegramBotMessage",
             "args": {
-                "Text": "Have not seen «{{ deviceName .Message.Payload.BuriedDeviceId }}» for a while..."
+                "Text": "Have not seen «{{ deviceName .Message.Payload.BuriedDeviceId }}» for a while 👀"
             }
         }
     ]

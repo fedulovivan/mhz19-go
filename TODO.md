@@ -1,25 +1,27 @@
 ### Prio 0
-none
+- (+) feat: calculate average for counters.Time
+- (+) complete race tests for counters.Time
 
 ### Prio 1
 - api: toggle rule on/off
-- api: toggle rule buried_timeout on/off
+- api: toggle device buried_timeout on/off
 - api: update rule? looks its better to use delete/create strategy
 
 ### Bugs
+- bug: find the reason of no sound on macmini
 - bug: check why docker build always takes 203s on macmini (Building 202.9s (17/17) FINISHED)
 - bug: no mqtt (re)connection if network was not available on app startup and returned online later
-- bug: "http: superfluous response.WriteHeader call from github.com/go-ozzo/ozzo-routing/v2.(*Router).handleError (router.go:131)" - appears after interruption of progressing apache bench
-- bug: "apr_socket_recv: Operation timed out (60)" - https://stackoverflow.com/questions/30352725/why-is-my-hello-world-go-server-getting-crushed-by-apachebench
-- bug: "api:getAll took 3.451973917s" when reading 1k rules 1k times - try same scenario with postgres
+- bug: "http: superfluous response.WriteHeader call from github.com/go-ozzo/ozzo-routing/v2.(*Router).handleError (router.go:131)" - appears after interruption of progressing apache bench - need to ensure this is normal, and not an application-level issue
+- bug: "apr_socket_recv: Operation timed out (60)" - https://stackoverflow.com/questions/30352725/why-is-my-hello-world-go-server-getting-crushed-by-apachebench, try to find protection
+- bug: "api:getAll took 3.451973917s" when reading 1k rules 1k times - try same scenario with postgres - ensure there is no room for optimisation here
 
 ### Features
 - feat: parse DeviceClass(telegram-bot) as well as DeviceClass(5)
 - feat: parse DeviceClass(mqtt) as well as ChannelType(1)
 - feat: add room entity, connect it with devices
-- feat: better api for counters.Time()
-- feat: detect bot(s) are connected, instead of using dumb timeout before publishing "Application started" message
-- feat: do auto db backup before running any migration
+- (+) feat: better api for counters.Time()
+- feat: detect bot(s) are connected/started, instead of using dumb timeout before publishing "Application started" message - decoupling and introducing outgoing queue may help here
+- feat: do auto db backup before running any kind of migration tasks
 - feat: ability to disable certain condition or action
 - feat: log rule/condition/action executions to the db table
 - feat: simple frontend
@@ -28,9 +30,7 @@ none
 - feat: create meta which descibes expected args for conditions and actions and validate in rest api
 
 ### Arch changes/decisions
-- arch: store outgoing messages as well
-- arch: instroduce same approach for handling outgoing messages: action only submits new message to out channel, and corresponding provider handles it asynchronously
-- arch: think of good api (constructor) for creating new message (NewMessage) Id, Timestamp, ChannelType, DeviceClass, DeviceId -  are mandatory
+- arch: introduce same approach for handling outgoing messages: action only submits new message to out channel, and corresponding provider handles it asynchronous manner + store outgoing messages history as well
 - arch: align arg names across actions (like we have two spellings: Cmd and Command)
 - arch: think how (where?) we can construct/init "TemplatePayload" automatically, now we need to build it manually in action implementation
 - mile: device_id + device_class adressing issue:
@@ -38,6 +38,7 @@ none
     - in addition to "native_id" problem see also "unsafemap" in internal/entities/ldm/repository.go
     - a solution could be to keep ids as strings like "ZigbeeDevice(0x00158d000a823bb0)" or "Pinger(192.168.88.44)"
     - Message, make fields DeviceClass and DeviceId optional
+    - arch: think of good api (constructor) for creating new message (NewMessage) Id, Timestamp, ChannelType, DeviceClass?, DeviceId? -  are mandatory
 - arch: in NewEngine create mocks for all services, which will panic with friendly message if user forgot to set that service
 - arch: get rid of any in Send(...any) - no ideas so far
 - arch: split rest api and engine into different microservices
@@ -59,6 +60,7 @@ none
 - try: postgres instead of sqlite3
 - try: mongodb instead of sqlite3
 - try: chatgpt or copilot to review code https://www.reddit.com/r/vscode/comments/14upva0/how_to_use_chatgptcopilot_for_code_review/
+- try: https://github.com/mheffner/go-simple-metrics, https://github.com/hashicorp/go-metrics or release own
 
 ### Milestones
 

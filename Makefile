@@ -60,6 +60,10 @@ clean:
 api-load-rules-read:
 	oha -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/rules
 
+.PHONY: api-load-stats-read
+api-load-stats-read:
+	oha -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/stats
+
 .PHONY: api-load-rules-write
 api-load-rules-write:
 	curl -H 'Content-Type: application/json' -X PUT -d '{"deviceId":"DeviceId(0x00158d0004244bda)","deviceClass":1}' $(REST_API_URL)/devices
@@ -117,7 +121,7 @@ migrate-dump:
 
 .PHONY: test
 test:
-	CGO_ENABLED=1 go test -cover -race ./...
+	CGO_ENABLED=1 go test -cover -race -count 1 ./...
 
 .PHONY: test-one
 test-one:
