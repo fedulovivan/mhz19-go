@@ -14,6 +14,10 @@ default: lint test build
 
 .PHONY: build
 build:
+	GORACE="halt_on_error=1" CGO_ENABLED=1 go build -race -o ./bin/backend ./cmd/backend
+
+.PHONY: build-norace
+build-norace:
 	CGO_ENABLED=1 go build -o ./bin/backend ./cmd/backend
 
 .PHONY: docker-build
@@ -29,7 +33,7 @@ docker-up:
 ifeq ($(OS_NAME), linux)
 	docker run --detach --restart=always --env-file=$(CONF) -v ./database.bin:/app/database.bin --network=host --device /dev/snd:/dev/snd --name=$(NAME) $(NAME)
 else
-	docker run --detach --restart=always --env-file=$(CONF) -v ./database.bin:/app/database.bin --network=host --name=$(NAME) $(NAME)
+	docker run --detach --restart=always --env-file=$(CONF) -v ./database.bin:/app/database.bin -p $(REST_API_PORT):$(REST_API_PORT) --name=$(NAME) $(NAME)
 endif
 	
 .PHONY: docker-logs
@@ -51,6 +55,10 @@ update:
 .PHONY: docker-logs-save
 docker-logs-save:
 	docker logs --timestamps $(NAME) 2>&1 | cat > log.txt
+	
+.PHONY: docker-stats
+docker-stats:
+	docker stats mhz19-go-backend
 
 .PHONY: clean
 clean:
@@ -121,23 +129,37 @@ migrate-dump:
 
 .PHONY: test
 test:
-	CGO_ENABLED=1 go test -cover -race -count 1 ./...
+	go test -cover -race -count 1 ./...
+
+.PHONY: bench
+bench:
+	rm -f *.prof && go test ./internal/counters -bench=^Benchmark30$$ -run=^$$ -benchmem -cpuprofile cpu.prof -memprofile=mem.prof
+
+.PHONY: pprof-mem
+pprof-mem:
+	go tool pprof mem.prof
+
+.PHONY: pprof-cpu
+pprof-cpu:
+	go tool pprof cpu.prof
 
 .PHONY: test-one
 test-one:
-	go test -v github.com/fedulovivan/mhz19-go/internal/engine -run "TestMappings"
+	go test ./internal/engine -run TestMappings -v
 
 # ab -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/rules
-# oha --method PUT -H 'Content-Type: application/json' -d "{\"name\":\"name-`uuidgen`\"}" -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/rules
-# oha --method PUT -H 'Content-Type: application/json' -D ./assets/load/create-rule.json $(REST_API_URL)/rules
 # ab -T application/json -u ./assets/load/create-rule.json -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/rules
+# CGO_ENABLED=1 go test -benchmem ./...
 # CGO_ENABLED=1 go test -cover -race -count 1 ./...
-# .PHONY: bench
-# bench:
-# 	CGO_ENABLED=1 go test -benchmem ./...
-# https://stackoverflow.com/questions/978142/how-to-benchmark-apache-with-delays
+# curl -X PUT -H "Content-Type: application/json" -d @assets/push-message.json $(REST_API_URL)/push-message
+# go test -bench Benchmark10 -run=^$ -benchmem ./internal/counters -cpuprofile=cpu.prof
+# go test -bench Benchmark10 -run=^$ ./internal/counters -memprofile=mem.prof
+# go test -bench=. -benchmem -memprofile memprofile.out -cpuprofile profile.out
+# go test -bench=^Benchmark10$ -run=^$ . -memprofile=mem.prof ./internal/counters
+# go test -benchmem -run=^$ -bench "^Benchmark10$" github.com/fedulovivan/mhz19-go/internal/counters -cpuprofile=cpuprofile.prof
+# go test ./internal/counters -bench=^Benchmark20$$ -run=^$$ 
 # https://gist.github.com/ungoldman/11282441
+# https://stackoverflow.com/questions/978142/how-to-benchmark-apache-with-delays
+# oha --method PUT -H 'Content-Type: application/json' -D ./assets/load/create-rule.json $(REST_API_URL)/rules
+# oha --method PUT -H 'Content-Type: application/json' -d "{\"name\":\"name-`uuidgen`\"}" -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/rules
 # watch -n 0.5 
-# .PHONY: api-load-write-3
-# api-load-write-3:
-# 	curl -X PUT -H "Content-Type: application/json" -d @assets/push-message.json $(REST_API_URL)/push-message

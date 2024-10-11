@@ -5,3 +5,5 @@ bin/
 database*.bin
 sql/*dump.sql
 log.txt
+*.prof
+*.test

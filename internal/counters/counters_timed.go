@@ -23,13 +23,14 @@ type TimingsRecord struct {
 	Avg Metric    `json:"avg"`
 }
 
-type TimingsData = map[Key]*TimingsRecord
+type TimingsData map[Key]*TimingsRecord
 
-var timings = make(TimingsData)
+var timings = make(TimingsData, 0)
 var timingsMu sync.RWMutex
 
 func Timings() (res TimingsData) {
-	timingsMu.Lock()
+	timingsMu.RLock()
+	defer timingsMu.RUnlock()
 	res = make(TimingsData, len(timings))
 	for k, v := range timings {
 		res[k] = &TimingsRecord{
@@ -39,7 +40,6 @@ func Timings() (res TimingsData) {
 			Cnt: utils.NewSeq(v.Cnt.Value()),
 		}
 	}
-	defer timingsMu.Unlock()
 	return
 }
 

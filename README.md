@@ -12,7 +12,7 @@ This project is backend for the home automation server, written on golang. Evolu
 - Play loud alert sound, notify owner via telegram and cut off home water supply upon receiving message from one of water leakage sensors
 - Notify owner then some guarded door (equipped with smart sensor) was opened/closed and user is not at home
 
-See full list of configured rules: [user rules](https://github.com/fedulovivan/mhz19-go/tree/main/assets/rules/system), [system rules](https://github.com/fedulovivan/mhz19-go/tree/main/assets/rules/system)
+See full list of configured rules: [user rules](https://github.com/fedulovivan/mhz19-go/tree/main/assets/rules/user) and [system rules](https://github.com/fedulovivan/mhz19-go/tree/main/assets/rules/system)
 
 ### Project goal
 
@@ -131,3 +131,39 @@ DIR=rules/user make provision
 
 run and view logs for selected module only `make run 2>&1 >/dev/null | grep "engine"`
 scp log `scp ivanf@192.168.88.188:/home/ivanf/Projects/mhz19-go/log.txt ~/Desktop`
+
+
+### Profiling
+
+run cpu and memory benchmark for single case, write two profiles accordingly
+`make bench`
+
+open cpu profile in pprof
+`make pprof-cpu`
+
+open memory profile in pprof
+`make pprof-mem`
+
+inside pprof: see top N records
+`top`
+
+inside pprof: open top N graph in browser
+`web`
+
+inside pprof: see memory allocation for certain function
+`list Test31`
+
+collect 10s cpu profile from running app
+`curl --location 'http://localhost:7070/debug/pprof/profile?seconds=10' > back_cpu.prof`
+
+collect 10s head allocations profile from running app
+`curl --location 'http://localhost:7070/debug/pprof/heap?seconds=10' > back_heap.prof`
+
+open heap snapshot in text format in browser
+`http://localhost:7070/debug/pprof/heap?debug=1`
+
+open pprof web version
+`go tool pprof -http=:7272 back_cpu.prof`
+
+list of available profilers
+`http://localhost:7070/debug/pprof`

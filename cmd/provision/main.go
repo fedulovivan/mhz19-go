@@ -58,7 +58,7 @@ func processDir(dir string) {
 		go func(e fs.DirEntry) {
 			defer wg.Done()
 			fmt.Printf("%s IsDir=%v\n", e.Name(), e.IsDir())
-			if !e.IsDir() {
+			if !e.IsDir() && strings.HasSuffix(e.Name(), ".json") {
 				filePath := fmt.Sprintf("%s/%s", dirPath, e.Name())
 				res, err := processFile(filePath, apiEntityPath)
 				if err == nil {

@@ -50,7 +50,7 @@ func (s *CountersSuite) Test31() {
 	wg := sync.WaitGroup{}
 	iterations := 1000
 	expected := 2000
-	key := "foo31"
+	key := Key("foo31")
 	wg.Add(3)
 	go func() {
 		for i := 0; i < iterations; i++ {
@@ -155,14 +155,18 @@ func Benchmark10(b *testing.B) {
 }
 
 func Benchmark20(b *testing.B) {
+	projectedRulesCount := 30
 	for k := 0; k < b.N; k++ {
-		Inc(fmt.Sprintf("%v", k))
+		ruleId := k%projectedRulesCount + 1
+		IncRule(ruleId)
 	}
+	// data := Counters()
+	// fmt.Println(data)
 }
 
 func Benchmark30(b *testing.B) {
 	for k := 0; k < b.N; k++ {
-		Time(time.Microsecond, "foo-4")
+		Time(1, "lorem30")
 	}
 }
 

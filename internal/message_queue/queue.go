@@ -7,7 +7,7 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
-type FlushFn = func(mm []types.Message)
+type FlushFn func(mm []types.Message)
 
 type Queue interface {
 	// store next message

@@ -25,6 +25,8 @@ import (
 	mqtt "github.com/fedulovivan/mhz19-go/internal/providers/mqtt"
 	"github.com/fedulovivan/mhz19-go/internal/providers/shim_provider"
 	tbot "github.com/fedulovivan/mhz19-go/internal/providers/tbot"
+
+	_ "net/http/pprof"
 )
 
 var tag = logger.NewTag(logger.MAIN)

@@ -143,7 +143,7 @@ type DbCount struct {
 	Value int32
 }
 
-type Where = map[string]any
+type Where map[string]any
 
 func AddWhere(in string, where Where) (out string) {
 	var entries []string

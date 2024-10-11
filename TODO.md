@@ -61,6 +61,8 @@
 - try: mongodb instead of sqlite3
 - try: chatgpt or copilot to review code https://www.reddit.com/r/vscode/comments/14upva0/how_to_use_chatgptcopilot_for_code_review/
 - try: https://github.com/mheffner/go-simple-metrics, https://github.com/hashicorp/go-metrics or release own
+- try: wrk utility (analog of ab, hey, oha) https://github.com/wg/wrk
+- try: yandex-tank https://github.com/yandex/yandex-tank
 
 ### Milestones
 

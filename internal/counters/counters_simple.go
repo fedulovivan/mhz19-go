@@ -1,11 +1,11 @@
 package counters
 
 import (
-	"fmt"
+	"strconv"
 	"sync"
 )
 
-type Key = string
+type Key string
 
 const (
 	MESSAGES_HANDLED Key = "messagesHandled"
@@ -15,16 +15,26 @@ const (
 	TRANSACTIONS     Key = "transactions"
 )
 
+type Data map[Key]int32
+
 type Container struct {
 	sync.Mutex
-	data map[Key]int32
+	data Data
 }
 
-var instance = &Container{
-	data: map[Key]int32{
-		API_REQUESTS: 0,
-		ERRORS_ALL:   0,
-	},
+func NewContainer(cnt int) *Container {
+	return &Container{
+		data: make(Data, cnt),
+	}
+}
+
+var instance = NewContainer(100).Set(API_REQUESTS, 0).Set(ERRORS_ALL, 0)
+
+func (c *Container) Set(key Key, value int32) *Container {
+	c.Lock()
+	defer c.Unlock()
+	c.data[key] = value
+	return c
 }
 
 func (c *Container) Inc(key Key) {
@@ -36,25 +46,22 @@ func (c *Container) Inc(key Key) {
 	c.data[key]++
 }
 
-func (c *Container) Counters() (res map[Key]int32) {
+func (c *Container) Counters() (res Data) {
 	c.Lock()
 	defer c.Unlock()
-	res = make(map[Key]int32, len(c.data))
+	res = make(Data, len(c.data))
 	for k, v := range c.data {
 		res[k] = v
 	}
 	return
 }
 
-func Counters() map[Key]int32 {
+func Counters() Data {
 	return instance.Counters()
 }
 
 func IncRule(ruleId int) {
-	instance.Inc(fmt.Sprintf(
-		"rule-%d",
-		ruleId,
-	))
+	instance.Inc(Key("rule-" + strconv.Itoa(ruleId)))
 }
 
 func Inc(key Key) {

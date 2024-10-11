@@ -13,7 +13,7 @@ import (
 
 var tag = logger.NewTag(logger.BURIED)
 
-type BuriedTimers = map[types.LdmKey]*time.Timer
+type BuriedTimers map[types.LdmKey]*time.Timer
 
 type provider struct {
 	engine.ProviderBase

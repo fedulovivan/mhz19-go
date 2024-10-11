@@ -48,7 +48,7 @@ type MessageCompound struct {
 	Queued []Message
 }
 
-type GetCompoundForOtherDeviceId = func(otherDeviceId DeviceId) MessageCompound
+type GetCompoundForOtherDeviceId func(otherDeviceId DeviceId) MessageCompound
 
 func IsSpecialDirective(field string) bool {
 	return field == "$deviceId" || field == "$deviceClass" || field == "$channelType" || field == "$fromEndDevice" || strings.HasPrefix(field, "$message.")
