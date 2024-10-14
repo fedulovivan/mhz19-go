@@ -1,0 +1,34 @@
+version: '3.9'
+
+services:
+
+  backend:
+    image: mhz19-go-backend
+    env_file: .env
+    volumes:
+      - ./database.bin:/app/database.bin
+    network_mode: host
+    devices:
+      - /dev/snd:/dev/snd
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - 9090:9090
+    volumes:
+      - prometheus_data:/prometheus
+      - ./prometheus:/etc/prometheus/
+    command:
+      - --config.file=/etc/prometheus/prometheus.yaml
+      - --storage.tsdb.path=/prometheus
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - 3000:3000
+    volumes:
+      - grafana-storage:/var/lib/grafana
+
+volumes:
+  grafana-storage:
+  prometheus_data:

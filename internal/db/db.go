@@ -276,6 +276,10 @@ func RunTx(db *sql.DB, fn func(ctx CtxEnhanced) error) error {
 
 	defer counters.TimeSince(time.Now(), counters.TRANSACTIONS)
 
+	defer func(s time.Time) {
+		counters.Transactions.Observe(float64(time.Since(s).Milliseconds()))
+	}(time.Now())
+
 	tag := BaseTag.WithTid("Tx")
 
 	if app.Config.DbDebug {

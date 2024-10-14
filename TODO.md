@@ -1,6 +1,13 @@
 ### Prio 0
-- (+) feat: calculate average for counters.Time
-- (+) complete race tests for counters.Time
+- try: prometheus 
+  - https://gabrieltanner.org/blog/collecting-prometheus-metrics-in-golang/
+  - https://prometheus.io/docs/guides/go-application/ 
+  - https://blog.yakunin.dev/promethues-%D0%BE%D0%BF%D0%BE%D0%B2%D0%B5%D1%89%D0%B5%D0%BD%D0%B8%D0%B5-%D1%87%D0%B5%D1%80%D0%B5%D0%B7-telegram/
+  - https://habr.com/ru/articles/709204/
+  - https://medium.com/@mertcakmak2/custom-prometheus-metrics-in-golang-and-send-alert-to-slack-with-grafana-99a27dffe430
+  - https://habr.com/ru/articles/492742/
+  - https://www.dmosk.ru/miniinstruktions.php?mini=prometheus-stack-docker
+  - https://grafana.com/blog/2020/06/23/how-to-visualize-prometheus-histograms-in-grafana/
 
 ### Prio 1
 - api: toggle rule on/off
@@ -19,7 +26,6 @@
 - feat: parse DeviceClass(telegram-bot) as well as DeviceClass(5)
 - feat: parse DeviceClass(mqtt) as well as ChannelType(1)
 - feat: add room entity, connect it with devices
-- (+) feat: better api for counters.Time()
 - feat: detect bot(s) are connected/started, instead of using dumb timeout before publishing "Application started" message - decoupling and introducing outgoing queue may help here
 - feat: do auto db backup before running any kind of migration tasks
 - feat: ability to disable certain condition or action
@@ -54,7 +60,6 @@
 - try: separate di library https://pkg.go.dev/go.uber.org/fx
 - try: openapi or swagger https://en.wikipedia.org/wiki/OpenAPI_Specification or https://swagger.io/
 - try: http router https://github.com/julienschmidt/httprouter istead of ozzo-routing
-- try: prometheus https://prometheus.io/docs/guides/go-application/, https://habr.com/ru/articles/709204/
 - try: grpc
 - try: benchmarking tool https://github.com/sharkdp/hyperfine
 - try: postgres instead of sqlite3
@@ -63,6 +68,8 @@
 - try: https://github.com/mheffner/go-simple-metrics, https://github.com/hashicorp/go-metrics or release own
 - try: wrk utility (analog of ab, hey, oha) https://github.com/wg/wrk
 - try: yandex-tank https://github.com/yandex/yandex-tank
+- try: https://prometheus.io/docs/guides/node-exporter/ for macmini host
+- try: read more about makefile PHONY https://vsupalov.com/makefile-phony/
 
 ### Milestones
 
@@ -73,6 +80,9 @@
 
 ### Completed
 
+- (+) feat: calculate average for counters.Time
+- (+) complete race tests for counters.Time
+- (+) feat: better api for counters.Time()
 - (+) bug: DATA RACE when strarting with incorrect mqtt settings
 - (+) feat: think how to design "bot reply feature" - TelegramBotMessage has access to initial message from 'telegram-bot' channel which contains ChatId in payload
 - (+) bug: `requesting message for otherDeviceId=192.168.88.44` Not Equal gives wrong result (added more logging, probably caused by recent app restart and missing data to execute otherDeviceId logic and get actual pinger status for 192.168.88.44) real reason was in using ldm service Get(m.DeviceClass, otherDeviceId) instead of GetByDeviceId(otherDeviceId)

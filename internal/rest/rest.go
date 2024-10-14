@@ -23,6 +23,8 @@ import (
 	"github.com/go-ozzo/ozzo-routing/v2/content"
 	"github.com/go-ozzo/ozzo-routing/v2/cors"
 	"github.com/go-ozzo/ozzo-routing/v2/slash"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var tag = logger.NewTag(logger.REST)
@@ -60,6 +62,7 @@ func errorHandler(c *routing.Context) (err error) {
 
 func requestCounter(c *routing.Context) error {
 	go counters.Inc(counters.API_REQUESTS)
+	go counters.ApiRequests.WithLabelValues(c.Request.URL.Path, c.Request.Method).Inc()
 	return c.Next()
 }
 
@@ -80,6 +83,8 @@ func Init(shimProvider types.ChannelProvider) {
 	router.Get(app.Config.RestApiPath, func(ctx *routing.Context) error {
 		return ctx.Write("rest api root")
 	})
+
+	router.Get("/metrics", routing.HTTPHandler(promhttp.Handler()))
 
 	apibase := router.Group(app.Config.RestApiPath)
 	apibase.Use(

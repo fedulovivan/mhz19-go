@@ -222,6 +222,7 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 	defer func(start time.Time) {
 		elapsed := utils.TimeTrack(mtag.F, start, "HandleMessage")
 		counters.Time(elapsed, counters.MESSAGES_HANDLED)
+		counters.MessagesHandled.Inc()
 	}(time.Now())
 
 	isSystem := m.DeviceClass == types.DEVICE_CLASS_SYSTEM
