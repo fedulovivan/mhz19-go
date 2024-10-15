@@ -1,13 +1,5 @@
 ### Prio 0
-- try: prometheus 
-  - https://gabrieltanner.org/blog/collecting-prometheus-metrics-in-golang/
-  - https://prometheus.io/docs/guides/go-application/ 
-  - https://blog.yakunin.dev/promethues-%D0%BE%D0%BF%D0%BE%D0%B2%D0%B5%D1%89%D0%B5%D0%BD%D0%B8%D0%B5-%D1%87%D0%B5%D1%80%D0%B5%D0%B7-telegram/
-  - https://habr.com/ru/articles/709204/
-  - https://medium.com/@mertcakmak2/custom-prometheus-metrics-in-golang-and-send-alert-to-slack-with-grafana-99a27dffe430
-  - https://habr.com/ru/articles/492742/
-  - https://www.dmosk.ru/miniinstruktions.php?mini=prometheus-stack-docker
-  - https://grafana.com/blog/2020/06/23/how-to-visualize-prometheus-histograms-in-grafana/
+- none
 
 ### Prio 1
 - api: toggle rule on/off
@@ -68,8 +60,9 @@
 - try: https://github.com/mheffner/go-simple-metrics, https://github.com/hashicorp/go-metrics or release own
 - try: wrk utility (analog of ab, hey, oha) https://github.com/wg/wrk
 - try: yandex-tank https://github.com/yandex/yandex-tank
-- try: https://prometheus.io/docs/guides/node-exporter/ for macmini host
+- try: https://prometheus.io/docs/guides/node-exporter/ for macmini host, https://prometheus.io/docs/guides/node-exporter/, https://krsnachalise.medium.com/installing-node-exporter-in-linux-machines-d85e81d8808d
 - try: read more about makefile PHONY https://vsupalov.com/makefile-phony/
+- try: once.Do instead of "singleton" pattern - https://blog.matthiasbruns.com/golang-singleton-pattern
 
 ### Milestones
 
@@ -80,6 +73,8 @@
 
 ### Completed
 
+- (+) make all channels unbuffered
+- (+) try: prometheus
 - (+) feat: calculate average for counters.Time
 - (+) complete race tests for counters.Time
 - (+) feat: better api for counters.Time()

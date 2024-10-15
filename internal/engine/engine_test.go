@@ -17,7 +17,14 @@ type EngineSuite struct {
 
 func (s *EngineSuite) SetupSuite() {
 	s.e = NewEngine()
-	s.e.SetLdmService(ldm.NewService(ldm.RepoSingleton()))
+	ldmService := ldm.NewService(ldm.RepoSingleton())
+	s.e.SetLdmService(ldmService)
+	go func() {
+		for range ldmService.OnSet() {
+			// noop
+			// just to allow send to unbuffered "onset" chan in internal/entities/ldm/repository.go
+		}
+	}()
 }
 
 var dummy_mtcb types.GetCompoundForOtherDeviceId = func(types.DeviceId) (res types.MessageCompound) {

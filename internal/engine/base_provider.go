@@ -23,11 +23,15 @@ func (p *ProviderBase) Send(a ...any) error {
 }
 
 func (p *ProviderBase) Stop() {
-	// noop
+	p.CloseChan()
 }
 
 func (p *ProviderBase) Push(m types.Message) {
 	p.MessagesChan <- m
+}
+
+func (p *ProviderBase) CloseChan() {
+	close(p.MessagesChan)
 }
 
 func (s *ProviderBase) Channel() types.ChannelType {

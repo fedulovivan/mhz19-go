@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/fedulovivan/mhz19-go/internal/counters"
+	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/fedulovivan/mhz19-go/internal/engine/actions"
 	"github.com/fedulovivan/mhz19-go/internal/engine/conditions"
@@ -61,6 +62,10 @@ func (e *engine) SetDevicesService(s types.DevicesService) {
 func (e *engine) SetLdmService(r types.LdmService) {
 	e.ldmService = r
 }
+
+//	func (e *engine) LdmService() types.LdmService {
+//		return e.ldmService
+//	}
 func (e *engine) AppendRules(rules ...types.Rule) {
 	e.rulesMu.Lock()
 	defer e.rulesMu.Unlock()
@@ -139,6 +144,7 @@ func (e *engine) InvokeConditionFunc(
 	} else {
 		slog.Error(tag.F("Failed in %s", elapsed), "err", err)
 		counters.Inc(counters.ERRORS_ALL)
+		counters.Errors.WithLabelValues(logger.MOD_CONDS).Inc()
 		return false
 	}
 }
@@ -153,6 +159,7 @@ func (e *engine) InvokeActionFunc(compound types.MessageCompound, a types.Action
 	if err != nil {
 		slog.Error(atag.F("Failed in %s", elapsed), "err", err)
 		counters.Inc(counters.ERRORS_ALL)
+		counters.Errors.WithLabelValues(logger.MOD_ACTIONS).Inc()
 	} else {
 		slog.Debug(atag.F("Completed in %s", elapsed))
 	}
@@ -214,16 +221,18 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 		panic("message must have Id and Timestamp initialised")
 	}
 
+	counters.MessagesByChannel.WithLabelValues(m.ChannelType.String()).Inc()
+	defer counters.TimeSince(time.Now(), counters.MESSAGES_HANDLED)
+	defer func(t *prometheus.Timer) {
+		t.ObserveDuration()
+	}(prometheus.NewTimer(counters.MessagesHandled))
+
 	e.rulesMu.RLock()
 	defer e.rulesMu.RUnlock()
 
 	mtag := BaseTag.With("Msg=%d", m.Id)
 
-	defer func(start time.Time) {
-		elapsed := utils.TimeTrack(mtag.F, start, "HandleMessage")
-		counters.Time(elapsed, counters.MESSAGES_HANDLED)
-		counters.MessagesHandled.Inc()
-	}(time.Now())
+	defer utils.TimeTrack(mtag.F, time.Now(), "HandleMessage")
 
 	isSystem := m.DeviceClass == types.DEVICE_CLASS_SYSTEM
 	isBridge := m.DeviceClass == types.DEVICE_CLASS_ZIGBEE_BRIDGE
@@ -287,6 +296,7 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 		}
 		if e.MatchesCondition(mtcb, r.Condition, rtag) {
 			counters.IncRule(r.Id)
+			counters.Rules.WithLabelValues( /* strconv.Itoa(r.Id) */ r.Name).Inc()
 			slog.Debug(rtag.F("matches👌"), "name", r.Name)
 			matches++
 			if r.Throttle.Duration == 0 {

@@ -22,7 +22,7 @@ var tag = logger.NewTag(logger.DNSSD)
 func NewProvider() types.ChannelProvider {
 	return &provider{
 		ProviderBase: engine.ProviderBase{
-			MessagesChan: make(types.MessageChan, 100),
+			MessagesChan: make(types.MessageChan /* , 100 */),
 		},
 	}
 }
@@ -72,6 +72,7 @@ func (p *provider) Init() {
 			fmt.Println(err)
 			slog.Error(tag.F(err.Error()))
 			counters.Inc(counters.ERRORS_ALL)
+			counters.Errors.WithLabelValues(logger.MOD_DNSSD).Inc()
 			return
 		}
 	}()

@@ -25,8 +25,8 @@ var knownSimpleTypes = []string{"string", "int", "float64", "bool"}
 
 func NewService(r RulesRepository) types.RulesService {
 	return rulesService{
-		created:    make(chan types.Rule, 100),
-		deleted:    make(chan int, 100),
+		created:    make(chan types.Rule),
+		deleted:    make(chan int),
 		repository: r,
 	}
 }
@@ -38,11 +38,11 @@ func ServiceSingleton(r RulesRepository) types.RulesService {
 	return instance
 }
 
-func (s rulesService) OnCreated() chan types.Rule {
+func (s rulesService) OnCreated() <-chan types.Rule {
 	return s.created
 }
 
-func (s rulesService) OnDeleted() chan int {
+func (s rulesService) OnDeleted() <-chan int {
 	return s.deleted
 }
 

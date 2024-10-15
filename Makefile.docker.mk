@@ -40,6 +40,12 @@ compose-up:
 compose-down:
 	NAME=$(NAME) docker compose down
 
+compose-up-dev:
+	NAME=$(NAME) docker compose up --no-build --detach prometheus grafana
+
+compose-down-dev:
+	NAME=$(NAME) docker compose down prometheus grafana
+
 update:
 	git pull && make docker-build && make docker-down && make docker-up && make docker-logs
 

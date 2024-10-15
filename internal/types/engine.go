@@ -21,6 +21,7 @@ type Engine interface {
 	ExecuteActions(compound MessageCompound, r Rule, tag logger.Tag)
 	HandleMessage(m Message, rules []Rule)
 	SetLdmService(r LdmService)
+	// LdmService() LdmService
 	AppendRules(rules ...Rule)
 	DeleteRule(ruleId int)
 	Start()

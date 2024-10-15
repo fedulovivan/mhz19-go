@@ -3,6 +3,8 @@ package app
 import (
 	"fmt"
 	"time"
+
+	"github.com/fedulovivan/mhz19-go/internal/counters"
 )
 
 var startTime time.Time
@@ -19,7 +21,13 @@ func RecordStartTime() {
 	if !startTime.IsZero() {
 		panic("expected to be called only once")
 	}
-	startTime = time.Now()
+	ticker := time.NewTicker(time.Second) // update metric each second
+	go func() {
+		startTime = time.Now()
+		for range ticker.C {
+			counters.Uptime.Set(time.Since(startTime).Seconds())
+		}
+	}()
 }
 
 func GetUptime() Uptime {

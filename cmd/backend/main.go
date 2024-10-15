@@ -34,6 +34,7 @@ var tag = logger.NewTag(logger.MAIN)
 func main() {
 
 	// bootstrap application
+	app.RecordStartTime()
 	app.InitConfig()
 	logger.Init()
 
@@ -104,6 +105,7 @@ func main() {
 		} else {
 			slog.Error(tag.F("Failed to load rules from db"), "err", err.Error())
 			counters.Inc(counters.ERRORS_ALL)
+			counters.Errors.WithLabelValues(logger.MOD_MAIN).Inc()
 		}
 	}()
 	go func() {
@@ -133,14 +135,8 @@ func main() {
 	})
 
 	// handle shutdown
-	stopped := make(chan struct{})
-	s := make(chan os.Signal, 1)
-	signal.Notify(s, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		for range s {
-			close(stopped)
-		}
-	}()
+	stopped := make(chan os.Signal, 1)
+	signal.Notify(stopped, os.Interrupt, syscall.SIGTERM)
 	<-stopped
 	slog.Debug(tag.F("App termination signal received"))
 
@@ -152,5 +148,3 @@ func main() {
 
 	slog.Info(tag.F("All done, bye-bye"))
 }
-
-// e.AppendRules(engine.GetStaticRules()...)

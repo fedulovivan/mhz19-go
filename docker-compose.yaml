@@ -14,18 +14,21 @@ services:
   prometheus:
     image: prom/prometheus:latest
     ports:
-      - 9090:9090
+      - 9092:9090
     volumes:
       - prometheus_data:/prometheus
       - ./prometheus:/etc/prometheus/
     command:
       - --config.file=/etc/prometheus/prometheus.yaml
       - --storage.tsdb.path=/prometheus
+      - --web.enable-admin-api
+    extra_hosts:
+      - host.docker.internal:host-gateway
 
   grafana:
     image: grafana/grafana:latest
     ports:
-      - 3000:3000
+      - 3002:3000
     volumes:
       - grafana-storage:/var/lib/grafana
 

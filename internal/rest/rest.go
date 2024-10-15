@@ -46,6 +46,7 @@ func errorHandler(c *routing.Context) (err error) {
 		if err != nil {
 			slog.Error(tag.F("errorHandler:"), "path", c.Request.URL.Path, "err", err.Error())
 			counters.Inc(counters.ERRORS_ALL)
+			counters.Errors.WithLabelValues(logger.MOD_REST).Inc()
 			res := map[string]any{
 				"is_error": true,
 				"error":    err.Error(),
@@ -173,6 +174,7 @@ func Stop() {
 	if err != nil {
 		slog.Error(tag.F(err.Error()))
 		counters.Inc(counters.ERRORS_ALL)
+		counters.Errors.WithLabelValues(logger.MOD_REST).Inc()
 	}
 }
 

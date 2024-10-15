@@ -34,6 +34,26 @@ func Init() {
 type TagName string
 
 const (
+	MOD_MAIN     string = "main"
+	MOD_ENGINE   string = "engine"
+	MOD_DB       string = "db"
+	MOD_REST     string = "rest"
+	MOD_ACTIONS  string = "actions"
+	MOD_CONDS    string = "conds"
+	MOD_ARGS     string = "args"
+	MOD_LDM      string = "a_ldm"
+	MOD_RULES    string = "a_rules"
+	MOD_STATS    string = "a_stats"
+	MOD_MESSAGES string = "a_messages"
+	MOD_DEVICES  string = "a_devices"
+	MOD_DICTS    string = "a_dicts"
+	MOD_TBOT     string = "p_tbot"
+	MOD_DNSSD    string = "p_dnssd"
+	MOD_MQTT     string = "p_mqtt"
+	MOD_BURIED   string = "p_buried"
+)
+
+const (
 	MAIN     TagName = "[main]      "
 	ENGINE   TagName = "[engine]    "
 	DB       TagName = "[db]        "

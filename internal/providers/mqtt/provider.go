@@ -25,7 +25,7 @@ type provider struct {
 func NewProvider() types.ChannelProvider {
 	return &provider{
 		ProviderBase: engine.ProviderBase{
-			MessagesChan: make(types.MessageChan, 100),
+			MessagesChan: make(types.MessageChan /* , 100 */),
 		},
 	}
 }
@@ -110,6 +110,7 @@ func (p *provider) Init() {
 	var defaultMessageHandler = func(client MqttLib.Client, msg MqttLib.Message) {
 		slog.Error(tag.F("defaultMessageHandler is not expected to be reached"), "topic", msg.Topic())
 		counters.Inc(counters.ERRORS_ALL)
+		counters.Errors.WithLabelValues(logger.MOD_MQTT).Inc()
 	}
 
 	var connectHandler = func(client MqttLib.Client) {
@@ -127,6 +128,7 @@ func (p *provider) Init() {
 	var connectLostHandler = func(client MqttLib.Client, err error) {
 		slog.Error(tag.F("Connection lost"), "error", err)
 		counters.Inc(counters.ERRORS_ALL)
+		counters.Errors.WithLabelValues(logger.MOD_MQTT).Inc()
 	}
 
 	// build opts
@@ -163,6 +165,7 @@ func (p *provider) Init() {
 	if token := p.client.Connect(); token.Wait() && token.Error() != nil {
 		slog.Error(tag.F("Initial connect"), "error", token.Error())
 		counters.Inc(counters.ERRORS_ALL)
+		counters.Errors.WithLabelValues(logger.MOD_MQTT).Inc()
 	}
 
 }
@@ -174,12 +177,14 @@ func (p *provider) Stop() {
 	} else {
 		slog.Warn(tag.F("Not connected"))
 	}
+	p.CloseChan()
 }
 
 func subscribe(client MqttLib.Client, topic string) {
 	if token := client.Subscribe(topic, 0, nil); token.Wait() && token.Error() != nil {
 		slog.Error(tag.F("client.Subscribe()"), "error", token.Error())
 		counters.Inc(counters.ERRORS_ALL)
+		counters.Errors.WithLabelValues(logger.MOD_MQTT).Inc()
 	}
 	slog.Info(tag.F("Subscribed to"), "topic", topic)
 }

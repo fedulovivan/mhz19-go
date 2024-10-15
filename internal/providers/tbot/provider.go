@@ -26,7 +26,7 @@ type provider struct {
 func NewProvider() types.ChannelProvider {
 	return &provider{
 		ProviderBase: engine.ProviderBase{
-			MessagesChan: make(types.MessageChan, 100),
+			MessagesChan: make(types.MessageChan /* , 100 */),
 		},
 		bots: make(map[string]*tgbotapi.BotAPI),
 	}
@@ -60,6 +60,7 @@ func (p *provider) Stop() {
 	for _, bot := range p.bots {
 		bot.StopReceivingUpdates()
 	}
+	p.CloseChan()
 }
 
 func (p *provider) SendNewMessage(text string, botName string, chatId int64) (err error) {
@@ -137,6 +138,7 @@ func (p *provider) Init() {
 		if err != nil {
 			slog.Error(tag.F("StartBotClient()"), "err", err.Error())
 			counters.Inc(counters.ERRORS_ALL)
+			counters.Errors.WithLabelValues(logger.MOD_TBOT).Inc()
 		}
 	}
 }

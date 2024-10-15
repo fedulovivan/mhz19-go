@@ -16,7 +16,7 @@ type provider struct {
 func NewProvider() types.ChannelProvider {
 	return &provider{
 		ProviderBase: engine.ProviderBase{
-			MessagesChan: make(types.MessageChan, 100),
+			MessagesChan: make(types.MessageChan /* , 100 */),
 		},
 	}
 }

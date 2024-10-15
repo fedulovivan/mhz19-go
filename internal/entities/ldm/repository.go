@@ -36,7 +36,7 @@ func RepoSingleton() LdmRepository {
 	if instance == nil {
 		instance = &repository{
 			device_id_to_key_unsafemap: make(map[types.DeviceId]types.LdmKey),
-			onset:                      make(chan types.LdmKey, 100),
+			onset:                      make(chan types.LdmKey),
 			data:                       make(map[types.LdmKey]types.Message),
 		}
 	}
@@ -116,5 +116,6 @@ func (r *repository) Set(newkey types.LdmKey, m types.Message) {
 		r.device_id_to_key_unsafemap[m.DeviceId] = newkey
 	}
 	r.data[newkey] = m
+	// this blocks now, if no receiver for onset is registered
 	r.onset <- newkey
 }

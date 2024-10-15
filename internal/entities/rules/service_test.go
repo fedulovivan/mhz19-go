@@ -494,11 +494,28 @@ func (s *ServiceSuite) Test70() {
 func (s *ServiceSuite) Test71() {
 	repo := mockrepo{}
 	service := NewService(repo)
+	go func() {
+		for range service.OnCreated() {
+			// noop, just to unblock sender
+		}
+	}()
 	_, err := service.Create(types.Rule{})
 	s.Nil(err)
 }
 
 func (s *ServiceSuite) Test72() {
+	repo := mockrepo{}
+	service := NewService(repo)
+	go func() {
+		for range service.OnDeleted() {
+			// noop, just to unblock sender
+		}
+	}()
+	err := service.Delete(111)
+	s.Nil(err)
+}
+
+func (s *ServiceSuite) Test73() {
 	repo := mockrepo{errors.New("mock error")}
 	service := NewService(repo)
 	rr, err := service.Get()

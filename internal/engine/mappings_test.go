@@ -44,7 +44,7 @@ func (s *dummyldmservice) Get(key types.LdmKey) (out types.Message) {
 func (s *dummyldmservice) Has(key types.LdmKey) bool {
 	return false
 }
-func (s *dummyldmservice) OnSet() chan types.LdmKey {
+func (s *dummyldmservice) OnSet() <-chan types.LdmKey {
 	return nil
 }
 func (s *dummyldmservice) Set(key types.LdmKey, m types.Message) {

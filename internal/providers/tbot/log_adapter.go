@@ -5,6 +5,7 @@ import (
 	"log/slog"
 
 	"github.com/fedulovivan/mhz19-go/internal/counters"
+	"github.com/fedulovivan/mhz19-go/internal/logger"
 )
 
 type slogAdapter struct{}
@@ -16,12 +17,14 @@ func (l slogAdapter) Println(v ...any) {
 	case error:
 		slog.Error(tag.F(v0.Error()), "more", len(v)-1)
 		counters.Inc(counters.ERRORS_ALL)
+		counters.Errors.WithLabelValues(logger.MOD_TBOT).Inc()
 	default:
 		slog.Error(tag.F(
 			"slogAdapter.Println() skipped, its first argument expected to be a string, but got %T with value %v",
 			v[0], v[0],
 		))
 		counters.Inc(counters.ERRORS_ALL)
+		counters.Errors.WithLabelValues(logger.MOD_TBOT).Inc()
 	}
 }
 func (l slogAdapter) Printf(format string, v ...any) {

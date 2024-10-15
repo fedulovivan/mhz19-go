@@ -13,6 +13,7 @@ import (
 
 	"github.com/fedulovivan/mhz19-go/internal/counters"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
+	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/fedulovivan/mhz19-go/internal/app"
 	"github.com/fedulovivan/mhz19-go/pkg/utils"
@@ -109,6 +110,10 @@ func Exec(
 ) (res sql.Result, err error) {
 
 	defer counters.TimeSince(time.Now(), counters.QUERIES)
+
+	defer func(t *prometheus.Timer) {
+		t.ObserveDuration()
+	}(prometheus.NewTimer(counters.Queries))
 
 	ctxpayload := ctx.Value(ctxkey{}).(ctxval)
 	tx := ctxpayload.Tx
@@ -223,6 +228,10 @@ func Select[T any](
 
 	defer counters.TimeSince(time.Now(), counters.QUERIES)
 
+	defer func(t *prometheus.Timer) {
+		t.ObserveDuration()
+	}(prometheus.NewTimer(counters.Queries))
+
 	ctxpayload := ctx.Value(ctxkey{}).(ctxval)
 	tx := ctxpayload.Tx
 	tag := ctxpayload.Tag.WithTid("Select")
@@ -266,7 +275,7 @@ func Select[T any](
 	}
 }
 
-// initially borrowed from https://www.reddit.com/r/golang/comments/18flz7z/comment/kcviej8/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
+// initial approach was borrowed from https://www.reddit.com/r/golang/comments/18flz7z/comment/kcviej8/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
 // starts transaction
 // stores tx into created context
 // enhances BaseTag with unique transaction id and also stores it into created context
@@ -276,9 +285,9 @@ func RunTx(db *sql.DB, fn func(ctx CtxEnhanced) error) error {
 
 	defer counters.TimeSince(time.Now(), counters.TRANSACTIONS)
 
-	defer func(s time.Time) {
-		counters.Transactions.Observe(float64(time.Since(s).Milliseconds()))
-	}(time.Now())
+	defer func(t *prometheus.Timer) {
+		t.ObserveDuration()
+	}(prometheus.NewTimer(counters.Transactions))
 
 	tag := BaseTag.WithTid("Tx")
 

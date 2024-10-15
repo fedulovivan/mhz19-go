@@ -52,7 +52,7 @@ type ConfigStorage struct {
 }
 
 func InitConfig() {
-	RecordStartTime()
+	// RecordStartTime()
 	fileName, withConf := os.LookupEnv("CONF")
 	if !withConf {
 		fileName = ".env"

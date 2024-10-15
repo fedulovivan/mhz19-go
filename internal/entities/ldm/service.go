@@ -32,7 +32,7 @@ func (s ldmService) GetByDeviceId(deviceId types.DeviceId) (types.Message, error
 	return s.repository.GetByDeviceId(deviceId)
 }
 
-func (s ldmService) OnSet() chan types.LdmKey {
+func (s ldmService) OnSet() <-chan types.LdmKey {
 	return s.repository.OnSet()
 }
 

@@ -38,7 +38,7 @@ type LdmService interface {
 	Set(key LdmKey, m Message)
 	GetAll() []Message
 	GetByDeviceId(deviceId DeviceId) (Message, error)
-	OnSet() chan LdmKey
+	OnSet() <-chan LdmKey
 }
 
 type StatsService interface {
@@ -50,6 +50,6 @@ type RulesService interface {
 	Delete(ruleId int) error
 	Get() ([]Rule, error)
 	Create(rule Rule) (int64, error)
-	OnCreated() chan Rule
-	OnDeleted() chan int
+	OnCreated() <-chan Rule
+	OnDeleted() <-chan int
 }
