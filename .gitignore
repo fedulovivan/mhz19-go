@@ -7,3 +7,4 @@ sql/*dump.sql
 log.txt
 *.prof
 *.test
+heap.out

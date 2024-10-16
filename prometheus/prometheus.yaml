@@ -7,3 +7,7 @@ scrape_configs:
     static_configs:
       - targets:
         - host.docker.internal:7070
+  - job_name: macmini
+    static_configs:
+      - targets:
+        - 192.168.88.188:9100

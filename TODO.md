@@ -1,10 +1,12 @@
 ### Prio 0
-- none
+- feat: show app is up/down on dashboard
+- feat: reset errors counter on app restart
 
 ### Prio 1
 - api: toggle rule on/off
 - api: toggle device buried_timeout on/off
 - api: update rule? looks its better to use delete/create strategy
+- feat: db: limit rule name length, since its used in prometheus metric labels
 
 ### Bugs
 - bug: find the reason of no sound on macmini
@@ -60,7 +62,6 @@
 - try: https://github.com/mheffner/go-simple-metrics, https://github.com/hashicorp/go-metrics or release own
 - try: wrk utility (analog of ab, hey, oha) https://github.com/wg/wrk
 - try: yandex-tank https://github.com/yandex/yandex-tank
-- try: https://prometheus.io/docs/guides/node-exporter/ for macmini host, https://prometheus.io/docs/guides/node-exporter/, https://krsnachalise.medium.com/installing-node-exporter-in-linux-machines-d85e81d8808d
 - try: read more about makefile PHONY https://vsupalov.com/makefile-phony/
 - try: once.Do instead of "singleton" pattern - https://blog.matthiasbruns.com/golang-singleton-pattern
 
@@ -73,6 +74,7 @@
 
 ### Completed
 
+- (+) bug: memory does not realesed after calling /api/messages (growth from 5 tj 20mb) - ok, was released later
 - (+) make all channels unbuffered
 - (+) try: prometheus
 - (+) feat: calculate average for counters.Time
@@ -211,13 +213,14 @@
 - (+) for mqtt client, rather than hardocding in defaultMessageHandler, define rules/adapters for transforming topic and payload into final message per device class
 - (+) consider replacing hand-written adapters with mqttClient.AddRoute() API, also add warning for messages captured by defaultMessageHandler (assuming all topics we subscribe should have own handlers and default one should not be reached)
 
-### Discarded
+### Discarded / doubtful
 - (?) arch: make logger and logTag a dependency of service, api and repository - no urgent need, everything is easily testable with current approach
 - (?) try: opentelemetry https://opentelemetry.io/docs/languages/go/getting-started/, https://www.reddit.com/r/devops/comments/nxrbqa/opentelemetry_is_great_but_why_is_it_so_bloody/ - no need now, due to overcomplicated api
 - (?) introduce intermediate layer between named args and function implementation using regular args (more robust, simplify things like ZigbeeDeviceFn)
 - (?) think about "first match" strategy in handleMessage - we do not need this, since we to execute RecordMessage and some other action 
 - (?) feat: create test service for sonoff wifi devices (poll them periodically to receive status updates)
 - (?) arch: looks like we need to compare values as srings in conditions
+- (?) feat: collect device up/down metrics
 
 ### new mapping rule structure
 ```golang
