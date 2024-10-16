@@ -15,6 +15,7 @@
   - What is Vectors https://satyanash.net/software/2021/01/04/understanding-prometheus-range-vectors.html
   - Deleting Series https://medium.com/@burakceviz97/prometheus-metric-deletion-guide-8866bc5434ff
   - Writing An Exporter Or Custom Collector https://prometheus.io/docs/instrumenting/writing_exporters
+  - Another way of visualization Prometheus histogram https://medium.com/@shershnev/another-way-of-visualization-prometheus-histogram-8442aebc932a
 
 ### TODO
   - try: https://prometheus.io/docs/guides/node-exporter/ for macmini host

@@ -1,5 +1,5 @@
 ### Prio 0
-- feat: show app is up/down on dashboard
+- (+) feat: show app is up/down on dashboard - up{instance="host.docker.internal:7070"}
 - feat: reset errors counter on app restart
 
 ### Prio 1
