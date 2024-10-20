@@ -1,6 +1,8 @@
 ### Prio 0
+- try: grpc
+- bug: critical: panic: interface conversion: interface {} is nil, not string (pairing new device)
 - (+) feat: show app is up/down on dashboard - up{instance="host.docker.internal:7070"}
-- feat: reset errors counter on app restart
+- bug: reset errors counter on app restart (already works. why?)
 
 ### Prio 1
 - api: toggle rule on/off
@@ -19,13 +21,13 @@
 ### Features
 - feat: parse DeviceClass(telegram-bot) as well as DeviceClass(5)
 - feat: parse DeviceClass(mqtt) as well as ChannelType(1)
-- feat: add room entity, connect it with devices
+- feat: db: add room entity, connect it with devices
 - feat: detect bot(s) are connected/started, instead of using dumb timeout before publishing "Application started" message - decoupling and introducing outgoing queue may help here
-- feat: do auto db backup before running any kind of migration tasks
-- feat: ability to disable certain condition or action
+- feat: db: auto db backup before running any kind of migration tasks
+- feat: db: ability to disable certain condition or action
 - feat: log rule/condition/action executions to the db table
 - feat: simple frontend
-- feat: introduce rules.comments column
+- feat: db: introduce rules.comments column
 - feat: merge Zigbee2MqttSetState and ValveSetState actions
 - feat: create meta which descibes expected args for conditions and actions and validate in rest api
 
@@ -54,7 +56,6 @@
 - try: separate di library https://pkg.go.dev/go.uber.org/fx
 - try: openapi or swagger https://en.wikipedia.org/wiki/OpenAPI_Specification or https://swagger.io/
 - try: http router https://github.com/julienschmidt/httprouter istead of ozzo-routing
-- try: grpc
 - try: benchmarking tool https://github.com/sharkdp/hyperfine
 - try: postgres instead of sqlite3
 - try: mongodb instead of sqlite3
@@ -64,6 +65,11 @@
 - try: yandex-tank https://github.com/yandex/yandex-tank
 - try: read more about makefile PHONY https://vsupalov.com/makefile-phony/
 - try: once.Do instead of "singleton" pattern - https://blog.matthiasbruns.com/golang-singleton-pattern
+- try: errors library https://github.com/ansel1/merry
+- try: to fix https://github.com/fedulovivan/effective-waffle/issues/9
+- try: https://github.com/vektra/mockery https://www.youtube.com/watch?v=eYHCCht8eX4
+- try: go generate
+- try: https://github.com/dundee/gdu
 
 ### Milestones
 

@@ -26,6 +26,7 @@ type MessagesRepository interface {
 	CreateAll(messages []DbMessage) error
 }
 
+// interface guard
 var _ MessagesRepository = (*messagesRepository)(nil)
 
 type messagesRepository struct {

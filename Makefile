@@ -54,12 +54,14 @@ lint:
 migrate-reset: migrate-down migrate-up
 
 migrate-down:
+	export DB_REV=02 && make migrate-down-single
 	export DB_REV=01 && make migrate-down-single
 	export DB_REV=00 && make migrate-down-single
 
 migrate-up:
 	export DB_REV=00 && make migrate-up-single
 	export DB_REV=01 && make migrate-up-single
+	export DB_REV=02 && make migrate-up-single
 
 migrate-up-single:
 	sqlite3 ./database.bin < ./sql/$(DB_REV)-up.sql

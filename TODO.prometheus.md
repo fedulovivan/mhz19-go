@@ -16,6 +16,7 @@
   - Deleting Series https://medium.com/@burakceviz97/prometheus-metric-deletion-guide-8866bc5434ff
   - Writing An Exporter Or Custom Collector https://prometheus.io/docs/instrumenting/writing_exporters
   - Another way of visualization Prometheus histogram https://medium.com/@shershnev/another-way-of-visualization-prometheus-histogram-8442aebc932a
+    `histogram_quantile(0.95, sum by(le, job,instance) (rate(mhz19_messages_handled_bucket[10m])))`
 
 ### TODO
   - try: https://prometheus.io/docs/guides/node-exporter/ for macmini host
