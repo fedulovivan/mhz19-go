@@ -5,7 +5,9 @@ include Makefile.docker.mk
 NAME ?= mhz19-go-backend
 GIT_REV ?= $(shell git rev-parse --short HEAD)
 DATE ?= $(shell date +%FT%T)
-REST_API_URL ?= http://localhost:$(REST_API_PORT)$(REST_API_PATH)
+REST_API_DOMAIN ?= localhost
+# REST_API_DOMAIN ?= 192.168.88.188
+REST_API_URL ?= http://$(REST_API_DOMAIN):$(REST_API_PORT)$(REST_API_PATH)
 API_LOAD_COUNT ?= 1000
 API_LOAD_THREADS ?= 10
 API_RPS ?= 50
@@ -21,6 +23,9 @@ clean:
 
 api-load-rules-read:
 	oha -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/rules
+
+api-load-messages-read:
+	oha -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/messages/device/0x00158d00067cb0c9
 
 api-load-stats-read:
 	oha -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/stats

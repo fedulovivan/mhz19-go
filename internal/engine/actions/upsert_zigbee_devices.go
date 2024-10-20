@@ -23,20 +23,21 @@ var UpsertZigbeeDevices types.ActionImpl = func(
 	out := make([]types.Device, 0)
 	origin := "bridge-upsert"
 	for _, d := range devicesjson.Children() {
-		dtype := d.Path("type").Data().(string)
-		if dtype == "Coordinator" {
+		dtype, ok := d.Path("type").Data().(string)
+		if !ok || dtype != "EndDevice" {
 			continue
 		}
+		deviceId := d.Path("ieee_address").Data().(string)
 		comments := d.Path("definition.description").Data().(string)
 		out = append(out, types.Device{
 			DeviceClass: types.DEVICE_CLASS_ZIGBEE_DEVICE,
-			DeviceId:    types.DeviceId(d.Path("ieee_address").Data().(string)),
+			DeviceId:    types.DeviceId(deviceId),
 			Comments:    &comments,
 			Origin:      &origin,
 			Json:        d.Data(),
 		})
 	}
 	id, err := e.DevicesService().UpsertAll(out)
-	slog.Debug(tag.F("Created"), "id", id)
+	slog.Debug(tag.F("Created"), "LastInsertId", id)
 	return
 }

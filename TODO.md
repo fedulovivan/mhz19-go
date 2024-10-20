@@ -1,10 +1,13 @@
 ### Prio 0
 - try: grpc
-- bug: critical: panic: interface conversion: interface {} is nil, not string (pairing new device)
-- (+) feat: show app is up/down on dashboard - up{instance="host.docker.internal:7070"}
-- bug: reset errors counter on app restart (already works. why?)
+- bug: perf: check why api time is x3 of sql call: Tx#13 Transaction took 5.621441ms -> api:getByDeviceId took 15.907499ms
+- bug: wrong id (id of messages table instead of expected devices) "Msg=25 Rule=1 Action=1 UpsertZigbeeDevices Created id=72852"
 
 ### Prio 1
+- bug: reset error counter on app restart (already works. why?)
+- feat: collect metrics for "message by device id"
+- feat: execute db migrations also from docker container, otherwize we depend on sqlite3 binary installed on the host system, more specifically problem is macmini has version 3.31.1, while mbp 3.39.5. as a result a new feature "DROP COLUMN" is not working on macmini (introduced in sqlite 3.35, also see https://github.com/mattn/go-sqlite3/issues/927)
+- feat: db: introduce updated_at, created_at columns
 - api: toggle rule on/off
 - api: toggle device buried_timeout on/off
 - api: update rule? looks its better to use delete/create strategy
@@ -70,16 +73,19 @@
 - try: https://github.com/vektra/mockery https://www.youtube.com/watch?v=eYHCCht8eX4
 - try: go generate
 - try: https://github.com/dundee/gdu
+- try: create load test for mqtt channel with `mosquitto_pub`
 
 ### Milestones
 
 - (+) 26 sep 2024, DONE. Initial launch - All features from mhz19-next plus storing mapping rules in database
 - Implement simple frontend
-- Interactive zigbee device join - End-to-end scenario with new device device join, confuguring rules, with no app retart
+- Interactive zigbee device join (pairing/interview/adding/joining) - End-to-end scenario with new device device join, confuguring rules, with no app retart - https://www.zigbee2mqtt.io/guide/usage/mqtt_topics_and_messages.html#zigbee2mqtt-bridge-event
 - device_id + device_class adressing issue
 
 ### Completed
 
+- (+) bug: critical: panic: interface conversion: interface {} is nil, not string (when pairing new device), most prpbably from internal/engine/actions/upsert_zigbee_devices.go
+- (+) feat: show app is up/down on dashboard - up{instance="host.docker.internal:7070"}
 - (+) bug: memory does not realesed after calling /api/messages (growth from 5 tj 20mb) - ok, was released later
 - (+) make all channels unbuffered
 - (+) try: prometheus

@@ -105,6 +105,12 @@ func (p *provider) Init() {
 				p.Push(outMsg)
 			}
 		},
+		// "zigbee2mqtt/bridge/event": func(c MqttLib.Client, msg MqttLib.Message) {
+		// 	outMsg, ok := NewZigbeeBridge(msg).Parse()
+		// 	if ok {
+		// 		p.Push(outMsg)
+		// 	}
+		// },
 	}
 
 	var defaultMessageHandler = func(client MqttLib.Client, msg MqttLib.Message) {
