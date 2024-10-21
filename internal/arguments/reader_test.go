@@ -211,10 +211,10 @@ func (s *ReaderSuite) Test124() {
 	}
 	tpayload := types.TemplatePayload{}
 	r := NewReader(&m, args, nil, &tpayload, engine, s.tag)
-	expected1 := "online 🟢"
+	expected1 := "online"
 	actual1 := r.Get("Foo5")
 	s.Equal(expected1, actual1)
-	expected2 := "offline 🔴"
+	expected2 := "offline"
 	actual2 := r.Get("Foo6")
 	s.Equal(expected2, actual2)
 	s.Nil(r.Error())
@@ -261,7 +261,7 @@ func (s *ReaderSuite) Test126() {
 	r1 := NewReader(&m, args, nil, &tpayload1, engine, s.tag)
 	actual1 := r1.Get("Foo6")
 	s.Nil(r1.Error())
-	s.Equal("lorem111:\n00:00:00 online 🟢\n00:00:00 offline 🔴\n", actual1)
+	s.Equal("lorem111:\n00:00:00 online\n00:00:00 offline\n", actual1)
 
 	tpayload2 := types.TemplatePayload{
 		Queued: []types.Message{
@@ -276,7 +276,7 @@ func (s *ReaderSuite) Test126() {
 	r2 := NewReader(&m, args, nil, &tpayload2, engine, s.tag)
 	actual2 := r2.Get("Foo6")
 	s.Nil(r2.Error())
-	s.Equal("lorem111 is online 🟢", actual2)
+	s.Equal("lorem111 is online", actual2)
 }
 
 func (s *ReaderSuite) Test130() {

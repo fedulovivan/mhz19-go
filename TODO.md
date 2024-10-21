@@ -84,6 +84,8 @@
 
 ### Completed
 
+- (+) bug: now message for "guarded doors were opened/closed when i'm not at home" when rule is triggered for the first time after app restart - not a bug, next time I've forgot about throttled messages logic
+- (+) feat: configure both telegram channels
 - (+) bug: critical: panic: interface conversion: interface {} is nil, not string (when pairing new device), most prpbably from internal/engine/actions/upsert_zigbee_devices.go
 - (+) feat: show app is up/down on dashboard - up{instance="host.docker.internal:7070"}
 - (+) bug: memory does not realesed after calling /api/messages (growth from 5 tj 20mb) - ok, was released later

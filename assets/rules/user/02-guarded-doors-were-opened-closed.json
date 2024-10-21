@@ -50,7 +50,8 @@
         {
             "fn": "TelegramBotMessage",
             "args": {
-                "Text": "{{ range .Queued }}{{ deviceName .DeviceId }} is {{ openedClosed .Payload.contact }}\n{{ end }}"
+                "Text": "{{ range .Queued }}{{ deviceName .DeviceId }} is {{ openedClosed .Payload.contact }}\n{{ end }}",
+                "BotName": "Mhz19AlertsBot"
             }
         }
     ]

@@ -44,7 +44,7 @@ func errorHandler(c *routing.Context) (err error) {
 			fmt.Println(string(debug.Stack()))
 		}
 		if err != nil {
-			slog.Error(tag.F("errorHandler:"), "path", c.Request.URL.Path, "err", err.Error())
+			slog.Error(tag.F("errorHandler:"), "method", c.Request.Method, "path", c.Request.URL.Path, "err", err.Error())
 			counters.Inc(counters.ERRORS_ALL)
 			counters.Errors.WithLabelValues(logger.MOD_REST).Inc()
 			res := map[string]any{
