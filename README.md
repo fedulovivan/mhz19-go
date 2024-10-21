@@ -119,7 +119,6 @@ No matter which channel was used to receive a message, or which certain device h
 run and view logs for selected module only `make run 2>&1 >/dev/null | grep "engine"`
 scp log `scp ivanf@192.168.88.188:/home/ivanf/Projects/mhz19-go/log.txt ~/Desktop`
 
-
 ### Profiling
 
 - run cpu and memory benchmark for single unit test and save two profiles accordingly

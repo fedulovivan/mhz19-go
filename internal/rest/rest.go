@@ -2,6 +2,7 @@ package rest
 
 import (
 	"context"
+
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -68,6 +69,11 @@ func requestCounter(c *routing.Context) error {
 }
 
 func Init(shimProvider types.ChannelProvider) {
+
+	// set custom json writer for better performance
+	// see var DataWriters
+	// in ozzo-routing/content/type.go
+	content.DataWriters[content.JSON] = &JSONDataWriterCustom{}
 
 	router := routing.New()
 	router.Use(

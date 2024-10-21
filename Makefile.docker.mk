@@ -3,9 +3,6 @@
 # which are extracted into separate file and included into main Makefile.
 #
 
-build-norace:
-	CGO_ENABLED=1 go build -o ./bin/backend ./cmd/backend
-
 docker-build:
 	DOCKER_CLI_HINTS=false docker build --label "git.revision=${GIT_REV}" --tag $(NAME) .
 

@@ -1,12 +1,9 @@
 ### Prio 0
 - try: grpc
-- bug: perf: check why api time is x3 of sql call: Tx#13 Transaction took 5.621441ms -> api:getByDeviceId took 15.907499ms
-- bug: wrong id (id of messages table instead of expected devices) "Msg=25 Rule=1 Action=1 UpsertZigbeeDevices Created id=72852"
 
 ### Prio 1
-- bug: reset error counter on app restart (already works. why?)
 - feat: collect metrics for "message by device id"
-- feat: execute db migrations also from docker container, otherwize we depend on sqlite3 binary installed on the host system, more specifically problem is macmini has version 3.31.1, while mbp 3.39.5. as a result a new feature "DROP COLUMN" is not working on macmini (introduced in sqlite 3.35, also see https://github.com/mattn/go-sqlite3/issues/927)
+- feat: execute db migrations also from within docker container, otherwize we depend on sqlite3 binary installed on the host system, more specifically problem is macmini has version 3.31.1, while mbp 3.39.5. as a result a new feature "DROP COLUMN" is not working on macmini (introduced in sqlite 3.35, also see https://github.com/mattn/go-sqlite3/issues/927)
 - feat: db: introduce updated_at, created_at columns
 - api: toggle rule on/off
 - api: toggle device buried_timeout on/off
@@ -14,6 +11,9 @@
 - feat: db: limit rule name length, since its used in prometheus metric labels
 
 ### Bugs
+- bug: wrong id (appeared id from messages table instead while was expected from devices) "Msg=25 Rule=1 Action=1 UpsertZigbeeDevices Created id=72852" - apparently is https://github.com/mattn/go-sqlite3/issues/30, however my case is quite complex to reproduce:
+  - UpsertZigbeeDevices does bulk UPSERT in transaction 1
+  - RecordMessage does bulk UPSERT into devices and messages in transaction 2
 - bug: find the reason of no sound on macmini
 - bug: check why docker build always takes 203s on macmini (Building 202.9s (17/17) FINISHED)
 - bug: no mqtt (re)connection if network was not available on app startup and returned online later
@@ -84,6 +84,8 @@
 
 ### Completed
 
+- (+) bug: reset error counter on app restart (already works. why?) - grafana shows LAST metric on most of widgets, so its expected to see zeroing after app restart
+- (+) bug: perf: check why api time is x3 of sql call: Tx#13 Transaction took 5.621441ms -> api:getByDeviceId took 15.907499ms - lots of time spent on json encoding, also BuildMessages did not used advance slice allocation
 - (+) bug: now message for "guarded doors were opened/closed when i'm not at home" when rule is triggered for the first time after app restart - not a bug, next time I've forgot about throttled messages logic
 - (+) feat: configure both telegram channels
 - (+) bug: critical: panic: interface conversion: interface {} is nil, not string (when pairing new device), most prpbably from internal/engine/actions/upsert_zigbee_devices.go
@@ -294,6 +296,10 @@
 {
     Condition{ Fn: "ZigbeeDevice" Args: ["0x00158d0000c2fa6e", "0x00158d000405811b"] }   
 }
+
+<!-- https://github.com/mattn/go-sqlite3/issues/30 -->
+Reproduced once for me. No exect scenario, unfortunately, just to record here. Lib version **v1.14.22**.
+In [my case](https://github.com/fedulovivan/mhz19-go/blob/5714115b99c62eb4b0d9471d6c605b5ec8ac9e8b/internal/entities/devices/repository.go#L94C6-L94C17) insert into two tables (devices, messages) were performing each in its own transaction. And LastInsertId returned an Id from the other table.
 
 // rules
 //   id int

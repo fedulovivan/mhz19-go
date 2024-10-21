@@ -5,7 +5,7 @@ include Makefile.docker.mk
 NAME ?= mhz19-go-backend
 GIT_REV ?= $(shell git rev-parse --short HEAD)
 DATE ?= $(shell date +%FT%T)
-REST_API_DOMAIN ?= localhost
+REST_API_DOMAIN ?= 127.0.0.1
 # REST_API_DOMAIN ?= 192.168.88.188
 REST_API_URL ?= http://$(REST_API_DOMAIN):$(REST_API_PORT)$(REST_API_PATH)
 API_LOAD_COUNT ?= 1000
@@ -17,6 +17,9 @@ default: lint test build
 
 build:
 	GORACE="halt_on_error=1" CGO_ENABLED=1 go build -race -o ./bin/backend ./cmd/backend
+
+build-norace:
+	CGO_ENABLED=1 go build -o ./bin/backend ./cmd/backend
 
 clean:
 	rm ./bin/backend

@@ -2,7 +2,9 @@ package messages
 
 import (
 	"database/sql"
-	"encoding/json"
+
+	"github.com/goccy/go-json"
+	// "encoding/json"
 
 	"github.com/fedulovivan/mhz19-go/internal/db"
 	"github.com/fedulovivan/mhz19-go/internal/types"
@@ -30,7 +32,8 @@ func (s messagesService) GetByDeviceId(deviceId string) (messages []types.Messag
 	return BuildMessages(dbmsg), nil
 }
 
-func BuildMessages(in []DbMessage) (out []types.Message) {
+func BuildMessages(in []DbMessage) []types.Message {
+	out := make([]types.Message, 0, len(in))
 	for _, m := range in {
 		var payload map[string]any
 		_ = json.Unmarshal([]byte(m.Json), &payload)
@@ -43,7 +46,7 @@ func BuildMessages(in []DbMessage) (out []types.Message) {
 			Payload:       payload,
 		})
 	}
-	return
+	return out
 }
 
 func ToDb(message types.Message) (res DbMessage, err error) {
