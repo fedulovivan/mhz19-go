@@ -63,9 +63,6 @@ func (e *engine) SetLdmService(r types.LdmService) {
 	e.ldmService = r
 }
 
-//	func (e *engine) LdmService() types.LdmService {
-//		return e.ldmService
-//	}
 func (e *engine) AppendRules(rules ...types.Rule) {
 	e.rulesMu.Lock()
 	defer e.rulesMu.Unlock()
@@ -280,11 +277,6 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 				} else {
 					slog.Warn(rtag.F(err.Error()))
 				}
-				// otherLdmKey := e.ldmService.NewKey(m.DeviceClass, otherDeviceId)
-				// if e.ldmService.Has(otherLdmKey) {
-				// 	tmp := e.ldmService.Get(otherLdmKey)
-				// 	compound.Curr = &tmp
-				// }
 			} else {
 				compound.Curr = &m
 				if e.ldmService.Has(ldmKey) {
@@ -296,7 +288,7 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 		}
 		if e.MatchesCondition(mtcb, r.Condition, rtag) {
 			counters.IncRule(r.Id)
-			counters.Rules.WithLabelValues( /* strconv.Itoa(r.Id) */ r.Name).Inc()
+			counters.Rules.WithLabelValues(r.Name).Inc()
 			slog.Debug(rtag.F("matches👌"), "name", r.Name)
 			matches++
 			if r.Throttle.Duration == 0 {
@@ -333,3 +325,9 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 		e.ldmService.Set(ldmKey, m)
 	}
 }
+
+// otherLdmKey := e.ldmService.NewKey(m.DeviceClass, otherDeviceId)
+// if e.ldmService.Has(otherLdmKey) {
+// 	tmp := e.ldmService.Get(otherLdmKey)
+// 	compound.Curr = &tmp
+// }

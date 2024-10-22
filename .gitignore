@@ -2,7 +2,7 @@
 bin/
 .env
 .env.debug
-database*.bin
+database.bin*
 sql/*dump.sql
 log.txt
 *.prof

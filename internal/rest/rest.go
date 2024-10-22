@@ -62,9 +62,18 @@ func errorHandler(c *routing.Context) (err error) {
 	return c.Next()
 }
 
+// func (rg *routing.RouteGroup) Path() string {
+// 	return ""
+// }
+
 func requestCounter(c *routing.Context) error {
 	go counters.Inc(counters.API_REQUESTS)
-	go counters.ApiRequests.WithLabelValues(c.Request.URL.Path, c.Request.Method).Inc()
+	go counters.ApiRequests.WithLabelValues(
+		// c.Router().RouteGroup,
+		// fmt.Sprintf("%v", c.Router().RouteGroup),
+		c.Request.URL.Path,
+		c.Request.Method,
+	).Inc()
 	return c.Next()
 }
 

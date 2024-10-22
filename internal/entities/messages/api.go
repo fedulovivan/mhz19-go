@@ -1,6 +1,8 @@
 package messages
 
 import (
+	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/fedulovivan/mhz19-go/internal/logger"
@@ -36,9 +38,29 @@ func (api messagesApi) get(c *routing.Context) error {
 
 func (api messagesApi) getByDeviceId(c *routing.Context) error {
 	defer utils.TimeTrack(api.tag.F, time.Now(), "api:getByDeviceId")
+	tocsv := c.Query("tocsv") == "1"
 	data, err := api.service.GetByDeviceId(c.Param("deviceId"))
 	if err != nil {
 		return err
+	}
+	if tocsv {
+		for _, row := range data {
+			timestamp := row.Timestamp.Format(time.RFC3339)
+			tstring := ""
+			if payload, ok := row.Payload.(map[string]any); ok {
+				if temperature, ok := payload["temperature"].(float64); ok {
+					tstring = strconv.FormatFloat(temperature, 'f', 2, 32)
+				}
+			}
+			_, err := fmt.Fprint(
+				c.Response,
+				timestamp+","+tstring+"\n",
+			)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
 	}
 	return c.Write(data)
 }

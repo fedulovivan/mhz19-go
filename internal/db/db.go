@@ -50,12 +50,19 @@ func DbSingleton() *sql.DB {
 	if _, err := os.Stat(dbabspath); errors.Is(err, os.ErrNotExist) {
 		Panic(err)
 	}
+	// instance, err = sql.Open("sqlite3", fmt.Sprintf("%v?_busy_timeout=5000", dbabspath))
 	// instance, err = sql.Open("sqlite3", fmt.Sprintf("%v?cache=shared&mode=wal", dbabspath))
 	instance, err = sql.Open("sqlite3", dbabspath)
 	if err != nil {
 		Panic(err)
 	}
-	_, err = instance.Exec("PRAGMA foreign_keys=ON")
+
+	// try busy_timeout to cope with "database is locked", instead of force putting db into single-conn mode
+	// note that Exec placeholders does not work for PRAGMA query, so we have to use Sprintf here
+	_, err = instance.Exec(fmt.Sprintf(
+		"PRAGMA foreign_keys=ON; PRAGMA busy_timeout=%d",
+		app.Config.SqliteBusyTimeout,
+	))
 	if err != nil {
 		Panic(err)
 	}

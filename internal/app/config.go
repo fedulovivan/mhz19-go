@@ -25,7 +25,8 @@ type ConfigStorage struct {
 	// db
 	DbDebug bool `env:"DB_DEBUG,default=false"`
 
-	SqliteFilename string `env:"SQLITE_FILENAME,default=database.bin"`
+	SqliteFilename    string `env:"SQLITE_FILENAME,default=database.bin"`
+	SqliteBusyTimeout int    `env:"SQLITE_BUSY_TIMEOUT,default=5000"`
 
 	// telegram
 	TelegramDebug         bool     `env:"TELEGRAM_DEBUG,default=false"`

@@ -1,5 +1,6 @@
 ### Prio 0
-- try: grpc
+- try: grpc. where?
+- try: can we speed up handleMessage? create benchmarks for handleMessage and conditions
 
 ### Prio 1
 - feat: collect metrics for "message by device id"
@@ -11,9 +12,9 @@
 - feat: db: limit rule name length, since its used in prometheus metric labels
 
 ### Bugs
-- bug: wrong id (appeared id from messages table instead while was expected from devices) "Msg=25 Rule=1 Action=1 UpsertZigbeeDevices Created id=72852" - apparently is https://github.com/mattn/go-sqlite3/issues/30, however my case is quite complex to reproduce:
-  - UpsertZigbeeDevices does bulk UPSERT in transaction 1
-  - RecordMessage does bulk UPSERT into devices and messages in transaction 2
+- bug: wrong id (appeared id from messages table instead while was expected from devices) "Msg=25 Rule=1 Action=1 UpsertZigbeeDevices Created id=72852" - apparently this is https://github.com/mattn/go-sqlite3/issues/30, however my case is quite complex to reproduce:
+  - UpsertZigbeeDevices performs bulk UPSERT in transaction 1
+  - RecordMessage performs bulk UPSERT into devices and messages in transaction 2
 - bug: find the reason of no sound on macmini
 - bug: check why docker build always takes 203s on macmini (Building 202.9s (17/17) FINISHED)
 - bug: no mqtt (re)connection if network was not available on app startup and returned online later
@@ -84,6 +85,7 @@
 
 ### Completed
 
+- (+) bug: only 50rps for api-load-push-message-write - there was a rps limit, renamed makefile commands to avoid future confusions
 - (+) bug: reset error counter on app restart (already works. why?) - grafana shows LAST metric on most of widgets, so its expected to see zeroing after app restart
 - (+) bug: perf: check why api time is x3 of sql call: Tx#13 Transaction took 5.621441ms -> api:getByDeviceId took 15.907499ms - lots of time spent on json encoding, also BuildMessages did not used advance slice allocation
 - (+) bug: now message for "guarded doors were opened/closed when i'm not at home" when rule is triggered for the first time after app restart - not a bug, next time I've forgot about throttled messages logic

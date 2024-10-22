@@ -1,6 +1,7 @@
 CONF ?= .env
 include $(CONF)
 include Makefile.docker.mk
+include Makefile.load.mk
 
 NAME ?= mhz19-go-backend
 GIT_REV ?= $(shell git rev-parse --short HEAD)
@@ -23,26 +24,6 @@ build-norace:
 
 clean:
 	rm ./bin/backend
-
-api-load-rules-read:
-	oha -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/rules
-
-api-load-messages-read:
-	oha -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/messages/device/0x00158d00067cb0c9
-
-api-load-stats-read:
-	oha -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/stats
-
-api-load-rules-write:
-	curl -H 'Content-Type: application/json' -X PUT -d '{"deviceId":"DeviceId(0x00158d0004244bda)","deviceClass":1}' $(REST_API_URL)/devices
-	curl -H 'Content-Type: application/json' -X PUT -d '{"deviceId":"DeviceId(10011cec96)","deviceClass":6}' $(REST_API_URL)/devices
-	oha --method PUT -H 'Content-Type: application/json' -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) -D ./assets/load/create-rule.json --rand-regex-url $(REST_API_URL)/rules/name-[a-z0-9]{16}
-
-api-load-push-message-write:
-	oha --method PUT -H 'Content-Type: application/json' -D ./assets/load/push-message.json -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) -q $(API_RPS) $(REST_API_URL)/push-message
-
-api-load-once:
-	wget -O /dev/null $(REST_API_URL)/rules
 
 run:
 	GORACE="halt_on_error=1" go run -race ./cmd/backend
@@ -95,8 +76,6 @@ pprof-cpu:
 test-one:
 	go test ./internal/engine -run TestMappings -v
 
-# ab -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/rules
-# ab -T application/json -u ./assets/load/create-rule.json -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/rules
 # CGO_ENABLED=1 go test -benchmem ./...
 # CGO_ENABLED=1 go test -cover -race -count 1 ./...
 # curl -X PUT -H "Content-Type: application/json" -d @assets/push-message.json $(REST_API_URL)/push-message
@@ -109,5 +88,4 @@ test-one:
 # https://gist.github.com/ungoldman/11282441
 # https://stackoverflow.com/questions/978142/how-to-benchmark-apache-with-delays
 # oha --method PUT -H 'Content-Type: application/json' -D ./assets/load/create-rule.json $(REST_API_URL)/rules
-# oha --method PUT -H 'Content-Type: application/json' -d "{\"name\":\"name-`uuidgen`\"}" -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/rules
 # watch -n 0.5 
