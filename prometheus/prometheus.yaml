@@ -7,6 +7,10 @@ scrape_configs:
     static_configs:
       - targets:
         - host.docker.internal:7070
+  - job_name: device-pinger
+    static_configs:
+      - targets:
+        - host.docker.internal:2112
   - job_name: macmini
     static_configs:
       - targets:
