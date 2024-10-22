@@ -18,6 +18,23 @@
   - Another way of visualization Prometheus histogram https://medium.com/@shershnev/another-way-of-visualization-prometheus-histogram-8442aebc932a
     `histogram_quantile(0.95, sum by(le, job,instance) (rate(mhz19_messages_handled_bucket[10m])))`
 
+### node-exporter
+
+macmini
+`wget https://github.com/prometheus/node_exporter/releases/download/v1.8.2/node_exporter-1.8.2.linux-amd64.tar.gz`
+rpi
+`wget https://github.com/prometheus/node_exporter/releases/download/v1.8.2/node_exporter-1.8.2.linux-armv7.tar.gz`
+
+`tar xvfz node_exporter-1.8.2.linux-amd64.tar.gz`
+
+`cd node-exporter...`
+
+`cp node_exporter /usr/local/bin/`
+
+`sudo crontab -e`
+
+`@reboot /usr/local/bin/node_exporter &`
+
 ### TODO
   - try: https://prometheus.io/docs/guides/node-exporter/ for macmini host
     - https://krsnachalise.medium.com/installing-node-exporter-in-linux-machines-d85e81d8808d
