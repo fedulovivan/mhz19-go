@@ -13,6 +13,12 @@ type TagSuite struct {
 	suite.Suite
 }
 
+func (s *TagSuite) Test05() {
+	tag1 := NewTag("[main]")
+	s.Equal("[main] message one", tag1.F("message one"))
+	s.Equal("[main] message two", tag1.F("message two"))
+}
+
 func (s *TagSuite) Test10() {
 	tag1 := NewTag("[main]")
 	tag2 := NewTag("[module]")

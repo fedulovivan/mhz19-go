@@ -65,7 +65,7 @@ test:
 	go test -cover -race -count 1 ./...
 
 bench:
-	rm -f *.prof && go test ./internal/counters -bench=^Benchmark30$$ -run=^$$ -benchmem -cpuprofile cpu.prof -memprofile=mem.prof
+	rm -f *.prof && LOG_LEVEL=error go test ./internal/engine -bench=^Benchmark10$$ -run=^$$ -benchmem -cpuprofile cpu.prof -memprofile=mem.prof
 
 pprof-mem:
 	go tool pprof mem.prof
@@ -76,6 +76,7 @@ pprof-cpu:
 test-one:
 	go test ./internal/engine -run TestMappings -v
 
+# rm -f *.prof && go test ./internal/counters -bench=^Benchmark30$$ -run=^$$ -benchmem -cpuprofile cpu.prof -memprofile=mem.prof
 # CGO_ENABLED=1 go test -benchmem ./...
 # CGO_ENABLED=1 go test -cover -race -count 1 ./...
 # curl -X PUT -H "Content-Type: application/json" -d @assets/push-message.json $(REST_API_URL)/push-message

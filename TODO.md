@@ -1,6 +1,5 @@
 ### Prio 0
 - try: grpc. where?
-- try: can we speed up handleMessage? create benchmarks for handleMessage and conditions
 
 ### Prio 1
 - feat: collect metrics for "message by device id"
@@ -85,6 +84,11 @@
 
 ### Completed
 
+- (+) try: can we speed up HandleMessage? create benchmarks for HandleMessage and conditions
+  - base performance is about 3700ns per operation (1 Equal condition)
+  - 15% performance gain in Tag module after switching to strings.Builder, with significant degrade in code readability
+  - 50% performance gain after disabling Tag module
+  - 90% performance gain when used without conditions, without TimeTrack, without Tag module, without logging, without prometheus
 - (+) bug: only 50rps for api-load-push-message-write - there was a rps limit, renamed makefile commands to avoid future confusions
 - (+) bug: reset error counter on app restart (already works. why?) - grafana shows LAST metric on most of widgets, so its expected to see zeroing after app restart
 - (+) bug: perf: check why api time is x3 of sql call: Tx#13 Transaction took 5.621441ms -> api:getByDeviceId took 15.907499ms - lots of time spent on json encoding, also BuildMessages did not used advance slice allocation
@@ -218,7 +222,7 @@
 - (+) try https://github.com/jmoiron/sqlx, https://jmoiron.github.io/sqlx/ - library has lots of issues (300 open, 370 closed) and , for now using own lightweight wrappers
 - (+) no new mqtt messages after mqtt disconnect/autoreconnect (`Connection lost error="pingresp not received, disconnecting"` and later `Connected broker=tcp://macmini:1883`) + same issue for device-pinger which impacts its service - subscriptions should be settled in connect handler
 - (+) schema, use same approach to check fk for device_classes and function_name (either CHECK constraint of FK to separate table)
-- (+) add transaction id to handleMessage log records
+- (+) add transaction id to HandleMessage log records
 - (+) execute actions asyncronously in goroutine
 - (+) "List" argument could be only defined as []any, not []string, not []int etc - no solution so far
 - (+) think how to organize OutChannel validation for the actions which require it - use callback
@@ -235,7 +239,7 @@
 - (?) arch: make logger and logTag a dependency of service, api and repository - no urgent need, everything is easily testable with current approach
 - (?) try: opentelemetry https://opentelemetry.io/docs/languages/go/getting-started/, https://www.reddit.com/r/devops/comments/nxrbqa/opentelemetry_is_great_but_why_is_it_so_bloody/ - no need now, due to overcomplicated api
 - (?) introduce intermediate layer between named args and function implementation using regular args (more robust, simplify things like ZigbeeDeviceFn)
-- (?) think about "first match" strategy in handleMessage - we do not need this, since we to execute RecordMessage and some other action 
+- (?) think about "first match" strategy in HandleMessage - we do not need this, since we to execute RecordMessage and some other action 
 - (?) feat: create test service for sonoff wifi devices (poll them periodically to receive status updates)
 - (?) arch: looks like we need to compare values as srings in conditions
 - (?) feat: collect device up/down metrics

@@ -1,6 +1,8 @@
 package engine
 
 import (
+	"io"
+	"log"
 	"testing"
 	"time"
 
@@ -157,6 +159,53 @@ func (s *EngineSuite) Test72() {
 			},
 		},
 	})
+}
+
+func Benchmark10(b *testing.B) {
+
+	log.SetOutput(io.Discard)
+
+	e := NewEngine()
+	ldmService := ldm.NewService(ldm.RepoSingleton())
+	e.SetLdmService(ldmService)
+	// noop
+	// just to allow send to unbuffered "onset" chan in internal/entities/ldm/repository.go
+	go func() {
+		for range ldmService.OnSet() {
+		}
+	}()
+
+	for k := 0; k < b.N; k++ {
+		e.HandleMessage(types.Message{
+			Id:        types.MessageIdSeq.Inc(),
+			Timestamp: time.Now(),
+		}, []types.Rule{
+			// {
+			// 	Condition: types.Condition{
+			// 		Fn:   types.COND_EQUAL,
+			// 		Args: types.Args{"Left": true, "Right": true},
+			// 	},
+			// },
+			// {
+			// 	Condition: types.Condition{
+			// 		Or: true,
+			// 		Nested: []types.Condition{
+			// 			{Fn: types.COND_CHANGED},
+			// 			{Fn: types.COND_EQUAL},
+			// 			{Fn: types.COND_IN_LIST},
+			// 			{Fn: types.COND_NIL},
+			// 			{Fn: types.COND_ZIGBEE_DEVICE},
+			// 			{Fn: types.COND_DEVICE_CLASS},
+			// 			{Fn: types.COND_СHANNEL},
+			// 			{Fn: types.COND_FROM_END_DEVICE},
+			// 			{Fn: types.COND_TRUE},
+			// 			{Fn: types.COND_FALSE},
+			// 			{Fn: types.COND_DEVICE_ID},
+			// 		},
+			// 	},
+			// },
+		})
+	}
 }
 
 func (s *EngineSuite) Test140() {
