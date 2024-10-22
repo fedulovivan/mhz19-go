@@ -86,8 +86,7 @@
 
 - (+) try: can we speed up HandleMessage? create benchmarks for HandleMessage and conditions
   - base performance is about 3700ns per operation (1 Equal condition)
-  - 15% performance gain in Tag module after switching to strings.Builder, with significant degrade in code readability
-  - 50% performance gain after disabling Tag module
+  - 60% performance gain in Tag module after switching to strings.Builder and reduced memory allocations making strings.Builder no-pointer value
   - 90% performance gain when used without conditions, without TimeTrack, without Tag module, without logging, without prometheus
 - (+) bug: only 50rps for api-load-push-message-write - there was a rps limit, renamed makefile commands to avoid future confusions
 - (+) bug: reset error counter on app restart (already works. why?) - grafana shows LAST metric on most of widgets, so its expected to see zeroing after app restart

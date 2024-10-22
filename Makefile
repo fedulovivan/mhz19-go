@@ -65,7 +65,7 @@ test:
 	go test -cover -race -count 1 ./...
 
 bench:
-	rm -f *.prof && LOG_LEVEL=error go test ./internal/engine -bench=^Benchmark10$$ -run=^$$ -benchmem -cpuprofile cpu.prof -memprofile=mem.prof
+	rm -f *.prof && go test ./internal/engine -bench=^Benchmark10$$ -run=^$$ -benchmem -cpuprofile cpu.prof -memprofile=mem.prof
 
 pprof-mem:
 	go tool pprof mem.prof
