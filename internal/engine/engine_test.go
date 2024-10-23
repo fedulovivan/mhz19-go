@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/fedulovivan/mhz19-go/internal/entities/ldm"
-	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/types"
+	"github.com/fedulovivan/mhz19-go/pkg/utils"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -128,7 +128,7 @@ func (s *EngineSuite) Test61() {
 			},
 		},
 	}
-	tag := logger.NewTag("[Test61]")
+	tag := utils.NewTag("[Test61]")
 	s.e.ExecuteActions(mc, rule, tag)
 }
 

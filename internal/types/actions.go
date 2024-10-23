@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/fedulovivan/mhz19-go/internal/logger"
+	"github.com/fedulovivan/mhz19-go/pkg/utils"
 )
 
 type ActionFn byte
@@ -67,6 +67,6 @@ func (fn *ActionFn) UnmarshalJSON(b []byte) (err error) {
 	return fmt.Errorf("failed to unmarshal %v (type=%T) to ActionFn", v, v)
 }
 
-type ActionImpl func(compound MessageCompound, args Args, mapping Mapping, engine EngineAsSupplier, tag logger.Tag) error
+type ActionImpl func(compound MessageCompound, args Args, mapping Mapping, engine EngineAsSupplier, tag utils.Tag) error
 
 type ActionImpls map[ActionFn]ActionImpl

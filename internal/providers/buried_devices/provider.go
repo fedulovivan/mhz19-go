@@ -9,9 +9,10 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/engine"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/types"
+	"github.com/fedulovivan/mhz19-go/pkg/utils"
 )
 
-var tag = logger.NewTag(logger.BURIED)
+var tag = utils.NewTag(logger.BURIED)
 
 type BuriedTimers map[types.LdmKey]*time.Timer
 

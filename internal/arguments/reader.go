@@ -9,11 +9,9 @@ import (
 	"time"
 
 	"github.com/fedulovivan/mhz19-go/internal/app"
-	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/types"
+	"github.com/fedulovivan/mhz19-go/pkg/utils"
 )
-
-// var baseTag = logger.NewTag(logger.ARGS)
 
 type reader struct {
 	args     types.Args
@@ -22,7 +20,7 @@ type reader struct {
 	mapping  types.Mapping
 	tpayload *types.TemplatePayload
 	engine   types.EngineAsSupplier
-	baseTag  logger.Tag
+	baseTag  utils.Tag
 }
 
 func NewReader(
@@ -31,7 +29,7 @@ func NewReader(
 	mapping types.Mapping,
 	tpayload *types.TemplatePayload,
 	engine types.EngineAsSupplier,
-	baseTag logger.Tag,
+	baseTag utils.Tag,
 ) reader {
 	return reader{
 		message:  message,

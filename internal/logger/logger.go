@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/fedulovivan/mhz19-go/internal/app"
+	"github.com/fedulovivan/mhz19-go/pkg/utils"
 	"github.com/lmittmann/tint"
 )
 
@@ -23,8 +24,6 @@ func Init() {
 		log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
 	}
 }
-
-type TagName string
 
 const (
 	MOD_MAIN     string = "main"
@@ -47,23 +46,23 @@ const (
 )
 
 const (
-	MAIN     TagName = "[main]      "
-	ENGINE   TagName = "[engine]    "
-	DB       TagName = "[db]        "
-	REST     TagName = "[rest]      "
-	ACTIONS  TagName = "[actions]   "
-	CONDS    TagName = "[conds]     "
-	ARGS     TagName = "[args]      "
-	LDM      TagName = "[a_ldm]     "
-	RULES    TagName = "[a_rules]   "
-	STATS    TagName = "[a_stats]   "
-	MESSAGES TagName = "[a_messages]"
-	DEVICES  TagName = "[a_devices] "
-	DICTS    TagName = "[a_dicts]   "
-	TBOT     TagName = "[p_tbot]    "
-	DNSSD    TagName = "[p_dnssd]   "
-	MQTT     TagName = "[p_mqtt]    "
-	BURIED   TagName = "[p_buried]  "
+	MAIN     utils.TagName = "[main]      "
+	ENGINE   utils.TagName = "[engine]    "
+	DB       utils.TagName = "[db]        "
+	REST     utils.TagName = "[rest]      "
+	ACTIONS  utils.TagName = "[actions]   "
+	CONDS    utils.TagName = "[conds]     "
+	ARGS     utils.TagName = "[args]      "
+	LDM      utils.TagName = "[a_ldm]     "
+	RULES    utils.TagName = "[a_rules]   "
+	STATS    utils.TagName = "[a_stats]   "
+	MESSAGES utils.TagName = "[a_messages]"
+	DEVICES  utils.TagName = "[a_devices] "
+	DICTS    utils.TagName = "[a_dicts]   "
+	TBOT     utils.TagName = "[p_tbot]    "
+	DNSSD    utils.TagName = "[p_dnssd]   "
+	MQTT     utils.TagName = "[p_mqtt]    "
+	BURIED   utils.TagName = "[p_buried]  "
 )
 
 // if app.Config.IsDev {

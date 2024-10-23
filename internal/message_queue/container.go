@@ -8,9 +8,10 @@ import (
 
 	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/types"
+	"github.com/fedulovivan/mhz19-go/pkg/utils"
 )
 
-var tag = logger.NewTag(logger.MAIN)
+var tag = utils.NewTag(logger.MAIN)
 
 type container struct {
 	mu    sync.RWMutex

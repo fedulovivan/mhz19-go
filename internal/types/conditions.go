@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/fedulovivan/mhz19-go/internal/logger"
+	"github.com/fedulovivan/mhz19-go/pkg/utils"
 )
 
 type CondFn byte
@@ -72,6 +72,6 @@ func (fn *CondFn) UnmarshalJSON(b []byte) (err error) {
 	return fmt.Errorf("failed to unmarshal %v (type=%T) to CondFn", v, v)
 }
 
-type CondImpl func(mt MessageCompound, args Args, tag logger.Tag) (bool, error)
+type CondImpl func(mt MessageCompound, args Args, tag utils.Tag) (bool, error)
 
 type CondImpls map[CondFn]CondImpl

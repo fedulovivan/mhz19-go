@@ -9,7 +9,7 @@ import (
 	routing "github.com/go-ozzo/ozzo-routing/v2"
 )
 
-var tag = logger.NewTag(logger.LDM)
+var tag = utils.NewTag(logger.LDM)
 
 type ldmApi struct {
 	service types.LdmService

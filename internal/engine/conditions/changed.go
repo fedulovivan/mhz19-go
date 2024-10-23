@@ -4,12 +4,12 @@ import (
 	"errors"
 
 	"github.com/fedulovivan/mhz19-go/internal/arguments"
-	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/types"
+	"github.com/fedulovivan/mhz19-go/pkg/utils"
 )
 
 // args: Value
-var Changed types.CondImpl = func(mt types.MessageCompound, args types.Args, tag logger.Tag) (res bool, err error) {
+var Changed types.CondImpl = func(mt types.MessageCompound, args types.Args, tag utils.Tag) (res bool, err error) {
 	if mt.Prev == nil && mt.Curr != nil {
 		return true, nil
 	}

@@ -12,7 +12,7 @@ import (
 	routing "github.com/go-ozzo/ozzo-routing/v2"
 )
 
-var tag = logger.NewTag(logger.STATS)
+var tag = utils.NewTag(logger.STATS)
 
 type statsApi struct {
 	service types.StatsService

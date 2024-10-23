@@ -12,11 +12,11 @@ import (
 
 type devicesApi struct {
 	service types.DevicesService
-	tag     logger.Tag
+	tag     utils.Tag
 }
 
 func NewApi(base *routing.RouteGroup, service types.DevicesService) {
-	logTag := logger.NewTag(logger.DEVICES)
+	logTag := utils.NewTag(logger.DEVICES)
 	api := devicesApi{
 		service,
 		logTag,

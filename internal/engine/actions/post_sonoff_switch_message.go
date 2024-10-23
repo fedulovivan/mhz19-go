@@ -11,8 +11,8 @@ import (
 
 	"github.com/Jeffail/gabs/v2"
 	"github.com/fedulovivan/mhz19-go/internal/arguments"
-	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/types"
+	"github.com/fedulovivan/mhz19-go/pkg/utils"
 )
 
 // args: DeviceId, Command (on,off)
@@ -21,7 +21,7 @@ var PostSonoffSwitchMessage types.ActionImpl = func(
 	args types.Args,
 	mapping types.Mapping,
 	e types.EngineAsSupplier,
-	tag logger.Tag,
+	tag utils.Tag,
 ) (err error) {
 	// tpayload := types.TemplatePayload{
 	// 	Messages: mm,
@@ -52,7 +52,7 @@ var PostSonoffSwitchMessage types.ActionImpl = func(
 	return
 }
 
-func httpPost(ip string, port string, cmd string, tag logger.Tag) error {
+func httpPost(ip string, port string, cmd string, tag utils.Tag) error {
 
 	url := fmt.Sprintf("http://%v:%v/zeroconf/switch", ip, port)
 	payload := []byte(fmt.Sprintf(`{"data":{"switch":"%v"}}`, cmd))

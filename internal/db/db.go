@@ -20,13 +20,13 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var BaseTag = logger.NewTag(logger.DB)
+var BaseTag = utils.NewTag(logger.DB)
 
 type ctxkey struct{}
 
 type ctxval struct {
 	Tx  *sql.Tx
-	Tag logger.Tag
+	Tag utils.Tag
 }
 
 type CtxEnhanced interface {
@@ -215,7 +215,7 @@ func Count(
 	return
 }
 
-func logQuery(tag logger.Tag, query string, values ...any) {
+func logQuery(tag utils.Tag, query string, values ...any) {
 	if !app.Config.DbDebug {
 		return
 	}
@@ -332,7 +332,7 @@ func RunTx(db *sql.DB, fn func(ctx CtxEnhanced) error) error {
 // }(time.Now())
 // }
 // tx := ctx.Value(key_tx{}).(*sql.Tx)
-// tag := ctx.Value(key_tag{}).(logger.Tag).AddTid("Select")
+// tag := ctx.Value(key_tag{}).(utils.Tag).AddTid("Select")
 // counters.Inc(counters.QUERIES)
 // if app.Config.DbDebug {
 // defer func(start time.Time) {
@@ -382,6 +382,6 @@ func RunTx(db *sql.DB, fn func(ctx CtxEnhanced) error) error {
 //     return nil
 // })
 // if app.Config.DbDebug {
-// 	tag := ctx.Value(Ctxkey_tag{}).(logger.Tag)
+// 	tag := ctx.Value(Ctxkey_tag{}).(utils.Tag)
 // 	slog.Error(tag.F("Rollback"))
 // }

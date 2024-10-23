@@ -4,12 +4,12 @@ import (
 	"fmt"
 
 	"github.com/fedulovivan/mhz19-go/internal/arguments"
-	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/types"
+	"github.com/fedulovivan/mhz19-go/pkg/utils"
 )
 
 // args: State, DeviceId
-var ValveSetState types.ActionImpl = func(compound types.MessageCompound, args types.Args, mapping types.Mapping, e types.EngineAsSupplier, tag logger.Tag) (err error) {
+var ValveSetState types.ActionImpl = func(compound types.MessageCompound, args types.Args, mapping types.Mapping, e types.EngineAsSupplier, tag utils.Tag) (err error) {
 	// tpayload := types.TemplatePayload{
 	// 	Messages: mm,
 	// }

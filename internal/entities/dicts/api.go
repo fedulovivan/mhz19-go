@@ -9,7 +9,7 @@ import (
 	routing "github.com/go-ozzo/ozzo-routing/v2"
 )
 
-var tag = logger.NewTag(logger.DICTS)
+var tag = utils.NewTag(logger.DICTS)
 
 type api struct {
 	service types.DictsService

@@ -13,11 +13,11 @@ import (
 
 type messagesApi struct {
 	service types.MessagesService
-	tag     logger.Tag
+	tag     utils.Tag
 }
 
 func NewApi(base *routing.RouteGroup, service types.MessagesService) {
-	logTag := logger.NewTag(logger.MESSAGES)
+	logTag := utils.NewTag(logger.MESSAGES)
 	api := messagesApi{
 		service,
 		logTag,

@@ -3,8 +3,8 @@ package actions
 import (
 	"os/exec"
 
-	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/types"
+	"github.com/fedulovivan/mhz19-go/pkg/utils"
 )
 
 // args: <none>
@@ -13,7 +13,7 @@ var PlayAlert types.ActionImpl = func(
 	args types.Args,
 	mapping types.Mapping,
 	e types.EngineAsSupplier,
-	tag logger.Tag,
+	tag utils.Tag,
 ) (err error) {
 	_, err = exec.Command(
 		"mpg123",

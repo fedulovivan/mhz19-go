@@ -11,11 +11,12 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/engine"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/types"
+	"github.com/fedulovivan/mhz19-go/pkg/utils"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-var tag = logger.NewTag(logger.TBOT)
+var tag = utils.NewTag(logger.TBOT)
 
 type provider struct {
 	engine.ProviderBase

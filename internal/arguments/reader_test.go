@@ -6,12 +6,13 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/mocks"
 	"github.com/fedulovivan/mhz19-go/internal/types"
+	"github.com/fedulovivan/mhz19-go/pkg/utils"
 	"github.com/stretchr/testify/suite"
 )
 
 type ReaderSuite struct {
 	suite.Suite
-	tag logger.Tag
+	tag utils.Tag
 }
 
 func (s *ReaderSuite) SetupSuite() {
@@ -290,6 +291,6 @@ func (s *ReaderSuite) Test130() {
 
 func TestReader(t *testing.T) {
 	suite.Run(t, &ReaderSuite{
-		tag: logger.NewTag(logger.ARGS),
+		tag: utils.NewTag(logger.ARGS),
 	})
 }

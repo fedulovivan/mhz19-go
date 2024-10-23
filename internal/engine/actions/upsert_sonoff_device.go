@@ -4,13 +4,13 @@ import (
 	"fmt"
 
 	"github.com/Jeffail/gabs/v2"
-	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/types"
+	"github.com/fedulovivan/mhz19-go/pkg/utils"
 )
 
 // args: <none>
 // system action to create device upon receiving dns-sd message with _ewelink._tcp service
-var UpsertSonoffDevice = func(compound types.MessageCompound, args types.Args, mapping types.Mapping, e types.EngineAsSupplier, tag logger.Tag) (err error) {
+var UpsertSonoffDevice = func(compound types.MessageCompound, args types.Args, mapping types.Mapping, e types.EngineAsSupplier, tag utils.Tag) (err error) {
 	m := compound.Curr
 	gjson := gabs.Wrap(m.Payload)
 	name, ok := gjson.Path("Host").Data().(string)

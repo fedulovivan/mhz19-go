@@ -19,6 +19,7 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/rest"
 	"github.com/fedulovivan/mhz19-go/internal/types"
+	"github.com/fedulovivan/mhz19-go/pkg/utils"
 
 	buried_devices "github.com/fedulovivan/mhz19-go/internal/providers/buried_devices"
 	dnssd "github.com/fedulovivan/mhz19-go/internal/providers/dnssd"
@@ -29,7 +30,7 @@ import (
 	_ "net/http/pprof"
 )
 
-var tag = logger.NewTag(logger.MAIN)
+var tag = utils.NewTag(logger.MAIN)
 
 func main() {
 

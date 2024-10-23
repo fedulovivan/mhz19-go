@@ -20,6 +20,7 @@ import (
 	stats_e "github.com/fedulovivan/mhz19-go/internal/entities/stats"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/types"
+	"github.com/fedulovivan/mhz19-go/pkg/utils"
 	routing "github.com/go-ozzo/ozzo-routing/v2"
 	"github.com/go-ozzo/ozzo-routing/v2/content"
 	"github.com/go-ozzo/ozzo-routing/v2/cors"
@@ -28,7 +29,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-var tag = logger.NewTag(logger.REST)
+var tag = utils.NewTag(logger.REST)
 
 var server http.Server
 

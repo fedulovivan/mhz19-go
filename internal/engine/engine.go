@@ -27,7 +27,7 @@ type GetProviderFn func(ch types.ChannelType) types.ChannelProvider
 var _ types.Engine = (*engine)(nil)
 var _ types.EngineAsSupplier = (*engine)(nil)
 
-var BaseTag = logger.NewTag(logger.ENGINE)
+var BaseTag = utils.NewTag(logger.ENGINE)
 
 type engine struct {
 	providers      []types.ChannelProvider
@@ -120,7 +120,7 @@ func (e *engine) Stop() {
 func (e *engine) InvokeConditionFunc(
 	mt types.MessageCompound,
 	c types.Condition,
-	baseTag logger.Tag,
+	baseTag utils.Tag,
 ) bool {
 	start := time.Now()
 	impl := conditions.Get(c.Fn)
@@ -146,7 +146,7 @@ func (e *engine) InvokeConditionFunc(
 	}
 }
 
-func (e *engine) InvokeActionFunc(compound types.MessageCompound, a types.Action, tag logger.Tag) {
+func (e *engine) InvokeActionFunc(compound types.MessageCompound, a types.Action, tag utils.Tag) {
 	start := time.Now()
 	impl := actions.Get(a.Fn)
 	atag := tag.With("Action=%d %s", a.Id, a.Fn.String())
@@ -162,7 +162,7 @@ func (e *engine) InvokeActionFunc(compound types.MessageCompound, a types.Action
 	}
 }
 
-func (e *engine) MatchesListSome(mtcb types.GetCompoundForOtherDeviceId, cc []types.Condition, tag logger.Tag) bool {
+func (e *engine) MatchesListSome(mtcb types.GetCompoundForOtherDeviceId, cc []types.Condition, tag utils.Tag) bool {
 	for _, c := range cc {
 		if e.MatchesCondition(mtcb, c, tag) {
 			return true
@@ -171,7 +171,7 @@ func (e *engine) MatchesListSome(mtcb types.GetCompoundForOtherDeviceId, cc []ty
 	return false
 }
 
-func (e *engine) MatchesListEvery(mtcb types.GetCompoundForOtherDeviceId, cc []types.Condition, tag logger.Tag) bool {
+func (e *engine) MatchesListEvery(mtcb types.GetCompoundForOtherDeviceId, cc []types.Condition, tag utils.Tag) bool {
 	if len(cc) == 0 {
 		return false
 	}
@@ -183,7 +183,7 @@ func (e *engine) MatchesListEvery(mtcb types.GetCompoundForOtherDeviceId, cc []t
 	return true
 }
 
-func (e *engine) MatchesCondition(mtcb types.GetCompoundForOtherDeviceId, c types.Condition, tag logger.Tag) bool {
+func (e *engine) MatchesCondition(mtcb types.GetCompoundForOtherDeviceId, c types.Condition, tag utils.Tag) bool {
 	withFn := c.Fn != 0
 	withList := len(c.Nested) > 0
 	if !withFn && !withList {
@@ -203,7 +203,7 @@ func (e *engine) MatchesCondition(mtcb types.GetCompoundForOtherDeviceId, c type
 	}
 }
 
-func (e *engine) ExecuteActions(compound types.MessageCompound, r types.Rule, tag logger.Tag) {
+func (e *engine) ExecuteActions(compound types.MessageCompound, r types.Rule, tag utils.Tag) {
 	slog.Debug(tag.F("going to execute %d actions", len(r.Actions)))
 	for _, a := range r.Actions {
 		go e.InvokeActionFunc(compound, a, tag)

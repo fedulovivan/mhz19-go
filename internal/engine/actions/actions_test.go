@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/mocks"
 	"github.com/fedulovivan/mhz19-go/internal/types"
+	"github.com/fedulovivan/mhz19-go/pkg/utils"
 	"github.com/stretchr/testify/suite"
 )
 
 type ActionsSuite struct {
 	suite.Suite
-	tag logger.Tag
+	tag utils.Tag
 }
 
 func (s *ActionsSuite) SetupSuite() {
@@ -147,6 +147,6 @@ func (s *ActionsSuite) Test50() {
 
 func TestActions(t *testing.T) {
 	suite.Run(t, &ActionsSuite{
-		tag: logger.NewTag("ActionsSuite"),
+		tag: utils.NewTag("ActionsSuite"),
 	})
 }

@@ -11,13 +11,14 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/engine"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/types"
+	"github.com/fedulovivan/mhz19-go/pkg/utils"
 )
 
 type provider struct {
 	engine.ProviderBase
 }
 
-var tag = logger.NewTag(logger.DNSSD)
+var tag = utils.NewTag(logger.DNSSD)
 
 func NewProvider() types.ChannelProvider {
 	return &provider{

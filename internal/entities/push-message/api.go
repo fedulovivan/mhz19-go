@@ -9,7 +9,7 @@ import (
 	routing "github.com/go-ozzo/ozzo-routing/v2"
 )
 
-var logTag = logger.NewTag(logger.MESSAGES)
+var logTag = utils.NewTag(logger.MESSAGES)
 
 func NewApi(base *routing.RouteGroup, shimProvider types.ChannelProvider) {
 	group := base.Group("/push-message")

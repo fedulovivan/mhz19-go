@@ -5,12 +5,13 @@ import (
 
 	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/fedulovivan/mhz19-go/internal/types"
+	"github.com/fedulovivan/mhz19-go/pkg/utils"
 	"github.com/stretchr/testify/suite"
 )
 
 type ConditionsSuite struct {
 	suite.Suite
-	tag logger.Tag
+	tag utils.Tag
 }
 
 func (s *ConditionsSuite) SetupSuite() {
@@ -315,6 +316,6 @@ func (s *ConditionsSuite) Test171() {
 
 func TestConditions(t *testing.T) {
 	suite.Run(t, &ConditionsSuite{
-		tag: logger.NewTag(logger.CONDS),
+		tag: utils.NewTag(logger.CONDS),
 	})
 }

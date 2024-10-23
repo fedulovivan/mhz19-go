@@ -1,15 +1,15 @@
-package logger
+package utils
 
 import (
 	"fmt"
 	"strconv"
 	"strings"
 	"sync"
-
-	"github.com/fedulovivan/mhz19-go/pkg/utils"
 )
 
-var nsSequences = make(map[string]utils.Seq)
+type TagName string
+
+var nsSequences = make(map[string]Seq)
 var secsMu = new(sync.Mutex)
 
 type Tag interface {
@@ -53,7 +53,7 @@ func (t *tag) WithTid(ns string) Tag {
 	secsMu.Lock()
 	defer secsMu.Unlock()
 	if _, exist := nsSequences[ns]; !exist {
-		nsSequences[ns] = utils.NewSeq(0)
+		nsSequences[ns] = NewSeq(0)
 	}
 	res := &tag{}
 	res.tags.WriteString(t.tags.String())
