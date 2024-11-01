@@ -68,7 +68,7 @@ func (s *CountersSuite) Test31() {
 		for i := 0; i < iterations; i++ {
 			data := Counters()
 			if v, ok := data[key]; ok {
-				json.Marshal(v)
+				_, _ = json.Marshal(v)
 			}
 		}
 		wg.Done()
@@ -96,7 +96,7 @@ func (s *CountersSuite) Test60() {
 	Time(time.Millisecond, "foo-1")
 	Time(time.Millisecond*10, "foo-1")
 	Time(time.Millisecond*100, "foo-1")
-	data := Timings()
+	data := TimingsCopy()
 	jdata, _ := json.Marshal(data)
 	s.Contains(string(jdata), `"foo-1":{"total":3,"min":"1ms","max":"100ms","avg":"37ms"}`)
 }
@@ -107,7 +107,7 @@ func (s *CountersSuite) Test61() {
 	Time(time.Millisecond*1, "foo-2")
 	Time(time.Millisecond*5, "foo-2")
 	Time(time.Millisecond*4, "foo-2")
-	data := Timings()
+	data := TimingsCopy()
 	jdata, _ := json.Marshal(data)
 	s.Contains(string(jdata), `"foo-2":{"total":5,"min":"1ms","max":"5ms","avg":"3ms"}`)
 }
@@ -116,7 +116,7 @@ func (s *CountersSuite) Test62() {
 	for i := 0; i < 1000; i++ {
 		Time(time.Millisecond, "foo-3")
 	}
-	data := Timings()
+	data := TimingsCopy()
 	jdata, _ := json.Marshal(data["foo-3"])
 	s.Equal(`{"total":1000,"min":"1ms","max":"1ms","avg":"1ms"}`, string(jdata))
 }
@@ -140,8 +140,8 @@ func (s *CountersSuite) Test70() {
 	}()
 	go func() {
 		for i := 0; i < iterations; i++ {
-			data := Timings()
-			json.Marshal(data)
+			data := TimingsCopy()
+			_, _ = json.Marshal(data)
 		}
 		wg.Done()
 	}()

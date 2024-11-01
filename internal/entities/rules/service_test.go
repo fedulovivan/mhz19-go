@@ -5,12 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sync/atomic"
 	"testing"
 	"time"
 
 	"github.com/fedulovivan/mhz19-go/internal/db"
 	"github.com/fedulovivan/mhz19-go/internal/types"
-	"github.com/fedulovivan/mhz19-go/pkg/utils"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -348,6 +348,7 @@ func (s *ServiceSuite) Test51() {
 }
 
 func (s *ServiceSuite) Test52() {
+	seq := &atomic.Int32{}
 	actualArgs := []DbRuleConditionOrActionArgument{}
 	actualConds := ToDbConditions(1, nil, types.Condition{
 		Or: true,
@@ -355,7 +356,7 @@ func (s *ServiceSuite) Test52() {
 			{Fn: types.COND_EQUAL, Args: types.Args{"Left": 1, "Right": 2}},
 			{Fn: types.COND_IN_LIST},
 		},
-	}, utils.NewSeq(00), &actualArgs)
+	}, seq, &actualArgs)
 	s.Len(actualArgs, 2)
 	s.Len(actualConds, 3)
 	// expectedArgs := "[{3 {2 true} {0 false} Left {0 false} {1 true} { false} {0 false}} {4 {2 true} {0 false} Right {0 false} {2 true} { false} {0 false}}]"
@@ -367,6 +368,7 @@ func (s *ServiceSuite) Test52() {
 }
 
 func (s *ServiceSuite) Test53() {
+	seq := &atomic.Int32{}
 	actual := ToDbConditions(1, nil, types.Condition{
 		Or: true,
 		Nested: []types.Condition{
@@ -376,7 +378,7 @@ func (s *ServiceSuite) Test53() {
 				{Fn: types.COND_IN_LIST},
 			}},
 		},
-	}, utils.NewSeq(00), nil)
+	}, seq, nil)
 	expected := "[{1 1 {0 false} {1 true} {0 false} {0 false} { false}} {2 1 {2 true} {0 false} {0 true} {1 true} { false}} {3 1 {0 false} {0 true} {0 false} {1 true} { false}} {4 1 {2 true} {0 false} {1 true} {3 true} { false}} {5 1 {3 true} {0 false} {0 true} {3 true} { false}}]"
 	s.Equal(expected, fmt.Sprintf("%v", actual))
 }
@@ -388,8 +390,9 @@ func (s *ServiceSuite) Test60() {
 }
 
 func (s *ServiceSuite) Test62() {
+	seq := &atomic.Int32{}
 	inrule := types.Rule{}
-	outrule, outconds, outactions, outargs, mappings := ToDb(inrule, utils.NewSeq(00))
+	outrule, outconds, outactions, outargs, mappings := ToDb(inrule, seq)
 	expected := "{1  {0 true} {0 true}}"
 	s.Equal(expected, fmt.Sprintf("%v", outrule))
 	s.Len(outconds, 0)
@@ -399,6 +402,7 @@ func (s *ServiceSuite) Test62() {
 }
 
 func (s *ServiceSuite) Test63() {
+	seq := &atomic.Int32{}
 	inrule := types.Rule{
 		Name:     "unit test",
 		Disabled: true,
@@ -418,7 +422,7 @@ func (s *ServiceSuite) Test63() {
 			Duration: time.Duration(100500),
 		},
 	}
-	outrule, outconds, outactions, outargs, mappings := ToDb(inrule, utils.NewSeq(00))
+	outrule, outconds, outactions, outargs, mappings := ToDb(inrule, seq)
 
 	expectedRule := "{1 unit test {1 true} {0 true}}"
 	s.Equal(expectedRule, fmt.Sprintf("%v", outrule))
@@ -526,13 +530,14 @@ func (s *ServiceSuite) Test73() {
 }
 
 func (s *ServiceSuite) Test80() {
+	seq := &atomic.Int32{}
 	aa := ToDbArguments(
 		1,
 		&DbRuleCondition{},
 		nil,
 		"key",
 		111,
-		utils.NewSeq(0),
+		seq,
 		false,
 	)
 	data, _ := json.Marshal(aa)
@@ -542,13 +547,14 @@ func (s *ServiceSuite) Test80() {
 }
 
 func (s *ServiceSuite) Test81() {
+	seq := &atomic.Int32{}
 	aa := ToDbArguments(
 		1,
 		&DbRuleCondition{},
 		nil,
 		"key2",
 		[]any{222, 333},
-		utils.NewSeq(0),
+		seq,
 		false,
 	)
 	data, _ := json.Marshal(aa)
@@ -558,13 +564,14 @@ func (s *ServiceSuite) Test81() {
 }
 
 func (s *ServiceSuite) Test82() {
+	seq := &atomic.Int32{}
 	aa := ToDbArguments(
 		1,
 		&DbRuleCondition{},
 		nil,
 		"key3",
 		types.DeviceId("0xqwe111111"),
-		utils.NewSeq(0),
+		seq,
 		false,
 	)
 	data, _ := json.Marshal(aa)
@@ -574,13 +581,14 @@ func (s *ServiceSuite) Test82() {
 }
 
 func (s *ServiceSuite) Test83() {
+	seq := &atomic.Int32{}
 	aa := ToDbArguments(
 		1,
 		&DbRuleCondition{},
 		nil,
 		"key4",
 		types.DEVICE_CLASS_ZIGBEE_DEVICE,
-		utils.NewSeq(0),
+		seq,
 		false,
 	)
 	data, _ := json.Marshal(aa)

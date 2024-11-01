@@ -7,7 +7,9 @@ api-load-rules-read:
 	oha -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/rules
 
 api-load-messages-read:
-	oha -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/messages/device/0x00158d00067cb0c9
+	oha -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/messages/temperature/0x00158d00067cb0c9
+# oha -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/messages/device/0x00158d00067cb0c9?tocsv=1
+# oha -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/messages/device/0x00158d00067cb0c9
 
 api-load-stats-read:
 	oha -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/stats
@@ -27,7 +29,6 @@ api-load-once:
 	wget -O /dev/null $(REST_API_URL)/rules
 
 # oha --method PUT -H 'Content-Type: application/json' -D ./assets/load/push-message.json -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) -q $(API_RPS) $(REST_API_URL)/push-message
-# oha -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/messages/device/0x00158d00067cb0c9?tocsv=1
 # ab -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/rules
 # ab -T application/json -u ./assets/load/create-rule.json -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/rules
 # oha --method PUT -H 'Content-Type: application/json' -d "{\"name\":\"name-`uuidgen`\"}" -n $(API_LOAD_COUNT) -c $(API_LOAD_THREADS) $(REST_API_URL)/rules

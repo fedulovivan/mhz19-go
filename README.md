@@ -64,10 +64,12 @@ No matter which channel was used to receive a message, or which certain device h
 - [dnssd](https://github.com/brutella/dnssd) as mdns client (sonoff smart devices discovery)
 - [gabs](https://github.com/Jeffail/gabs) as json querier
 
-### Demo
+### Screenshots
 
-![console.png](assets/demo-02.png)
+Dashboard
 ![console.png](assets/demo-03.png)
+Console
+![console.png](assets/demo-02.png)
 
 ### Migrations, schema version validation
 
@@ -118,6 +120,10 @@ No matter which channel was used to receive a message, or which certain device h
 
 run and view logs for selected module only `make run 2>&1 >/dev/null | grep "engine"`
 scp log `scp ivanf@192.168.88.188:/home/ivanf/Projects/mhz19-go/log.txt ~/Desktop`
+htop hotkeys:
+    - t - toggle tree view
+    - Shift + k - toglle showing kernel processes
+    - p - toggle showing full paths
 
 ### Profiling
 

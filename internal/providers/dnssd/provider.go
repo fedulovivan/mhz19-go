@@ -51,7 +51,7 @@ func (p *provider) Init() {
 			"Host": entry.Host,
 		}
 		outMsg := types.Message{
-			Id:            types.MessageIdSeq.Inc(),
+			Id:            types.MessageIdSeq.Add(1),
 			Timestamp:     time.Now(),
 			ChannelType:   p.Channel(),
 			DeviceClass:   types.DEVICE_CLASS_SONOFF_ANNOUNCE,

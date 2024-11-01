@@ -17,7 +17,7 @@ type dummyProvider struct {
 func (p *dummyProvider) Init() {
 	time.Sleep(time.Millisecond * 100)
 	p.Push(types.Message{
-		Id:        types.MessageIdSeq.Inc(),
+		Id:        types.MessageIdSeq.Add(1),
 		Timestamp: time.Now(),
 	})
 }

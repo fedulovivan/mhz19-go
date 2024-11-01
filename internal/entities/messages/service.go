@@ -2,12 +2,11 @@ package messages
 
 import (
 	"database/sql"
-
-	"github.com/goccy/go-json"
-	// "encoding/json"
+	"time"
 
 	"github.com/fedulovivan/mhz19-go/internal/db"
 	"github.com/fedulovivan/mhz19-go/internal/types"
+	"github.com/goccy/go-json"
 )
 
 var _ types.MessagesService = (*messagesService)(nil)
@@ -24,8 +23,28 @@ func (s messagesService) Get() (messages []types.Message, err error) {
 	return BuildMessages(dbmsg), nil
 }
 
-func (s messagesService) GetByDeviceId(deviceId string) (messages []types.Message, err error) {
-	dbmsg, err := s.repository.Get(db.NewNullString(deviceId))
+func (s messagesService) GetWithTemperature(deviceId types.DeviceId) ([]types.TemperatureMessage, error) {
+	messages, err := s.repository.GetWithTemperature(
+		db.NewNullString(string(deviceId)),
+	)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]types.TemperatureMessage, 0, len(messages))
+	for _, m := range messages {
+		r := types.TemperatureMessage{
+			Timestamp: time.Unix(int64(m.Timestamp), 0),
+		}
+		if m.Temperature.Valid {
+			r.Temperature = m.Temperature.Float64
+		}
+		result = append(result, r)
+	}
+	return result, nil
+}
+
+func (s messagesService) GetByDeviceId(deviceId types.DeviceId) (messages []types.Message, err error) {
+	dbmsg, err := s.repository.Get(db.NewNullString(string(deviceId)))
 	if err != nil {
 		return
 	}

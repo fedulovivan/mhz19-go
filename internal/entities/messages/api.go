@@ -2,6 +2,7 @@ package messages
 
 import (
 	"fmt"
+	"net/http"
 	"strconv"
 	"time"
 
@@ -25,6 +26,7 @@ func NewApi(base *routing.RouteGroup, service types.MessagesService) {
 	group := base.Group("/messages")
 	group.Get("", api.get)
 	group.Get("/device/<deviceId>", api.getByDeviceId)
+	group.Get("/temperature/<deviceId>", api.getTemperature)
 }
 
 func (api messagesApi) get(c *routing.Context) error {
@@ -36,28 +38,62 @@ func (api messagesApi) get(c *routing.Context) error {
 	return c.Write(data)
 }
 
+func (api messagesApi) getTemperature(c *routing.Context) error {
+	defer utils.TimeTrack(api.tag.F, time.Now(), "api:getTemperature")
+	deviceId := types.DeviceId(c.Param("deviceId"))
+	data, err := api.service.GetWithTemperature(deviceId)
+	if err != nil {
+		return err
+	}
+	c.Response.Header().Set("Content-Type", "text/plain")
+	for _, message := range data {
+		_, err := writeCsvRowToResponse(
+			c.Response,
+			message.Temperature,
+			message.Timestamp,
+		)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func writeCsvRowToResponse(
+	writer http.ResponseWriter,
+	temperature float64,
+	timestamp time.Time,
+) (int, error) {
+	tsString := timestamp.Format(time.RFC3339)
+	tempString := strconv.FormatFloat(temperature, 'f', 2, 32)
+	return fmt.Fprint(
+		writer,
+		tsString+","+tempString+"\n",
+	)
+}
+
 func (api messagesApi) getByDeviceId(c *routing.Context) error {
 	defer utils.TimeTrack(api.tag.F, time.Now(), "api:getByDeviceId")
 	tocsv := c.Query("tocsv") == "1"
-	data, err := api.service.GetByDeviceId(c.Param("deviceId"))
+	deviceId := types.DeviceId(c.Param("deviceId"))
+	data, err := api.service.GetByDeviceId(deviceId)
 	if err != nil {
 		return err
 	}
 	if tocsv {
+		c.Response.Header().Set("Content-Type", "text/plain")
 		for _, row := range data {
-			timestamp := row.Timestamp.Format(time.RFC3339)
-			tstring := ""
 			if payload, ok := row.Payload.(map[string]any); ok {
 				if temperature, ok := payload["temperature"].(float64); ok {
-					tstring = strconv.FormatFloat(temperature, 'f', 2, 32)
+					_, err := writeCsvRowToResponse(
+						c.Response,
+						temperature,
+						row.Timestamp,
+					)
+					if err != nil {
+						return err
+					}
 				}
-			}
-			_, err := fmt.Fprint(
-				c.Response,
-				timestamp+","+tstring+"\n",
-			)
-			if err != nil {
-				return err
 			}
 		}
 		return nil

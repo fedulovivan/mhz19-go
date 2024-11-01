@@ -16,7 +16,10 @@
   - Deleting Series https://medium.com/@burakceviz97/prometheus-metric-deletion-guide-8866bc5434ff
   - Writing An Exporter Or Custom Collector https://prometheus.io/docs/instrumenting/writing_exporters
   - Another way of visualization Prometheus histogram https://medium.com/@shershnev/another-way-of-visualization-prometheus-histogram-8442aebc932a
-    `histogram_quantile(0.95, sum by(le, job,instance) (rate(mhz19_messages_handled_bucket[10m])))`
+  - Prometheus Cheat Sheet - Moving Average, Max, Min, etc (Aggregation Over Time) https://iximiuz.com/en/posts/prometheus-functions-agg-over-time/
+  - `histogram_quantile(0.95, sum by(le, job,instance) (rate(mhz19_messages_handled_bucket[10m])))`
+  - 15 Steps to Write an Application Prometheus Exporter in GO https://medium.com/teamzerolabs/15-steps-to-write-an-application-prometheus-exporter-in-go-9746b4520e26
+  - promql cheatsheet https://promlabs.com/promql-cheat-sheet/
 
 ### node-exporter
 

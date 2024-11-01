@@ -16,7 +16,7 @@ func NewApi(base *routing.RouteGroup, shimProvider types.ChannelProvider) {
 	group.Put("", func(c *routing.Context) error {
 		defer utils.TimeTrack(logTag.F, time.Now(), "api:pushMessage")
 		outMsg := types.Message{
-			Id:            types.MessageIdSeq.Inc(),
+			Id:            types.MessageIdSeq.Add(1),
 			Timestamp:     time.Now(),
 			ChannelType:   types.CHANNEL_REST,
 			DeviceClass:   types.DEVICE_CLASS_SYSTEM,

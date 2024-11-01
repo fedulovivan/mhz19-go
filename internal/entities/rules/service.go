@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"slices"
 	"strconv"
+	"sync/atomic"
 	"time"
 
 	"github.com/fedulovivan/mhz19-go/internal/db"
 	"github.com/fedulovivan/mhz19-go/internal/types"
-	"github.com/fedulovivan/mhz19-go/pkg/utils"
 	"github.com/samber/lo"
 )
 
@@ -47,9 +47,10 @@ func (s rulesService) OnDeleted() <-chan int {
 }
 
 func (s rulesService) Create(rule types.Rule) (newRuleId int64, err error) {
+	seq := &atomic.Int32{}
 	dbRule, dbConditions, dbActions, dbArguments, dbMappings := ToDb(
 		rule,
-		utils.NewSeq(0),
+		seq,
 	)
 	newRuleId, err = s.repository.Create(
 		dbRule,
@@ -293,7 +294,7 @@ func BuildArguments(args []DbRuleConditionOrActionArgument) (result types.Args) 
 
 // transforms [types.Rule] to flat representtion for db
 // (opposite to Build)
-func ToDb(inrule types.Rule, seq utils.Seq) (
+func ToDb(inrule types.Rule, seq *atomic.Int32) (
 	DbRule,
 	[]DbRuleCondition,
 	[]DbRuleAction,
@@ -308,9 +309,9 @@ func ToDb(inrule types.Rule, seq utils.Seq) (
 	return outrule, outconds, outactions, args, mappings
 }
 
-func ToDbRule(rule types.Rule, seq utils.Seq) DbRule {
+func ToDbRule(rule types.Rule, seq *atomic.Int32) DbRule {
 	return DbRule{
-		Id:         int32(seq.Inc()),
+		Id:         seq.Add(1),
 		Name:       rule.Name,
 		IsDisabled: db.NewNullInt32FromBool(rule.Disabled),
 		ThrottleMs: db.NewNullInt32(int32(rule.Throttle.Duration.Milliseconds())),
@@ -320,13 +321,13 @@ func ToDbRule(rule types.Rule, seq utils.Seq) DbRule {
 func ToDbActions(
 	ruleId int32,
 	actions []types.Action,
-	seq utils.Seq,
+	seq *atomic.Int32,
 	args *[]DbRuleConditionOrActionArgument,
 	mappings *[]DbRuleActionArgumentMapping,
 ) (res []DbRuleAction) {
 	for _, action := range actions {
 		node := DbRuleAction{
-			Id:           int32(seq.Inc()),
+			Id:           seq.Add(1),
 			RuleId:       ruleId,
 			FunctionType: db.NewNullInt32(int32(action.Fn)),
 		}
@@ -350,7 +351,7 @@ func ToDbActions(
 		for argName, argMapping := range action.Mapping {
 			for key, value := range argMapping {
 				*mappings = append(*mappings, DbRuleActionArgumentMapping{
-					Id:         int32(seq.Inc()),
+					Id:         seq.Add(1),
 					RuleId:     ruleId,
 					ArgumentId: argNameToId[argName],
 					Key:        key,
@@ -366,7 +367,7 @@ func ToDbConditions(
 	ruleId int32,
 	parent *DbRuleCondition,
 	condition types.Condition,
-	seq utils.Seq,
+	seq *atomic.Int32,
 	args *[]DbRuleConditionOrActionArgument,
 ) (res []DbRuleCondition) {
 	withList := len(condition.Nested) > 0
@@ -379,7 +380,7 @@ func ToDbConditions(
 	}
 	if withList {
 		cond := DbRuleCondition{
-			Id:      int32(seq.Inc()),
+			Id:      seq.Add(1),
 			RuleId:  ruleId,
 			LogicOr: db.NewNullInt32FromBool(condition.Or),
 		}
@@ -392,7 +393,7 @@ func ToDbConditions(
 		}
 	} else if withFn {
 		node := DbRuleCondition{
-			Id:           int32(seq.Inc()),
+			Id:           seq.Add(1),
 			RuleId:       ruleId,
 			FunctionType: db.NewNullInt32(int32(condition.Fn)),
 			Not:          db.NewNullInt32FromBool(condition.Not),
@@ -426,7 +427,7 @@ func ToDbArguments(
 	action *DbRuleAction,
 	key string,
 	value any,
-	seq utils.Seq,
+	seq *atomic.Int32,
 	islist bool,
 ) (res []DbRuleConditionOrActionArgument) {
 	if listArg, ok := value.([]any); ok {
@@ -438,7 +439,7 @@ func ToDbArguments(
 		}
 	} else {
 		arg := DbRuleConditionOrActionArgument{
-			Id:           int32(seq.Inc()),
+			Id:           seq.Add(1),
 			RuleId:       ruleId,
 			ArgumentName: key,
 			IsList:       db.NewNullInt32FromBool(islist),

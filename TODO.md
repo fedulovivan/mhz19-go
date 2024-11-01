@@ -1,5 +1,11 @@
 ### Prio 0
-- try: grpc. where?
+- feat: move services "device-pinger", "zigbee2mqtt", "mosquitto" from mhz19-next to local compose file + dont forget to extend .env file with required variables
+- feat: include draft mhz19-front to the main compose stack
+- feat: add logging of the key, at the place where message was initially queued: "Rule=4 message queue is flushed now key=zigbee-device-0x00158d00067cb0c9-Rule4 mm=3"
+- bug: still lots of err="got an error \"database is locked\"
+- learn: how GOMAXPROC and docker --proc are connected?
+- feat: visualize buried devices in grafana
+- bug: check why HandleMessage bench gives 1500 nanoseconds, while prometheus measure is 1.5-3milliseconds
 
 ### Prio 1
 - feat: collect metrics for "message by device id"
@@ -51,6 +57,7 @@
 - arch: switch to nil instead of sql.NullInt32 - easy to MarshalJSON
 
 ### Try
+- try: grpc
 - try: to deploy on old rpi/raspberrypi with ram disk enabled
 - try: hcl - https://github.com/hashicorp/hcl
 - try: some interactive cli framework for provision tool like cobra
@@ -72,8 +79,9 @@
 - try: to fix https://github.com/fedulovivan/effective-waffle/issues/9
 - try: https://github.com/vektra/mockery https://www.youtube.com/watch?v=eYHCCht8eX4
 - try: go generate
-- try: https://github.com/dundee/gdu
+- try: Fast disk usage analyzer https://github.com/dundee/gdu
 - try: create load test for mqtt channel with `mosquitto_pub`
+- try: https://github.com/proullon/ramsql (from https://youtu.be/UfeZ-bPFs10?si=3FZTWpvjNvqh3X24&t=217)
 
 ### Milestones
 
@@ -84,6 +92,9 @@
 
 ### Completed
 
+- (+) bug: check why lots of records have duplicates http://macmini:7070/api/messages/device/0x00158d00067cb0c9?tocsv=1, for now stick with no changes on backend side, originally all messages are emitted by zigbee device (see assets/duplicated-messages-log.txt)
+- (+) bug: make with no args invokes docker build
+- (+) feat: switch from Seq to atomics
 - (+) try: can we speed up HandleMessage? create benchmarks for HandleMessage and conditions
   - base performance is about 3700ns per operation (1 Equal condition)
   - 60% performance gain in Tag module after switching to strings.Builder and reduced memory allocations making strings.Builder no-pointer value

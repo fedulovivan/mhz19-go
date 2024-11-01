@@ -3,6 +3,8 @@ include $(CONF)
 include Makefile.docker.mk
 include Makefile.load.mk
 
+.DEFAULT_GOAL := default
+
 NAME ?= mhz19-go-backend
 GIT_REV ?= $(shell git rev-parse --short HEAD)
 DATE ?= $(shell date +%FT%T)
@@ -68,10 +70,10 @@ bench:
 	rm -f *.prof && go test ./internal/engine -bench=^Benchmark10$$ -run=^$$ -benchmem -cpuprofile cpu.prof -memprofile=mem.prof
 
 pprof-mem:
-	go tool pprof mem.prof
+	go tool pprof -http=:7272 mem.prof
 
 pprof-cpu:
-	go tool pprof cpu.prof
+	go tool pprof -http=:7272 cpu.prof
 
 test-one:
 	go test ./internal/engine -run TestMappings -v

@@ -157,11 +157,10 @@ type DbCount struct {
 
 type Where map[string]any
 
-func AddWhere(in string, where Where) (out string) {
-	var entries []string
-	out = in
+func AddWhere(in string, where Where) string {
+	var entries = make([]string, 0, len(where))
 	for key, value := range where {
-		// (!) note we cannot use "fallthrough" in type switch
+		// (!) note we cannot use "fallthrough" in type switch, so each case section is duplicated
 		switch vtyped := value.(type) {
 		case sql.NullInt32:
 			if vtyped.Valid {
@@ -174,9 +173,14 @@ func AddWhere(in string, where Where) (out string) {
 		}
 	}
 	if len(entries) > 0 {
-		out = fmt.Sprintf("%v WHERE %v", in, strings.Join(entries, " AND "))
+		whereString := fmt.Sprintf("WHERE %s", strings.Join(entries, " AND "))
+		obyIndex := strings.Index(in, "ORDER BY")
+		if obyIndex >= 0 {
+			return in[:obyIndex] + whereString + " " + in[obyIndex:]
+		}
+		return in + " " + whereString
 	}
-	return
+	return in
 }
 
 func PickWhereValues(where Where) (out []any) {
@@ -232,39 +236,34 @@ func Select[T any](
 	scan func(rows *sql.Rows, model *T) error,
 	where Where,
 ) (result []T, err error) {
-
-	defer counters.TimeSince(time.Now(), counters.QUERIES)
-
-	defer func(t *prometheus.Timer) {
-		t.ObserveDuration()
-	}(prometheus.NewTimer(counters.Queries))
-
 	ctxpayload := ctx.Value(ctxkey{}).(ctxval)
 	tx := ctxpayload.Tx
-	tag := ctxpayload.Tag.WithTid("Select")
-
-	if app.Config.DbDebug {
-		defer utils.TimeTrack(tag.F, time.Now(), "Select")
-	}
-
 	select {
 	case <-ctx.Done():
 		return
 	default:
+		tag := ctxpayload.Tag.WithTid("Select")
+		if app.Config.DbDebug {
+			defer utils.TimeTrack(tag.F, time.Now(), "Select")
+		}
+		defer counters.TimeSince(time.Now(), counters.QUERIES)
+		defer func(t *prometheus.Timer) {
+			t.ObserveDuration()
+		}(prometheus.NewTimer(counters.Queries))
 		var rows *sql.Rows
-		wquery := AddWhere(query, where)
+		query = utils.OneLineTrim(query)
+		query = AddWhere(query, where)
 		values := PickWhereValues(where)
-		lquery := utils.OneLineTrim(wquery)
-		logQuery(tag, lquery, values)
+		logQuery(tag, query, values)
 		rows, err = tx.QueryContext(
 			ctx,
-			wquery,
+			query,
 			values...,
 		)
 		if err != nil {
 			err = fmt.Errorf(
 				"got an error \"%v\" for query %v, values %v",
-				err, lquery, values,
+				err, query, values,
 			)
 			return
 		}

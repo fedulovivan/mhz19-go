@@ -1,0 +1,28 @@
+zigbee2mqtt:
+--------------------
+2024-10-23T18:31:27.316124540Z Zigbee2MQTT:debug 2024-10-23 18:31:27: Received Zigbee message from '0x00158d00067cb0c9', type 'attributeReport', cluster 'msTemperatureMeasurement', data '{"measuredValue":2291}' from endpoint 1 with groupID 0
+2024-10-23T18:31:27.317009326Z Zigbee2MQTT:info  2024-10-23 18:31:27: MQTT publish: topic 'zigbee2mqtt/0x00158d00067cb0c9', payload '{"battery":100,"humidity":47.2,"linkquality":72,"power_outage_count":18643,"pressure":988,"temperature":22.91,"voltage":3085}'
+2024-10-23T18:31:27.324661601Z Zigbee2MQTT:debug 2024-10-23 18:31:27: Received Zigbee message from '0x00158d00067cb0c9', type 'attributeReport', cluster 'msRelativeHumidity', data '{"measuredValue":4676}' from endpoint 1 with groupID 0
+2024-10-23T18:31:27.324988716Z Zigbee2MQTT:debug 2024-10-23 18:31:27: Received Zigbee message from '0x00158d00067cb0c9', type 'attributeReport', cluster 'msPressureMeasurement', data '{"measuredValue":988,"scale":-1,"scaledValue":9883}' from endpoint 1 with groupID 0
+2024-10-23T18:31:27.325987659Z Zigbee2MQTT:info  2024-10-23 18:31:27: MQTT publish: topic 'zigbee2mqtt/0x00158d00067cb0c9', payload '{"battery":100,"humidity":46.76,"linkquality":72,"power_outage_count":18643,"pressure":988,"temperature":22.91,"voltage":3085}'
+2024-10-23T18:31:27.326783286Z Zigbee2MQTT:info  2024-10-23 18:31:27: MQTT publish: topic 'zigbee2mqtt/0x00158d00067cb0c9', payload '{"battery":100,"humidity":46.76,"linkquality":72,"power_outage_count":18643,"pressure":988.3,"temperature":22.91,"voltage":3085}'
+
+mosquitto:
+--------------------
+2024-10-23T18:31:27.319645123Z 1729708287: Received PUBLISH from mqttjs_d0846642 (d0, q0, r0, m0, 'zigbee2mqtt/0x00158d00067cb0c9', ... (125 bytes))
+2024-10-23T18:31:27.319662723Z 1729708287: Sending PUBLISH to mhz19-go (d0, q0, r0, m0, 'zigbee2mqtt/0x00158d00067cb0c9', ... (125 bytes))
+2024-10-23T18:31:27.319695322Z 1729708287: Sending PUBLISH to mqttjs_d0846642 (d0, q0, r0, m0, 'zigbee2mqtt/0x00158d00067cb0c9', ... (125 bytes))
+2024-10-23T18:31:27.328442099Z 1729708287: Received PUBLISH from mqttjs_d0846642 (d0, q0, r0, m0, 'zigbee2mqtt/0x00158d00067cb0c9', ... (126 bytes))
+2024-10-23T18:31:27.328458939Z 1729708287: Sending PUBLISH to mhz19-go (d0, q0, r0, m0, 'zigbee2mqtt/0x00158d00067cb0c9', ... (126 bytes))
+2024-10-23T18:31:27.328475259Z 1729708287: Sending PUBLISH to mqttjs_d0846642 (d0, q0, r0, m0, 'zigbee2mqtt/0x00158d00067cb0c9', ... (126 bytes))
+2024-10-23T18:31:27.328550618Z 1729708287: Received PUBLISH from mqttjs_d0846642 (d0, q0, r0, m0, 'zigbee2mqtt/0x00158d00067cb0c9', ... (128 bytes))
+2024-10-23T18:31:27.328590657Z 1729708287: Sending PUBLISH to mhz19-go (d0, q0, r0, m0, 'zigbee2mqtt/0x00158d00067cb0c9', ... (128 bytes))
+2024-10-23T18:31:27.328608697Z 1729708287: Sending PUBLISH to mqttjs_d0846642 (d0, q0, r0, m0, 'zigbee2mqtt/0x00158d00067cb0c9', ... (128 bytes))
+
+mhz19-go:
+--------------------
+2024-10-23T18:31:27.318277785Z DEBUG [engine]     Msg=5144 New message ChannelType=mqtt ChannelMeta=&{MqttTopic:zigbee2mqtt/0x00158d00067cb0c9} DeviceClass=zigbee-device DeviceId=0x00158d00067cb0c9 Payload="map[battery:100 humidity:47.2 linkquality:72 power_outage_count:18643 pressure:988 temperature:22.91 voltage:3085]" FromEndDevice=true
+2024-10-23T18:31:27.328792774Z DEBUG [engine]     Msg=5145 New message ChannelType=mqtt ChannelMeta=&{MqttTopic:zigbee2mqtt/0x00158d00067cb0c9} DeviceClass=zigbee-device DeviceId=0x00158d00067cb0c9 Payload="map[battery:100 humidity:46.76 linkquality:72 power_outage_count:18643 pressure:988 temperature:22.91 voltage:3085]" FromEndDevice=true
+2024-10-23T18:31:27.330880700Z DEBUG [engine]     Msg=5146 New message ChannelType=mqtt ChannelMeta=&{MqttTopic:zigbee2mqtt/0x00158d00067cb0c9} DeviceClass=zigbee-device DeviceId=0x00158d00067cb0c9 Payload="map[battery:100 humidity:46.76 linkquality:72 power_outage_count:18643 pressure:988.3 temperature:22.91 voltage:3085]" FromEndDevice=true
+...
+2024-10-23T18:31:57.320187786Z DEBUG [db]         Tx#10011 Exec#4802 executing query INSERT INTO messages( channel_type_id, device_class_id, device_id, timestamp, json ) VALUES (?,?,?,?,?), (?,?,?,?,?), (?,?,?,?,?) values [1 1 0x00158d00067cb0c9 2024-10-23 21:31:27.317934991 +0300 MSK m=+108232.532778677 {"battery":100,"humidity":47.20,"linkquality":72,"power_outage_count":18643,"pressure":988,"temperature":22.91,"voltage":3085} 1 1 0x00158d00067cb0c9 2024-10-23 21:31:27.3283897   +0300 MSK m=+108232.543233386 {"battery":100,"humidity":46.76,"linkquality":72,"power_outage_count":18643,"pressure":988,"temperature":22.91,"voltage":3085} 1 1 0x00158d00067cb0c9 2024-10-23 21:31:27.3284281   +0300 MSK m=+108232.543271906 {"battery":100,"humidity":46.76,"linkquality":72,"power_outage_count":18643,"pressure":988.3,"temperature":22.91,"voltage":3085}]

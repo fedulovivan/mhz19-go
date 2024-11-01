@@ -3,12 +3,11 @@ package types
 import (
 	"fmt"
 	"strings"
+	"sync/atomic"
 	"time"
-
-	"github.com/fedulovivan/mhz19-go/pkg/utils"
 )
 
-var MessageIdSeq = utils.NewSeq(0)
+var MessageIdSeq = &atomic.Int32{}
 
 type Message struct {
 	// unique id
@@ -32,6 +31,11 @@ type Message struct {
 	RawPayload []byte `json:"-"`
 	// additional metadata specific for the current channel
 	ChannelMeta *ChannelMeta `json:"-"`
+}
+
+type TemperatureMessage struct {
+	Temperature float64   `json:"temperature"`
+	Timestamp   time.Time `json:"timestamp"`
 }
 
 type MessageChan chan Message
@@ -90,7 +94,7 @@ func (m *Message) ExecDirective(field string) (any, error) {
 
 func NewSystemMessage(text string) Message {
 	return Message{
-		Id:            MessageIdSeq.Inc(),
+		Id:            MessageIdSeq.Add(1),
 		Timestamp:     time.Now(),
 		ChannelType:   CHANNEL_SYSTEM,
 		DeviceClass:   DEVICE_CLASS_SYSTEM,

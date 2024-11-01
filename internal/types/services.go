@@ -2,9 +2,10 @@ package types
 
 type MessagesService interface {
 	Get() ([]Message, error)
-	GetByDeviceId(deviceId string) ([]Message, error)
-	Create(message Message) error
-	CreateAll(messages []Message) error
+	GetByDeviceId(DeviceId) ([]Message, error)
+	GetWithTemperature(DeviceId) ([]TemperatureMessage, error)
+	Create(Message) error
+	CreateAll([]Message) error
 }
 
 type DevicesService interface {

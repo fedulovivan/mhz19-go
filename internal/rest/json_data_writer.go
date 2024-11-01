@@ -8,7 +8,7 @@ import (
 )
 
 // same as JSONDataWriter from ozzo-routing/content/type.go
-// but with "encoding/json" replaced with "github.com/goccy/go-json"
+// but "encoding/json" is replaced with "github.com/goccy/go-json"
 
 type JSONDataWriterCustom struct{}
 

@@ -11,6 +11,11 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/entities/devices"
 )
 
+type DbTemperatureMessage struct {
+	Temperature sql.NullFloat64
+	Timestamp   int32
+}
+
 type DbMessage struct {
 	Id            int32
 	ChannelTypeId int32
@@ -22,7 +27,7 @@ type DbMessage struct {
 
 type MessagesRepository interface {
 	Get(deviceId sql.NullString) ([]DbMessage, error)
-	// Create(message DbMessage) (messageId int64, err error)
+	GetWithTemperature(deviceId sql.NullString) ([]DbTemperatureMessage, error)
 	CreateAll(messages []DbMessage) error
 }
 
@@ -70,26 +75,27 @@ func messageInsertAllTx(
 	return err
 }
 
-// func messageInsertTx(
-// 	m DbMessage,
-// 	ctx context.Context,
-// ) (sql.Result, error) {
-// 	return db.Exec(
-// 		ctx,
-// 		`INSERT INTO messages(
-// 			channel_type_id,
-// 			device_class_id,
-// 			device_id,
-// 			timestamp,
-// 			json
-// 		) VALUES(?,?,?,?,?)`,
-// 		m.ChannelTypeId,
-// 		m.DeviceClassId,
-// 		m.DeviceId,
-// 		m.Timestamp,
-// 		m.Json,
-// 	)
-// }
+func (r messagesRepository) GetWithTemperature(deviceId sql.NullString) ([]DbTemperatureMessage, error) {
+	var messages []DbTemperatureMessage
+	err := db.RunTx(r.database, func(ctx db.CtxEnhanced) (err error) {
+		messages, err = db.Select(
+			ctx,
+			`SELECT 
+				DISTINCT json -> '$.temperature',
+				unixepoch(timestamp) 
+			FROM 
+				messages
+			ORDER BY 
+				timestamp DESC`,
+			func(rows *sql.Rows, m *DbTemperatureMessage) error {
+				return rows.Scan(&m.Temperature, &m.Timestamp)
+			},
+			db.Where{"device_id": deviceId},
+		)
+		return err
+	})
+	return messages, err
+}
 
 func messagesSelectTx(ctx context.Context, deviceId sql.NullString) ([]DbMessage, error) {
 	return db.Select(
@@ -219,3 +225,25 @@ func (r messagesRepository) CreateAll(messages []DbMessage) error {
 // }
 // err = tx.Commit()
 // return
+
+// Create(message DbMessage) (messageId int64, err error)
+// func messageInsertTx(
+// 	m DbMessage,
+// 	ctx context.Context,
+// ) (sql.Result, error) {
+// 	return db.Exec(
+// 		ctx,
+// 		`INSERT INTO messages(
+// 			channel_type_id,
+// 			device_class_id,
+// 			device_id,
+// 			timestamp,
+// 			json
+// 		) VALUES(?,?,?,?,?)`,
+// 		m.ChannelTypeId,
+// 		m.DeviceClassId,
+// 		m.DeviceId,
+// 		m.Timestamp,
+// 		m.Json,
+// 	)
+// }

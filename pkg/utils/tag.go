@@ -5,11 +5,12 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 )
 
 type TagName string
 
-var nsSequences = make(map[string]Seq)
+var nsSequences = make(map[string]*atomic.Int32)
 var secsMu = new(sync.Mutex)
 
 type Tag interface {
@@ -53,14 +54,14 @@ func (t *tag) WithTid(ns string) Tag {
 	secsMu.Lock()
 	defer secsMu.Unlock()
 	if _, exist := nsSequences[ns]; !exist {
-		nsSequences[ns] = NewSeq(0)
+		nsSequences[ns] = &atomic.Int32{}
 	}
 	res := &tag{}
 	res.tags.WriteString(t.tags.String())
 	res.tags.WriteString(ns)
 	res.tags.WriteRune(HASH)
 	res.tags.WriteString(strconv.FormatInt(
-		int64(nsSequences[ns].Inc()),
+		int64(nsSequences[ns].Add(1)),
 		10,
 	))
 	res.tags.WriteRune(SPACE)

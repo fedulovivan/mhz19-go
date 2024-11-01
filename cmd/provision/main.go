@@ -11,9 +11,8 @@ import (
 	"path"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
-
-	"github.com/fedulovivan/mhz19-go/pkg/utils"
 )
 
 const (
@@ -43,8 +42,8 @@ func timeTrack(start time.Time, name string) {
 
 func processDir(dir string) {
 	defer timeTrack(time.Now(), "")
-	succeeded := utils.NewSeq(0)
-	failed := utils.NewSeq(0)
+	succeeded := atomic.Int32{}
+	failed := atomic.Int32{}
 	dirPath := path.Join(basePath, dir)
 	entries, err := os.ReadDir(dirPath)
 	dd := strings.Split(dir, "/")
@@ -62,10 +61,10 @@ func processDir(dir string) {
 				filePath := fmt.Sprintf("%s/%s", dirPath, e.Name())
 				res, err := processFile(filePath, apiEntityPath)
 				if err == nil {
-					succeeded.Inc()
+					succeeded.Add(1)
 					fmt.Println("success:", res)
 				} else {
-					failed.Inc()
+					failed.Add(1)
 					fmt.Println("fail:", err.Error())
 				}
 			}
@@ -73,8 +72,8 @@ func processDir(dir string) {
 	}
 	wg.Wait()
 	fmt.Println("---")
-	fmt.Println("succeeded", succeeded.Value())
-	fmt.Println("failed", failed.Value())
+	fmt.Println("succeeded", succeeded.Load())
+	fmt.Println("failed", failed.Load())
 }
 
 func processFile(filePath string, apiEntityPath string) (res string, err error) {

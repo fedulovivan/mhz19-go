@@ -58,7 +58,7 @@ func (p *parserBase) parse_base() (types.Message, bool) {
 	meta := types.ChannelMeta{MqttTopic: topic}
 
 	outMsg := types.Message{
-		Id:            types.MessageIdSeq.Inc(),
+		Id:            types.MessageIdSeq.Add(1),
 		Timestamp:     time.Now(),
 		ChannelType:   types.CHANNEL_MQTT,
 		ChannelMeta:   &meta,

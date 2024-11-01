@@ -73,7 +73,7 @@ func (p *provider) handleKey(key types.LdmKey) {
 			timeout,
 			func() {
 				outMsg := types.Message{
-					Id:          types.MessageIdSeq.Inc(),
+					Id:          types.MessageIdSeq.Add(1),
 					Timestamp:   time.Now(),
 					ChannelType: types.CHANNEL_SYSTEM,
 					DeviceClass: types.DEVICE_CLASS_SYSTEM,

@@ -40,7 +40,7 @@ func (api statsApi) get(c *routing.Context) error {
 		"app":      app,
 		"tables":   tables,
 		"counters": counters.Counters(),
-		"timings":  counters.Timings(),
+		"timings":  counters.TimingsCopy(),
 	}
 	// countersdata := counters.Counters()
 	// minmax := counters.MinMaxAvg()

@@ -134,14 +134,14 @@ func (s *EngineSuite) Test61() {
 
 func (s *EngineSuite) Test70() {
 	s.e.HandleMessage(types.Message{
-		Id:        types.MessageIdSeq.Inc(),
+		Id:        types.MessageIdSeq.Add(1),
 		Timestamp: time.Now(),
 	}, []types.Rule{})
 }
 
 func (s *EngineSuite) Test71() {
 	s.e.HandleMessage(types.Message{
-		Id:          types.MessageIdSeq.Inc(),
+		Id:          types.MessageIdSeq.Add(1),
 		Timestamp:   time.Now(),
 		DeviceClass: types.DEVICE_CLASS_ZIGBEE_BRIDGE,
 	}, []types.Rule{})
@@ -149,7 +149,7 @@ func (s *EngineSuite) Test71() {
 
 func (s *EngineSuite) Test72() {
 	s.e.HandleMessage(types.Message{
-		Id:        types.MessageIdSeq.Inc(),
+		Id:        types.MessageIdSeq.Add(1),
 		Timestamp: time.Now(),
 	}, []types.Rule{
 		{
@@ -177,7 +177,7 @@ func Benchmark10(b *testing.B) {
 
 	for k := 0; k < b.N; k++ {
 		e.HandleMessage(types.Message{
-			Id:        types.MessageIdSeq.Inc(),
+			Id:        types.MessageIdSeq.Add(1),
 			Timestamp: time.Now(),
 		}, []types.Rule{
 			// {
