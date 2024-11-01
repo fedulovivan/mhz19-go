@@ -15,7 +15,9 @@ services:
     network_mode: host
     devices:
       - /dev/snd:/dev/snd
-    logging: *default-logging      
+    logging: *default-logging
+    depends_on:
+      - mosquitto
 
   device-pinger:
     build:
@@ -78,6 +80,8 @@ services:
       - 3002:3000
     volumes:
       - grafana-storage:/var/lib/grafana
+    depends_on:
+      - prometheus
 
 volumes:
   grafana-storage:
