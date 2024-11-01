@@ -1,3 +1,10 @@
+x-logging: &default-logging
+    driver: json-file
+    options:
+        max-size: 50m
+        max-file: 5
+        compress: 1
+
 services:
 
   backend:
@@ -8,6 +15,47 @@ services:
     network_mode: host
     devices:
       - /dev/snd:/dev/snd
+    logging: *default-logging      
+
+  device-pinger:
+    build:
+      context: ../device-pinger
+    image: device-pinger
+    env_file: ".env"
+    restart: unless-stopped
+    logging: *default-logging
+    depends_on:
+      - mosquitto
+    ports:
+      - 2112:2112
+
+  zigbee2mqtt:
+    image: koenkk/zigbee2mqtt
+    ports:
+      - 7000:7000
+    volumes:
+      - ./zigbee2mqtt-data:/app/data
+    devices:
+      - /dev/ttyUSB0:/dev/ttyUSB0
+    depends_on:
+      - mosquitto
+    restart: unless-stopped
+    logging: *default-logging
+    environment:
+      - ZIGBEE2MQTT_CONFIG_MQTT_PASSWORD=$MQTT_PASSWORD
+
+  mosquitto:
+    image: eclipse-mosquitto
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+    ports:
+      - 1883:1883
+    restart: unless-stopped
+    logging: *default-logging
+    command: |
+      /bin/sh -c "
+          mkdir -p /etc/mosquitto && touch /etc/mosquitto/passwd && mosquitto_passwd -b /etc/mosquitto/passwd $MQTT_USERNAME $MQTT_PASSWORD && /usr/sbin/mosquitto -c /mosquitto/config/mosquitto.conf
+      "
 
   prometheus:
     image: prom/prometheus:latest
@@ -22,6 +70,7 @@ services:
       - --web.enable-admin-api
     extra_hosts:
       - host.docker.internal:host-gateway
+    logging: *default-logging      
 
   grafana:
     image: grafana/grafana:latest
