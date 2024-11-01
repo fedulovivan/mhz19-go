@@ -7,29 +7,29 @@ docker-build:
 	DOCKER_CLI_HINTS=false docker build --label "git.revision=${GIT_REV}" --tag $(NAME) .
 
 docker-down:
-	docker stop $(NAME) && docker rm $(NAME)
+	docker stop $(NAME) && docker rm $(NAME)-1
 
 docker-up:
 ifeq ($(OS_NAME), linux)
-	docker run --detach --restart=always --env-file=$(CONF) -v ./database.bin:/app/database.bin --network=host --device /dev/snd:/dev/snd --name=$(NAME) $(NAME)
+	docker run --detach --restart=always --env-file=$(CONF) -v ./database.bin:/app/database.bin --network=host --device /dev/snd:/dev/snd --name=$(NAME)-1 $(NAME)
 else
-	docker run --detach --restart=always --env-file=$(CONF) -v ./database.bin:/app/database.bin -p $(REST_API_PORT):$(REST_API_PORT) --name=$(NAME) $(NAME)
+	docker run --detach --restart=always --env-file=$(CONF) -v ./database.bin:/app/database.bin -p $(REST_API_PORT):$(REST_API_PORT) --name=$(NAME)-1 $(NAME)
 endif
 	
 docker-logs:
-	docker logs --follow $(NAME)
+	docker logs --follow $(NAME)-1
 
 docker-shell:
-	docker exec -it $(NAME) /bin/sh
+	docker exec -it $(NAME)-1 /bin/sh
 
 docker-dive:
 	_dive $(NAME)
 
 docker-logs-save:
-	docker logs --timestamps $(NAME) 2>&1 | cat > log.txt
+	docker logs --timestamps $(NAME)-1 2>&1 | cat > log.txt
 	
 docker-stats:
-	docker stats $(NAME)
+	docker stats $(NAME)-1
 
 compose-up:
 	NAME=$(NAME) docker compose up --no-build --detach
@@ -37,11 +37,11 @@ compose-up:
 compose-down:
 	NAME=$(NAME) docker compose down
 
-compose-up-dev:
-	NAME=$(NAME) docker compose up --no-build --detach prometheus grafana
+# compose-up-dev:
+# 	NAME=$(NAME) docker compose up --no-build --detach prometheus grafana
 
-compose-down-dev:
-	NAME=$(NAME) docker compose down prometheus grafana
+# compose-down-dev:
+# 	NAME=$(NAME) docker compose down prometheus grafana
 
 update:
 	git pull && make docker-build && make docker-down && make docker-up && make docker-logs

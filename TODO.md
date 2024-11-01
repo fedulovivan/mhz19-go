@@ -1,11 +1,13 @@
 ### Prio 0
-- feat: move services "device-pinger", "zigbee2mqtt", "mosquitto" from mhz19-next to local compose file + dont forget to extend .env file with required variables
+- (+) feat: move services "device-pinger", "zigbee2mqtt", "mosquitto" from mhz19-next to local compose file + dont forget to extend .env file with required variables
 - feat: include draft mhz19-front to the main compose stack
 - feat: add logging of the key, at the place where message was initially queued: "Rule=4 message queue is flushed now key=zigbee-device-0x00158d00067cb0c9-Rule4 mm=3"
-- bug: still lots of err="got an error \"database is locked\"
+- bug: still lots of err="got an error \"database is locked\" after eliminating SetMaxOpenConns(1) - https://stackoverflow.com/a/35805826/1012298
 - learn: how GOMAXPROC and docker --proc are connected?
 - feat: visualize buried devices in grafana
-- bug: check why HandleMessage bench gives 1500 nanoseconds, while prometheus measure is 1.5-3milliseconds
+- bug: check why HandleMessage gives 1500 nanoseconds in benchmark, while prometheus measure is x1000 = 1.5-3milliseconds
+- bug: pass all zigbee2mqtt settings (host, serial/port, frontend port) via env vars and remove zigbee2mqtt-data/configuration.yaml from vcs
+- feat: freeze image version for 3pp deps (zigbee2mqtt 1.36.1 commit: ffc2ff1, mosquitto etc)
 
 ### Prio 1
 - feat: collect metrics for "message by device id"
@@ -82,6 +84,7 @@
 - try: Fast disk usage analyzer https://github.com/dundee/gdu
 - try: create load test for mqtt channel with `mosquitto_pub`
 - try: https://github.com/proullon/ramsql (from https://youtu.be/UfeZ-bPFs10?si=3FZTWpvjNvqh3X24&t=217)
+- try: switch from docker to kubernetes
 
 ### Milestones
 

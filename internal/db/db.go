@@ -60,7 +60,7 @@ func DbSingleton() *sql.DB {
 	// try busy_timeout to cope with "database is locked", instead of force putting db into single-conn mode
 	// note that Exec placeholders does not work for PRAGMA query, so we have to use Sprintf here
 	_, err = instance.Exec(fmt.Sprintf(
-		"PRAGMA foreign_keys=ON; PRAGMA busy_timeout=%d",
+		"PRAGMA foreign_keys=ON; PRAGMA busy_timeout=%d; PRAGMA journal_mode=WAL",
 		app.Config.SqliteBusyTimeout,
 	))
 	if err != nil {
@@ -69,7 +69,7 @@ func DbSingleton() *sql.DB {
 
 	// aid for the "database is locked" issue
 	// https://github.com/mattn/go-sqlite3/issues/274#issuecomment-191597862
-	// instance.SetMaxOpenConns(1)
+	instance.SetMaxOpenConns(1)
 
 	return instance
 }

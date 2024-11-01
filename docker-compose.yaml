@@ -44,6 +44,9 @@ services:
     restart: unless-stopped
     logging: *default-logging
     environment:
+      - ZIGBEE2MQTT_CONFIG_SERIAL_PORT=/dev/ttyUSB0
+      - ZIGBEE2MQTT_CONFIG_MQTT_SERVER=mqtt://mosquitto
+      - ZIGBEE2MQTT_CONFIG_MQTT_USER=mosquitto
       - ZIGBEE2MQTT_CONFIG_MQTT_PASSWORD=$MQTT_PASSWORD
 
   mosquitto:

@@ -1,0 +1,49 @@
+homeassistant: false
+permit_join: false
+mqtt:
+  base_topic: zigbee2mqtt
+  server: mqtt://mosquitto
+  user: mosquitto
+serial:
+  port: /dev/ttyUSB0
+frontend:
+  port: 7000
+advanced:
+  pan_id: 19159
+  log_level: debug
+  log_output:
+    - console
+  homeassistant_legacy_entity_attributes: false
+  legacy_api: false
+device_options:
+  legacy: false
+devices:
+  '0x00158d00067cb0c9':
+    friendly_name: '0x00158d00067cb0c9'
+  '0x00158d00042446ec':
+    friendly_name: '0x00158d00042446ec'
+  '0x00158d0004244bda':
+    friendly_name: '0x00158d0004244bda'
+  '0x00158d0004035e3e':
+    friendly_name: '0x00158d0004035e3e'
+  '0x00158d00040356af':
+    friendly_name: '0x00158d00040356af'
+  '0x00158d000405811b':
+    friendly_name: '0x00158d000405811b'
+  '0x00158d000391f252':
+    friendly_name: '0x00158d000391f252'
+  '0x00158d0003a010a5':
+    friendly_name: '0x00158d0003a010a5'
+  '0x50325ffffe6ca5da':
+    friendly_name: '0x50325ffffe6ca5da'
+  '0x00158d000a823bb0':
+    friendly_name: '0x00158d000a823bb0'
+    occupancy_timeout: 300
+  '0x00158d0000c2fa6e':
+    friendly_name: '0x00158d0000c2fa6e'
+  '0xe0798dfffed39ed1':
+    friendly_name: '0xe0798dfffed39ed1'
+  '0x00124b002510b59d':
+    friendly_name: '0x00124b002510b59d'
+  '0x00158d0000bedf87':
+    friendly_name: '0x00158d0000bedf87'
