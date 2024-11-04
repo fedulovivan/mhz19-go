@@ -83,7 +83,8 @@ func Init(shimProvider types.ChannelProvider) {
 	// set custom json writer for better performance
 	// see var DataWriters
 	// in ozzo-routing/content/type.go
-	content.DataWriters[content.JSON] = &JSONDataWriterCustom{}
+	// temporary disabled, see https://github.com/goccy/go-json/issues/526
+	// content.DataWriters[content.JSON] = &JSONDataWriterCustom{}
 
 	router := routing.New()
 	router.Use(

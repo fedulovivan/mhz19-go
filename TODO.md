@@ -1,34 +1,32 @@
 ### Prio 0
-- (+) feat: move services "device-pinger", "zigbee2mqtt", "mosquitto" from mhz19-next to local compose file + dont forget to extend .env file with required variables
-- feat: include draft mhz19-front to the main compose stack
-- feat: add logging of the key, at the place where message was initially queued: "Rule=4 message queue is flushed now key=zigbee-device-0x00158d00067cb0c9-Rule4 mm=3"
-- bug: still lots of err="got an error \"database is locked\" after eliminating SetMaxOpenConns(1) - https://stackoverflow.com/a/35805826/1012298
-- learn: how GOMAXPROC and docker --proc are connected?
-- feat: visualize buried devices in grafana
-- bug: check why HandleMessage gives 1500 nanoseconds in benchmark, while prometheus measure is x1000 = 1.5-3milliseconds
-- bug: pass all zigbee2mqtt settings (host, serial/port, frontend port) via env vars and remove zigbee2mqtt-data/configuration.yaml from vcs
-- feat: freeze image version for 3pp deps (zigbee2mqtt 1.36.1 commit: ffc2ff1, mosquitto etc)
+- feat: collect metrics for "messages by device id"
 
 ### Prio 1
-- feat: collect metrics for "message by device id"
-- feat: execute db migrations also from within docker container, otherwize we depend on sqlite3 binary installed on the host system, more specifically problem is macmini has version 3.31.1, while mbp 3.39.5. as a result a new feature "DROP COLUMN" is not working on macmini (introduced in sqlite 3.35, also see https://github.com/mattn/go-sqlite3/issues/927)
+- feat: add logging of the key, at the place where message was initially queued: "Rule=4 message queue is flushed now key=zigbee-device-0x00158d00067cb0c9-Rule4 mm=3"
+- feat: freeze images version for 3pp docker deps (zigbee2mqtt 1.36.1 commit: ffc2ff1, mosquitto etc)
+- feat: switch to docker-compose in `make update`
+- feat: tidy up all volume-targeted folders/files structure with 3pp configs (prometheus, zigbee2mqtt, mosquitto etc), avoid anonymous volume for zigbee2mqtt
 - feat: db: introduce updated_at, created_at columns
-- api: toggle rule on/off
-- api: toggle device buried_timeout on/off
-- api: update rule? looks its better to use delete/create strategy
-- feat: db: limit rule name length, since its used in prometheus metric labels
+- feat: db: limit rule name length, since its used to group prometheus metrics
+- feat: pass all zigbee2mqtt settings (host, serial/port, frontend port) via env vars and remove zigbee2mqtt-data/configuration.yaml from vcs
+- feat: api: toggle rule on/off
+- feat: api: toggle device buried_timeout on/off
+- feat: api: update rule - looks its better to utilize delete/create strategy
+- feat: configure builds with compose, now we have to build all images manually with separate tasks (mhz19-go, device-pinger, mhz19-front)
 
 ### Bugs
-- bug: wrong id (appeared id from messages table instead while was expected from devices) "Msg=25 Rule=1 Action=1 UpsertZigbeeDevices Created id=72852" - apparently this is https://github.com/mattn/go-sqlite3/issues/30, however my case is quite complex to reproduce:
-  - UpsertZigbeeDevices performs bulk UPSERT in transaction 1
-  - RecordMessage performs bulk UPSERT into devices and messages in transaction 2
+- bug: execute db migrations also from within docker container, otherwize we depend on sqlite3 binary installed on the host system, more specifically problem is macmini has version 3.31.1, while mbp 3.39.5. as a result a new feature "DROP COLUMN" is not working on macmini (introduced in sqlite 3.35, also see https://github.com/mattn/go-sqlite3/issues/927)
+- bug: wrong id (appeared id from messages table instead while was expected from devices) "Msg=25 Rule=1 Action=1 UpsertZigbeeDevices Created id=72852" - apparently this is https://github.com/mattn/go-sqlite3/issues/30, however my case is quite complex to reproduce: UpsertZigbeeDevices performs bulk UPSERT in transaction 1; RecordMessage performs bulk UPSERT into devices and messages in transaction 2
 - bug: find the reason of no sound on macmini
-- bug: check why docker build always takes 203s on macmini (Building 202.9s (17/17) FINISHED)
 - bug: no mqtt (re)connection if network was not available on app startup and returned online later
 - bug: "http: superfluous response.WriteHeader call from github.com/go-ozzo/ozzo-routing/v2.(*Router).handleError (router.go:131)" - appears after interruption of progressing apache bench - need to ensure this is normal, and not an application-level issue
 - bug: "apr_socket_recv: Operation timed out (60)" - https://stackoverflow.com/questions/30352725/why-is-my-hello-world-go-server-getting-crushed-by-apachebench, try to find protection
-- bug: "api:getAll took 3.451973917s" when reading 1k rules 1k times - try same scenario with postgres - ensure there is no room for optimisation here
 
+### Digs
+- dig: "api:getAll took 3.451973917s" when reading 1k rules 1k times - try same scenario with postgres - check there is no room for optimisation here
+- dig: check why HandleMessage gives 1500 nanoseconds in benchmark, while prometheus measure is x1000 = 1.5-3milliseconds
+- dig: check why docker build always takes 203s on macmini (Building 202.9s (17/17) FINISHED)
+- 
 ### Features
 - feat: parse DeviceClass(telegram-bot) as well as DeviceClass(5)
 - feat: parse DeviceClass(mqtt) as well as ChannelType(1)
@@ -84,7 +82,10 @@
 - try: Fast disk usage analyzer https://github.com/dundee/gdu
 - try: create load test for mqtt channel with `mosquitto_pub`
 - try: https://github.com/proullon/ramsql (from https://youtu.be/UfeZ-bPFs10?si=3FZTWpvjNvqh3X24&t=217)
-- try: switch from docker to kubernetes
+- try: to switch from docker to kubernetes
+- try: to learn how GOMAXPROC and docker --proc are related
+- try: create client for miio devices udp port 54321 (yeelight smart ceiling light, robot vacuum), for now stuck with token fetching issue. links: https://github.com/aholstenson/miio, https://github.com/OpenMiHome/mihome-binary-protocol, https://github.com/maxinminax/node-mihome, https://github.com/nickw444/miio-go, https://github.com/marcelrv/XiaomiRobotVacuumProtocol, https://github.com/vkorn/go-miio, https://www.youtube.com/watch?v=m11qbkgOz5o
+- (?) try: visualize buried devices in grafana
 
 ### Milestones
 
@@ -95,6 +96,10 @@
 
 ### Completed
 
+- (+) feat: include draft mhz19-front to the main compose stack
+- (+) bug: "slice bounds out of range"  when reading single rule, RCA is https://github.com/goccy/go-json/issues/526
+- (+) bug: still lots of err="got an error \"database is locked\" after eliminating SetMaxOpenConns(1) - https://stackoverflow.com/a/35805826/1012298, switched back to SetMaxOpenConns(1) and enabled WAL
+- (+) feat: move services "device-pinger", "zigbee2mqtt", "mosquitto" from mhz19-next to local compose file + dont forget to extend .env file with required variables
 - (+) bug: check why lots of records have duplicates http://macmini:7070/api/messages/device/0x00158d00067cb0c9?tocsv=1, for now stick with no changes on backend side, originally all messages are emitted by zigbee device (see assets/duplicated-messages-log.txt)
 - (+) bug: make with no args invokes docker build
 - (+) feat: switch from Seq to atomics

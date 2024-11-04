@@ -19,6 +19,18 @@ services:
     depends_on:
       - mosquitto
 
+  frontend:
+    build:
+      context: ../mhz19-front
+    image: mhz19-front
+    env_file: ".env"
+    restart: unless-stopped
+    logging: *default-logging
+    depends_on:
+      - backend
+    ports:
+      - 7171:80
+
   device-pinger:
     build:
       context: ../device-pinger

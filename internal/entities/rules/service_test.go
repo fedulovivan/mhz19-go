@@ -181,6 +181,35 @@ var testDataTable = []TableRow{
 	},
 }
 
+type mockrepo struct {
+	err error
+}
+
+func (r mockrepo) Get(ruleId sql.NullInt32) (
+	rules []DbRule,
+	conditions []DbRuleCondition,
+	ruleActions []DbRuleAction,
+	args []DbRuleConditionOrActionArgument,
+	mappings []DbRuleActionArgumentMapping,
+	err error,
+) {
+	err = r.err
+	return
+}
+func (r mockrepo) Create(
+	rule DbRule,
+	conditions []DbRuleCondition,
+	actions []DbRuleAction,
+	arguments []DbRuleConditionOrActionArgument,
+	mappings []DbRuleActionArgumentMapping,
+) (ruleId int64, err error) {
+	err = r.err
+	return
+}
+func (r mockrepo) Delete(int32) error {
+	return nil
+}
+
 func (s *ServiceSuite) Test10() {
 	row := testDataTable[0]
 	result := Build(
@@ -455,36 +484,6 @@ func (s *ServiceSuite) Test63() {
 	// s.Len(mappings, 0)
 	// s.Nil(err)
 
-}
-
-type mockrepo struct {
-	err error
-}
-
-func (r mockrepo) Get(ruleId sql.NullInt32) (
-	rules []DbRule,
-	conditions []DbRuleCondition,
-	ruleActions []DbRuleAction,
-	args []DbRuleConditionOrActionArgument,
-	mappings []DbRuleActionArgumentMapping,
-	err error,
-) {
-	err = r.err
-	return
-}
-func (r mockrepo) Create(
-	rule DbRule,
-	conditions []DbRuleCondition,
-	actions []DbRuleAction,
-	arguments []DbRuleConditionOrActionArgument,
-	mappings []DbRuleActionArgumentMapping,
-) (ruleId int64, err error) {
-	err = r.err
-	return
-}
-
-func (r mockrepo) Delete(int32) error {
-	return nil
 }
 
 func (s *ServiceSuite) Test70() {
