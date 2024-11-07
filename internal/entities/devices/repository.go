@@ -19,20 +19,11 @@ type DbDevice struct {
 	BuriedTimeout sql.NullInt32
 }
 
-type DevicesRepository interface {
-	UpsertAll(devices []DbDevice) (int64, error)
-	Get(deviceId sql.NullString, deviceClass sql.NullInt32) ([]DbDevice, error)
-	Update(device DbDevice) error
-	Delete(int64) error
-}
-
-var _ DevicesRepository = (*devicesRepository)(nil)
-
 type devicesRepository struct {
 	database *sql.DB
 }
 
-func NewRepository(database *sql.DB) DevicesRepository {
+func NewRepository(database *sql.DB) devicesRepository {
 	return devicesRepository{
 		database: database,
 	}

@@ -8,9 +8,9 @@ import (
 
 var (
 	// interface guards
-	_ types.DevicesService   = (*mockDevicesService)(nil)
-	_ types.ChannelProvider  = (*mockprovider)(nil)
-	_ types.EngineAsSupplier = (*mockengine)(nil)
+	_ types.DevicesService  = (*mockDevicesService)(nil)
+	_ types.ChannelProvider = (*mockprovider)(nil)
+	_ types.ServiceSupplier = (*mockengine)(nil)
 )
 
 type mockDevicesService struct {
@@ -79,29 +79,18 @@ func (p *mockprovider) CloseChan() {
 type mockengine struct {
 }
 
-func (e *mockengine) SetDevicesService(s types.DevicesService) {
-}
-
-func (e *mockengine) DevicesService() types.DevicesService {
+func (e *mockengine) GetDevicesService() types.DevicesService {
 	return &mockDevicesService{}
 }
 
-func (e *mockengine) SetMessagesService(s types.MessagesService) {
-
-}
-
-func (e *mockengine) MessagesService() types.MessagesService {
+func (e *mockengine) GetMessagesService() types.MessagesService {
 	return nil
 }
 
-func (e *mockengine) SetProviders(s ...types.ChannelProvider) {
-
-}
-
-func (e *mockengine) FindProvider(ct types.ChannelType) types.ChannelProvider {
+func (e *mockengine) GetProvider(ct types.ChannelType) types.ChannelProvider {
 	return &mockprovider{}
 }
 
-func NewEngineMock() types.EngineAsSupplier {
+func NewEngineMock() *mockengine {
 	return &mockengine{}
 }

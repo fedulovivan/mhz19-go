@@ -4,7 +4,7 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
-var _ types.ChannelProvider = (*ProviderBase)(nil)
+// var _ types.ChannelProvider = (*ProviderBase)(nil)
 
 type ProviderBase struct {
 	MessagesChan types.MessageChan

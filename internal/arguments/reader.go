@@ -19,7 +19,7 @@ type reader struct {
 	errors   []error
 	mapping  types.Mapping
 	tpayload *types.TemplatePayload
-	engine   types.EngineAsSupplier
+	supplier types.ServiceSupplier
 	baseTag  utils.Tag
 }
 
@@ -28,7 +28,7 @@ func NewReader(
 	args types.Args,
 	mapping types.Mapping,
 	tpayload *types.TemplatePayload,
-	engine types.EngineAsSupplier,
+	supplier types.ServiceSupplier,
 	baseTag utils.Tag,
 ) reader {
 	return reader{
@@ -36,7 +36,7 @@ func NewReader(
 		args:     args,
 		mapping:  mapping,
 		tpayload: tpayload,
-		engine:   engine,
+		supplier: supplier,
 		errors:   make([]error, 0),
 		baseTag:  baseTag,
 	}
@@ -56,9 +56,6 @@ func GetTyped[T any](r *reader, field string) (res T, err error) {
 	if err != nil {
 		return
 	}
-	// if v == nil {
-	// 	return
-	// }
 	res, ok := v.(T)
 	if !ok {
 		err = fmt.Errorf("cannot cast %T to %T", v, res)
@@ -87,7 +84,7 @@ func (r *reader) Get(field string) any {
 	if sIn, isString := in.(string); isString {
 		if isTemplate(sIn) {
 			// stage 2: process string value as template
-			processed, err := r.ExecTemplate(sIn, field)
+			processed, err := r.execTemplate(sIn, field)
 			if err == nil {
 				out = processed
 			} else {
@@ -127,12 +124,12 @@ func (r *reader) Get(field string) any {
 	return out
 }
 
-func (r *reader) ExecTemplate(in string, field string) (string, error) {
+func (r *reader) execTemplate(in string, field string) (string, error) {
 	tmpl, err := template.New(field).Funcs(
 		template.FuncMap{
 			"deviceName": func(deviceId any) (string, error) {
 				if typedDeviceId, ok := deviceId.(types.DeviceId); ok {
-					device, err := r.engine.DevicesService().GetOne(typedDeviceId)
+					device, err := r.supplier.GetDevicesService().GetOne(typedDeviceId)
 					if err != nil {
 						return string(typedDeviceId), nil
 					}

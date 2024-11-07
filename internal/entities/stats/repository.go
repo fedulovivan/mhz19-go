@@ -15,19 +15,19 @@ type StatsRepository interface {
 	Get() (res types.TableStats, err error)
 }
 
-var _ StatsRepository = (*statsRepository)(nil)
+var _ StatsRepository = (*repo)(nil)
 
-type statsRepository struct {
+type repo struct {
 	database *sql.DB
 }
 
-func NewRepository(database *sql.DB) StatsRepository {
-	return statsRepository{
+func NewRepository(database *sql.DB) repo {
+	return repo{
 		database: database,
 	}
 }
 
-func (r statsRepository) Get() (
+func (r repo) Get() (
 	res types.TableStats,
 	err error,
 ) {

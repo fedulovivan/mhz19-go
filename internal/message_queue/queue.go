@@ -2,58 +2,48 @@ package message_queue
 
 import (
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
-type FlushFn func(mm []types.Message)
-
-type Queue interface {
-	// store next message
-	PushMessage(m types.Message)
-	// get flushes count, for uts
-	Flushes() int64
-}
-
-var _ Queue = (*queue)(nil)
+type OnFlushed func(mm []types.Message)
 
 type queue struct {
-	flushCnt int64
-	mu       sync.RWMutex
-	mm       []types.Message
-	throttle time.Duration
-	flushCb  FlushFn
-	timer    *time.Timer
+	sync.Mutex
+	flushes   atomic.Int64
+	mm        []types.Message
+	throttle  time.Duration
+	onFlushed OnFlushed
+	timer     *time.Timer
 }
 
-func (q *queue) onFlushed() {
-	q.mu.Lock()
-	defer q.mu.Unlock()
-	q.flushCb(q.mm)
-	q.flushCnt++
+func (q *queue) flush() {
+	q.Lock()
+	defer q.Unlock()
+	q.onFlushed(q.mm)
 	q.timer = nil
-	q.mm = make([]types.Message, 0)
+	q.mm = nil
+	q.flushes.Add(1)
 }
 
 func (q *queue) Flushes() int64 {
-	q.mu.RLock()
-	defer q.mu.RUnlock()
-	return q.flushCnt
+	return q.flushes.Load()
 }
 
 func (q *queue) PushMessage(m types.Message) {
-	q.mu.Lock()
-	defer q.mu.Unlock()
+	q.Lock()
+	defer q.Unlock()
 	q.mm = append(q.mm, m)
 	if q.timer == nil {
-		q.timer = time.AfterFunc(q.throttle, q.onFlushed)
+		q.timer = time.AfterFunc(q.throttle, q.flush)
 	}
 }
 
-func NewQueue(throttle time.Duration, flush FlushFn) Queue {
+func NewQueue(throttle time.Duration, onFlushed OnFlushed) *queue {
 	return &queue{
-		throttle: throttle,
-		flushCb:  flush,
+		throttle:  throttle,
+		onFlushed: onFlushed,
 	}
 }

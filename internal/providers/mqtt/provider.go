@@ -23,7 +23,9 @@ type provider struct {
 	client MqttLib.Client
 }
 
-func NewProvider() types.ChannelProvider {
+var _ types.ChannelProvider = (*provider)(nil)
+
+func NewProvider() *provider {
 	return &provider{
 		ProviderBase: engine.ProviderBase{
 			MessagesChan: make(types.MessageChan /* , 100 */),

@@ -9,7 +9,7 @@ import (
 	"github.com/fedulovivan/mhz19-go/pkg/utils"
 )
 
-var instance LdmRepository
+var instance *repo
 
 type LdmRepository interface {
 	NewKey(deviceClass types.DeviceClass, deviceId types.DeviceId) types.LdmKey
@@ -21,9 +21,9 @@ type LdmRepository interface {
 	GetByDeviceId(deviceId types.DeviceId) (types.Message, error)
 }
 
-var _ LdmRepository = (*repository)(nil)
+var _ LdmRepository = (*repo)(nil)
 
-type repository struct {
+type repo struct {
 	// unsafe cache of device id to Key map, used only in GetByDeviceId
 	// panics on key collision, see implementation in "Set"
 	device_id_to_key_unsafemap map[types.DeviceId]types.LdmKey
@@ -32,9 +32,9 @@ type repository struct {
 	mu                         sync.RWMutex
 }
 
-func RepoSingleton() LdmRepository {
+func RepoSingleton() *repo {
 	if instance == nil {
-		instance = &repository{
+		instance = &repo{
 			device_id_to_key_unsafemap: make(map[types.DeviceId]types.LdmKey),
 			onset:                      make(chan types.LdmKey),
 			data:                       make(map[types.LdmKey]types.Message),
@@ -43,14 +43,14 @@ func RepoSingleton() LdmRepository {
 	return instance
 }
 
-func (r *repository) NewKey(deviceClass types.DeviceClass, deviceId types.DeviceId) types.LdmKey {
+func (r *repo) NewKey(deviceClass types.DeviceClass, deviceId types.DeviceId) types.LdmKey {
 	return types.LdmKey{
 		DeviceClass: deviceClass,
 		DeviceId:    deviceId,
 	}
 }
 
-func (r *repository) GetAll() (result []types.Message) {
+func (r *repo) GetAll() (result []types.Message) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	result = utils.Values(r.data)
@@ -63,7 +63,7 @@ func (r *repository) GetAll() (result []types.Message) {
 	return
 }
 
-func (r *repository) GetByDeviceId(deviceId types.DeviceId) (res types.Message, err error) {
+func (r *repo) GetByDeviceId(deviceId types.DeviceId) (res types.Message, err error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	key, exist := r.device_id_to_key_unsafemap[deviceId]
@@ -74,13 +74,13 @@ func (r *repository) GetByDeviceId(deviceId types.DeviceId) (res types.Message, 
 	return r.get_unsafe(key), nil
 }
 
-func (r *repository) Get(key types.LdmKey) types.Message {
+func (r *repo) Get(key types.LdmKey) types.Message {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	return r.get_unsafe(key)
 }
 
-func (r *repository) Has(key types.LdmKey) (flag bool) {
+func (r *repo) Has(key types.LdmKey) (flag bool) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	_, flag = r.data[key]
@@ -88,7 +88,7 @@ func (r *repository) Has(key types.LdmKey) (flag bool) {
 }
 
 // "private" getter not protected by lock
-func (r *repository) get_unsafe(key types.LdmKey) types.Message {
+func (r *repo) get_unsafe(key types.LdmKey) types.Message {
 	return r.data[key]
 	// res, exist := r.data[key]
 	// if !exist {
@@ -97,11 +97,11 @@ func (r *repository) get_unsafe(key types.LdmKey) types.Message {
 	// return res
 }
 
-func (r *repository) OnSet() chan types.LdmKey {
+func (r *repo) OnSet() chan types.LdmKey {
 	return r.onset
 }
 
-func (r *repository) Set(newkey types.LdmKey, m types.Message) {
+func (r *repo) Set(newkey types.LdmKey, m types.Message) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	existingkey, alreadyexist := r.device_id_to_key_unsafemap[m.DeviceId]

@@ -27,6 +27,13 @@ var Transactions = promauto.NewHistogram(
 	},
 )
 
+var BuildRules = promauto.NewHistogram(
+	prometheus.HistogramOpts{
+		Name: "mhz19_build_rules",
+		Help: "Mhz19 time taken to transform rules from db representation into the types.Rule",
+	},
+)
+
 var Queries = promauto.NewHistogram(
 	prometheus.HistogramOpts{
 		Name: "mhz19_queries",

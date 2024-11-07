@@ -2,42 +2,42 @@ package ldm
 
 import "github.com/fedulovivan/mhz19-go/internal/types"
 
-var _ types.LdmService = (*ldmService)(nil)
+var _ types.LdmService = (*service)(nil)
 
-type ldmService struct {
+type service struct {
 	repository LdmRepository
 }
 
-func (s ldmService) NewKey(deviceClass types.DeviceClass, deviceId types.DeviceId) types.LdmKey {
+func (s service) NewKey(deviceClass types.DeviceClass, deviceId types.DeviceId) types.LdmKey {
 	return s.repository.NewKey(deviceClass, deviceId)
 }
 
-func (s ldmService) Get(key types.LdmKey) types.Message {
+func (s service) Get(key types.LdmKey) types.Message {
 	return s.repository.Get(key)
 }
 
-func (s ldmService) Has(key types.LdmKey) bool {
+func (s service) Has(key types.LdmKey) bool {
 	return s.repository.Has(key)
 }
 
-func (s ldmService) Set(key types.LdmKey, m types.Message) {
+func (s service) Set(key types.LdmKey, m types.Message) {
 	s.repository.Set(key, m)
 }
 
-func (s ldmService) GetAll() []types.Message {
+func (s service) GetAll() []types.Message {
 	return s.repository.GetAll()
 }
 
-func (s ldmService) GetByDeviceId(deviceId types.DeviceId) (types.Message, error) {
+func (s service) GetByDeviceId(deviceId types.DeviceId) (types.Message, error) {
 	return s.repository.GetByDeviceId(deviceId)
 }
 
-func (s ldmService) OnSet() <-chan types.LdmKey {
+func (s service) OnSet() <-chan types.LdmKey {
 	return s.repository.OnSet()
 }
 
-func NewService(r LdmRepository) types.LdmService {
-	return ldmService{
+func NewService(r LdmRepository) service {
+	return service{
 		repository: r,
 	}
 }

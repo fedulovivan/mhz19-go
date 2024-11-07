@@ -224,7 +224,7 @@ func logQuery(tag utils.Tag, query string, values ...any) {
 		return
 	}
 	slog.Debug(tag.F(
-		"executing query %v, values %v",
+		"executing query %v; values %v",
 		query,
 		values,
 	))
@@ -240,6 +240,7 @@ func Select[T any](
 	tx := ctxpayload.Tx
 	select {
 	case <-ctx.Done():
+		err = ctx.Err()
 		return
 	default:
 		tag := ctxpayload.Tag.WithTid("Select")
@@ -269,12 +270,18 @@ func Select[T any](
 		}
 		defer rows.Close()
 		for rows.Next() {
-			m := new(T)
-			err = scan(rows, m)
-			if err != nil {
+			select {
+			case <-ctx.Done():
+				err = ctx.Err()
 				return
+			default:
+				m := new(T)
+				err = scan(rows, m)
+				if err != nil {
+					return
+				}
+				result = append(result, *m)
 			}
-			result = append(result, *m)
 		}
 		err = rows.Err()
 		return
@@ -308,8 +315,10 @@ func RunTx(db *sql.DB, fn func(ctx CtxEnhanced) error) error {
 	if err != nil {
 		return err
 	}
+	ctxTimeout, cancel := context.WithTimeout(context.Background(), time.Second*60)
+	defer cancel()
 	var ctx CtxEnhanced = context.WithValue(
-		context.Background(),
+		ctxTimeout,
 		ctxkey{}, ctxval{
 			Tx:  tx,
 			Tag: tag,

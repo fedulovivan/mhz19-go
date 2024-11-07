@@ -20,7 +20,7 @@ type Tag interface {
 }
 
 type tag struct {
-	tags strings.Builder
+	strings.Builder
 }
 
 const (
@@ -30,41 +30,41 @@ const (
 
 func NewTag(first TagName) Tag {
 	res := &tag{}
-	res.tags.WriteString(string(first))
-	res.tags.WriteRune(SPACE)
+	res.WriteString(string(first))
+	res.WriteRune(SPACE)
 	return res
 }
 
 // format existing
 func (t *tag) F(format string, a ...any) string {
-	return t.tags.String() + fmt.Sprintf(format, a...)
+	return t.String() + fmt.Sprintf(format, a...)
 }
 
 // extend "tags chain" with arbitrary formatted string
 func (t *tag) With(format string, a ...any) Tag {
 	res := &tag{}
-	res.tags.WriteString(t.tags.String())
-	fmt.Fprintf(&res.tags, format, a...)
-	res.tags.WriteRune(SPACE)
+	res.WriteString(t.String())
+	fmt.Fprintf(&res.Builder, format, a...)
+	res.WriteRune(SPACE)
 	return res
 }
 
 // extend "tags chain" with tid
 func (t *tag) WithTid(ns string) Tag {
 	secsMu.Lock()
-	defer secsMu.Unlock()
 	if _, exist := nsSequences[ns]; !exist {
 		nsSequences[ns] = &atomic.Int32{}
 	}
+	secsMu.Unlock()
 	res := &tag{}
-	res.tags.WriteString(t.tags.String())
-	res.tags.WriteString(ns)
-	res.tags.WriteRune(HASH)
-	res.tags.WriteString(strconv.FormatInt(
+	res.WriteString(t.String())
+	res.WriteString(ns)
+	res.WriteRune(HASH)
+	res.WriteString(strconv.FormatInt(
 		int64(nsSequences[ns].Add(1)),
 		10,
 	))
-	res.tags.WriteRune(SPACE)
+	res.WriteRune(SPACE)
 	return res
 }
 

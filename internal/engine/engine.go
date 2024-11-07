@@ -24,8 +24,7 @@ var queuesContainer = message_queue.NewContainer()
 
 type GetProviderFn func(ch types.ChannelType) types.ChannelProvider
 
-var _ types.Engine = (*engine)(nil)
-var _ types.EngineAsSupplier = (*engine)(nil)
+var _ types.ServiceSupplier = (*engine)(nil)
 
 var BaseTag = utils.NewTag(logger.ENGINE)
 
@@ -38,7 +37,7 @@ type engine struct {
 	rulesMu        sync.RWMutex
 }
 
-func NewEngine() types.Engine {
+func NewEngine() *engine {
 	return &engine{}
 }
 
@@ -81,10 +80,10 @@ func (e *engine) DeleteRule(ruleId int) {
 	slog.Debug(BaseTag.F("DeleteRule"), "deleted", before-after, "total", after)
 }
 
-func (e *engine) MessagesService() types.MessagesService {
+func (e *engine) GetMessagesService() types.MessagesService {
 	return e.messageService
 }
-func (e *engine) DevicesService() types.DevicesService {
+func (e *engine) GetDevicesService() types.DevicesService {
 	return e.devicesService
 }
 
@@ -94,7 +93,7 @@ func (e *engine) Start() {
 			provider.Init()
 			for message := range provider.Messages() {
 				e.rulesMu.RLock()
-				e.HandleMessage(message, e.rules)
+				e.handleMessage(message, e.rules)
 				e.rulesMu.RUnlock()
 			}
 		}(p)
@@ -102,7 +101,7 @@ func (e *engine) Start() {
 	slog.Debug(BaseTag.F("Started"))
 }
 
-func (e *engine) FindProvider(ct types.ChannelType) types.ChannelProvider {
+func (e *engine) GetProvider(ct types.ChannelType) types.ChannelProvider {
 	for _, provider := range e.providers {
 		if provider.Channel() == ct {
 			return provider
@@ -117,7 +116,7 @@ func (e *engine) Stop() {
 	}
 }
 
-func (e *engine) InvokeConditionFunc(
+func (e *engine) invokeConditionFunc(
 	mt types.MessageCompound,
 	c types.Condition,
 	baseTag utils.Tag,
@@ -146,7 +145,7 @@ func (e *engine) InvokeConditionFunc(
 	}
 }
 
-func (e *engine) InvokeActionFunc(compound types.MessageCompound, a types.Action, tag utils.Tag) {
+func (e *engine) invokeActionFunc(compound types.MessageCompound, a types.Action, tag utils.Tag) {
 	start := time.Now()
 	impl := actions.Get(a.Fn)
 	atag := tag.With("Action=%d %s", a.Id, a.Fn.String())
@@ -162,57 +161,57 @@ func (e *engine) InvokeActionFunc(compound types.MessageCompound, a types.Action
 	}
 }
 
-func (e *engine) MatchesListSome(mtcb types.GetCompoundForOtherDeviceId, cc []types.Condition, tag utils.Tag) bool {
+func (e *engine) matchesListSome(mtcb types.GetCompoundForOtherDeviceId, cc []types.Condition, tag utils.Tag) bool {
 	for _, c := range cc {
-		if e.MatchesCondition(mtcb, c, tag) {
+		if e.matchesCondition(mtcb, c, tag) {
 			return true
 		}
 	}
 	return false
 }
 
-func (e *engine) MatchesListEvery(mtcb types.GetCompoundForOtherDeviceId, cc []types.Condition, tag utils.Tag) bool {
+func (e *engine) matchesListEvery(mtcb types.GetCompoundForOtherDeviceId, cc []types.Condition, tag utils.Tag) bool {
 	if len(cc) == 0 {
 		return false
 	}
 	for _, c := range cc {
-		if !e.MatchesCondition(mtcb, c, tag) {
+		if !e.matchesCondition(mtcb, c, tag) {
 			return false
 		}
 	}
 	return true
 }
 
-func (e *engine) MatchesCondition(mtcb types.GetCompoundForOtherDeviceId, c types.Condition, tag utils.Tag) bool {
+func (e *engine) matchesCondition(mtcb types.GetCompoundForOtherDeviceId, c types.Condition, tag utils.Tag) bool {
 	withFn := c.Fn != 0
 	withList := len(c.Nested) > 0
 	if !withFn && !withList {
 		return false
 	} else if withFn && !withList {
-		return e.InvokeConditionFunc(
+		return e.invokeConditionFunc(
 			mtcb(c.OtherDeviceId), c, tag,
 		)
 	} else if withList && !withFn {
 		if c.Or {
-			return e.MatchesListSome(mtcb, c.Nested, tag)
+			return e.matchesListSome(mtcb, c.Nested, tag)
 		} else {
-			return e.MatchesListEvery(mtcb, c.Nested, tag)
+			return e.matchesListEvery(mtcb, c.Nested, tag)
 		}
 	} else {
 		panic("unexpected conditions")
 	}
 }
 
-func (e *engine) ExecuteActions(compound types.MessageCompound, r types.Rule, tag utils.Tag) {
+func (e *engine) executeActions(compound types.MessageCompound, r types.Rule, tag utils.Tag) {
 	slog.Debug(tag.F("going to execute %d actions", len(r.Actions)))
 	for _, a := range r.Actions {
-		go e.InvokeActionFunc(compound, a, tag)
+		go e.invokeActionFunc(compound, a, tag)
 	}
 }
 
 // called simultaneusly upon receiving messages from all providers
 // should have thread-safe implementation
-func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
+func (e *engine) handleMessage(m types.Message, rules []types.Rule) {
 
 	if m.Id == 0 || m.Timestamp.IsZero() {
 		panic("message must have Id and Timestamp initialised")
@@ -229,7 +228,7 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 
 	mtag := BaseTag.With("Msg=%d", m.Id)
 
-	defer utils.TimeTrack(mtag.F, time.Now(), "HandleMessage")
+	defer utils.TimeTrack(mtag.F, time.Now(), "handleMessage")
 
 	isSystem := m.DeviceClass == types.DEVICE_CLASS_SYSTEM
 	isBridge := m.DeviceClass == types.DEVICE_CLASS_ZIGBEE_BRIDGE
@@ -261,6 +260,7 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 
 	for _, r := range rules {
 		rtag := mtag.With("Rule=%d", r.Id)
+		qtag := BaseTag.With("Rule=%d", r.Id)
 		if r.Disabled {
 			slog.Debug(rtag.F("is disabled, skipping"))
 			continue
@@ -286,21 +286,20 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 			}
 			return compound
 		}
-		if e.MatchesCondition(mtcb, r.Condition, rtag) {
+		if e.matchesCondition(mtcb, r.Condition, rtag) {
 			counters.IncRule(r.Id)
 			counters.Rules.WithLabelValues(r.Name).Inc()
 			slog.Debug(rtag.F("matches👌"), "name", r.Name)
 			matches++
 			if r.Throttle.Duration == 0 {
 				compound := mtcb("")
-				e.ExecuteActions(compound, r, rtag)
+				e.executeActions(compound, r, rtag)
 			} else {
 				key := message_queue.NewKey(m.DeviceClass, m.DeviceId, r.Id)
-				qtag := BaseTag.With("Rule=%d", r.Id)
 				if !queuesContainer.HasQueue(key) {
 					queuesContainer.CreateQueue(key, r.Throttle.Duration, func(mm []types.Message) {
 						slog.Debug(qtag.F("message queue is flushed now"), "key", key, "mm", len(mm))
-						e.ExecuteActions(types.MessageCompound{Queued: mm}, r, qtag)
+						e.executeActions(types.MessageCompound{Queued: mm}, r, qtag)
 					})
 				}
 				queuesContainer.GetQueue(key).PushMessage(m)
@@ -308,7 +307,7 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 					"message and execution of %d actions were queued for %s",
 					len(r.Actions),
 					r.Throttle.Duration,
-				))
+				), "key", key)
 			}
 		}
 	}
@@ -325,9 +324,3 @@ func (e *engine) HandleMessage(m types.Message, rules []types.Rule) {
 		e.ldmService.Set(ldmKey, m)
 	}
 }
-
-// otherLdmKey := e.ldmService.NewKey(m.DeviceClass, otherDeviceId)
-// if e.ldmService.Has(otherLdmKey) {
-// 	tmp := e.ldmService.Get(otherLdmKey)
-// 	compound.Curr = &tmp
-// }

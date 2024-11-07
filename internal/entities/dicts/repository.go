@@ -29,7 +29,7 @@ type repo struct {
 	database *sql.DB
 }
 
-func NewRepository(database *sql.DB) DictsRepository {
+func NewRepository(database *sql.DB) repo {
 	return repo{
 		database: database,
 	}

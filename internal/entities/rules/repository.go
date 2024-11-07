@@ -16,14 +16,14 @@ type RulesRepository interface {
 	Create(rule DbRule, conditions []DbRuleCondition, actions []DbRuleAction, arguments []DbRuleConditionOrActionArgument, mappings []DbRuleActionArgumentMapping) (int64, error)
 }
 
-var _ RulesRepository = (*rulesRepository)(nil)
+var _ RulesRepository = (*repo)(nil)
 
-type rulesRepository struct {
+type repo struct {
 	database *sql.DB
 }
 
-func NewRepository(database *sql.DB) RulesRepository {
-	return rulesRepository{
+func NewRepository(database *sql.DB) repo {
+	return repo{
 		database: database,
 	}
 }
@@ -298,7 +298,7 @@ func CountMappingsTx(ctx db.CtxEnhanced) (int32, error) {
 	)
 }
 
-func (r rulesRepository) Create(
+func (r repo) Create(
 	rule DbRule,
 	conditions []DbRuleCondition,
 	actions []DbRuleAction,
@@ -398,7 +398,7 @@ func (r rulesRepository) Create(
 	return
 }
 
-func (r rulesRepository) Get(ruleId sql.NullInt32) (
+func (r repo) Get(ruleId sql.NullInt32) (
 	rules []DbRule,
 	conditions []DbRuleCondition,
 	ruleActions []DbRuleAction,
@@ -430,7 +430,7 @@ func ruleDeleteTx(
 	)
 }
 
-func (r rulesRepository) Delete(ruleId int32) error {
+func (r repo) Delete(ruleId int32) error {
 	return db.RunTx(r.database, func(ctx db.CtxEnhanced) (err error) {
 		res, err := ruleDeleteTx(ruleId, ctx)
 		if err != nil {

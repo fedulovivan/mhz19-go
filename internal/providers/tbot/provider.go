@@ -24,7 +24,9 @@ type provider struct {
 	botsMu sync.RWMutex
 }
 
-func NewProvider() types.ChannelProvider {
+var _ types.ChannelProvider = (*provider)(nil)
+
+func NewProvider() *provider {
 	return &provider{
 		ProviderBase: engine.ProviderBase{
 			MessagesChan: make(types.MessageChan /* , 100 */),

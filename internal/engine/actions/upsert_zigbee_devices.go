@@ -16,7 +16,7 @@ var UpsertZigbeeDevices types.ActionImpl = func(
 	compound types.MessageCompound,
 	args types.Args,
 	mapping types.Mapping,
-	e types.EngineAsSupplier,
+	e types.ServiceAndProviderSupplier,
 	tag utils.Tag,
 ) (err error) {
 	devicesjson := gabs.Wrap(compound.Curr.Payload)
@@ -37,7 +37,7 @@ var UpsertZigbeeDevices types.ActionImpl = func(
 			Json:        d.Data(),
 		})
 	}
-	id, err := e.DevicesService().UpsertAll(out)
+	id, err := e.GetDevicesService().UpsertAll(out)
 	slog.Debug(tag.F("Created"), "LastInsertId", id)
 	return
 }

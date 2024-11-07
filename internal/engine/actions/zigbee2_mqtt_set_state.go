@@ -8,12 +8,15 @@ import (
 	"github.com/fedulovivan/mhz19-go/pkg/utils"
 )
 
-// args: State, DeviceId
-var Zigbee2MqttSetState types.ActionImpl = func(compound types.MessageCompound, args types.Args, mapping types.Mapping, e types.EngineAsSupplier, tag utils.Tag) (err error) {
-	// tpayload := types.TemplatePayload{
-	// 	Messages: mm,
-	// }
-	areader := arguments.NewReader(compound.Curr, args, mapping /* &tpayload */, nil, e, tag)
+// args: DeviceId, State
+var Zigbee2MqttSetState types.ActionImpl = func(
+	compound types.MessageCompound,
+	args types.Args,
+	mapping types.Mapping,
+	e types.ServiceAndProviderSupplier,
+	tag utils.Tag,
+) (err error) {
+	areader := arguments.NewReader(compound.Curr, args, mapping, nil, e, tag)
 	deviceId := areader.Get("DeviceId")
 	state := areader.Get("State")
 	err = areader.Error()
@@ -21,7 +24,7 @@ var Zigbee2MqttSetState types.ActionImpl = func(compound types.MessageCompound, 
 		return
 	}
 	topic := fmt.Sprintf("zigbee2mqtt/%v/set/state", deviceId)
-	p := e.FindProvider(types.CHANNEL_MQTT)
+	p := e.GetProvider(types.CHANNEL_MQTT)
 	err = p.Send(topic, state)
 	return
 }

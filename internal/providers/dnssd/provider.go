@@ -18,9 +18,11 @@ type provider struct {
 	engine.ProviderBase
 }
 
+var _ types.ChannelProvider = (*provider)(nil)
+
 var tag = utils.NewTag(logger.DNSSD)
 
-func NewProvider() types.ChannelProvider {
+func NewProvider() *provider {
 	return &provider{
 		ProviderBase: engine.ProviderBase{
 			MessagesChan: make(types.MessageChan /* , 100 */),

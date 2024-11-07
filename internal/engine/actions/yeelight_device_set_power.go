@@ -14,7 +14,7 @@ var YeelightDeviceSetPower types.ActionImpl = func(
 	compound types.MessageCompound,
 	args types.Args,
 	mapping types.Mapping,
-	e types.EngineAsSupplier,
+	e types.ServiceAndProviderSupplier,
 	tag utils.Tag,
 ) (err error) {
 	// tpayload := types.TemplatePayload{

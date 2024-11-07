@@ -5,7 +5,7 @@ import (
 	"sync/atomic"
 )
 
-// Deprecated: to be replaced by atomics
+// Deprecated: was replaced by atomics
 type Seq interface {
 	Inc() int32
 	Value() int32
@@ -15,7 +15,7 @@ type sequence struct {
 	value atomic.Int32
 }
 
-// Deprecated: to be replaced by atomics
+// Deprecated: was replaced by atomics
 func NewSeq(start int32) *sequence {
 	seq := &sequence{}
 	seq.value.Add(start)

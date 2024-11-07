@@ -67,9 +67,9 @@ No matter which channel was used to receive a message, or which certain device h
 ### Screenshots
 
 Dashboard
-![console.png](assets/demo-03.png)
+![demo-03.png](assets/demo-03.png)
 Console
-![console.png](assets/demo-02.png)
+![demo-02.png](assets/demo-02.png)
 
 ### Migrations, schema version validation
 

@@ -62,15 +62,16 @@ func main() {
 	)
 	e := engine.NewEngine()
 	shimProvider := shim_provider.NewProvider()
+	buriedDevicesProvider := buried_devices.NewProvider(
+		ldm.NewService(ldm.RepoSingleton()),
+		devicesService,
+	)
 	e.SetProviders(
 		mqtt.NewProvider(),
 		tbot.NewProvider(),
 		dnssd.NewProvider(),
-		buried_devices.NewProvider(
-			ldm.NewService(ldm.RepoSingleton()),
-			devicesService,
-		),
 		shimProvider,
+		buriedDevicesProvider,
 	)
 	e.SetMessagesService(
 		messages.NewService(
@@ -148,4 +149,9 @@ func main() {
 	rest.Stop()
 
 	slog.Info(tag.F("All done, bye-bye"))
+
+	// ctx := context.Background()
+	// <-ctx.Done()
+	// slog.Debug("BACKGROUND CONTEXT DONE!!!", "err", ctx.Err())
+
 }

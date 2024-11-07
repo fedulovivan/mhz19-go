@@ -9,13 +9,13 @@ import (
 	"github.com/goccy/go-json"
 )
 
-var _ types.MessagesService = (*messagesService)(nil)
+var _ types.MessagesService = (*service)(nil)
 
-type messagesService struct {
+type service struct {
 	repository MessagesRepository
 }
 
-func (s messagesService) Get() (messages []types.Message, err error) {
+func (s service) Get() (messages []types.Message, err error) {
 	dbmsg, err := s.repository.Get(sql.NullString{})
 	if err != nil {
 		return
@@ -23,7 +23,7 @@ func (s messagesService) Get() (messages []types.Message, err error) {
 	return BuildMessages(dbmsg), nil
 }
 
-func (s messagesService) GetWithTemperature(deviceId types.DeviceId) ([]types.TemperatureMessage, error) {
+func (s service) GetWithTemperature(deviceId types.DeviceId) ([]types.TemperatureMessage, error) {
 	messages, err := s.repository.GetWithTemperature(
 		db.NewNullString(string(deviceId)),
 	)
@@ -43,7 +43,7 @@ func (s messagesService) GetWithTemperature(deviceId types.DeviceId) ([]types.Te
 	return result, nil
 }
 
-func (s messagesService) GetByDeviceId(deviceId types.DeviceId) (messages []types.Message, err error) {
+func (s service) GetByDeviceId(deviceId types.DeviceId) (messages []types.Message, err error) {
 	dbmsg, err := s.repository.Get(db.NewNullString(string(deviceId)))
 	if err != nil {
 		return
@@ -83,7 +83,7 @@ func ToDb(message types.Message) (res DbMessage, err error) {
 	return
 }
 
-func (s messagesService) CreateAll(messages []types.Message) error {
+func (s service) CreateAll(messages []types.Message) error {
 	res := make([]DbMessage, 0, len(messages))
 	for _, message := range messages {
 		dbMessage, err := ToDb(message)
@@ -95,7 +95,7 @@ func (s messagesService) CreateAll(messages []types.Message) error {
 	return s.repository.CreateAll(res)
 }
 
-func (s messagesService) Create(message types.Message) (err error) {
+func (s service) Create(message types.Message) (err error) {
 	dbMessage, err := ToDb(message)
 	if err != nil {
 		return
@@ -105,7 +105,7 @@ func (s messagesService) Create(message types.Message) (err error) {
 }
 
 func NewService(r MessagesRepository) types.MessagesService {
-	return messagesService{
+	return service{
 		repository: r,
 	}
 }

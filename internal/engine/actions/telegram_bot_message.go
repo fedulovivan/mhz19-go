@@ -11,7 +11,7 @@ import (
 )
 
 // args: Text?, BotName?
-var TelegramBotMessage types.ActionImpl = func(compound types.MessageCompound, args types.Args, mapping types.Mapping, e types.EngineAsSupplier, tag utils.Tag) (err error) {
+var TelegramBotMessage types.ActionImpl = func(compound types.MessageCompound, args types.Args, mapping types.Mapping, e types.ServiceAndProviderSupplier, tag utils.Tag) (err error) {
 	tpayload := types.TemplatePayload{
 		WithPrev: compound.Prev != nil,
 		Queued:   compound.Queued,
@@ -51,6 +51,6 @@ var TelegramBotMessage types.ActionImpl = func(compound types.MessageCompound, a
 		}
 		text = string(mjson)
 	}
-	p := e.FindProvider(types.CHANNEL_TELEGRAM)
+	p := e.GetProvider(types.CHANNEL_TELEGRAM)
 	return p.Send(botName, text, chatId)
 }

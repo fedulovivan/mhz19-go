@@ -10,13 +10,27 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
-var _ types.DevicesService = (*devicesService)(nil)
+type DevicesRepository interface {
+	UpsertAll(devices []DbDevice) (int64, error)
+	Get(deviceId sql.NullString, deviceClass sql.NullInt32) ([]DbDevice, error)
+	Update(device DbDevice) error
+	Delete(int64) error
+}
 
-type devicesService struct {
+// var _ DevicesRepository = (*devicesRepository)(nil)
+// var _ types.DevicesService = (*devicesService)(nil)
+
+type service struct {
 	repository DevicesRepository
 }
 
-func (s devicesService) UpsertAll(devices []types.Device) (int64, error) {
+func NewService(r DevicesRepository) service {
+	return service{
+		repository: r,
+	}
+}
+
+func (s service) UpsertAll(devices []types.Device) (int64, error) {
 	return s.repository.UpsertAll(ToDbAll(devices))
 }
 
@@ -86,11 +100,11 @@ func BuildDevices(in []DbDevice) (out []types.Device) {
 // 	// s.repository.UpsertAll()
 // }
 
-func (s devicesService) Update(device types.Device) error {
+func (s service) Update(device types.Device) error {
 	return s.repository.Update(ToDb(device))
 }
 
-func (s devicesService) GetByDeviceClass(dc types.DeviceClass) (devices []types.Device, err error) {
+func (s service) GetByDeviceClass(dc types.DeviceClass) (devices []types.Device, err error) {
 	dbdev, err := s.repository.Get(
 		sql.NullString{},
 		db.NewNullInt32(int32(dc)),
@@ -99,7 +113,7 @@ func (s devicesService) GetByDeviceClass(dc types.DeviceClass) (devices []types.
 	return
 }
 
-func (s devicesService) Get() (devices []types.Device, err error) {
+func (s service) Get() (devices []types.Device, err error) {
 	dbdev, err := s.repository.Get(
 		sql.NullString{},
 		sql.NullInt32{},
@@ -110,7 +124,7 @@ func (s devicesService) Get() (devices []types.Device, err error) {
 	return BuildDevices(dbdev), nil
 }
 
-func (s devicesService) GetOne(id types.DeviceId) (res types.Device, err error) {
+func (s service) GetOne(id types.DeviceId) (res types.Device, err error) {
 	dbdev, err := s.repository.Get(
 		db.NewNullString(string(id)),
 		sql.NullInt32{},
@@ -124,13 +138,7 @@ func (s devicesService) GetOne(id types.DeviceId) (res types.Device, err error) 
 	return
 }
 
-func (s devicesService) Delete(id int64) (err error) {
+func (s service) Delete(id int64) (err error) {
 	err = s.repository.Delete(id)
 	return
-}
-
-func NewService(r DevicesRepository) types.DevicesService {
-	return devicesService{
-		repository: r,
-	}
 }

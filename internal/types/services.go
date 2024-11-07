@@ -54,3 +54,13 @@ type RulesService interface {
 	OnCreated() <-chan Rule
 	OnDeleted() <-chan int
 }
+
+type ServiceSupplier interface {
+	GetDevicesService() DevicesService
+	GetMessagesService() MessagesService
+}
+
+type ServiceAndProviderSupplier interface {
+	ServiceSupplier
+	GetProvider(ct ChannelType) ChannelProvider
+}

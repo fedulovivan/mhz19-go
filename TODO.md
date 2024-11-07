@@ -1,8 +1,11 @@
 ### Prio 0
-- feat: collect metrics for "messages by device id"
+- bug: "http: superfluous response.WriteHeader call from github.com/go-ozzo/ozzo-routing/v2.(*Router).handleError (router.go:131)" - appears after interruption of progressing in apache bench - need to ensure this is normal, and not an application-level issue
+- bug: "apr_socket_recv: Operation timed out (60)" - https://stackoverflow.com/questions/30352725/why-is-my-hello-world-go-server-getting-crushed-by-apachebench, try to find protection
+- bug: no abortion of "Fetching rules is still running" on Ctrl+C
+- bug: rules service Build takes crazy much time to transform db records into to the rules representation
 
 ### Prio 1
-- feat: add logging of the key, at the place where message was initially queued: "Rule=4 message queue is flushed now key=zigbee-device-0x00158d00067cb0c9-Rule4 mm=3"
+- feat: collect metrics for "messages by device id"
 - feat: freeze images version for 3pp docker deps (zigbee2mqtt 1.36.1 commit: ffc2ff1, mosquitto etc)
 - feat: switch to docker-compose in `make update`
 - feat: tidy up all volume-targeted folders/files structure with 3pp configs (prometheus, zigbee2mqtt, mosquitto etc), avoid anonymous volume for zigbee2mqtt
@@ -19,8 +22,6 @@
 - bug: wrong id (appeared id from messages table instead while was expected from devices) "Msg=25 Rule=1 Action=1 UpsertZigbeeDevices Created id=72852" - apparently this is https://github.com/mattn/go-sqlite3/issues/30, however my case is quite complex to reproduce: UpsertZigbeeDevices performs bulk UPSERT in transaction 1; RecordMessage performs bulk UPSERT into devices and messages in transaction 2
 - bug: find the reason of no sound on macmini
 - bug: no mqtt (re)connection if network was not available on app startup and returned online later
-- bug: "http: superfluous response.WriteHeader call from github.com/go-ozzo/ozzo-routing/v2.(*Router).handleError (router.go:131)" - appears after interruption of progressing apache bench - need to ensure this is normal, and not an application-level issue
-- bug: "apr_socket_recv: Operation timed out (60)" - https://stackoverflow.com/questions/30352725/why-is-my-hello-world-go-server-getting-crushed-by-apachebench, try to find protection
 
 ### Digs
 - dig: "api:getAll took 3.451973917s" when reading 1k rules 1k times - try same scenario with postgres - check there is no room for optimisation here
@@ -96,6 +97,8 @@
 
 ### Completed
 
+- (+) bug: add logging of the key, at the place where message was initially queued: "Rule=4 message queue is flushed now key=zigbee-device-0x00158d00067cb0c9-Rule4 mm=3"
+- (+) ensure we accept interfaces and return concrete types (structs)
 - (+) feat: include draft mhz19-front to the main compose stack
 - (+) bug: "slice bounds out of range"  when reading single rule, RCA is https://github.com/goccy/go-json/issues/526
 - (+) bug: still lots of err="got an error \"database is locked\" after eliminating SetMaxOpenConns(1) - https://stackoverflow.com/a/35805826/1012298, switched back to SetMaxOpenConns(1) and enabled WAL

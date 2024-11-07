@@ -14,7 +14,7 @@ import (
 
 type EngineSuite struct {
 	suite.Suite
-	e types.Engine
+	e *engine /* types.EngineAsExecutor */
 }
 
 func (s *EngineSuite) SetupSuite() {
@@ -34,12 +34,12 @@ var dummy_mtcb types.GetCompoundForOtherDeviceId = func(types.DeviceId) (res typ
 }
 
 func (s *EngineSuite) Test10() {
-	actual := s.e.MatchesCondition(dummy_mtcb, types.Condition{}, BaseTag)
+	actual := s.e.matchesCondition(dummy_mtcb, types.Condition{}, BaseTag)
 	s.False(actual)
 }
 
 func (s *EngineSuite) Test11() {
-	actual := s.e.MatchesCondition(dummy_mtcb, types.Condition{
+	actual := s.e.matchesCondition(dummy_mtcb, types.Condition{
 		Or: true,
 		Nested: []types.Condition{
 			{Fn: types.COND_EQUAL, Args: types.Args{"Left": true, "Right": false}},
@@ -50,7 +50,7 @@ func (s *EngineSuite) Test11() {
 }
 
 func (s *EngineSuite) Test12() {
-	actual := s.e.MatchesCondition(dummy_mtcb, types.Condition{
+	actual := s.e.matchesCondition(dummy_mtcb, types.Condition{
 		Nested: []types.Condition{
 			{Fn: types.COND_EQUAL, Args: types.Args{"Left": true, "Right": false}},
 			{Fn: types.COND_EQUAL, Args: types.Args{"Left": 1.11, "Right": 1.11}},
@@ -60,7 +60,7 @@ func (s *EngineSuite) Test12() {
 }
 
 func (s *EngineSuite) Test13() {
-	actual := s.e.MatchesCondition(dummy_mtcb, types.Condition{
+	actual := s.e.matchesCondition(dummy_mtcb, types.Condition{
 		Nested: []types.Condition{
 			{
 				Fn:   types.COND_NIL,
@@ -82,17 +82,17 @@ func (s *EngineSuite) Test20() {
 		Fn: 66,
 	}
 	s.PanicsWithValue("Condition function 66 not yet implemented", func() {
-		s.False(s.e.InvokeConditionFunc(types.MessageCompound{}, c, BaseTag))
+		s.False(s.e.invokeConditionFunc(types.MessageCompound{}, c, BaseTag))
 	})
 }
 
 func (s *EngineSuite) Test30() {
-	actual := s.e.MatchesListSome(dummy_mtcb, []types.Condition{}, BaseTag)
+	actual := s.e.matchesListSome(dummy_mtcb, []types.Condition{}, BaseTag)
 	s.False(actual)
 }
 
 func (s *EngineSuite) Test31() {
-	actual := s.e.MatchesListSome(dummy_mtcb, []types.Condition{
+	actual := s.e.matchesListSome(dummy_mtcb, []types.Condition{
 		{Fn: types.COND_EQUAL, Args: types.Args{"Left": 1, "Right": 1}},
 		{Fn: types.COND_EQUAL, Args: types.Args{"Left": "foo", "Right": "bar"}},
 	}, BaseTag)
@@ -100,12 +100,12 @@ func (s *EngineSuite) Test31() {
 }
 
 func (s *EngineSuite) Test40() {
-	actual := s.e.MatchesListEvery(dummy_mtcb, []types.Condition{}, BaseTag)
+	actual := s.e.matchesListEvery(dummy_mtcb, []types.Condition{}, BaseTag)
 	s.False(actual)
 }
 
 func (s *EngineSuite) Test41() {
-	actual := s.e.MatchesListEvery(dummy_mtcb, []types.Condition{
+	actual := s.e.matchesListEvery(dummy_mtcb, []types.Condition{
 		{Fn: types.COND_EQUAL, Args: types.Args{"Left": 1, "Right": 1}},
 		{Fn: types.COND_EQUAL, Args: types.Args{"Left": "foo", "Right": "foo"}},
 	}, BaseTag)
@@ -113,7 +113,7 @@ func (s *EngineSuite) Test41() {
 }
 
 func (s *EngineSuite) Test60() {
-	s.e.ExecuteActions(types.MessageCompound{}, types.Rule{}, BaseTag)
+	s.e.executeActions(types.MessageCompound{}, types.Rule{}, BaseTag)
 }
 
 func (s *EngineSuite) Test61() {
@@ -129,18 +129,18 @@ func (s *EngineSuite) Test61() {
 		},
 	}
 	tag := utils.NewTag("[Test61]")
-	s.e.ExecuteActions(mc, rule, tag)
+	s.e.executeActions(mc, rule, tag)
 }
 
 func (s *EngineSuite) Test70() {
-	s.e.HandleMessage(types.Message{
+	s.e.handleMessage(types.Message{
 		Id:        types.MessageIdSeq.Add(1),
 		Timestamp: time.Now(),
 	}, []types.Rule{})
 }
 
 func (s *EngineSuite) Test71() {
-	s.e.HandleMessage(types.Message{
+	s.e.handleMessage(types.Message{
 		Id:          types.MessageIdSeq.Add(1),
 		Timestamp:   time.Now(),
 		DeviceClass: types.DEVICE_CLASS_ZIGBEE_BRIDGE,
@@ -148,7 +148,7 @@ func (s *EngineSuite) Test71() {
 }
 
 func (s *EngineSuite) Test72() {
-	s.e.HandleMessage(types.Message{
+	s.e.handleMessage(types.Message{
 		Id:        types.MessageIdSeq.Add(1),
 		Timestamp: time.Now(),
 	}, []types.Rule{
@@ -176,7 +176,7 @@ func Benchmark10(b *testing.B) {
 	}()
 
 	for k := 0; k < b.N; k++ {
-		e.HandleMessage(types.Message{
+		e.handleMessage(types.Message{
 			Id:        types.MessageIdSeq.Add(1),
 			Timestamp: time.Now(),
 		}, []types.Rule{

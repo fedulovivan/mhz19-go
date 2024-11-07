@@ -14,8 +14,8 @@ import (
 var tag = utils.NewTag(logger.MAIN)
 
 type container struct {
-	mu    sync.RWMutex
-	qlist map[Key]Queue
+	sync.RWMutex
+	qlist map[Key]*queue
 }
 
 type Key struct {
@@ -30,7 +30,7 @@ func (k Key) String() string {
 
 func NewContainer() *container {
 	return &container{
-		qlist: make(map[Key]Queue),
+		qlist: make(map[Key]*queue),
 	}
 }
 
@@ -42,28 +42,28 @@ func NewKey(deviceClass types.DeviceClass, deviceId types.DeviceId, ruleId int) 
 	}
 }
 
-func (c *container) HasQueue(key Key) (flag bool) {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	_, flag = c.qlist[key]
-	return
+func (c *container) HasQueue(key Key) bool {
+	c.RLock()
+	defer c.RUnlock()
+	_, flag := c.qlist[key]
+	return flag
 }
 
-func (c *container) CreateQueue(key Key, throttle time.Duration, flush FlushFn) (q Queue) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+func (c *container) CreateQueue(key Key, throttle time.Duration, flush OnFlushed) (q *queue) {
+	c.Lock()
+	defer c.Unlock()
 	q = NewQueue(throttle, flush)
 	c.qlist[key] = q
 	slog.Debug(tag.F(
-		"New Queue created for key='%v', total instances %v",
+		"New queue created for key='%v', total instances %v",
 		key,
 		len(c.qlist),
 	))
 	return
 }
 
-func (c *container) GetQueue(key Key) (qq Queue) {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
+func (c *container) GetQueue(key Key) *queue {
+	c.RLock()
+	defer c.RUnlock()
 	return c.qlist[key]
 }

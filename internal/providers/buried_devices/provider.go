@@ -24,13 +24,15 @@ type provider struct {
 	timersMu       sync.Mutex
 }
 
+var _ types.ChannelProvider = (*provider)(nil)
+
 func NewProvider(
 	ldmService types.LdmService,
 	devicesService types.DevicesService,
-) types.ChannelProvider {
+) *provider {
 	return &provider{
 		ProviderBase: engine.ProviderBase{
-			MessagesChan: make(types.MessageChan /* , 100 */),
+			MessagesChan: make(types.MessageChan),
 		},
 		ldmService:     ldmService,
 		devicesService: devicesService,

@@ -18,7 +18,7 @@ type repo struct {
 	database *sql.DB
 }
 
-func NewRepository(database *sql.DB) SchemaVersionRepository {
+func NewRepository(database *sql.DB) repo {
 	return repo{
 		database: database,
 	}

@@ -32,14 +32,14 @@ type MessagesRepository interface {
 }
 
 // interface guard
-var _ MessagesRepository = (*messagesRepository)(nil)
+var _ MessagesRepository = (*repo)(nil)
 
-type messagesRepository struct {
+type repo struct {
 	database *sql.DB
 }
 
-func NewRepository(database *sql.DB) MessagesRepository {
-	return messagesRepository{
+func NewRepository(database *sql.DB) repo {
+	return repo{
 		database: database,
 	}
 }
@@ -75,7 +75,7 @@ func messageInsertAllTx(
 	return err
 }
 
-func (r messagesRepository) GetWithTemperature(deviceId sql.NullString) ([]DbTemperatureMessage, error) {
+func (r repo) GetWithTemperature(deviceId sql.NullString) ([]DbTemperatureMessage, error) {
 	var messages []DbTemperatureMessage
 	err := db.RunTx(r.database, func(ctx db.CtxEnhanced) (err error) {
 		messages, err = db.Select(
@@ -123,7 +123,7 @@ func CountTx(ctx context.Context) (int32, error) {
 	)
 }
 
-func (r messagesRepository) Get(deviceId sql.NullString) (messages []DbMessage, err error) {
+func (r repo) Get(deviceId sql.NullString) (messages []DbMessage, err error) {
 	err = db.RunTx(r.database, func(ctx db.CtxEnhanced) (err error) {
 		messages, err = messagesSelectTx(ctx, deviceId)
 		return
@@ -131,7 +131,7 @@ func (r messagesRepository) Get(deviceId sql.NullString) (messages []DbMessage, 
 	return
 }
 
-func (r messagesRepository) CreateAll(messages []DbMessage) error {
+func (r repo) CreateAll(messages []DbMessage) error {
 	return db.RunTx(r.database, func(ctx db.CtxEnhanced) (err error) {
 		existingDeviceIds := make([]string, 0)
 		missingDeviceIds := make([]string, 0)

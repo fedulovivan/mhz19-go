@@ -9,7 +9,13 @@ import (
 )
 
 // args: State, DeviceId
-var ValveSetState types.ActionImpl = func(compound types.MessageCompound, args types.Args, mapping types.Mapping, e types.EngineAsSupplier, tag utils.Tag) (err error) {
+var ValveSetState types.ActionImpl = func(
+	compound types.MessageCompound,
+	args types.Args,
+	mapping types.Mapping,
+	e types.ServiceAndProviderSupplier,
+	tag utils.Tag,
+) (err error) {
 	// tpayload := types.TemplatePayload{
 	// 	Messages: mm,
 	// }
@@ -21,7 +27,7 @@ var ValveSetState types.ActionImpl = func(compound types.MessageCompound, args t
 		return
 	}
 	topic := fmt.Sprintf("/VALVE/%v/STATE/SET", deviceId)
-	p := e.FindProvider(types.CHANNEL_MQTT)
+	p := e.GetProvider(types.CHANNEL_MQTT)
 	err = p.Send(topic, state)
 	return
 }

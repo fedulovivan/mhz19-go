@@ -8,45 +8,47 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/fedulovivan/mhz19-go/internal/counters"
 	"github.com/fedulovivan/mhz19-go/internal/db"
 	"github.com/fedulovivan/mhz19-go/internal/types"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/samber/lo"
 )
 
-type rulesService struct {
+type service struct {
 	created    chan types.Rule
 	deleted    chan int
 	repository RulesRepository
 }
 
-var instance types.RulesService
+var instance *service
 
 var knownSimpleTypes = []string{"string", "int", "float64", "bool"}
 
-func NewService(r RulesRepository) types.RulesService {
-	return rulesService{
+func NewService(r RulesRepository) *service {
+	return &service{
 		created:    make(chan types.Rule),
 		deleted:    make(chan int),
 		repository: r,
 	}
 }
 
-func ServiceSingleton(r RulesRepository) types.RulesService {
+func ServiceSingleton(r RulesRepository) *service {
 	if instance == nil {
 		instance = NewService(r)
 	}
 	return instance
 }
 
-func (s rulesService) OnCreated() <-chan types.Rule {
+func (s service) OnCreated() <-chan types.Rule {
 	return s.created
 }
 
-func (s rulesService) OnDeleted() <-chan int {
+func (s service) OnDeleted() <-chan int {
 	return s.deleted
 }
 
-func (s rulesService) Create(rule types.Rule) (newRuleId int64, err error) {
+func (s service) Create(rule types.Rule) (newRuleId int64, err error) {
 	seq := &atomic.Int32{}
 	dbRule, dbConditions, dbActions, dbArguments, dbMappings := ToDb(
 		rule,
@@ -66,7 +68,7 @@ func (s rulesService) Create(rule types.Rule) (newRuleId int64, err error) {
 	return
 }
 
-func (s rulesService) Delete(ruleId int) (err error) {
+func (s service) Delete(ruleId int) (err error) {
 	err = s.repository.Delete(int32(ruleId))
 	if err == nil {
 		s.deleted <- ruleId
@@ -74,7 +76,7 @@ func (s rulesService) Delete(ruleId int) (err error) {
 	return
 }
 
-func (s rulesService) GetOne(ruleId int) (res types.Rule, err error) {
+func (s service) GetOne(ruleId int) (res types.Rule, err error) {
 	rules,
 		conditions,
 		ruleActions,
@@ -99,7 +101,7 @@ func (s rulesService) GetOne(ruleId int) (res types.Rule, err error) {
 	return
 }
 
-func (s rulesService) Get() ([]types.Rule, error) {
+func (s service) Get() ([]types.Rule, error) {
 	rules,
 		conditions,
 		ruleActions,
@@ -109,6 +111,12 @@ func (s rulesService) Get() ([]types.Rule, error) {
 	if err != nil {
 		return nil, err
 	}
+	// slog.Debug("REPO FETCH DONE", "len", len(rules))
+
+	defer func(t *prometheus.Timer) {
+		t.ObserveDuration()
+	}(prometheus.NewTimer(counters.BuildRules))
+
 	return Build(
 		rules,
 		conditions,

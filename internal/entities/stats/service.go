@@ -4,13 +4,13 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
-var _ types.StatsService = (*statsService)(nil)
+var _ types.StatsService = (*service)(nil)
 
-type statsService struct {
+type service struct {
 	repository StatsRepository
 }
 
-func (s statsService) Get() (res types.TableStats, err error) {
+func (s service) Get() (res types.TableStats, err error) {
 	res, err = s.repository.Get()
 	if err != nil {
 		return
@@ -18,8 +18,8 @@ func (s statsService) Get() (res types.TableStats, err error) {
 	return
 }
 
-func NewService(r StatsRepository) types.StatsService {
-	return statsService{
+func NewService(r StatsRepository) service {
+	return service{
 		repository: r,
 	}
 }
