@@ -1,10 +1,10 @@
 ### Prio 0
-node
 
 ### Prio 1
 none
 
 ### Bugs
+- bug: find the reason of rebuilding mhz19-frontend along with rebuild of mhz19-go
 - bug: some sql alterations from migrations cannot be undone by rollback https://stackoverflow.com/questions/4692690/is-it-possible-to-roll-back-create-table-and-alter-table-statements-in-major-sql/56738277
 - bug: execute db migrations also from within docker container, otherwize we depend on sqlite3 binary installed on the host system, more specifically problem is macmini has version 3.31.1, while mbp 3.39.5. as a result a new feature "DROP COLUMN" is not working on macmini (introduced in sqlite 3.35, also see https://github.com/mattn/go-sqlite3/issues/927)
 - bug: wrong id (appeared id from messages table instead while was expected from devices) "Msg=25 Rule=1 Action=1 UpsertZigbeeDevices Created id=72852" - apparently this is https://github.com/mattn/go-sqlite3/issues/30, however my case is quite complex to reproduce: UpsertZigbeeDevices performs bulk UPSERT in transaction 1; RecordMessage performs bulk UPSERT into devices and messages in transaction 2
@@ -14,6 +14,7 @@ none
 ### Digs
 - dig: check why "api:getAll took 3.451973917s" when reading 1k rules 1k times; try same scenario with postgres; check there is no room for optimisation here
 - dig: check why HandleMessage gives 1500 nanoseconds in benchmark, while prometheus measure is x1000 = 1.5-3milliseconds
+- dig: read more about makefile PHONY https://vsupalov.com/makefile-phony/
   
 ### Features
 - feat: think how to init SqliteMaxTxDuration in unit tests, now app.InitConfig is not called in UTs
@@ -64,26 +65,25 @@ none
 - try: postgres instead of sqlite3
 - try: mongodb instead of sqlite3
 - try: chatgpt or copilot to review code https://www.reddit.com/r/vscode/comments/14upva0/how_to_use_chatgptcopilot_for_code_review/
-- try: https://github.com/mheffner/go-simple-metrics, https://github.com/hashicorp/go-metrics or release own
+- (?) try: https://github.com/mheffner/go-simple-metrics, https://github.com/hashicorp/go-metrics or release own
 - try: wrk utility (analog of ab, hey, oha) https://github.com/wg/wrk
 - try: yandex-tank https://github.com/yandex/yandex-tank
-- try: read more about makefile PHONY https://vsupalov.com/makefile-phony/
 - try: once.Do instead of "singleton" pattern - https://blog.matthiasbruns.com/golang-singleton-pattern
 - try: errors library https://github.com/ansel1/merry
 - try: to fix https://github.com/fedulovivan/effective-waffle/issues/9
-- try: https://github.com/vektra/mockery https://www.youtube.com/watch?v=eYHCCht8eX4
+- try: mockery https://github.com/vektra/mockery https://www.youtube.com/watch?v=eYHCCht8eX4
 - try: go generate
-- try: Fast disk usage analyzer https://github.com/dundee/gdu
 - try: create load test for mqtt channel with `mosquitto_pub`
 - try: https://github.com/proullon/ramsql (from https://youtu.be/UfeZ-bPFs10?si=3FZTWpvjNvqh3X24&t=217)
 - try: to switch from docker to kubernetes
 - try: to learn how GOMAXPROC and docker --proc are related
-- try: create client for miio devices udp port 54321 (yeelight smart ceiling light, robot vacuum), for now stuck with token fetching issue. links: https://github.com/aholstenson/miio, https://github.com/OpenMiHome/mihome-binary-protocol, https://github.com/maxinminax/node-mihome, https://github.com/nickw444/miio-go, https://github.com/marcelrv/XiaomiRobotVacuumProtocol, https://github.com/vkorn/go-miio, https://www.youtube.com/watch?v=m11qbkgOz5o
+- try: to create client for miio devices udp port 54321 (yeelight smart ceiling light, robot vacuum), for now stuck with token fetching issue. links: https://github.com/aholstenson/miio, https://github.com/OpenMiHome/mihome-binary-protocol, https://github.com/maxinminax/node-mihome, https://github.com/nickw444/miio-go, https://github.com/marcelrv/XiaomiRobotVacuumProtocol, https://github.com/vkorn/go-miio, https://www.youtube.com/watch?v=m11qbkgOz5o
 
 ### Milestones
 
 - (+) 26 sep 2024, DONE. Initial launch - All features from mhz19-next plus storing mapping rules in database
 - Implement simple frontend
+- Prepare for the public usage (real use cases)
 - Interactive zigbee device join (pairing/interview/adding/joining) - End-to-end scenario with new device device join, confuguring rules, with no app retart - https://www.zigbee2mqtt.io/guide/usage/mqtt_topics_and_messages.html#zigbee2mqtt-bridge-event
 - device_id + device_class adressing issue
     - "FOREIGN KEY (device_id) REFERENCES devices(native_id)" requires sole UNIQUE index for column devices.native_id, while we actually need UNIQUE(device_class_id, native_id) since its unreasonable to constraint native_id across devices off all classes
@@ -94,7 +94,8 @@ none
 
 ### Completed
 
-- (+) dig: check why docker build always takes 203s on macmini, even after no changes in go files (Building 202.9s (17/17) FINISHED); RCA is rebuilding from scratch every time, without involing go build cache 
+- (+) try: fast disk usage analyzer https://github.com/dundee/gdu
+- (+) dig: check why docker build always takes 203s on macmini, even after no changes in go files (Building 202.9s (17/17) FINISHED); RCA is rebuilding from scratch every time, without involing go build cache; reading: https://dev.to/jacktt/20x-faster-golang-docker-builds-289n; https://docs.docker.com/build/cache/optimize/
 - (+) feat: configure builds with compose, now we have to build all images manually with separate tasks (mhz19-go, device-pinger, mhz19-front)
 - (+) separate folder for sqlite files
 - (+) bug: "apr_socket_recv: Operation timed out (60)" - https://stackoverflow.com/questions/30352725/why-is-my-hello-world-go-server-getting-crushed-by-apachebench; RCA this is in ab and macos limitations, no need to handle in app

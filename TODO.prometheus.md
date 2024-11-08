@@ -39,8 +39,7 @@ rpi
 `@reboot /usr/local/bin/node_exporter &`
 
 ### TODO
-  - try: https://prometheus.io/docs/guides/node-exporter/ for macmini host
-    - https://krsnachalise.medium.com/installing-node-exporter-in-linux-machines-d85e81d8808d
+  - (+) try: https://prometheus.io/docs/guides/node-exporter/ for macmini host; https://krsnachalise.medium.com/installing-node-exporter-in-linux-machines-d85e81d8808d
 
 ### Prometheus API
 - http://localhost:9092/api/v1/labels

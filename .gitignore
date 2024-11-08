@@ -8,4 +8,4 @@ log.txt
 *.prof
 *.test
 heap.out
-zigbee2mqtt-data/
+zigbee2mqtt/
