@@ -10,8 +10,8 @@ import (
 
 type TagName string
 
-var nsSequences = make(map[string]*atomic.Int32)
-var secsMu = new(sync.Mutex)
+var seqs = make(map[string]*atomic.Int32, 10)
+var seqslock sync.Mutex
 
 type Tag interface {
 	With(string, ...any) Tag
@@ -51,17 +51,17 @@ func (t *tag) With(format string, a ...any) Tag {
 
 // extend "tags chain" with tid
 func (t *tag) WithTid(ns string) Tag {
-	secsMu.Lock()
-	if _, exist := nsSequences[ns]; !exist {
-		nsSequences[ns] = &atomic.Int32{}
+	seqslock.Lock()
+	defer seqslock.Unlock()
+	if _, exist := seqs[ns]; !exist {
+		seqs[ns] = &atomic.Int32{}
 	}
-	secsMu.Unlock()
 	res := &tag{}
 	res.WriteString(t.String())
 	res.WriteString(ns)
 	res.WriteRune(HASH)
 	res.WriteString(strconv.FormatInt(
-		int64(nsSequences[ns].Add(1)),
+		int64(seqs[ns].Add(1)),
 		10,
 	))
 	res.WriteRune(SPACE)

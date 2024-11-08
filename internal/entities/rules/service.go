@@ -12,7 +12,6 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/db"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/samber/lo"
 )
 
 type service struct {
@@ -111,12 +110,6 @@ func (s service) Get() ([]types.Rule, error) {
 	if err != nil {
 		return nil, err
 	}
-	// slog.Debug("REPO FETCH DONE", "len", len(rules))
-
-	defer func(t *prometheus.Timer) {
-		t.ObserveDuration()
-	}(prometheus.NewTimer(counters.BuildRules))
-
 	return Build(
 		rules,
 		conditions,
@@ -126,7 +119,7 @@ func (s service) Get() ([]types.Rule, error) {
 	), nil
 }
 
-// takes flat db representation of buils hierarchic [types.Rule]
+// takes flat db representation and build hierarchic structure of types.Rule
 // (opposite to ToDb)
 func Build(
 	allRules []DbRule,
@@ -135,14 +128,54 @@ func Build(
 	allArgs []DbRuleConditionOrActionArgument,
 	allMappings []DbRuleActionArgumentMapping,
 ) (result []types.Rule) {
-	for _, r := range allRules {
-		rootCond, rootCondFound := lo.Find(allConditions, func(c DbRuleCondition) bool {
-			return c.RuleId == r.Id && !c.ParentConditionId.Valid
-		})
-		cond := types.Condition{}
-		if rootCondFound {
-			cond = BuildCondition(rootCond.Id, allConditions, allArgs)
+
+	defer func(t *prometheus.Timer) {
+		t.ObserveDuration()
+	}(prometheus.NewTimer(counters.BuildRules))
+
+	actionsByRuleId := make(map[int32][]DbRuleAction, len(allRules))
+	for _, action := range allRuleActions {
+		actionsByRuleId[action.RuleId] = append(actionsByRuleId[action.RuleId], action)
+	}
+
+	argsByActionId := make(map[int32][]DbRuleConditionOrActionArgument, len(allRuleActions))
+	argsByConditionId := make(map[int32][]DbRuleConditionOrActionArgument /* , len() */)
+	for _, arg := range allArgs {
+		if arg.ActionId.Valid {
+			argsByActionId[arg.ActionId.Int32] = append(argsByActionId[arg.ActionId.Int32], arg)
 		}
+		if arg.ConditionId.Valid {
+			argsByConditionId[arg.ConditionId.Int32] = append(argsByConditionId[arg.ConditionId.Int32], arg)
+		}
+	}
+
+	mappingsByArgumentId := make(map[int32][]DbRuleActionArgumentMapping)
+	for _, mapping := range allMappings {
+		mappingsByArgumentId[mapping.ArgumentId] = append(mappingsByArgumentId[mapping.ArgumentId], mapping)
+	}
+
+	conditionsByRuleAndParent := make(map[int32](map[int32][]DbRuleCondition))
+	for _, condition := range allConditions {
+		if _, exist := conditionsByRuleAndParent[condition.RuleId]; !exist {
+			conditionsByRuleAndParent[condition.RuleId] = map[int32][]DbRuleCondition{}
+		}
+		parent := int32(-1)
+		if condition.ParentConditionId.Valid {
+			parent = condition.ParentConditionId.Int32
+		}
+		conditionsByRuleAndParent[condition.RuleId][parent] = append(conditionsByRuleAndParent[condition.RuleId][parent], condition)
+	}
+
+	for _, r := range allRules {
+
+		сonditionsByParent := conditionsByRuleAndParent[r.Id]
+
+		if len(сonditionsByParent[-1]) != 1 {
+			panic("unexpected conditions")
+		}
+
+		rootCond := сonditionsByParent[-1][0]
+
 		var throttle types.Throttle
 		if r.ThrottleMs.Valid {
 			throttle = types.Throttle{
@@ -150,12 +183,21 @@ func Build(
 			}
 		}
 		rule := types.Rule{
-			Id:        int(r.Id),
-			Name:      r.Name,
-			Disabled:  r.IsDisabled.Int32 == 1,
-			Condition: cond,
-			Throttle:  throttle,
-			Actions:   BuildActions(r.Id, allRuleActions, allArgs, allMappings),
+			Id:       int(r.Id),
+			Name:     r.Name,
+			Disabled: r.IsDisabled.Int32 == 1,
+			Throttle: throttle,
+			Condition: BuildCondition(
+				rootCond,
+				сonditionsByParent,
+				argsByConditionId,
+			),
+			Actions: BuildActions(
+				r.Id,
+				actionsByRuleId,
+				argsByActionId,
+				mappingsByArgumentId,
+			),
 		}
 		result = append(result, rule)
 	}
@@ -163,25 +205,15 @@ func Build(
 }
 
 func BuildCondition(
-	rootConditionId int32,
-	conditions []DbRuleCondition,
-	allArgs []DbRuleConditionOrActionArgument,
+	root DbRuleCondition,
+	сonditionsByParent map[int32][]DbRuleCondition,
+	argsByConditionId map[int32][]DbRuleConditionOrActionArgument,
 ) (cond types.Condition) {
-	if len(conditions) == 0 {
-		return
-	}
-	root, rootFound := lo.Find(conditions, func(c DbRuleCondition) bool {
-		return c.Id == rootConditionId
-	})
-	if !rootFound {
-		return
-	}
+
 	isFn := root.FunctionType.Valid
 	if isFn {
 		// build function node
-		args := lo.Filter(allArgs, func(arg DbRuleConditionOrActionArgument, i int) bool {
-			return arg.ConditionId.Valid && arg.ConditionId.Int32 == root.Id
-		})
+		args := argsByConditionId[root.Id]
 		cond = types.Condition{
 			Id:   int(root.Id),
 			Fn:   types.CondFn(root.FunctionType.Int32),
@@ -194,11 +226,10 @@ func BuildCondition(
 	} else {
 		// recursively build nested nodes
 		nested := []types.Condition{}
-		children := lo.Filter(conditions, func(c DbRuleCondition, i int) bool {
-			return c.ParentConditionId.Valid && c.ParentConditionId.Int32 == rootConditionId
-		})
+		children := сonditionsByParent[root.Id]
+
 		for _, child := range children {
-			nested = append(nested, BuildCondition(child.Id, conditions, allArgs))
+			nested = append(nested, BuildCondition(child, сonditionsByParent, argsByConditionId))
 		}
 		cond = types.Condition{
 			Id:     int(root.Id),
@@ -211,48 +242,38 @@ func BuildCondition(
 
 func BuildActions(
 	ruleId int32,
-	allRuleActions []DbRuleAction,
-	allArgs []DbRuleConditionOrActionArgument,
-	allMappings []DbRuleActionArgumentMapping,
+	actionsByRuleId map[int32][]DbRuleAction,
+	argsByActionId map[int32][]DbRuleConditionOrActionArgument,
+	mappingsByArgumentId map[int32][]DbRuleActionArgumentMapping,
 ) (result []types.Action) {
-	actions := lo.Filter(allRuleActions, func(a DbRuleAction, i int) bool {
-		return a.RuleId == ruleId
-	})
-	for _, a := range actions {
-		args := lo.Filter(allArgs, func(arg DbRuleConditionOrActionArgument, i int) bool {
-			return arg.ActionId.Valid && arg.ActionId.Int32 == a.Id
-		})
-		mappings := lo.Filter(allMappings, func(mapping DbRuleActionArgumentMapping, i int) bool {
-			return lo.SomeBy(args, func(arg DbRuleConditionOrActionArgument) bool {
-				return arg.Id == mapping.ArgumentId
-			})
-		})
+	actions := actionsByRuleId[ruleId]
+	for _, action := range actions {
+		actionArgs := argsByActionId[action.Id]
 		result = append(result, types.Action{
-			Id:      int(a.Id),
-			Fn:      types.ActionFn(a.FunctionType.Int32),
-			Args:    BuildArguments(args),
-			Mapping: BuildMappings(mappings, args),
+			Id:      int(action.Id),
+			Fn:      types.ActionFn(action.FunctionType.Int32),
+			Args:    BuildArguments(actionArgs),
+			Mapping: BuildMappings(actionArgs, mappingsByArgumentId),
 		})
 	}
 	return
 }
 
 func BuildMappings(
-	mappings []DbRuleActionArgumentMapping,
-	args []DbRuleConditionOrActionArgument,
-) (result types.Mapping) {
-	result = types.Mapping{}
-	for _, mapping := range mappings {
-		arg, _ := lo.Find(args, func(arg DbRuleConditionOrActionArgument) bool {
-			return arg.Id == mapping.ArgumentId
-		})
-		_, exist := result[arg.ArgumentName]
-		if !exist {
-			result[arg.ArgumentName] = make(map[string]string)
+	actionArgs []DbRuleConditionOrActionArgument,
+	mappingsByArgumentId map[int32][]DbRuleActionArgumentMapping,
+) types.Mapping {
+	result := make(types.Mapping)
+	for _, arg := range actionArgs {
+		mappings := mappingsByArgumentId[arg.Id]
+		if len(mappings) > 0 {
+			result[arg.ArgumentName] = make(map[string]string, len(mappings))
+			for _, mapping := range mappings {
+				result[arg.ArgumentName][mapping.Key] = mapping.Value
+			}
 		}
-		result[arg.ArgumentName][mapping.Key] = mapping.Value
 	}
-	return
+	return result
 }
 
 func BuildArguments(args []DbRuleConditionOrActionArgument) (result types.Args) {
@@ -475,5 +496,3 @@ func ToDbArguments(
 	}
 	return
 }
-
-//

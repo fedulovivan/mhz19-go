@@ -251,6 +251,29 @@ func (s *ServiceSuite) Test12() {
 	// fmt.Println(string(data))
 }
 
+// func Benchmark10(b *testing.B) {
+// 	for k := 0; k < b.N; k++ {
+// 		row := testDataTable[1]
+// 		Build(
+// 			row.rules,
+// 			row.conditions,
+// 			row.ruleActions,
+// 			row.ruleConditionOrActionArguments,
+// 			row.ruleActionArgumentMappings,
+// 		)
+// 	}
+// }
+
+// func Benchmark20(b *testing.B) {
+// 	repo := NewRepository(
+// 		db.DbSingleton(),
+// 	)
+// 	s := NewService(repo)
+// 	for k := 0; k < b.N; k++ {
+// 		_, _ = s.Get()
+// 	}
+// }
+
 func (s *ServiceSuite) Test20() {
 	s.PanicsWithValue("unexpected conditions", func() {
 		BuildArguments([]DbRuleConditionOrActionArgument{
@@ -349,19 +372,19 @@ func (s *ServiceSuite) Test29() {
 	s.Equal(types.CHANNEL_DNS_SD, actual["Bar7"])
 }
 
-func (s *ServiceSuite) Test30() {
-	res := BuildCondition(0, []DbRuleCondition{}, []DbRuleConditionOrActionArgument{})
-	s.Zero(res)
-}
+// func (s *ServiceSuite) Test30() {
+// 	res := BuildCondition(0, []DbRuleCondition{}, []DbRuleConditionOrActionArgument{})
+// 	s.Zero(res)
+// }
 
-func (s *ServiceSuite) Test40() {
-	res := BuildCondition(
-		1,
-		[]DbRuleCondition{{}},
-		[]DbRuleConditionOrActionArgument{},
-	)
-	s.Zero(res)
-}
+// func (s *ServiceSuite) Test40() {
+// 	res := BuildCondition(
+// 		1,
+// 		[]DbRuleCondition{{}},
+// 		[]DbRuleConditionOrActionArgument{},
+// 	)
+// 	s.Zero(res)
+// }
 
 func (s *ServiceSuite) Test50() {
 	ToDbConditions(1, nil, types.Condition{}, nil, nil)

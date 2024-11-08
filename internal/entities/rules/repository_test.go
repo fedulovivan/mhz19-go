@@ -61,8 +61,8 @@ func (s *RepoSuite) Test21() {
 	mock.ExpectQuery(`rule_condition_or_action_arguments`).WillReturnRows(sqlmock.NewRows([]string{}))
 	mock.ExpectQuery(`rule_action_argument_mappings`).WillReturnRows(sqlmock.NewRows([]string{}))
 	mock.ExpectCommit()
-	r := NewRepository(mdatabase)
-	_, _, _, _, _, err = r.Get(db.NewNullInt32(123))
+	repo := NewRepository(mdatabase)
+	_, _, _, _, _, err = repo.Get(db.NewNullInt32(123))
 	s.Nil(err)
 }
 

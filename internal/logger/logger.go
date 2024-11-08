@@ -29,7 +29,6 @@ const (
 	MOD_MAIN     string = "main"
 	MOD_ENGINE   string = "engine"
 	MOD_DB       string = "db"
-	MOD_REST     string = "rest"
 	MOD_ACTIONS  string = "actions"
 	MOD_CONDS    string = "conds"
 	MOD_ARGS     string = "args"
@@ -43,6 +42,9 @@ const (
 	MOD_DNSSD    string = "p_dnssd"
 	MOD_MQTT     string = "p_mqtt"
 	MOD_BURIED   string = "p_buried"
+
+	MOD_REST       string = "rest"
+	MOD_REST_EPIPE string = "rest_epipe"
 )
 
 const (

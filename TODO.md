@@ -1,10 +1,8 @@
 ### Prio 0
-- bug: "http: superfluous response.WriteHeader call from github.com/go-ozzo/ozzo-routing/v2.(*Router).handleError (router.go:131)" - appears after interruption of progressing in apache bench - need to ensure this is normal, and not an application-level issue
-- bug: "apr_socket_recv: Operation timed out (60)" - https://stackoverflow.com/questions/30352725/why-is-my-hello-world-go-server-getting-crushed-by-apachebench, try to find protection
-- bug: no abortion of "Fetching rules is still running" on Ctrl+C
-- bug: rules service Build takes crazy much time to transform db records into to the rules representation
+none
 
 ### Prio 1
+- feat: think how to init SqliteMaxTxDuration in unit tests, now app.InitConfig is not called in UTs
 - feat: collect metrics for "messages by device id"
 - feat: freeze images version for 3pp docker deps (zigbee2mqtt 1.36.1 commit: ffc2ff1, mosquitto etc)
 - feat: switch to docker-compose in `make update`
@@ -18,6 +16,7 @@
 - feat: configure builds with compose, now we have to build all images manually with separate tasks (mhz19-go, device-pinger, mhz19-front)
 
 ### Bugs
+- bug: some sql alterations from migrations cannot be undone by rollback https://stackoverflow.com/questions/4692690/is-it-possible-to-roll-back-create-table-and-alter-table-statements-in-major-sql/56738277
 - bug: execute db migrations also from within docker container, otherwize we depend on sqlite3 binary installed on the host system, more specifically problem is macmini has version 3.31.1, while mbp 3.39.5. as a result a new feature "DROP COLUMN" is not working on macmini (introduced in sqlite 3.35, also see https://github.com/mattn/go-sqlite3/issues/927)
 - bug: wrong id (appeared id from messages table instead while was expected from devices) "Msg=25 Rule=1 Action=1 UpsertZigbeeDevices Created id=72852" - apparently this is https://github.com/mattn/go-sqlite3/issues/30, however my case is quite complex to reproduce: UpsertZigbeeDevices performs bulk UPSERT in transaction 1; RecordMessage performs bulk UPSERT into devices and messages in transaction 2
 - bug: find the reason of no sound on macmini
@@ -97,6 +96,12 @@
 
 ### Completed
 
+- (+) bug: "apr_socket_recv: Operation timed out (60)" - https://stackoverflow.com/questions/30352725/why-is-my-hello-world-go-server-getting-crushed-by-apachebench; RCA this is in ab and macos limitations, no need to handle in app
+- (+) bug: "http: superfluous response.WriteHeader call from github.com/go-ozzo/ozzo-routing/v2.(*Context).WriteWithStatus (context.go:178)" appears after interruption of progressing load test; need to ensure this is expected and not an application-level issue; reprodution is invoking `wget http://localhost:7070/api/rules` and immediate `Ctrl+C` when db contains 20k rules; RCA: first we start to write response normally with 200 code, meaning WriteHeader is already called, then after client disconnect an error "write: broken pipe" is raised and handled by errorHandler which calls WriteHeader again on attenmpt to "push" a json with error details and 500 code. Additinal read for "broken **pipe**" https://stackoverflow.com/questions/43189375/why-is-golang-http-server-failing-with-broken-pipe-when-response-exceeds-8kb, https://medium.com/trendyol-tech/golang-what-is-broken-pipe-error-tcp-http-connections-and-pools-3988b79f28e5
+- (+) bug: race: /Users/ivanf/Desktop/race000 - appeared after recent moving reading map out of critical section in WithTag
+- (+) bug: no abortion of "Fetching rules is still running" on Ctrl+C - code was synchronously blocked by long running rules_service.Build
+- (+) bug: rules_service.Build takes crazy amount of time to transform db records into to the rules representation - O(n^5) complexity caused by lots of repeating inner samber/lo calls, refactorred to advance indexing utilized objects. processing time reduced from 300s to 0.1s
+- (+) bug: get rid of github.com/samber/lo
 - (+) bug: add logging of the key, at the place where message was initially queued: "Rule=4 message queue is flushed now key=zigbee-device-0x00158d00067cb0c9-Rule4 mm=3"
 - (+) ensure we accept interfaces and return concrete types (structs)
 - (+) feat: include draft mhz19-front to the main compose stack

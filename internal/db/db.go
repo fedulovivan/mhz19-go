@@ -308,6 +308,14 @@ func RunTx(db *sql.DB, fn func(ctx CtxEnhanced) error) error {
 		defer utils.TimeTrack(tag.F, time.Now(), "Transaction")
 	}
 
+	ctxTimeout, cancel := context.WithTimeout(
+		context.Background(),
+		time.Second*60,
+		// check TODO
+		// app.Config.SqliteMaxTxDuration,
+	)
+	defer cancel()
+
 	tx, err := db.Begin()
 	if app.Config.DbDebug {
 		slog.Debug(tag.F("Transaction started"))
@@ -315,8 +323,6 @@ func RunTx(db *sql.DB, fn func(ctx CtxEnhanced) error) error {
 	if err != nil {
 		return err
 	}
-	ctxTimeout, cancel := context.WithTimeout(context.Background(), time.Second*60)
-	defer cancel()
 	var ctx CtxEnhanced = context.WithValue(
 		ctxTimeout,
 		ctxkey{}, ctxval{
@@ -332,64 +338,3 @@ func RunTx(db *sql.DB, fn func(ctx CtxEnhanced) error) error {
 	err = tx.Commit()
 	return err
 }
-
-// if app.Config.DbDebug {
-// defer func(start time.Time) {
-// 	elapsed := utils.TimeTrack(tag.F, start, "Transaction")
-// 	counters.Time(elapsed, counters.QUERIES)
-// }(time.Now())
-// }
-// tx := ctx.Value(key_tx{}).(*sql.Tx)
-// tag := ctx.Value(key_tag{}).(utils.Tag).AddTid("Select")
-// counters.Inc(counters.QUERIES)
-// if app.Config.DbDebug {
-// defer func(start time.Time) {
-// 	counters.Time(time.Since(start), counters.QUERIES)
-// }(time.Now())
-// }
-// var ctx CtxEnhanced
-// ctx = context.WithValue(
-// 	context.Background(),
-// 	key_tx{}, tx,
-// )
-// ctx = context.WithValue(
-// 	ctx,
-// 	key_tag{}, tag,
-// )
-// counters.Inc(counters.QUERIES)
-// func WithTx(db *sql.DB, fn func(tx *sql.Tx) error) error {
-//     txn, err := db.Begin()
-//     if err != nil {
-//         return err
-//     }
-//     err = fn(txn)
-//     if err != nil {
-//         err2 := txn.Rollback()
-//         return errors.Join(err, err2)
-//     }
-//     return txn.Commit()
-// }
-// WithTx(db, func(tx *sql.Tx) error {
-//     var id int
-//     err := txn.QueryRow("SELECT id FROM record WHERE status = 'PENDING'").Scan(&id)
-//     if err != nil {
-// 	return err
-//     }
-//     _, err = txn.Exec("UPDATE record SET status = 'PROCESSING' WHERE id = $1", id)
-//     if err != nil {
-// 	return err
-//     }
-//     err := processRecord(id)
-//     if err != nil {
-// 	return err
-//     }
-//     _, err = txn.Exec("UPDATE record SET status = 'COMPLETED' WHERE id = $1", id)
-//     if err != nil {
-// 	return err
-//     }
-//     return nil
-// })
-// if app.Config.DbDebug {
-// 	tag := ctx.Value(Ctxkey_tag{}).(utils.Tag)
-// 	slog.Error(tag.F("Rollback"))
-// }

@@ -43,11 +43,6 @@ type DbRuleCondition struct {
 	Not               sql.NullInt32
 	ParentConditionId sql.NullInt32
 	OtherDeviceId     sql.NullString
-	// FunctionType      *int32
-	// LogicOr           *int32
-	// Not               *int32
-	// ParentConditionId *int32
-	// OtherDeviceId     *string
 }
 
 type DbRuleAction struct {
@@ -446,33 +441,3 @@ func (r repo) Delete(ruleId int32) error {
 		return
 	})
 }
-
-// baseCtx := context.WithValue(
-// 	context.Background(),
-// 	db.Ctxkey_tag{},
-// 	db.BaseTag.WithTid("Tx"),
-// )
-// g, ctx := errgroup.WithContext(baseCtx)
-// tx, err := r.database.Begin()
-// defer db.Rollback(tx)
-// if err != nil {
-// 	return
-// }
-// g.Go(func() (e error) { rules, e = rulesSelectTx(ctx, tx, ruleId); return })
-// g.Go(func() (e error) { conditions, e = conditionsSelectTx(ctx, tx, ruleId); return })
-// g.Go(func() (e error) { ruleActions, e = ruleActionsSelectTx(ctx, tx, ruleId); return })
-// g.Go(func() (e error) { args, e = argsSelectTx(ctx, tx, ruleId); return })
-// g.Go(func() (e error) { mappings, e = mappingsSelectTx(ctx, tx, ruleId); return })
-// err = g.Wait()
-// if err == nil {
-// 	err = db.Commit(tx)
-// }
-
-// ctx := context.Background()
-// tx, err := r.database.Begin()
-// ctx = context.WithValue(ctx, db.Ctxkey_tx{}, tx)
-// ctx = context.WithValue(ctx, db.Ctxkey_tag{}, db.BaseTag.WithTid("Tx"))
-// defer db.Rollback(ctx)
-// if err != nil {
-// 	return
-// }

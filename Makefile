@@ -8,12 +8,6 @@ include Makefile.load.mk
 NAME ?= mhz19-go-backend
 GIT_REV ?= $(shell git rev-parse --short HEAD)
 DATE ?= $(shell date +%FT%T)
-REST_API_DOMAIN ?= 127.0.0.1
-# REST_API_DOMAIN ?= 192.168.88.188
-REST_API_URL ?= http://$(REST_API_DOMAIN):$(REST_API_PORT)$(REST_API_PATH)
-API_LOAD_COUNT ?= 10000
-API_LOAD_THREADS ?= 10
-API_RPS ?= 50
 OS_NAME := $(shell uname -s | tr A-Z a-z)
 
 default: lint test build
@@ -45,6 +39,7 @@ lint:
 migrate-reset: migrate-down migrate-up
 
 migrate-down:
+	export DB_REV=03 && make migrate-down-single
 	export DB_REV=02 && make migrate-down-single
 	export DB_REV=01 && make migrate-down-single
 	export DB_REV=00 && make migrate-down-single
@@ -53,6 +48,7 @@ migrate-up:
 	export DB_REV=00 && make migrate-up-single
 	export DB_REV=01 && make migrate-up-single
 	export DB_REV=02 && make migrate-up-single
+	export DB_REV=03 && make migrate-up-single
 
 migrate-up-single:
 	sqlite3 ./database.bin < ./sql/$(DB_REV)-up.sql
@@ -78,6 +74,7 @@ pprof-cpu:
 test-one:
 	go test ./internal/engine -run TestMappings -v
 
+# rm -f *.prof && go test ./internal/entities/rules -bench=^Benchmark20$$ -run=^$$ -benchmem -cpuprofile cpu.prof -memprofile=mem.prof
 # rm -f *.prof && go test ./internal/counters -bench=^Benchmark30$$ -run=^$$ -benchmem -cpuprofile cpu.prof -memprofile=mem.prof
 # CGO_ENABLED=1 go test -benchmem ./...
 # CGO_ENABLED=1 go test -cover -race -count 1 ./...

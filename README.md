@@ -1,6 +1,6 @@
 ### Project «mhz19-go»
 
-This project is backend for the home automation server, written on golang. Evolution of another myne project [mhz19-next](https://github.com/fedulovivan/mhz19-next) which was a typescript-based. 
+This project is a backend for the home automation server, written on Golang. Evolution of another myne project [mhz19-next](https://github.com/fedulovivan/mhz19-next) which was a typescript-based. 
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/fedulovivan/mhz19-go)](https://goreportcard.com/report/github.com/fedulovivan/mhz19-go)
 
@@ -8,8 +8,8 @@ This project is backend for the home automation server, written on golang. Evolu
 
 - Switch smart ceiling light on/off upon receiving message from smart wall switch
 - Automatically switch storage room light upon receiving message from movement sensor
-- Automatically switch storage room ventilation, when movement sensor reports a man presense and room door sensor reports it is closed
-- Play loud alert sound, notify owner via telegram and cut off home water supply upon receiving message from one of water leakage sensors
+- Automatically switch storage room ventilation, when movement sensor reports a human presense and room door sensor reports it is closed
+- Play alert sound, notify owner via telegram and cut off home water supply upon receiving message from one of water leakage sensors
 - Notify owner then some guarded door (equipped with smart sensor) was opened/closed and user is not at home
 
 See full list of configured rules: [user rules](https://github.com/fedulovivan/mhz19-go/tree/main/assets/rules/user) and [system rules](https://github.com/fedulovivan/mhz19-go/tree/main/assets/rules/system)

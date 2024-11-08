@@ -154,11 +154,20 @@ func (p *provider) Init() {
 
 	// attach logger
 	if app.Config.MqttDebug {
+		prefix := string(logger.MQTT) + " "
 		sloghandler := slog.Default().Handler()
-		MqttLib.ERROR = slog.NewLogLogger(sloghandler, slog.LevelError)
-		MqttLib.CRITICAL = slog.NewLogLogger(sloghandler, slog.LevelError)
-		MqttLib.WARN = slog.NewLogLogger(sloghandler, slog.LevelWarn)
-		MqttLib.DEBUG = slog.NewLogLogger(sloghandler, slog.LevelDebug)
+		lerror := slog.NewLogLogger(sloghandler, slog.LevelError)
+		lcritical := slog.NewLogLogger(sloghandler, slog.LevelError)
+		lwarn := slog.NewLogLogger(sloghandler, slog.LevelWarn)
+		ldebug := slog.NewLogLogger(sloghandler, slog.LevelDebug)
+		lerror.SetPrefix(prefix)
+		lcritical.SetPrefix(prefix)
+		lwarn.SetPrefix(prefix)
+		ldebug.SetPrefix(prefix)
+		MqttLib.ERROR = lerror
+		MqttLib.CRITICAL = lcritical
+		MqttLib.WARN = lwarn
+		MqttLib.DEBUG = ldebug
 	}
 
 	// create client

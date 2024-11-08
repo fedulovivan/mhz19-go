@@ -2,6 +2,9 @@ package rest
 
 import (
 	"context"
+	"errors"
+	"log"
+	"syscall"
 
 	"fmt"
 	"log/slog"
@@ -33,7 +36,6 @@ var tag = utils.NewTag(logger.REST)
 
 var server http.Server
 
-// borrowed with simplifications from qiangxue/go-rest-api
 // see original at https://github.com/qiangxue/go-rest-api/blob/master/internal/errors/middleware.go
 func errorHandler(c *routing.Context) (err error) {
 	defer func() {
@@ -45,9 +47,16 @@ func errorHandler(c *routing.Context) (err error) {
 			slog.Error(tag.F("recovered from panic"))
 			fmt.Println(string(debug.Stack()))
 		}
-		if err != nil {
-			slog.Error(tag.F("errorHandler:"), "method", c.Request.Method, "path", c.Request.URL.Path, "err", err.Error())
-			counters.Inc(counters.ERRORS_ALL)
+		if err == nil {
+			return
+		}
+		epipe := errors.Is(err, syscall.EPIPE)
+		slog.Error(tag.F("errorHandler:"), "method", c.Request.Method, "path", c.Request.URL.Path, "err", err.Error())
+		counters.Inc(counters.ERRORS_ALL)
+		if epipe {
+			counters.Errors.WithLabelValues(logger.MOD_REST_EPIPE).Inc()
+			slog.Warn(tag.F("Look like client is abruptly disconnected, not gonna try writing json response after receiving broken pipe error..."))
+		} else {
 			counters.Errors.WithLabelValues(logger.MOD_REST).Inc()
 			res := map[string]any{
 				"is_error": true,
@@ -56,9 +65,9 @@ func errorHandler(c *routing.Context) (err error) {
 			if err = c.WriteWithStatus(res, http.StatusInternalServerError); err != nil {
 				slog.Error(tag.F("failed writing error response"), "err", err)
 			}
-			c.Abort()
-			err = nil
 		}
+		c.Abort()
+		err = nil
 	}()
 	return c.Next()
 }
@@ -179,10 +188,20 @@ func Init(shimProvider types.ChannelProvider) {
 	go func() {
 		addr := fmt.Sprintf(":%v", app.Config.RestApiPort)
 		slog.Debug(tag.F("Server is running at " + addr))
-		server = http.Server{Addr: addr}
+		server = http.Server{
+			Addr:     addr,
+			ErrorLog: getErrorLogger(),
+		}
 		err := server.ListenAndServe()
 		slog.Debug(tag.F(err.Error()))
 	}()
+}
+
+func getErrorLogger() *log.Logger {
+	h := slog.Default().Handler()
+	l := slog.NewLogLogger(h, slog.LevelError)
+	l.SetPrefix(string(logger.REST) + " ")
+	return l
 }
 
 func Stop() {

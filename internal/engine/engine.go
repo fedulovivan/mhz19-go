@@ -17,7 +17,6 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/message_queue"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 	"github.com/fedulovivan/mhz19-go/pkg/utils"
-	"github.com/samber/lo"
 )
 
 var queuesContainer = message_queue.NewContainer()
@@ -43,9 +42,10 @@ func NewEngine() *engine {
 
 func (e *engine) SetProviders(providers ...types.ChannelProvider) {
 	e.providers = providers
-	providerNames := lo.Map(providers, func(p types.ChannelProvider, index int) string {
-		return fmt.Sprintf("%T", p)
-	})
+	providerNames := make([]string, len(providers))
+	for i, p := range providers {
+		providerNames[i] = fmt.Sprintf("%T", p)
+	}
 	slog.Debug(BaseTag.F(
 		"%d provider(s) were set: %s",
 		len(providers),

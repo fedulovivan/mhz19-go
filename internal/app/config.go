@@ -27,6 +27,7 @@ type ConfigStorage struct {
 
 	SqliteFilename    string `env:"SQLITE_FILENAME,default=database.bin"`
 	SqliteBusyTimeout int    `env:"SQLITE_BUSY_TIMEOUT,default=5000"`
+	// SqliteMaxTxDuration time.Duration `env:"SQLITE_MAX_TX_DURATION,default=60s"`
 
 	// telegram
 	TelegramDebug         bool     `env:"TELEGRAM_DEBUG,default=false"`
