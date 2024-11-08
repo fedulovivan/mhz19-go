@@ -93,3 +93,4 @@ update:
 # https://stackoverflow.com/questions/978142/how-to-benchmark-apache-with-delays
 # oha --method PUT -H 'Content-Type: application/json' -D ./assets/load/create-rule.json $(REST_API_URL)/rules
 # watch -n 0.5 
+# RUN GORACE="halt_on_error=1" CGO_ENABLED=1 GOOS=linux go build -race -o /build/backend ./cmd/backend

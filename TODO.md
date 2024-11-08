@@ -1,4 +1,5 @@
 ### Prio 0
+node
 
 ### Prio 1
 none
@@ -13,7 +14,6 @@ none
 ### Digs
 - dig: check why "api:getAll took 3.451973917s" when reading 1k rules 1k times; try same scenario with postgres; check there is no room for optimisation here
 - dig: check why HandleMessage gives 1500 nanoseconds in benchmark, while prometheus measure is x1000 = 1.5-3milliseconds
-- dig: check why docker build always takes 203s on macmini (Building 202.9s (17/17) FINISHED)
   
 ### Features
 - feat: think how to init SqliteMaxTxDuration in unit tests, now app.InitConfig is not called in UTs
@@ -50,6 +50,7 @@ none
 - arch: switch to nil instead of sql.NullInt32 - easy to MarshalJSON
 
 ### Try
+- try: to disable go telemetry (/root/.config/go/telemetry/local)
 - try: validation: https://github.com/go-playground/validator OR https://github.com/asaskevich/govalidator OR https://github.com/go-ozzo/ozzo-validation
 - try: grpc
 - try: to deploy on old rpi/raspberrypi with ram disk enabled
@@ -93,6 +94,7 @@ none
 
 ### Completed
 
+- (+) dig: check why docker build always takes 203s on macmini, even after no changes in go files (Building 202.9s (17/17) FINISHED); RCA is rebuilding from scratch every time, without involing go build cache 
 - (+) feat: configure builds with compose, now we have to build all images manually with separate tasks (mhz19-go, device-pinger, mhz19-front)
 - (+) separate folder for sqlite files
 - (+) bug: "apr_socket_recv: Operation timed out (60)" - https://stackoverflow.com/questions/30352725/why-is-my-hello-world-go-server-getting-crushed-by-apachebench; RCA this is in ab and macos limitations, no need to handle in app
