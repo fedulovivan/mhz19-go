@@ -11,9 +11,9 @@ docker-down:
 
 docker-up:
 ifeq ($(OS_NAME), linux)
-	docker run --detach --restart=always --env-file=$(CONF) -v ./database.bin:/app/database.bin --network=host --device /dev/snd:/dev/snd --name=$(NAME)-1 $(NAME)
+	docker run --detach --restart=always --env-file=$(CONF) -v ./sqlite:/app/sqlite --network=host --device /dev/snd:/dev/snd --name=$(NAME)-1 $(NAME)
 else
-	docker run --detach --restart=always --env-file=$(CONF) -v ./database.bin:/app/database.bin -p $(REST_API_PORT):$(REST_API_PORT) --name=$(NAME)-1 $(NAME)
+	docker run --detach --restart=always --env-file=$(CONF) -v ./sqlite:/app/sqlite -p $(REST_API_PORT):$(REST_API_PORT) --name=$(NAME)-1 $(NAME)
 endif
 	
 docker-logs:

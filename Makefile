@@ -51,13 +51,13 @@ migrate-up:
 	export DB_REV=03 && make migrate-up-single
 
 migrate-up-single:
-	sqlite3 ./database.bin < ./sql/$(DB_REV)-up.sql
+	sqlite3 ./sqlite/database.bin < ./sql/$(DB_REV)-up.sql
 
 migrate-down-single:
-	sqlite3 ./database.bin < ./sql/$(DB_REV)-down.sql
+	sqlite3 ./sqlite/database.bin < ./sql/$(DB_REV)-down.sql
 
 migrate-dump:
-	sqlite3 ./database.bin .dump > ./sql/$(DATE)-dump.sql
+	sqlite3 ./sqlite/database.bin .dump > ./sql/$(DATE)-dump.sql
 
 test:
 	go test -cover -race -count 1 ./...

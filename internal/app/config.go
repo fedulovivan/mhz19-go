@@ -25,7 +25,7 @@ type ConfigStorage struct {
 	// db
 	DbDebug bool `env:"DB_DEBUG,default=false"`
 
-	SqliteFilename    string `env:"SQLITE_FILENAME,default=database.bin"`
+	SqliteFilename    string `env:"SQLITE_FILENAME,default=./sqlite/database.bin"`
 	SqliteBusyTimeout int    `env:"SQLITE_BUSY_TIMEOUT,default=5000"`
 	// SqliteMaxTxDuration time.Duration `env:"SQLITE_MAX_TX_DURATION,default=60s"`
 

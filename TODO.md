@@ -1,19 +1,8 @@
 ### Prio 0
-none
+- feat: configure builds with compose, now we have to build all images manually with separate tasks (mhz19-go, device-pinger, mhz19-front)
 
 ### Prio 1
-- feat: think how to init SqliteMaxTxDuration in unit tests, now app.InitConfig is not called in UTs
-- feat: collect metrics for "messages by device id"
-- feat: freeze images version for 3pp docker deps (zigbee2mqtt 1.36.1 commit: ffc2ff1, mosquitto etc)
-- feat: switch to docker-compose in `make update`
-- feat: tidy up all volume-targeted folders/files structure with 3pp configs (prometheus, zigbee2mqtt, mosquitto etc), avoid anonymous volume for zigbee2mqtt
-- feat: db: introduce updated_at, created_at columns
-- feat: db: limit rule name length, since its used to group prometheus metrics
-- feat: pass all zigbee2mqtt settings (host, serial/port, frontend port) via env vars and remove zigbee2mqtt-data/configuration.yaml from vcs
-- feat: api: toggle rule on/off
-- feat: api: toggle device buried_timeout on/off
-- feat: api: update rule - looks its better to utilize delete/create strategy
-- feat: configure builds with compose, now we have to build all images manually with separate tasks (mhz19-go, device-pinger, mhz19-front)
+none
 
 ### Bugs
 - bug: some sql alterations from migrations cannot be undone by rollback https://stackoverflow.com/questions/4692690/is-it-possible-to-roll-back-create-table-and-alter-table-statements-in-major-sql/56738277
@@ -23,33 +12,38 @@ none
 - bug: no mqtt (re)connection if network was not available on app startup and returned online later
 
 ### Digs
-- dig: "api:getAll took 3.451973917s" when reading 1k rules 1k times - try same scenario with postgres - check there is no room for optimisation here
+- dig: check why "api:getAll took 3.451973917s" when reading 1k rules 1k times; try same scenario with postgres; check there is no room for optimisation here
 - dig: check why HandleMessage gives 1500 nanoseconds in benchmark, while prometheus measure is x1000 = 1.5-3milliseconds
 - dig: check why docker build always takes 203s on macmini (Building 202.9s (17/17) FINISHED)
-- 
+  
 ### Features
-- feat: parse DeviceClass(telegram-bot) as well as DeviceClass(5)
-- feat: parse DeviceClass(mqtt) as well as ChannelType(1)
+- feat: think how to init SqliteMaxTxDuration in unit tests, now app.InitConfig is not called in UTs
+- feat: collect "messages by device id" metric
+- feat: freeze image version for 3pp docker deps (zigbee2mqtt 1.36.1 commit: ffc2ff1, mosquitto etc)
+- feat: switch to docker-compose in `make update`
+- feat: tidy up all volume-targeted folders/files structure with 3pp configs (prometheus, zigbee2mqtt, mosquitto etc), avoid anonymous volume for zigbee2mqtt
+- feat: db: introduce updated_at, created_at columns
+- feat: db: limit rule name length, since its used to group prometheus metrics
+- feat: pass all zigbee2mqtt settings (host, serial/port, frontend port) via env vars and remove zigbee2mqtt-data/configuration.yaml from vcs
+- feat: api: toggle rule on/off
+- feat: api: toggle device buried_timeout on/off
+- feat: api: update rule - looks its better to utilize delete/create strategy
+- feat: accept DeviceClass(telegram-bot) as well as DeviceClass(5) in json
+- feat: accept DeviceClass(mqtt) as well as ChannelType(1) in json
 - feat: db: add room entity, connect it with devices
 - feat: detect bot(s) are connected/started, instead of using dumb timeout before publishing "Application started" message - decoupling and introducing outgoing queue may help here
 - feat: db: auto db backup before running any kind of migration tasks
 - feat: db: ability to disable certain condition or action
-- feat: log rule/condition/action executions to the db table
-- feat: simple frontend
+- feat: log rule/condition/action execution history to separate db table
 - feat: db: introduce rules.comments column
 - feat: merge Zigbee2MqttSetState and ValveSetState actions
-- feat: create meta which descibes expected args for conditions and actions and validate in rest api
+- feat: create meta which descibes expected args for conditions and actions and validate them
 
 ### Arch changes/decisions
 - arch: introduce same approach for handling outgoing messages: action only submits new message to out channel, and corresponding provider handles it asynchronous manner + store outgoing messages history as well
 - arch: align arg names across actions (like we have two spellings: Cmd and Command)
 - arch: think how (where?) we can construct/init "TemplatePayload" automatically, now we need to build it manually in action implementation
 - mile: device_id + device_class adressing issue:
-    - "FOREIGN KEY (device_id) REFERENCES devices(native_id)" requires sole UNIQUE index for column devices.native_id, while we actually need UNIQUE(device_class_id, native_id) since its unreasonable to constraint native_id across devices off all classes
-    - in addition to "native_id" problem see also "unsafemap" in internal/entities/ldm/repository.go
-    - a solution could be to keep ids as strings like "ZigbeeDevice(0x00158d000a823bb0)" or "Pinger(192.168.88.44)"
-    - Message, make fields DeviceClass and DeviceId optional
-    - arch: think of good api (constructor) for creating new message (NewMessage) Id, Timestamp, ChannelType, DeviceClass?, DeviceId? -  are mandatory
 - arch: in NewEngine create mocks for all services, which will panic with friendly message if user forgot to set that service
 - arch: get rid of any in Send(...any) - no ideas so far
 - arch: split rest api and engine into different microservices
@@ -57,11 +51,11 @@ none
 - arch: switch to nil instead of sql.NullInt32 - easy to MarshalJSON
 
 ### Try
+- try: validation: https://github.com/go-playground/validator OR https://github.com/asaskevich/govalidator OR https://github.com/go-ozzo/ozzo-validation
 - try: grpc
 - try: to deploy on old rpi/raspberrypi with ram disk enabled
 - try: hcl - https://github.com/hashicorp/hcl
 - try: some interactive cli framework for provision tool like cobra
-- try: validation https://github.com/asaskevich/govalidator OR https://github.com/go-ozzo/ozzo-validation
 - try: find out why cli command "make test" and "vscode" report different coverage statistics: 86.9% vs 100%. vscode syntax - `Running tool: /opt/homebrew/bin/go test -timeout 30s -coverprofile=/var/folders/5v/0wjs9g1948ddpdqkgf1h31q80000gn/T/vscode-go7lC7ip/go-code-cover github.com/fedulovivan/mhz19-go/internal/engine`
 - try: separate di library https://pkg.go.dev/go.uber.org/fx
 - try: openapi or swagger https://en.wikipedia.org/wiki/OpenAPI_Specification or https://swagger.io/
@@ -85,7 +79,6 @@ none
 - try: to switch from docker to kubernetes
 - try: to learn how GOMAXPROC and docker --proc are related
 - try: create client for miio devices udp port 54321 (yeelight smart ceiling light, robot vacuum), for now stuck with token fetching issue. links: https://github.com/aholstenson/miio, https://github.com/OpenMiHome/mihome-binary-protocol, https://github.com/maxinminax/node-mihome, https://github.com/nickw444/miio-go, https://github.com/marcelrv/XiaomiRobotVacuumProtocol, https://github.com/vkorn/go-miio, https://www.youtube.com/watch?v=m11qbkgOz5o
-- (?) try: visualize buried devices in grafana
 
 ### Milestones
 
@@ -93,14 +86,20 @@ none
 - Implement simple frontend
 - Interactive zigbee device join (pairing/interview/adding/joining) - End-to-end scenario with new device device join, confuguring rules, with no app retart - https://www.zigbee2mqtt.io/guide/usage/mqtt_topics_and_messages.html#zigbee2mqtt-bridge-event
 - device_id + device_class adressing issue
+    - "FOREIGN KEY (device_id) REFERENCES devices(native_id)" requires sole UNIQUE index for column devices.native_id, while we actually need UNIQUE(device_class_id, native_id) since its unreasonable to constraint native_id across devices off all classes
+    - in addition to "native_id" problem see also "unsafemap" in internal/entities/ldm/repository.go
+    - a solution could be to keep ids as strings like "ZigbeeDevice(0x00158d000a823bb0)" or "Pinger(192.168.88.44)"
+    - Message, make fields DeviceClass and DeviceId optional
+    - arch: think of good api (constructor) for creating new message (NewMessage) Id, Timestamp, ChannelType, DeviceClass?, DeviceId? -  are mandatory
 
 ### Completed
 
+- (+) 
 - (+) bug: "apr_socket_recv: Operation timed out (60)" - https://stackoverflow.com/questions/30352725/why-is-my-hello-world-go-server-getting-crushed-by-apachebench; RCA this is in ab and macos limitations, no need to handle in app
 - (+) bug: "http: superfluous response.WriteHeader call from github.com/go-ozzo/ozzo-routing/v2.(*Context).WriteWithStatus (context.go:178)" appears after interruption of progressing load test; need to ensure this is expected and not an application-level issue; reprodution is invoking `wget http://localhost:7070/api/rules` and immediate `Ctrl+C` when db contains 20k rules; RCA: first we start to write response normally with 200 code, meaning WriteHeader is already called, then after client disconnect an error "write: broken pipe" is raised and handled by errorHandler which calls WriteHeader again on attenmpt to "push" a json with error details and 500 code. Additinal read for "broken **pipe**" https://stackoverflow.com/questions/43189375/why-is-golang-http-server-failing-with-broken-pipe-when-response-exceeds-8kb, https://medium.com/trendyol-tech/golang-what-is-broken-pipe-error-tcp-http-connections-and-pools-3988b79f28e5
 - (+) bug: race: /Users/ivanf/Desktop/race000 - appeared after recent moving reading map out of critical section in WithTag
 - (+) bug: no abortion of "Fetching rules is still running" on Ctrl+C - code was synchronously blocked by long running rules_service.Build
-- (+) bug: rules_service.Build takes crazy amount of time to transform db records into to the rules representation - O(n^5) complexity caused by lots of repeating inner samber/lo calls, refactorred to advance indexing utilized objects. processing time reduced from 300s to 0.1s
+- (+) bug: perf: rules_service.Build takes crazy amount of time to transform db records into to the rules representation - O(n^5) complexity caused by lots of repeating inner samber/lo calls, refactorred to advance indexing utilized objects. processing time reduced from 300s to 0.1s
 - (+) bug: get rid of github.com/samber/lo
 - (+) bug: add logging of the key, at the place where message was initially queued: "Rule=4 message queue is flushed now key=zigbee-device-0x00158d00067cb0c9-Rule4 mm=3"
 - (+) ensure we accept interfaces and return concrete types (structs)
@@ -111,10 +110,7 @@ none
 - (+) bug: check why lots of records have duplicates http://macmini:7070/api/messages/device/0x00158d00067cb0c9?tocsv=1, for now stick with no changes on backend side, originally all messages are emitted by zigbee device (see assets/duplicated-messages-log.txt)
 - (+) bug: make with no args invokes docker build
 - (+) feat: switch from Seq to atomics
-- (+) try: can we speed up HandleMessage? create benchmarks for HandleMessage and conditions
-  - base performance is about 3700ns per operation (1 Equal condition)
-  - 60% performance gain in Tag module after switching to strings.Builder and reduced memory allocations making strings.Builder no-pointer value
-  - 90% performance gain when used without conditions, without TimeTrack, without Tag module, without logging, without prometheus
+- (+) try: perf: can we speed up HandleMessage? create benchmarks for HandleMessage and conditions: baseline performance is about 3700ns per operation (1 Equal condition); 60% performance gain in Tag module after switching to strings.Builder and reduced heap memory allocations making strings.Builder no-pointer value; 90% performance gain with excluded conditions, TimeTrack, Tag module, logging, prometheus
 - (+) bug: only 50rps for api-load-push-message-write - there was a rps limit, renamed makefile commands to avoid future confusions
 - (+) bug: reset error counter on app restart (already works. why?) - grafana shows LAST metric on most of widgets, so its expected to see zeroing after app restart
 - (+) bug: perf: check why api time is x3 of sql call: Tx#13 Transaction took 5.621441ms -> api:getByDeviceId took 15.907499ms - lots of time spent on json encoding, also BuildMessages did not used advance slice allocation
@@ -269,6 +265,7 @@ none
 - (?) feat: create test service for sonoff wifi devices (poll them periodically to receive status updates)
 - (?) arch: looks like we need to compare values as srings in conditions
 - (?) feat: collect device up/down metrics
+- (?) try: visualize buried devices in grafana
 
 ### new mapping rule structure
 ```golang

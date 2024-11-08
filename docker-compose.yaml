@@ -11,7 +11,7 @@ services:
     image: mhz19-go-backend
     env_file: .env
     volumes:
-      - ./database.bin:/app/database.bin
+      - ./sqlite:/app/sqlite
     network_mode: host
     devices:
       - /dev/snd:/dev/snd
