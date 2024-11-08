@@ -8,6 +8,8 @@ x-logging: &default-logging
 services:
 
   backend:
+    build:
+      context: .
     image: mhz19-go-backend
     env_file: .env
     volumes:

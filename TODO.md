@@ -1,5 +1,4 @@
 ### Prio 0
-- feat: configure builds with compose, now we have to build all images manually with separate tasks (mhz19-go, device-pinger, mhz19-front)
 
 ### Prio 1
 none
@@ -94,7 +93,8 @@ none
 
 ### Completed
 
-- (+) 
+- (+) feat: configure builds with compose, now we have to build all images manually with separate tasks (mhz19-go, device-pinger, mhz19-front)
+- (+) separate folder for sqlite files
 - (+) bug: "apr_socket_recv: Operation timed out (60)" - https://stackoverflow.com/questions/30352725/why-is-my-hello-world-go-server-getting-crushed-by-apachebench; RCA this is in ab and macos limitations, no need to handle in app
 - (+) bug: "http: superfluous response.WriteHeader call from github.com/go-ozzo/ozzo-routing/v2.(*Context).WriteWithStatus (context.go:178)" appears after interruption of progressing load test; need to ensure this is expected and not an application-level issue; reprodution is invoking `wget http://localhost:7070/api/rules` and immediate `Ctrl+C` when db contains 20k rules; RCA: first we start to write response normally with 200 code, meaning WriteHeader is already called, then after client disconnect an error "write: broken pipe" is raised and handled by errorHandler which calls WriteHeader again on attenmpt to "push" a json with error details and 500 code. Additinal read for "broken **pipe**" https://stackoverflow.com/questions/43189375/why-is-golang-http-server-failing-with-broken-pipe-when-response-exceeds-8kb, https://medium.com/trendyol-tech/golang-what-is-broken-pipe-error-tcp-http-connections-and-pools-3988b79f28e5
 - (+) bug: race: /Users/ivanf/Desktop/race000 - appeared after recent moving reading map out of critical section in WithTag

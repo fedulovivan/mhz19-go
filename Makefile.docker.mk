@@ -31,20 +31,20 @@ docker-logs-save:
 docker-stats:
 	docker stats $(NAME)-1
 
+compose-build:
+	docker compose build
+
 compose-up:
-	NAME=$(NAME) docker compose up --no-build --detach
+	docker compose up --no-build --detach
 
 compose-down:
-	NAME=$(NAME) docker compose down
+	docker compose down
 
 # compose-up-dev:
 # 	NAME=$(NAME) docker compose up --no-build --detach prometheus grafana
 
 # compose-down-dev:
 # 	NAME=$(NAME) docker compose down prometheus grafana
-
-update:
-	git pull && make docker-build && make docker-down && make docker-up && make docker-logs
 
 # utility command for getting shell in the "Docker Desktop"s linux vm on mac
 # borrowed from https://gist.github.com/BretFisher/5e1a0c7bcca4c735e716abf62afad389

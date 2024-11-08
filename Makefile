@@ -74,6 +74,10 @@ pprof-cpu:
 test-one:
 	go test ./internal/engine -run TestMappings -v
 
+update:
+	git -C . pull && git -C ../mhz19-front pull && git -C ../device-pinger pull && make compose-build && make compose-up
+
+# git pull && make docker-build && make docker-down && make docker-up && make docker-logs
 # rm -f *.prof && go test ./internal/entities/rules -bench=^Benchmark20$$ -run=^$$ -benchmem -cpuprofile cpu.prof -memprofile=mem.prof
 # rm -f *.prof && go test ./internal/counters -bench=^Benchmark30$$ -run=^$$ -benchmem -cpuprofile cpu.prof -memprofile=mem.prof
 # CGO_ENABLED=1 go test -benchmem ./...
