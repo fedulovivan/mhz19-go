@@ -125,6 +125,10 @@ htop hotkeys:
     - Shift + k - toglle showing kernel processes
     - p - toggle showing full paths
 
+measure on/off time for sonoff relay
+https://stackoverflow.com/questions/18215389/how-do-i-measure-request-and-response-times-at-once-using-curl
+`curl -w "@assets/curl-format.txt" -v -d '{"data":{"switch":"off"}}' http://192.168.88.60:8081/zeroconf/switch`
+
 ### Profiling
 
 - run cpu and memory benchmark for single unit test and save two profiles accordingly

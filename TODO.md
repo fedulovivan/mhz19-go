@@ -1,12 +1,11 @@
 ### Prio 0
+none
 
 ### Prio 1
 none
 
 ### Bugs
 - bug: find the reason of rebuilding mhz19-frontend along with rebuild of mhz19-go
-- bug: some sql alterations from migrations cannot be undone by rollback https://stackoverflow.com/questions/4692690/is-it-possible-to-roll-back-create-table-and-alter-table-statements-in-major-sql/56738277
-- bug: execute db migrations also from within docker container, otherwize we depend on sqlite3 binary installed on the host system, more specifically problem is macmini has version 3.31.1, while mbp 3.39.5. as a result a new feature "DROP COLUMN" is not working on macmini (introduced in sqlite 3.35, also see https://github.com/mattn/go-sqlite3/issues/927)
 - bug: wrong id (appeared id from messages table instead while was expected from devices) "Msg=25 Rule=1 Action=1 UpsertZigbeeDevices Created id=72852" - apparently this is https://github.com/mattn/go-sqlite3/issues/30, however my case is quite complex to reproduce: UpsertZigbeeDevices performs bulk UPSERT in transaction 1; RecordMessage performs bulk UPSERT into devices and messages in transaction 2
 - bug: find the reason of no sound on macmini
 - bug: no mqtt (re)connection if network was not available on app startup and returned online later
@@ -94,6 +93,7 @@ none
 
 ### Completed
 
+- (+) bug: execute db migrations also from within docker container, otherwize we depend on sqlite3 binary installed on the host system, more specifically problem is macmini has version 3.31.1, while mbp 3.39.5. as a result a new feature "DROP COLUMN" is not working on macmini (introduced in sqlite 3.35, also see https://github.com/mattn/go-sqlite3/issues/927)
 - (+) try: fast disk usage analyzer https://github.com/dundee/gdu
 - (+) dig: check why docker build always takes 203s on macmini, even after no changes in go files (Building 202.9s (17/17) FINISHED); RCA is rebuilding from scratch every time, without involing go build cache; reading: https://dev.to/jacktt/20x-faster-golang-docker-builds-289n; https://docs.docker.com/build/cache/optimize/
 - (+) feat: configure builds with compose, now we have to build all images manually with separate tasks (mhz19-go, device-pinger, mhz19-front)
@@ -269,6 +269,7 @@ none
 - (?) arch: looks like we need to compare values as srings in conditions
 - (?) feat: collect device up/down metrics
 - (?) try: visualize buried devices in grafana
+- (?) bug: some sql alterations from migrations cannot be undone by rollback https://stackoverflow.com/questions/4692690/is-it-possible-to-roll-back-create-table-and-alter-table-statements-in-major-sql/56738277; in sqlite DDL is transactional
 
 ### new mapping rule structure
 ```golang

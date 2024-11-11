@@ -2,6 +2,7 @@ CONF ?= .env
 include $(CONF)
 include Makefile.docker.mk
 include Makefile.load.mk
+include Makefile.migrate.mk
 
 .DEFAULT_GOAL := default
 
@@ -35,29 +36,6 @@ tidy:
 
 lint:
 	golangci-lint run
-
-migrate-reset: migrate-down migrate-up
-
-migrate-down:
-	export DB_REV=03 && make migrate-down-single
-	export DB_REV=02 && make migrate-down-single
-	export DB_REV=01 && make migrate-down-single
-	export DB_REV=00 && make migrate-down-single
-
-migrate-up:
-	export DB_REV=00 && make migrate-up-single
-	export DB_REV=01 && make migrate-up-single
-	export DB_REV=02 && make migrate-up-single
-	export DB_REV=03 && make migrate-up-single
-
-migrate-up-single:
-	sqlite3 ./sqlite/database.bin < ./sql/$(DB_REV)-up.sql
-
-migrate-down-single:
-	sqlite3 ./sqlite/database.bin < ./sql/$(DB_REV)-down.sql
-
-migrate-dump:
-	sqlite3 ./sqlite/database.bin .dump > ./sql/$(DATE)-dump.sql
 
 test:
 	go test -cover -race -count 1 ./...

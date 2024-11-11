@@ -10,7 +10,7 @@ ENV GOCACHE=/root/.cache/go-build
 RUN --mount=type=cache,target="/root/.cache/go-build" CGO_ENABLED=1 GOOS=linux go build -o /build/backend ./cmd/backend
 
 FROM alpine:latest
-RUN apk add --no-cache tzdata mpg123
+RUN apk add --no-cache tzdata mpg123 sqlite
 COPY assets/siren.mp3 /app/assets/siren.mp3
 COPY --from=builder /build/backend /app/backend
 WORKDIR /app

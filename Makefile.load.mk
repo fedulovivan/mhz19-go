@@ -3,7 +3,7 @@
 # which are extracted into separate file and included into main Makefile.
 #
 
-API_LOAD_COUNT ?= 10
+API_LOAD_COUNT ?= 10000
 API_LOAD_THREADS ?= 10
 API_RPS ?= 50
 REST_API_DOMAIN ?= 127.0.0.1
