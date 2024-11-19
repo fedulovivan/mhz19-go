@@ -151,6 +151,7 @@ func (p *provider) Init() {
 	opts.SetOnConnectHandler(connectHandler)
 	opts.SetReconnectingHandler(reconnectHandler)
 	opts.SetConnectionLostHandler(connectLostHandler)
+	opts.SetConnectRetry(true)
 
 	// attach logger
 	if app.Config.MqttDebug {
@@ -206,3 +207,31 @@ func subscribe(client MqttLib.Client, topic string) {
 	}
 	slog.Info(tag.F("Subscribed to"), "topic", topic)
 }
+
+// ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
+// defer cancel()
+// p.initialConnectWithRetry(ctx)
+
+// func (p *provider) initialConnectWithRetry(ctx context.Context) {
+// 	retries := 0
+// 	for {
+// 		select {
+// 		case <-ctx.Done():
+// 			slog.Error(tag.F("Initial connect failed"), "retries", retries)
+// 			slog.Error(tag.F("context cancelled"), "err", ctx.Err())
+// 			counters.Inc(counters.ERRORS_ALL)
+// 			counters.Errors.WithLabelValues(logger.MOD_MQTT).Inc()
+// 			return
+// 		default:
+// 			slog.Debug(tag.F("Trying to connect..."))
+// 			if token := p.client.Connect(); token.Wait() && token.Error() != nil {
+// 				slog.Error(tag.F("initialConnectWithRetry"), "err", token.Error())
+// 				slog.Warn(tag.F("Retrying in a second..."))
+// 				time.Sleep(time.Second)
+// 				retries += 1
+// 			} else {
+// 				return
+// 			}
+// 		}
+// 	}
+// }

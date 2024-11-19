@@ -15,6 +15,9 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/logger"
 	"github.com/prometheus/client_golang/prometheus"
 
+	// "sync/atomic"
+	// "atomic"
+
 	"github.com/fedulovivan/mhz19-go/internal/app"
 	"github.com/fedulovivan/mhz19-go/pkg/utils"
 	_ "github.com/mattn/go-sqlite3"
@@ -132,6 +135,7 @@ func Exec(
 
 	select {
 	case <-ctx.Done():
+		err = ctx.Err()
 		return
 	default:
 		lquery := utils.OneLineTrim(query)

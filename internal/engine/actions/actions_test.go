@@ -60,7 +60,7 @@ func (s *ActionsSuite) Test20() {
 		"DeviceId": types.DeviceId("0xe0798dfffed39ed1"),
 		"State":    "OFF",
 	}
-	err := Zigbee2MqttSetState(compound, args, nil, engine, s.tag)
+	err := MqttSetState(compound, args, nil, engine, s.tag)
 	s.Nil(err)
 	fmt.Println(err)
 }

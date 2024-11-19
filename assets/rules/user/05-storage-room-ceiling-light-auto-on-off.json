@@ -37,7 +37,7 @@
     },
     "actions": [
         {
-            "fn": "Zigbee2MqttSetState",
+            "fn": "MqttSetState",
             "args": {
                 "DeviceId": "DeviceId(0xe0798dfffed39ed1)",
                 "State": "$message.occupancy"

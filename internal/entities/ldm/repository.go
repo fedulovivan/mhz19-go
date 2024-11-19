@@ -24,7 +24,7 @@ type LdmRepository interface {
 var _ LdmRepository = (*repo)(nil)
 
 type repo struct {
-	// unsafe cache of device id to Key map, used only in GetByDeviceId
+	// unsafe (unreliable to be correct) cache of device id to Key map, used only in GetByDeviceId
 	// panics on key collision, see implementation in "Set"
 	device_id_to_key_unsafemap map[types.DeviceId]types.LdmKey
 	onset                      chan types.LdmKey
@@ -90,11 +90,6 @@ func (r *repo) Has(key types.LdmKey) (flag bool) {
 // "private" getter not protected by lock
 func (r *repo) get_unsafe(key types.LdmKey) types.Message {
 	return r.data[key]
-	// res, exist := r.data[key]
-	// if !exist {
-	// 	panic(fmt.Sprintf("no message for key %s", key))
-	// }
-	// return res
 }
 
 func (r *repo) OnSet() chan types.LdmKey {

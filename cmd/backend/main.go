@@ -21,6 +21,7 @@ import (
 	"github.com/fedulovivan/mhz19-go/internal/types"
 	"github.com/fedulovivan/mhz19-go/pkg/utils"
 
+	"github.com/fedulovivan/mhz19-go/internal/message_queue"
 	buried_devices "github.com/fedulovivan/mhz19-go/internal/providers/buried_devices"
 	dnssd "github.com/fedulovivan/mhz19-go/internal/providers/dnssd"
 	mqtt "github.com/fedulovivan/mhz19-go/internal/providers/mqtt"
@@ -66,10 +67,14 @@ func main() {
 		ldm.NewService(ldm.RepoSingleton()),
 		devicesService,
 	)
+	tbotProvider := tbot.NewProvider()
+	e.SetQueuesContainer(
+		message_queue.NewContainer(),
+	)
 	e.SetProviders(
 		mqtt.NewProvider(),
-		tbot.NewProvider(),
 		dnssd.NewProvider(),
+		tbotProvider,
 		shimProvider,
 		buriedDevicesProvider,
 	)
@@ -120,6 +125,11 @@ func main() {
 			e.DeleteRule(ruleId)
 		}
 	}()
+	go func() {
+		// publish "Application started" message
+		<-tbotProvider.Started()
+		shimProvider.Push(types.NewSystemMessage("Application started"))
+	}()
 	e.Start()
 
 	// init rest
@@ -130,28 +140,17 @@ func main() {
 		slog.Debug(tag.F("Running in developlment mode"))
 	}
 
-	// publish "Application started" message
-	// TODO detect bot(s) are connected, instead of using dumb timeout
-	time.AfterFunc(time.Second*10, func() {
-		shimProvider.Push(types.NewSystemMessage("Application started"))
-	})
-
 	// handle shutdown
 	stopped := make(chan os.Signal, 1)
 	signal.Notify(stopped, os.Interrupt, syscall.SIGTERM)
 	<-stopped
 	slog.Debug(tag.F("App termination signal received"))
 
-	// stop engine and all underlying providers
+	// stop engine and all underlying modules
 	e.Stop()
 
 	// stop rest
 	rest.Stop()
 
 	slog.Info(tag.F("All done, bye-bye"))
-
-	// ctx := context.Background()
-	// <-ctx.Done()
-	// slog.Debug("BACKGROUND CONTEXT DONE!!!", "err", ctx.Err())
-
 }

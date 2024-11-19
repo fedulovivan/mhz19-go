@@ -23,11 +23,8 @@ var PostSonoffSwitchMessage types.ActionImpl = func(
 	e types.ServiceAndProviderSupplier,
 	tag utils.Tag,
 ) (err error) {
-	// tpayload := types.TemplatePayload{
-	// 	Messages: mm,
-	// }
 	reader := arguments.NewReader(
-		compound.Curr, args, mapping /* &tpayload */, nil, e, tag,
+		compound.Curr, args, mapping, nil, e, tag,
 	)
 	deviceId, err := arguments.GetTyped[types.DeviceId](&reader, "DeviceId")
 	if err != nil {

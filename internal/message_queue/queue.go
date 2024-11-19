@@ -11,25 +11,37 @@ import (
 type OnFlushed func(mm []types.Message)
 
 type queue struct {
-	sync.Mutex
-	flushes   atomic.Int64
-	mm        []types.Message
-	throttle  time.Duration
-	onFlushed OnFlushed
-	timer     *time.Timer
+	sync.RWMutex
+	flushesCount atomic.Int64
+	waitFlush    atomic.Pointer[chan struct{}]
+	mm           []types.Message
+	throttle     time.Duration
+	onFlushed    OnFlushed
+	timer        *time.Timer
 }
 
 func (q *queue) flush() {
 	q.Lock()
 	defer q.Unlock()
-	q.onFlushed(q.mm)
+	if q.onFlushed != nil {
+		q.onFlushed(q.mm)
+	}
 	q.timer = nil
 	q.mm = nil
-	q.flushes.Add(1)
+	q.flushesCount.Add(1)
+	close(*q.waitFlush.Load())
+}
+
+func (q *queue) Wait() {
+	wf := q.waitFlush.Load()
+	if wf == nil {
+		return
+	}
+	<-*wf
 }
 
 func (q *queue) Flushes() int64 {
-	return q.flushes.Load()
+	return q.flushesCount.Load()
 }
 
 func (q *queue) PushMessage(m types.Message) {
@@ -37,6 +49,8 @@ func (q *queue) PushMessage(m types.Message) {
 	defer q.Unlock()
 	q.mm = append(q.mm, m)
 	if q.timer == nil {
+		wf := make(chan struct{})
+		q.waitFlush.Store(&wf)
 		q.timer = time.AfterFunc(q.throttle, q.flush)
 	}
 }

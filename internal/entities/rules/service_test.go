@@ -266,7 +266,7 @@ func (s *ServiceSuite) Test12() {
 
 // func Benchmark20(b *testing.B) {
 // 	repo := NewRepository(
-// 		db.DbSingleton(),
+// 		db.DbSingleton_(),
 // 	)
 // 	s := NewService(repo)
 // 	for k := 0; k < b.N; k++ {
@@ -463,7 +463,7 @@ func (s *ServiceSuite) Test63() {
 		},
 		Actions: []types.Action{
 			{
-				Fn:   types.ACTION_ZIGBEE2_MQTT_SET_STATE,
+				Fn:   types.ACTION_MQTT_SET_STATE,
 				Args: types.Args{"Lorem": 100, "Ipsum": "200"},
 				Mapping: types.Mapping{
 					"Lorem": {"Ipsum": "112233", "Bar": "Baz"},

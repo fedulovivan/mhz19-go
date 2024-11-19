@@ -24,7 +24,7 @@
     },
     "actions": [
         {
-            "fn": "ValveSetState",
+            "fn": "MqttSetState",
             "args": {
                 "DeviceId": "DeviceId(6613075)",
                 "State": "close"

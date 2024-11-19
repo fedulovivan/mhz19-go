@@ -1,6 +1,7 @@
 migrate-reset: migrate-down migrate-up
 
 migrate-down:
+	DB_REV=04 make migrate-down-single
 	DB_REV=03 make migrate-down-single
 	DB_REV=02 make migrate-down-single
 	DB_REV=01 make migrate-down-single
@@ -11,6 +12,7 @@ migrate-up:
 	DB_REV=01 make migrate-up-single
 	DB_REV=02 make migrate-up-single
 	DB_REV=03 make migrate-up-single
+	DB_REV=04 make migrate-up-single
 
 migrate-up-single:
 	sqlite3 ./sqlite/database.bin < ./sql/$(DB_REV)-up.sql

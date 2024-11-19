@@ -63,6 +63,36 @@ func (s *QueueSuite) Test40() {
 	s.Equal([]int{2, 2}, flushStats)
 }
 
+func (s *QueueSuite) Test50() {
+	// for the queue without pushed messages Wait returns immediately
+	q := NewQueue(time.Second*5, nil)
+	s.Eventually(func() bool {
+		q.Wait()
+		return true
+	}, time.Millisecond*5, time.Millisecond*1)
+}
+
+func (s *QueueSuite) Test60() {
+	q := NewQueue(time.Millisecond*10, nil)
+	q.PushMessage(types.Message{})
+	s.Eventually(func() bool {
+		q.Wait()
+		return true
+	}, time.Millisecond*15, time.Millisecond*10)
+}
+
+func (s *QueueSuite) Test70() {
+	q1 := NewQueue(time.Millisecond*10, nil)
+	q2 := NewQueue(time.Millisecond*15, nil)
+	q1.PushMessage(types.Message{})
+	q2.PushMessage(types.Message{})
+	s.Eventually(func() bool {
+		q1.Wait()
+		q2.Wait()
+		return true
+	}, time.Millisecond*20, time.Millisecond*5)
+}
+
 func TestQueue(t *testing.T) {
 	suite.Run(t, new(QueueSuite))
 }

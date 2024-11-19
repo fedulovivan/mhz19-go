@@ -20,8 +20,9 @@ var tag = utils.NewTag(logger.TBOT)
 
 type provider struct {
 	engine.ProviderBase
-	bots   map[string]*tgbotapi.BotAPI
-	botsMu sync.RWMutex
+	bots    map[string]*tgbotapi.BotAPI
+	botsMu  sync.RWMutex
+	started chan struct{}
 }
 
 var _ types.ChannelProvider = (*provider)(nil)
@@ -29,14 +30,19 @@ var _ types.ChannelProvider = (*provider)(nil)
 func NewProvider() *provider {
 	return &provider{
 		ProviderBase: engine.ProviderBase{
-			MessagesChan: make(types.MessageChan /* , 100 */),
+			MessagesChan: make(types.MessageChan),
 		},
-		bots: make(map[string]*tgbotapi.BotAPI),
+		bots:    make(map[string]*tgbotapi.BotAPI),
+		started: make(chan struct{}),
 	}
 }
 
 func (p *provider) Channel() types.ChannelType {
 	return types.CHANNEL_TELEGRAM
+}
+
+func (p *provider) Started() <-chan struct{} {
+	return p.started
 }
 
 // args: botName, text, chatId
@@ -144,4 +150,5 @@ func (p *provider) Init() {
 			counters.Errors.WithLabelValues(logger.MOD_TBOT).Inc()
 		}
 	}
+	p.started <- struct{}{}
 }

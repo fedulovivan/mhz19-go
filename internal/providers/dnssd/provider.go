@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/brutella/dnssd"
+	dlog "github.com/brutella/dnssd/log"
+	"github.com/fedulovivan/mhz19-go/internal/app"
 	"github.com/fedulovivan/mhz19-go/internal/counters"
 	"github.com/fedulovivan/mhz19-go/internal/engine"
 	"github.com/fedulovivan/mhz19-go/internal/logger"
@@ -25,7 +27,7 @@ var tag = utils.NewTag(logger.DNSSD)
 func NewProvider() *provider {
 	return &provider{
 		ProviderBase: engine.ProviderBase{
-			MessagesChan: make(types.MessageChan /* , 100 */),
+			MessagesChan: make(types.MessageChan),
 		},
 	}
 }
@@ -35,6 +37,11 @@ func (p *provider) Channel() types.ChannelType {
 }
 
 func (p *provider) Init() {
+
+	if app.Config.DnssdDebug {
+		dlog.Debug.Enable()
+		dlog.Info.Enable()
+	}
 
 	ctx := context.Background()
 

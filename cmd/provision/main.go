@@ -58,14 +58,15 @@ func processDir(dir string) {
 			defer wg.Done()
 			fmt.Printf("%s IsDir=%v\n", e.Name(), e.IsDir())
 			if !e.IsDir() && strings.HasSuffix(e.Name(), ".json") {
-				filePath := fmt.Sprintf("%s/%s", dirPath, e.Name())
+				name := e.Name()
+				filePath := fmt.Sprintf("%s/%s", dirPath, name)
 				res, err := processFile(filePath, apiEntityPath)
 				if err == nil {
 					succeeded.Add(1)
-					fmt.Println("success:", res)
+					fmt.Println("✅ success:", name, res)
 				} else {
 					failed.Add(1)
-					fmt.Println("fail:", err.Error())
+					fmt.Println("❌ fail:", name, err.Error())
 				}
 			}
 		}(e)
@@ -74,6 +75,10 @@ func processDir(dir string) {
 	fmt.Println("---")
 	fmt.Println("succeeded", succeeded.Load())
 	fmt.Println("failed", failed.Load())
+	fmt.Println("---")
+	fmt.Println("host", host)
+	fmt.Println("dir", dir)
+	fmt.Println("---")
 }
 
 func processFile(filePath string, apiEntityPath string) (res string, err error) {

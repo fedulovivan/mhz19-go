@@ -19,8 +19,6 @@ import (
 	"github.com/fedulovivan/mhz19-go/pkg/utils"
 )
 
-var queuesContainer = message_queue.NewContainer()
-
 type GetProviderFn func(ch types.ChannelType) types.ChannelProvider
 
 var _ types.ServiceSupplier = (*engine)(nil)
@@ -28,16 +26,21 @@ var _ types.ServiceSupplier = (*engine)(nil)
 var BaseTag = utils.NewTag(logger.ENGINE)
 
 type engine struct {
-	providers      []types.ChannelProvider
-	rules          []types.Rule
-	messageService types.MessagesService
-	devicesService types.DevicesService
-	ldmService     types.LdmService
-	rulesMu        sync.RWMutex
+	providers       []types.ChannelProvider
+	rules           []types.Rule
+	messageService  types.MessagesService
+	devicesService  types.DevicesService
+	ldmService      types.LdmService
+	rulesMu         sync.RWMutex
+	queuesContainer *message_queue.Container
 }
 
 func NewEngine() *engine {
 	return &engine{}
+}
+
+func (e *engine) SetQueuesContainer(queuesContainer *message_queue.Container) {
+	e.queuesContainer = queuesContainer
 }
 
 func (e *engine) SetProviders(providers ...types.ChannelProvider) {
@@ -107,13 +110,14 @@ func (e *engine) GetProvider(ct types.ChannelType) types.ChannelProvider {
 			return provider
 		}
 	}
-	panic(fmt.Sprintf("%v provider is not found", ct))
+	panic(fmt.Sprintf("%v provider not found", ct))
 }
 
 func (e *engine) Stop() {
 	for _, s := range e.providers {
 		s.Stop()
 	}
+	e.queuesContainer.Wait()
 }
 
 func (e *engine) invokeConditionFunc(
@@ -296,13 +300,13 @@ func (e *engine) handleMessage(m types.Message, rules []types.Rule) {
 				e.executeActions(compound, r, rtag)
 			} else {
 				key := message_queue.NewKey(m.DeviceClass, m.DeviceId, r.Id)
-				if !queuesContainer.HasQueue(key) {
-					queuesContainer.CreateQueue(key, r.Throttle.Duration, func(mm []types.Message) {
+				if !e.queuesContainer.HasQueue(key) {
+					e.queuesContainer.CreateQueue(key, r.Throttle.Duration, func(mm []types.Message) {
 						slog.Debug(qtag.F("message queue is flushed now"), "key", key, "mm", len(mm))
 						e.executeActions(types.MessageCompound{Queued: mm}, r, qtag)
 					})
 				}
-				queuesContainer.GetQueue(key).PushMessage(m)
+				e.queuesContainer.GetQueue(key).PushMessage(m)
 				slog.Debug(rtag.F(
 					"message and execution of %d actions were queued for %s",
 					len(r.Actions),

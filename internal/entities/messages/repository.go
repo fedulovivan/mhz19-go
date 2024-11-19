@@ -87,6 +87,11 @@ func (r repo) GetWithTemperature(deviceId sql.NullString) ([]DbTemperatureMessag
 				messages
 			ORDER BY 
 				timestamp DESC`,
+			// `SELECT
+			// 	json -> '$.temperature',
+			// 	unixepoch(timestamp)
+			// FROM
+			// 	messages`,
 			func(rows *sql.Rows, m *DbTemperatureMessage) error {
 				return rows.Scan(&m.Temperature, &m.Timestamp)
 			},

@@ -51,6 +51,7 @@ type ConfigStorage struct {
 	RestApiPath          string        `env:"REST_API_PATH,default=/api"`
 	ArgsDebug            bool          `env:"ARGS_DEBUG,default=false"`
 	RulesFetchingLimit   time.Duration `env:"RULES_FETCHING_LIMIT,default=10s"`
+	DnssdDebug           bool          `env:"DNSSD_DEBUG,default=false"`
 }
 
 func InitConfig() {

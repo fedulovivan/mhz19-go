@@ -38,6 +38,12 @@ func (s mockDevicesService) GetOne(id types.DeviceId) (res types.Device, err err
 				"Port": "8081",
 			},
 		}
+	} else if id == types.DeviceId("0xe0798dfffed39ed1") {
+		name := "My perfect zigbee device"
+		res = types.Device{
+			Name:        &name,
+			DeviceClass: types.DEVICE_CLASS_ZIGBEE_DEVICE,
+		}
 	} else if id == types.DeviceId("nullish-device-id") {
 		res = types.Device{}
 	} else {

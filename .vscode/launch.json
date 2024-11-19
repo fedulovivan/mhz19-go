@@ -6,7 +6,7 @@
             "program": "${workspaceFolder}/cmd/backend/main.go",
             "type": "go",
             "request": "launch",
-            "envFile": "${workspaceFolder}/.env.debug",
+            "envFile": "${workspaceFolder}/.env",
             "mode": "debug",
             // "args": ["-mod vendor"]
         }

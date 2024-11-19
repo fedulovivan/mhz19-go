@@ -1,14 +1,12 @@
 ### Prio 0
-none
+- try: mongodb instead of sqlite3
 
 ### Prio 1
 none
 
 ### Bugs
-- bug: find the reason of rebuilding mhz19-frontend along with rebuild of mhz19-go
-- bug: wrong id (appeared id from messages table instead while was expected from devices) "Msg=25 Rule=1 Action=1 UpsertZigbeeDevices Created id=72852" - apparently this is https://github.com/mattn/go-sqlite3/issues/30, however my case is quite complex to reproduce: UpsertZigbeeDevices performs bulk UPSERT in transaction 1; RecordMessage performs bulk UPSERT into devices and messages in transaction 2
-- bug: find the reason of no sound on macmini
-- bug: no mqtt (re)connection if network was not available on app startup and returned online later
+- bug: docker: find the reason of rebuilding mhz19-frontend along with rebuild of mhz19-go; neither --always-recreate-deps, --no-deps helps nor removing depends_on helps; see https://github.com/docker/compose/issues/9600
+- bug: macmini: find the reason of no sound
 
 ### Digs
 - dig: check why "api:getAll took 3.451973917s" when reading 1k rules 1k times; try same scenario with postgres; check there is no room for optimisation here
@@ -16,55 +14,53 @@ none
 - dig: read more about makefile PHONY https://vsupalov.com/makefile-phony/
   
 ### Features
+- feat: sql: avoid ON DELETE CASCADE for the columns dependand on dictionaries (e.g to avoid unexpected loss of rules after reducing actions list)
+- feat: move docker-compose stack-related items into the separate repository; tidy up all volume-targeted folders/files structure with 3pp configs (prometheus, zigbee2mqtt, mosquitto etc), avoid anonymous volume for zigbee2mqtt; pass all zigbee2mqtt settings (host, serial/port, frontend port) via env vars and remove zigbee2mqtt-data/configuration.yaml from vcs
 - feat: think how to init SqliteMaxTxDuration in unit tests, now app.InitConfig is not called in UTs
 - feat: collect "messages by device id" metric
 - feat: freeze image version for 3pp docker deps (zigbee2mqtt 1.36.1 commit: ffc2ff1, mosquitto etc)
-- feat: switch to docker-compose in `make update`
-- feat: tidy up all volume-targeted folders/files structure with 3pp configs (prometheus, zigbee2mqtt, mosquitto etc), avoid anonymous volume for zigbee2mqtt
 - feat: db: introduce updated_at, created_at columns
 - feat: db: limit rule name length, since its used to group prometheus metrics
-- feat: pass all zigbee2mqtt settings (host, serial/port, frontend port) via env vars and remove zigbee2mqtt-data/configuration.yaml from vcs
 - feat: api: toggle rule on/off
 - feat: api: toggle device buried_timeout on/off
 - feat: api: update rule - looks its better to utilize delete/create strategy
 - feat: accept DeviceClass(telegram-bot) as well as DeviceClass(5) in json
 - feat: accept DeviceClass(mqtt) as well as ChannelType(1) in json
-- feat: db: add room entity, connect it with devices
-- feat: detect bot(s) are connected/started, instead of using dumb timeout before publishing "Application started" message - decoupling and introducing outgoing queue may help here
+- feat: db: add new table "rooms", connect it with devices
 - feat: db: auto db backup before running any kind of migration tasks
 - feat: db: ability to disable certain condition or action
 - feat: log rule/condition/action execution history to separate db table
 - feat: db: introduce rules.comments column
-- feat: merge Zigbee2MqttSetState and ValveSetState actions
 - feat: create meta which descibes expected args for conditions and actions and validate them
 
 ### Arch changes/decisions
 - arch: introduce same approach for handling outgoing messages: action only submits new message to out channel, and corresponding provider handles it asynchronous manner + store outgoing messages history as well
 - arch: align arg names across actions (like we have two spellings: Cmd and Command)
 - arch: think how (where?) we can construct/init "TemplatePayload" automatically, now we need to build it manually in action implementation
-- mile: device_id + device_class adressing issue:
 - arch: in NewEngine create mocks for all services, which will panic with friendly message if user forgot to set that service
 - arch: get rid of any in Send(...any) - no ideas so far
 - arch: split rest api and engine into different microservices
 - arch: consider replacing sql.NullInt32 and sql.NullString with corresponding of pointer types - https://stackoverflow.com/questions/40092155/difference-between-string-and-sql-nullstring, for now stick with existing approach as more convenient
 - arch: switch to nil instead of sql.NullInt32 - easy to MarshalJSON
+- arch: device_id + device_class adressing issue (see more detailed tasks breakdown in "Milestones" section below)
 
 ### Try
+- try: to utilize tcpdump to capture dnssd messages
+- try: lib for online deadlock detection in go https://github.com/sasha-s/go-deadlock
+- try: custom firmware for roborock vacuum https://valetudo.cloud/, https://www.youtube.com/watch?v=r_04K5SPEXI
 - try: to disable go telemetry (/root/.config/go/telemetry/local)
 - try: validation: https://github.com/go-playground/validator OR https://github.com/asaskevich/govalidator OR https://github.com/go-ozzo/ozzo-validation
 - try: grpc
-- try: to deploy on old rpi/raspberrypi with ram disk enabled
+- try: to deploy on old rpi/raspberrypi with read-only fs enabled
 - try: hcl - https://github.com/hashicorp/hcl
-- try: some interactive cli framework for provision tool like cobra
+- try: some interactive cli framework for provisioning tool like cobra
 - try: find out why cli command "make test" and "vscode" report different coverage statistics: 86.9% vs 100%. vscode syntax - `Running tool: /opt/homebrew/bin/go test -timeout 30s -coverprofile=/var/folders/5v/0wjs9g1948ddpdqkgf1h31q80000gn/T/vscode-go7lC7ip/go-code-cover github.com/fedulovivan/mhz19-go/internal/engine`
-- try: separate di library https://pkg.go.dev/go.uber.org/fx
+- try: 3pp di library https://pkg.go.dev/go.uber.org/fx
 - try: openapi or swagger https://en.wikipedia.org/wiki/OpenAPI_Specification or https://swagger.io/
 - try: http router https://github.com/julienschmidt/httprouter istead of ozzo-routing
 - try: benchmarking tool https://github.com/sharkdp/hyperfine
 - try: postgres instead of sqlite3
-- try: mongodb instead of sqlite3
 - try: chatgpt or copilot to review code https://www.reddit.com/r/vscode/comments/14upva0/how_to_use_chatgptcopilot_for_code_review/
-- (?) try: https://github.com/mheffner/go-simple-metrics, https://github.com/hashicorp/go-metrics or release own
 - try: wrk utility (analog of ab, hey, oha) https://github.com/wg/wrk
 - try: yandex-tank https://github.com/yandex/yandex-tank
 - try: once.Do instead of "singleton" pattern - https://blog.matthiasbruns.com/golang-singleton-pattern
@@ -73,13 +69,12 @@ none
 - try: mockery https://github.com/vektra/mockery https://www.youtube.com/watch?v=eYHCCht8eX4
 - try: go generate
 - try: create load test for mqtt channel with `mosquitto_pub`
-- try: https://github.com/proullon/ramsql (from https://youtu.be/UfeZ-bPFs10?si=3FZTWpvjNvqh3X24&t=217)
-- try: to switch from docker to kubernetes
+- try: In-memory SQL engine in Go sql/driver for testing purpose https://github.com/proullon/ramsql (from https://youtu.be/UfeZ-bPFs10?si=3FZTWpvjNvqh3X24&t=217)
+- try: to switch from docker and docker-compose to kubernetes + helm OR openshift
 - try: to learn how GOMAXPROC and docker --proc are related
 - try: to create client for miio devices udp port 54321 (yeelight smart ceiling light, robot vacuum), for now stuck with token fetching issue. links: https://github.com/aholstenson/miio, https://github.com/OpenMiHome/mihome-binary-protocol, https://github.com/maxinminax/node-mihome, https://github.com/nickw444/miio-go, https://github.com/marcelrv/XiaomiRobotVacuumProtocol, https://github.com/vkorn/go-miio, https://www.youtube.com/watch?v=m11qbkgOz5o
 
 ### Milestones
-
 - (+) 26 sep 2024, DONE. Initial launch - All features from mhz19-next plus storing mapping rules in database
 - Implement simple frontend
 - Prepare for the public usage (real use cases)
@@ -92,14 +87,21 @@ none
     - arch: think of good api (constructor) for creating new message (NewMessage) Id, Timestamp, ChannelType, DeviceClass?, DeviceId? -  are mandatory
 
 ### Completed
-
+- (+) bug: wrong id (appeared id from messages table while was expected from devices) "Msg=25 Rule=1 Action=1 UpsertZigbeeDevices Created id=72852" - apparently this is https://github.com/mattn/go-sqlite3/issues/30, however my case is quite complex to reproduce: UpsertZigbeeDevices performs bulk UPSERT in transaction 1; RecordMessage performs bulk UPSERT into devices and messages in transaction 2; closing, no new ideas, no go-related specific
+- (+) feat: switch to docker-compose in `make update`
+- (+) feat: detect bot(s) are connected/started, instead of using dumb timeout before publishing "Application started" message - decoupling and introducing outgoing queue may help here
+- (+) feat: merge Zigbee2MqttSetState and ValveSetState actions
+- dig: mqtt: 0xe0798dfffed39ed1 (sonoff zigbee relay do not present in retained mqtt message with devices)
+- (+) bug: no warning when app stops with non-empty queues, implement queues Wait logic
+- (+) bug: no mqtt (re)connection if network was not available on app startup and returned online later: Firstly was written custom initialConnectWithRetry function, then found "opts.SetConnectRetry(true)" option for paho
+- (+) bug: use host network to fix multicast in docker - https://github.com/flungo-docker/avahi; https://github.com/moby/libnetwork/issues/2397; https://forums.docker.com/t/multicast-support-on-docker-containers/144255: multicast cannot go through network bridge boundary, so for docker we need to use either host network or run dnssd part of the app in separate container (also with host networking enabled) 
 - (+) bug: execute db migrations also from within docker container, otherwize we depend on sqlite3 binary installed on the host system, more specifically problem is macmini has version 3.31.1, while mbp 3.39.5. as a result a new feature "DROP COLUMN" is not working on macmini (introduced in sqlite 3.35, also see https://github.com/mattn/go-sqlite3/issues/927)
-- (+) try: fast disk usage analyzer https://github.com/dundee/gdu
+- (+) try: gdu fast disk usage analyzer https://github.com/dundee/gdu
 - (+) dig: check why docker build always takes 203s on macmini, even after no changes in go files (Building 202.9s (17/17) FINISHED); RCA is rebuilding from scratch every time, without involing go build cache; reading: https://dev.to/jacktt/20x-faster-golang-docker-builds-289n; https://docs.docker.com/build/cache/optimize/
 - (+) feat: configure builds with compose, now we have to build all images manually with separate tasks (mhz19-go, device-pinger, mhz19-front)
 - (+) separate folder for sqlite files
 - (+) bug: "apr_socket_recv: Operation timed out (60)" - https://stackoverflow.com/questions/30352725/why-is-my-hello-world-go-server-getting-crushed-by-apachebench; RCA this is in ab and macos limitations, no need to handle in app
-- (+) bug: "http: superfluous response.WriteHeader call from github.com/go-ozzo/ozzo-routing/v2.(*Context).WriteWithStatus (context.go:178)" appears after interruption of progressing load test; need to ensure this is expected and not an application-level issue; reprodution is invoking `wget http://localhost:7070/api/rules` and immediate `Ctrl+C` when db contains 20k rules; RCA: first we start to write response normally with 200 code, meaning WriteHeader is already called, then after client disconnect an error "write: broken pipe" is raised and handled by errorHandler which calls WriteHeader again on attenmpt to "push" a json with error details and 500 code. Additinal read for "broken **pipe**" https://stackoverflow.com/questions/43189375/why-is-golang-http-server-failing-with-broken-pipe-when-response-exceeds-8kb, https://medium.com/trendyol-tech/golang-what-is-broken-pipe-error-tcp-http-connections-and-pools-3988b79f28e5
+- (+) bug: "http: superfluous response.WriteHeader call from github.com/go-ozzo/ozzo-routing/v2.(*Context).WriteWithStatus (context.go:178)" appears after interruption of progressing load test; need to ensure this is expected and not an application-level issue; reprodution is invoking `wget http://localhost:7070/api/rules` and immediate `Ctrl+C` when db contains 20k rules; RCA: first we start to write response normally with 200 code, meaning WriteHeader is already called, then after client disconnect an error "write: broken pipe" is raised and handled by errorHandler which calls WriteHeader again on attenmpt to "push" a json with error details and 500 code. Additinal read for "broken pipe" https://stackoverflow.com/questions/43189375/why-is-golang-http-server-failing-with-broken-pipe-when-response-exceeds-8kb, https://medium.com/trendyol-tech/golang-what-is-broken-pipe-error-tcp-http-connections-and-pools-3988b79f28e5
 - (+) bug: race: /Users/ivanf/Desktop/race000 - appeared after recent moving reading map out of critical section in WithTag
 - (+) bug: no abortion of "Fetching rules is still running" on Ctrl+C - code was synchronously blocked by long running rules_service.Build
 - (+) bug: perf: rules_service.Build takes crazy amount of time to transform db records into to the rules representation - O(n^5) complexity caused by lots of repeating inner samber/lo calls, refactorred to advance indexing utilized objects. processing time reduced from 300s to 0.1s
@@ -163,7 +165,6 @@ none
 - (+) arch: try benchmark tests
 - (+) bug: fixed logging/execution issue for InvokeActionFunc
 - (+) feat: creted all "legacy" rules
-- (+) bug: use host network to fix multicast in docker - https://github.com/flungo-docker/avahi
 - (+) feat: migrate all rules from mhz19-next
 - (+) bug: avoid "%!,(MISSING)" in logs - caused by usage of tag.F with inner fmt.Sprintf
 - (+) bug: no DeviceId prefix in serialized json - https://stackoverflow.com/questions/39164471/marshaljson-not-called
@@ -270,7 +271,9 @@ none
 - (?) feat: collect device up/down metrics
 - (?) try: visualize buried devices in grafana
 - (?) bug: some sql alterations from migrations cannot be undone by rollback https://stackoverflow.com/questions/4692690/is-it-possible-to-roll-back-create-table-and-alter-table-statements-in-major-sql/56738277; in sqlite DDL is transactional
-
+- (?) try: https://github.com/mheffner/go-simple-metrics, https://github.com/hashicorp/go-metrics or release own
+- (?) try: to eliminate mutexes from all race-condition-prune sections in favour of atomics https://betterprogramming.pub/atomic-pointers-in-go-1-19-cad312f82d5b; conclusion: for now mutexes are used solely to protect maps, so there is no better alternatives aside of Mutex (no way to use atomics, sync.Map ist too usefull for learning purposes, RCU approach is quite clean and to much complex to be placed instead of Mutexes)
+ 
 ### new mapping rule structure
 ```golang
     type ConditionArgument interface {

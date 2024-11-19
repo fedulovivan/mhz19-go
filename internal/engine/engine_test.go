@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/fedulovivan/mhz19-go/internal/entities/ldm"
+	"github.com/fedulovivan/mhz19-go/internal/message_queue"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 	"github.com/fedulovivan/mhz19-go/pkg/utils"
 	"github.com/stretchr/testify/suite"
@@ -21,6 +22,7 @@ func (s *EngineSuite) SetupSuite() {
 	s.e = NewEngine()
 	ldmService := ldm.NewService(ldm.RepoSingleton())
 	s.e.SetLdmService(ldmService)
+	s.e.SetQueuesContainer(message_queue.NewContainer())
 	go func() {
 		for range ldmService.OnSet() {
 			// noop

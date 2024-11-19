@@ -26,7 +26,7 @@
     },
     "actions": [
         {
-            "fn": "ValveSetState",
+            "fn": "MqttSetState",
             "args": {
                 "DeviceId": "DeviceId(6613075)",
                 "State": "$message.Text"
@@ -39,7 +39,7 @@
             }
         },
         {
-            "fn": "ValveSetState",
+            "fn": "MqttSetState",
             "args": {
                 "DeviceId": "DeviceId(18225)",
                 "State": "$message.Text"

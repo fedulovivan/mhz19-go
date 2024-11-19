@@ -8,6 +8,7 @@ import (
 
 	"github.com/fedulovivan/mhz19-go/internal/db"
 	"golang.org/x/sync/errgroup"
+	// "sort"
 )
 
 type RulesRepository interface {
@@ -315,6 +316,7 @@ func (r repo) Create(
 		if err != nil {
 			return
 		}
+		// sort.Sort(conditions)
 		slices.SortFunc(conditions, func(a, b DbRuleCondition) int {
 			return int(a.ParentConditionId.Int32 - b.ParentConditionId.Int32)
 		})
