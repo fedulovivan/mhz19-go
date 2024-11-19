@@ -68,9 +68,8 @@ func main() {
 		devicesService,
 	)
 	tbotProvider := tbot.NewProvider()
-	e.SetQueuesContainer(
-		message_queue.NewContainer(),
-	)
+	queuesContainer := message_queue.NewContainer()
+	e.SetQueuesContainer(queuesContainer)
 	e.SetProviders(
 		mqtt.NewProvider(),
 		dnssd.NewProvider(),
@@ -116,7 +115,8 @@ func main() {
 		}
 	}()
 	go func() {
-		for rule := range rulesService.OnCreated() {
+		for ruleId := range rulesService.OnCreated() {
+			rule, _ := rulesService.GetOne(ruleId)
 			e.AppendRules(rule)
 		}
 	}()
@@ -145,6 +145,9 @@ func main() {
 	signal.Notify(stopped, os.Interrupt, syscall.SIGTERM)
 	<-stopped
 	slog.Debug(tag.F("App termination signal received"))
+
+	// wait for queues to stop
+	queuesContainer.Wait()
 
 	// stop engine and all underlying modules
 	e.Stop()

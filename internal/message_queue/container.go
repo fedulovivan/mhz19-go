@@ -45,8 +45,14 @@ func NewKey(deviceClass types.DeviceClass, deviceId types.DeviceId, ruleId int) 
 func (c *Container) Wait() {
 	c.RLock()
 	defer c.RUnlock()
-	for _, queue := range c.qlist {
+	qlen := len(c.qlist)
+	if qlen == 0 {
+		return
+	}
+	slog.Warn(tag.F("Waiting for the %d message queues to stop", qlen))
+	for key, queue := range c.qlist {
 		queue.Wait()
+		slog.Debug(tag.F("Queue wait done"), "key", key)
 	}
 }
 

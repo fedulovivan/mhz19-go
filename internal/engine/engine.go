@@ -117,7 +117,6 @@ func (e *engine) Stop() {
 	for _, s := range e.providers {
 		s.Stop()
 	}
-	e.queuesContainer.Wait()
 }
 
 func (e *engine) invokeConditionFunc(

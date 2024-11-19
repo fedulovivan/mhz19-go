@@ -87,6 +87,7 @@ none
     - arch: think of good api (constructor) for creating new message (NewMessage) Id, Timestamp, ChannelType, DeviceClass?, DeviceId? -  are mandatory
 
 ### Completed
+- (+) bug: rulesService.OnCreated() returns rule conditions and actions without real db ids which impacts the log, see ~/Desktop/rules-git-diff.diff; we can use "Build" to construct types.Rule back from db objects, but repository.Create should update db objects with real ids - fixed with simplest approach: re-fetching from db
 - (+) bug: wrong id (appeared id from messages table while was expected from devices) "Msg=25 Rule=1 Action=1 UpsertZigbeeDevices Created id=72852" - apparently this is https://github.com/mattn/go-sqlite3/issues/30, however my case is quite complex to reproduce: UpsertZigbeeDevices performs bulk UPSERT in transaction 1; RecordMessage performs bulk UPSERT into devices and messages in transaction 2; closing, no new ideas, no go-related specific
 - (+) feat: switch to docker-compose in `make update`
 - (+) feat: detect bot(s) are connected/started, instead of using dumb timeout before publishing "Application started" message - decoupling and introducing outgoing queue may help here

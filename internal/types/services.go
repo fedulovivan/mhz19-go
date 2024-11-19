@@ -51,7 +51,7 @@ type RulesService interface {
 	Delete(ruleId int) error
 	Get() ([]Rule, error)
 	Create(rule Rule) (int64, error)
-	OnCreated() <-chan Rule
+	OnCreated() <-chan int
 	OnDeleted() <-chan int
 }
 
