@@ -16,13 +16,5 @@ var _ types.ChannelProvider = (*provider)(nil)
 // - internal/entities/push-message/api.go to push message reveived via Rest
 // - cmd/backend/main.go to push system messages like "Application started"
 func NewProvider() *provider {
-	return &provider{
-		ProviderBase: engine.ProviderBase{
-			MessagesChan: make(types.MessageChan /* , 100 */),
-		},
-	}
-}
-
-func (p *provider) Init() {
-	// noop
+	return &provider{}
 }

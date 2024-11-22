@@ -215,7 +215,7 @@ func (s *EngineSuite) Test140() {
 }
 
 func (s *EngineSuite) Test141() {
-	s.e.Stop()
+	s.e.StopProviders()
 }
 
 func TestEngine(t *testing.T) {

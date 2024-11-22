@@ -1,21 +1,26 @@
 package engine
 
 import (
+	"sync"
+
 	"github.com/fedulovivan/mhz19-go/internal/types"
 )
 
-// var _ types.ChannelProvider = (*ProviderBase)(nil)
-
 type ProviderBase struct {
-	MessagesChan types.MessageChan
+	sync.Mutex
+	messages types.MessageChan
 }
 
 func (p *ProviderBase) Messages() types.MessageChan {
-	return p.MessagesChan
+	p.Lock()
+	defer p.Unlock()
+	return p.messages
 }
 
 func (p *ProviderBase) Init() {
-	panic("Init() must be implemented in concrete provider")
+	p.Lock()
+	defer p.Unlock()
+	p.messages = make(types.MessageChan)
 }
 
 func (p *ProviderBase) Send(a ...any) error {
@@ -23,15 +28,15 @@ func (p *ProviderBase) Send(a ...any) error {
 }
 
 func (p *ProviderBase) Stop() {
-	p.CloseChan()
+	p.Lock()
+	defer p.Unlock()
+	close(p.messages)
 }
 
 func (p *ProviderBase) Push(m types.Message) {
-	p.MessagesChan <- m
-}
-
-func (p *ProviderBase) CloseChan() {
-	close(p.MessagesChan)
+	p.Lock()
+	defer p.Unlock()
+	p.messages <- m
 }
 
 func (s *ProviderBase) Channel() types.ChannelType {

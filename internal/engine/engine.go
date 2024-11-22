@@ -113,7 +113,7 @@ func (e *engine) GetProvider(ct types.ChannelType) types.ChannelProvider {
 	panic(fmt.Sprintf("%v provider not found", ct))
 }
 
-func (e *engine) Stop() {
+func (e *engine) StopProviders() {
 	for _, s := range e.providers {
 		s.Stop()
 	}

@@ -1,11 +1,8 @@
 package mqtt_provider
 
 import (
-	"encoding/json"
 	"fmt"
 	"log/slog"
-	"strings"
-	"time"
 
 	MqttLib "github.com/eclipse/paho.mqtt.golang"
 	"github.com/fedulovivan/mhz19-go/internal/app"
@@ -18,6 +15,8 @@ import (
 
 var tag = utils.NewTag(logger.MQTT)
 
+type TopicHandlers map[string]MqttLib.MessageHandler
+
 type provider struct {
 	engine.ProviderBase
 	client MqttLib.Client
@@ -26,11 +25,7 @@ type provider struct {
 var _ types.ChannelProvider = (*provider)(nil)
 
 func NewProvider() *provider {
-	return &provider{
-		ProviderBase: engine.ProviderBase{
-			MessagesChan: make(types.MessageChan /* , 100 */),
-		},
-	}
+	return &provider{}
 }
 
 func (p *provider) Send(a ...any) (err error) {
@@ -53,67 +48,26 @@ func (p *provider) Channel() types.ChannelType {
 	return types.CHANNEL_MQTT
 }
 
-func (p *parserBase) parse_base() (types.Message, bool) {
-
-	payload := p.m.Payload()
-	topic := p.m.Topic()
-	meta := types.ChannelMeta{MqttTopic: topic}
-
-	outMsg := types.Message{
-		Id:            types.MessageIdSeq.Add(1),
-		Timestamp:     time.Now(),
-		ChannelType:   types.CHANNEL_MQTT,
-		ChannelMeta:   &meta,
-		DeviceClass:   p.dc,
-		FromEndDevice: false,
-	}
-
-	tt := strings.Split(strings.TrimLeft(topic, "/"), "/")
-
-	if deviceId := tt[1]; len(tt) >= 2 {
-		outMsg.DeviceId = types.DeviceId(deviceId)
-	}
-
-	if err := json.Unmarshal(payload, &outMsg.Payload); err != nil {
-		slog.Warn(tag.F("Failed to parse payload as json"), "payload", string(payload[:]), "err", err)
-		outMsg.RawPayload = payload
-	}
-
-	return outMsg, true
-}
-
 func (p *provider) Init() {
+
+	p.ProviderBase.Init()
+
 	var handlers = TopicHandlers{
 		"zigbee2mqtt/+": func(client MqttLib.Client, msg MqttLib.Message) {
-			outMsg, ok := NewZigbeeDevice(msg).Parse()
-			if ok {
-				p.Push(outMsg)
-			}
+			p.Push(Parse(msg, types.DEVICE_CLASS_ZIGBEE_DEVICE, true, 1))
 		},
 		"device-pinger/+/status": func(c MqttLib.Client, msg MqttLib.Message) {
-			outMsg, ok := NewDevicePinger(msg).Parse()
-			if ok {
-				p.Push(outMsg)
-			}
+			p.Push(Parse(msg, types.DEVICE_CLASS_PINGER, true, 1))
 		},
 		"/VALVE/+/STATE/STATUS": func(c MqttLib.Client, msg MqttLib.Message) {
-			outMsg, ok := NewValveManipulator(msg).Parse()
-			if ok {
-				p.Push(outMsg)
-			}
+			p.Push(Parse(msg, types.DEVICE_CLASS_VALVE, true, 1))
 		},
 		"zigbee2mqtt/bridge/devices": func(c MqttLib.Client, msg MqttLib.Message) {
-			outMsg, ok := NewZigbeeBridge(msg).Parse()
-			if ok {
-				p.Push(outMsg)
-			}
+			p.Push(Parse(msg, types.DEVICE_CLASS_ZIGBEE_BRIDGE, false, 1))
 		},
-		// "zigbee2mqtt/bridge/event": func(c MqttLib.Client, msg MqttLib.Message) {
-		// 	outMsg, ok := NewZigbeeBridge(msg).Parse()
-		// 	if ok {
-		// 		p.Push(outMsg)
-		// 	}
-		// },
+		"espresense/devices/+/+": func(c MqttLib.Client, msg MqttLib.Message) {
+			p.Push(Parse(msg, types.DEVICE_CLASS_ESPRESENCE_DEVICE, true, 2))
+		},
 	}
 
 	var defaultMessageHandler = func(client MqttLib.Client, msg MqttLib.Message) {
@@ -196,7 +150,7 @@ func (p *provider) Stop() {
 	} else {
 		slog.Warn(tag.F("Not connected"))
 	}
-	p.CloseChan()
+	p.ProviderBase.Stop()
 }
 
 func subscribe(client MqttLib.Client, topic string) {
@@ -207,6 +161,13 @@ func subscribe(client MqttLib.Client, topic string) {
 	}
 	slog.Info(tag.F("Subscribed to"), "topic", topic)
 }
+
+// "zigbee2mqtt/bridge/event": func(c MqttLib.Client, msg MqttLib.Message) {
+// 	outMsg, ok := NewZigbeeBridge(msg).Parse()
+// 	if ok {
+// 		p.Push(outMsg)
+// 	}
+// },
 
 // ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
 // defer cancel()

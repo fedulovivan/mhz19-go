@@ -79,9 +79,6 @@ func (p *mockprovider) Init() {
 func (p *mockprovider) Stop() {
 }
 
-func (p *mockprovider) CloseChan() {
-}
-
 type mockengine struct {
 }
 

@@ -146,14 +146,14 @@ func main() {
 	<-stopped
 	slog.Debug(tag.F("App termination signal received"))
 
-	// wait for queues to stop
-	queuesContainer.Wait()
-
-	// stop engine and all underlying modules
-	e.Stop()
+	// stop providers
+	e.StopProviders()
 
 	// stop rest
 	rest.Stop()
+
+	// wait for queues to stop
+	queuesContainer.Wait()
 
 	slog.Info(tag.F("All done, bye-bye"))
 }

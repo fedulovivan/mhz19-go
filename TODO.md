@@ -1,5 +1,7 @@
 ### Prio 0
 - try: mongodb instead of sqlite3
+- feat: add ForceFlush to avoid "Waiting for the 9 message queues to stop"
+- feat: add a sibling for "Have not seen" message, which will notify device is back online
 
 ### Prio 1
 none
@@ -45,6 +47,7 @@ none
 - arch: device_id + device_class adressing issue (see more detailed tasks breakdown in "Milestones" section below)
 
 ### Try
+- try: go version manager https://github.com/moovweb/gvm
 - try: to utilize tcpdump to capture dnssd messages
 - try: lib for online deadlock detection in go https://github.com/sasha-s/go-deadlock
 - try: custom firmware for roborock vacuum https://valetudo.cloud/, https://www.youtube.com/watch?v=r_04K5SPEXI
@@ -87,6 +90,10 @@ none
     - arch: think of good api (constructor) for creating new message (NewMessage) Id, Timestamp, ChannelType, DeviceClass?, DeviceId? -  are mandatory
 
 ### Completed
+- (+) feat: refactor parse_base method
+- (+) bug: app still continue to receive messages after receiving shutdown
+- (+) bug: two forms: Have not seen «ed6af05f0d59» for a while; Have not seen «Device of class valve-manipulator, with id 18225» for a while; see execTemplate - this is expected
+- (+) feat: device white/black list for RecordMessage action; corrected on espresence side, added whitelist
 - (+) bug: rulesService.OnCreated() returns rule conditions and actions without real db ids which impacts the log, see ~/Desktop/rules-git-diff.diff; we can use "Build" to construct types.Rule back from db objects, but repository.Create should update db objects with real ids - fixed with simplest approach: re-fetching from db
 - (+) bug: wrong id (appeared id from messages table while was expected from devices) "Msg=25 Rule=1 Action=1 UpsertZigbeeDevices Created id=72852" - apparently this is https://github.com/mattn/go-sqlite3/issues/30, however my case is quite complex to reproduce: UpsertZigbeeDevices performs bulk UPSERT in transaction 1; RecordMessage performs bulk UPSERT into devices and messages in transaction 2; closing, no new ideas, no go-related specific
 - (+) feat: switch to docker-compose in `make update`

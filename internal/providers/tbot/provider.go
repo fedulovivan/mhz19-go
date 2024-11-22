@@ -29,9 +29,6 @@ var _ types.ChannelProvider = (*provider)(nil)
 
 func NewProvider() *provider {
 	return &provider{
-		ProviderBase: engine.ProviderBase{
-			MessagesChan: make(types.MessageChan),
-		},
 		bots:    make(map[string]*tgbotapi.BotAPI),
 		started: make(chan struct{}),
 	}
@@ -69,7 +66,8 @@ func (p *provider) Stop() {
 	for _, bot := range p.bots {
 		bot.StopReceivingUpdates()
 	}
-	p.CloseChan()
+	p.ProviderBase.Stop()
+	// p.CloseChan()
 }
 
 func (p *provider) SendNewMessage(text string, botName string, chatId int64) (err error) {
@@ -85,13 +83,6 @@ func (p *provider) SendNewMessage(text string, botName string, chatId int64) (er
 	_, err = bot.Send(msg)
 	return
 }
-
-// chatId := app.Config.TelegramChatId
-// msg.ReplyToMessageID = update.Message.MessageID
-// if chatId == 0 {
-// 	chatId = app.Config.TelegramChatId
-// }
-// chatId = int64(114333844)
 
 func (p *provider) StartBotClient(token string) (err error) {
 	p.botsMu.Lock()
@@ -142,6 +133,7 @@ func (p *provider) StartBotClient(token string) (err error) {
 }
 
 func (p *provider) Init() {
+	p.ProviderBase.Init()
 	for _, token := range app.Config.TelegramTokens {
 		err := p.StartBotClient(token)
 		if err != nil {
@@ -152,3 +144,10 @@ func (p *provider) Init() {
 	}
 	p.started <- struct{}{}
 }
+
+// chatId := app.Config.TelegramChatId
+// msg.ReplyToMessageID = update.Message.MessageID
+// if chatId == 0 {
+// 	chatId = app.Config.TelegramChatId
+// }
+// chatId = int64(114333844)

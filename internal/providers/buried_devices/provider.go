@@ -31,9 +31,6 @@ func NewProvider(
 	devicesService types.DevicesService,
 ) *provider {
 	return &provider{
-		ProviderBase: engine.ProviderBase{
-			MessagesChan: make(types.MessageChan),
-		},
 		ldmService:     ldmService,
 		devicesService: devicesService,
 		buriedTimers:   make(BuriedTimers),
@@ -92,6 +89,7 @@ func (p *provider) handleKey(key types.LdmKey) {
 }
 
 func (p *provider) Init() {
+	p.ProviderBase.Init()
 	go func() {
 		for key := range p.ldmService.OnSet() {
 			p.handleKey(key)

@@ -25,11 +25,7 @@ var _ types.ChannelProvider = (*provider)(nil)
 var tag = utils.NewTag(logger.DNSSD)
 
 func NewProvider() *provider {
-	return &provider{
-		ProviderBase: engine.ProviderBase{
-			MessagesChan: make(types.MessageChan),
-		},
-	}
+	return &provider{}
 }
 
 func (p *provider) Channel() types.ChannelType {
@@ -37,6 +33,8 @@ func (p *provider) Channel() types.ChannelType {
 }
 
 func (p *provider) Init() {
+
+	p.ProviderBase.Init()
 
 	if app.Config.DnssdDebug {
 		dlog.Debug.Enable()
