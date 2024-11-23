@@ -1,7 +1,6 @@
 ### Prio 0
-- try: mongodb instead of sqlite3
 - feat: add ForceFlush to avoid "Waiting for the 9 message queues to stop"
-- feat: add a sibling for "Have not seen" message, which will notify device is back online
+- bug: "panic: send on closed channel" during gracefull shutdown; /Users/ivanf/Desktop/panic-001.txt
 
 ### Prio 1
 none
@@ -24,6 +23,7 @@ none
 - feat: db: introduce updated_at, created_at columns
 - feat: db: limit rule name length, since its used to group prometheus metrics
 - feat: api: toggle rule on/off
+- feat: api: add url /devices/id/15
 - feat: api: toggle device buried_timeout on/off
 - feat: api: update rule - looks its better to utilize delete/create strategy
 - feat: accept DeviceClass(telegram-bot) as well as DeviceClass(5) in json
@@ -47,6 +47,7 @@ none
 - arch: device_id + device_class adressing issue (see more detailed tasks breakdown in "Milestones" section below)
 
 ### Try
+- try: mongodb instead of sqlite3
 - try: go version manager https://github.com/moovweb/gvm
 - try: to utilize tcpdump to capture dnssd messages
 - try: lib for online deadlock detection in go https://github.com/sasha-s/go-deadlock
@@ -90,7 +91,9 @@ none
     - arch: think of good api (constructor) for creating new message (NewMessage) Id, Timestamp, ChannelType, DeviceClass?, DeviceId? -  are mandatory
 
 ### Completed
-- (+) feat: refactor parse_base method
+- (+) feat: add a sibling for "Have not seen" message, which will notify device is back online
+- (+) feat: reload change in devices.buried_timeout on the fly; already supported
+- (+) feat: refactor and simplify parse_base method
 - (+) bug: app still continue to receive messages after receiving shutdown
 - (+) bug: two forms: Have not seen «ed6af05f0d59» for a while; Have not seen «Device of class valve-manipulator, with id 18225» for a while; see execTemplate - this is expected
 - (+) feat: device white/black list for RecordMessage action; corrected on espresence side, added whitelist

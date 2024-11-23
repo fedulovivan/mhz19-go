@@ -16,6 +16,10 @@ type DbDevice struct {
 	Comments      sql.NullString
 	Origin        sql.NullString
 	Json          sql.NullString
+	// in seconds
+	// when 0 no "Have not seen" messages will be delivered fot this device
+	// when NULL a default value DefaultBuriedTimeout/BURIED_TIMEOUT will be used (90m)
+	// whwn >0 customised timeout in seconds
 	BuriedTimeout sql.NullInt32
 }
 
