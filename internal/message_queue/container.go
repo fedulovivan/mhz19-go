@@ -42,6 +42,19 @@ func NewKey(deviceClass types.DeviceClass, deviceId types.DeviceId, ruleId int) 
 	}
 }
 
+func (c *Container) Flush() {
+	c.RLock()
+	defer c.RUnlock()
+	qlen := len(c.qlist)
+	if qlen == 0 {
+		return
+	}
+	slog.Debug(tag.F("Flushing %d message queues now", qlen))
+	for _, queue := range c.qlist {
+		queue.Flush()
+	}
+}
+
 func (c *Container) Wait() {
 	c.RLock()
 	defer c.RUnlock()
@@ -49,7 +62,7 @@ func (c *Container) Wait() {
 	if qlen == 0 {
 		return
 	}
-	slog.Warn(tag.F("Waiting for the %d message queues to stop", qlen))
+	slog.Debug(tag.F("Waiting for the %d message queues to stop", qlen))
 	for key, queue := range c.qlist {
 		queue.Wait()
 		slog.Debug(tag.F("Queue wait done"), "key", key)

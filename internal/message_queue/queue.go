@@ -20,7 +20,7 @@ type queue struct {
 	timer        *time.Timer
 }
 
-func (q *queue) flush() {
+func (q *queue) flush_internal() {
 	q.Lock()
 	defer q.Unlock()
 	if q.onFlushed != nil {
@@ -30,6 +30,12 @@ func (q *queue) flush() {
 	q.mm = nil
 	q.flushesCount.Add(1)
 	close(*q.waitFlush.Load())
+}
+
+func (q *queue) Flush() {
+	if q.timer != nil {
+		q.timer.Reset(0)
+	}
 }
 
 func (q *queue) Wait() {
@@ -51,7 +57,7 @@ func (q *queue) PushMessage(m types.Message) {
 	if q.timer == nil {
 		wf := make(chan struct{})
 		q.waitFlush.Store(&wf)
-		q.timer = time.AfterFunc(q.throttle, q.flush)
+		q.timer = time.AfterFunc(q.throttle, q.flush_internal)
 	}
 }
 

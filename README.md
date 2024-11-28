@@ -101,11 +101,11 @@ Console
 - create and run container `make docker-up`
 - optionally: check logs with `make docker-logs`
 
-### Entities provisioning
+### Initial data seeding (provisioning)
 
-`DIR=devices make provision`
-`DIR=rules/system make provision`
-`DIR=rules/user make provision`
+`DIR=devices make seed`
+`DIR=rules/system make seed`
+`DIR=rules/user make seed`
 
 ### Tools required for the development on the bare host
 

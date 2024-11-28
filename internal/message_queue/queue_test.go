@@ -93,6 +93,17 @@ func (s *QueueSuite) Test70() {
 	}, time.Millisecond*20, time.Millisecond*5)
 }
 
+func (s *QueueSuite) Test80() {
+	q := NewQueue(time.Millisecond*100, nil)
+	q.PushMessage(types.Message{})
+	q.Flush()
+	s.Eventually(func() bool {
+		q.Wait()
+		return true
+	}, time.Millisecond*10, time.Millisecond*5)
+	s.Equal(q.Flushes(), int64(1))
+}
+
 func TestQueue(t *testing.T) {
 	suite.Run(t, new(QueueSuite))
 }

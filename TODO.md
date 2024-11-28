@@ -1,6 +1,6 @@
 ### Prio 0
-- feat: add ForceFlush to avoid "Waiting for the 9 message queues to stop"
 - bug: "panic: send on closed channel" during gracefull shutdown; /Users/ivanf/Desktop/panic-001.txt
+- uts: create unit tests for internal/providers/buried_devices/provider.go
 
 ### Prio 1
 none
@@ -91,6 +91,10 @@ none
     - arch: think of good api (constructor) for creating new message (NewMessage) Id, Timestamp, ChannelType, DeviceClass?, DeviceId? -  are mandatory
 
 ### Completed
+- (+) feat: handle seeding single asset file (instead of whole dir); quick implementation is introducing a FILTER parameter
+- (+) feat: write exact time like "5 mins ago" instead of "for a while"
+- (+) feat: rename provisioning to seed
+- (+) feat: add ForceFlush to avoid "Waiting for the 9 message queues to stop"
 - (+) feat: add a sibling for "Have not seen" message, which will notify device is back online
 - (+) feat: reload change in devices.buried_timeout on the fly; already supported
 - (+) feat: refactor and simplify parse_base method

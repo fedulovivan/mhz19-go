@@ -14,14 +14,19 @@ import (
 
 var tag = utils.NewTag(logger.BURIED)
 
-type BuriedTimers map[types.LdmKey]*time.Timer
+type TimerWithLastSeen struct {
+	lastSeen time.Time
+	timer    *time.Timer
+}
+
+type Timers map[types.LdmKey]*TimerWithLastSeen
 
 type provider struct {
 	engine.ProviderBase
 	ldmService     types.LdmService
 	devicesService types.DevicesService
-	buriedTimers   BuriedTimers
-	timersMu       sync.Mutex
+	buriedTimers   Timers
+	timersMu       sync.RWMutex
 }
 
 var _ types.ChannelProvider = (*provider)(nil)
@@ -33,7 +38,7 @@ func NewProvider(
 	return &provider{
 		ldmService:     ldmService,
 		devicesService: devicesService,
-		buriedTimers:   make(BuriedTimers),
+		buriedTimers:   make(Timers),
 	}
 }
 
@@ -54,40 +59,59 @@ func (p *provider) handleKey(key types.LdmKey) {
 			slog.Debug(tag.F("%v device skipped (devices.buried_timeout == 0)", key.DeviceId))
 			skipped = true
 		} else {
-			slog.Warn(tag.F("%v using custom BuriedTimeout value=%s", key.DeviceId, device.BuriedTimeout.Duration))
+			slog.Debug(tag.F("%v using custom BuriedTimeout value=%s", key.DeviceId, device.BuriedTimeout.Duration))
 			timeout = device.BuriedTimeout.Duration
 		}
 	}
-	// timer already exist
-	if timer, ok := p.buriedTimers[key]; ok {
-		// delete timer if on next reading of device data, "skipped" flag is changed to true
+	// timerWithLastSeen already exist
+	if timerWithLastSeen, ok := p.buriedTimers[key]; ok {
+		// delete timer if on next reading of device data "skipped" flag has been changed to true
 		if skipped {
 			slog.Warn(tag.F("%v is now skipped, stopping and deleting timer", key.DeviceId))
-			timer.Stop()
+			timerWithLastSeen.timer.Stop()
 			delete(p.buriedTimers, key)
 			return
 		}
 		// prolong timer after receiving next message
 		// and also check if timer was already fired and emit approprite message
-		active := timer.Reset(timeout)
+		active := timerWithLastSeen.timer.Reset(timeout)
 		if !active {
-			p.emitMessage(key.DeviceId, "ceased")
+			p.emitMessage(
+				key.DeviceId,
+				"ceased",
+				timerWithLastSeen.lastSeen, // read before updating, to celculated duration of missing period for "ceased" message
+			)
 		}
+		timerWithLastSeen.lastSeen = time.Now()
 	} else {
 		if skipped {
 			return
 		}
 		// register timer
-		p.buriedTimers[key] = time.AfterFunc(
-			timeout,
-			func() {
-				p.emitMessage(key.DeviceId, "fired")
-			},
-		)
+		p.buriedTimers[key] = &TimerWithLastSeen{
+			timer: time.AfterFunc(
+				timeout,
+				func() {
+					p.timersMu.RLock()
+					lastSeen := p.buriedTimers[key].lastSeen
+					p.timersMu.RUnlock()
+					p.emitMessage(
+						key.DeviceId,
+						"fired",
+						lastSeen,
+					)
+				},
+			),
+			lastSeen: time.Now(),
+		}
 	}
 }
 
-func (p *provider) emitMessage(deviceId types.DeviceId, transition string) {
+func (p *provider) emitMessage(
+	deviceId types.DeviceId,
+	transition string,
+	lastSeen time.Time,
+) {
 	outMsg := types.Message{
 		Id:          types.MessageIdSeq.Add(1),
 		Timestamp:   time.Now(),
@@ -97,6 +121,7 @@ func (p *provider) emitMessage(deviceId types.DeviceId, transition string) {
 		Payload: map[string]any{
 			"BuriedDeviceId": deviceId,
 			"Transition":     transition,
+			"HaveNotSeen":    time.Since(lastSeen).Round(time.Second),
 		},
 		FromEndDevice: false,
 	}

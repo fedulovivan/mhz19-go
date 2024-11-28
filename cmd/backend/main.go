@@ -152,7 +152,8 @@ func main() {
 	// stop rest
 	rest.Stop()
 
-	// wait for queues to stop
+	// request flushing of queues immediately and then wait to stop
+	queuesContainer.Flush()
 	queuesContainer.Wait()
 
 	slog.Info(tag.F("All done, bye-bye"))

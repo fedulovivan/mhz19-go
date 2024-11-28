@@ -28,8 +28,8 @@ run:
 run-norace:
 	go run ./cmd/backend
 
-provision:
-	go run ./cmd/provision
+seed:
+	go run ./cmd/seed
 
 tidy:
 	go mod tidy	

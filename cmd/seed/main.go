@@ -20,28 +20,44 @@ const (
 )
 
 var (
-	host = "localhost:7070"
+	host   = "localhost:7070"
+	filter = ""
 )
 
+var help = `
+not enough options...
+usage examples:
+  DIR=devices make seed
+  DIR=rules/system make seed
+  DIR=rules/user make seed
+  HOST=%s DIR=rules/system make seed
+  DIR=rules/system FILTER=buried make seed
+`
+
 func main() {
-	fmt.Println("Hello from provisioning tool")
-	if value, ok := os.LookupEnv("HOST"); ok {
-		host = value
+	fmt.Println("Hello from data seeding tool")
+	if v, ok := os.LookupEnv("HOST"); ok {
+		host = v
+	}
+	if v, ok := os.LookupEnv("FILTER"); ok {
+		filter = v
 	}
 	if dir, ok := os.LookupEnv("DIR"); ok {
 		processDir(dir)
 	} else {
-		fmt.Println("not enough options..\nusage examples:\nDIR=devices make provision\nDIR=rules/system make provision\nDIR=rules/user make provision\nHOST=macmini:7070 DIR=rules/system make provision")
+		fmt.Printf(help, host)
 	}
 }
 
-func timeTrack(start time.Time, name string) {
+// use simplified version of github.com/fedulovivan/mhz19-go/pkg/utils::TimeTrack()
+// to avoid extra work with slog initialisation
+func TimeTrack(start time.Time, name string) {
 	elapsed := time.Since(start)
 	fmt.Printf("%stook %s\n", name, elapsed)
 }
 
 func processDir(dir string) {
-	defer timeTrack(time.Now(), "")
+	defer TimeTrack(time.Now(), "")
 	succeeded := atomic.Int32{}
 	failed := atomic.Int32{}
 	dirPath := path.Join(basePath, dir)
@@ -54,11 +70,14 @@ func processDir(dir string) {
 	var wg sync.WaitGroup
 	for _, e := range entries {
 		wg.Add(1)
-		go func(e fs.DirEntry) {
+		go func(entry fs.DirEntry) {
 			defer wg.Done()
-			fmt.Printf("%s IsDir=%v\n", e.Name(), e.IsDir())
-			if !e.IsDir() && strings.HasSuffix(e.Name(), ".json") {
-				name := e.Name()
+			name := entry.Name()
+			fmt.Printf("%s IsDir=%v\n", name, entry.IsDir())
+			use := !entry.IsDir() &&
+				strings.HasSuffix(name, ".json") &&
+				(len(filter) == 0 || strings.Contains(name, filter))
+			if use {
 				filePath := fmt.Sprintf("%s/%s", dirPath, name)
 				res, err := processFile(filePath, apiEntityPath)
 				if err == nil {
@@ -68,6 +87,8 @@ func processDir(dir string) {
 					failed.Add(1)
 					fmt.Println("❌ fail:", name, err.Error())
 				}
+			} else {
+				fmt.Println("⏭️  skipped:", name)
 			}
 		}(e)
 	}

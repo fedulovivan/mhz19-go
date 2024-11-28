@@ -23,7 +23,7 @@
         {
             "fn": "TelegramBotMessage",
             "args": {
-                "Text": "{{ if eq .Message.Payload.Transition \"fired\" }}Have not seen «{{ deviceName .Message.Payload.BuriedDeviceId }}» for a while 👀{{ else }}«{{ deviceName .Message.Payload.BuriedDeviceId }}» returned back{{ end }}"            
+                "Text": "{{ if eq .Message.Payload.Transition \"fired\" }}Have not seen «{{ deviceName .Message.Payload.BuriedDeviceId }}» for {{ .Message.Payload.HaveNotSeen }} 👀{{ else }}«{{ deviceName .Message.Payload.BuriedDeviceId }}» returned back (was missing for {{ .Message.Payload.HaveNotSeen }}){{ end }}"
             }
         }
     ]
