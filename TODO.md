@@ -1,6 +1,5 @@
 ### Prio 0
-- bug: "panic: send on closed channel" during gracefull shutdown; /Users/ivanf/Desktop/panic-001.txt
-- uts: create unit tests for internal/providers/buried_devices/provider.go
+none
 
 ### Prio 1
 none
@@ -15,7 +14,9 @@ none
 - dig: read more about makefile PHONY https://vsupalov.com/makefile-phony/
   
 ### Features
-- feat: sql: avoid ON DELETE CASCADE for the columns dependand on dictionaries (e.g to avoid unexpected loss of rules after reducing actions list)
+- feat: uts: create unit tests for internal/providers/buried_devices/provider.go
+- feat: instrument queue and queue container modules
+- feat: sql: avoid ON DELETE CASCADE for the columns dependand on dictionaries (e.g to avoid unexpected loss of rules after reducing dictionary with actions list)
 - feat: move docker-compose stack-related items into the separate repository; tidy up all volume-targeted folders/files structure with 3pp configs (prometheus, zigbee2mqtt, mosquitto etc), avoid anonymous volume for zigbee2mqtt; pass all zigbee2mqtt settings (host, serial/port, frontend port) via env vars and remove zigbee2mqtt-data/configuration.yaml from vcs
 - feat: think how to init SqliteMaxTxDuration in unit tests, now app.InitConfig is not called in UTs
 - feat: collect "messages by device id" metric
@@ -91,6 +92,7 @@ none
     - arch: think of good api (constructor) for creating new message (NewMessage) Id, Timestamp, ChannelType, DeviceClass?, DeviceId? -  are mandatory
 
 ### Completed
+- (+) bug: "panic: send on closed channel" during gracefull shutdown; /Users/ivanf/Desktop/panic-001.txt
 - (+) feat: handle seeding single asset file (instead of whole dir); quick implementation is introducing a FILTER parameter
 - (+) feat: write exact time like "5 mins ago" instead of "for a while"
 - (+) feat: rename provisioning to seed

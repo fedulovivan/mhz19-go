@@ -79,7 +79,7 @@ func (p *provider) handleKey(key types.LdmKey) {
 			p.emitMessage(
 				key.DeviceId,
 				"ceased",
-				timerWithLastSeen.lastSeen, // read before updating, to celculated duration of missing period for "ceased" message
+				timerWithLastSeen.lastSeen, // read before updating, to calculate duration of missing period for "ceased" message
 			)
 		}
 		timerWithLastSeen.lastSeen = time.Now()
@@ -105,6 +105,15 @@ func (p *provider) handleKey(key types.LdmKey) {
 			lastSeen: time.Now(),
 		}
 	}
+}
+
+func (p *provider) Stop() {
+	p.timersMu.RLock()
+	defer p.timersMu.RUnlock()
+	for _, timerWithLastSeen := range p.buriedTimers {
+		timerWithLastSeen.timer.Stop()
+	}
+	p.ProviderBase.Stop()
 }
 
 func (p *provider) emitMessage(
