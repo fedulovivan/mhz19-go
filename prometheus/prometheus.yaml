@@ -11,10 +11,10 @@ scrape_configs:
     static_configs:
       - targets:
         - host.docker.internal:2112
-  - job_name: macmini
+  - job_name: localhost
     static_configs:
       - targets:
-        - 192.168.88.188:9100
+        - localhost:9100
   - job_name: rpi
     static_configs:
       - targets:

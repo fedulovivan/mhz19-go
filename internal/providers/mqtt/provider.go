@@ -62,6 +62,9 @@ func (p *provider) Init() {
 		"/VALVE/+/STATE/STATUS": func(c MqttLib.Client, msg MqttLib.Message) {
 			p.Push(Parse(msg, types.DEVICE_CLASS_VALVE, true, 1))
 		},
+		"valves-manipulator/+/status": func(c MqttLib.Client, msg MqttLib.Message) {
+			p.Push(Parse(msg, types.DEVICE_CLASS_VALVE, true, 1))
+		},
 		"zigbee2mqtt/bridge/devices": func(c MqttLib.Client, msg MqttLib.Message) {
 			p.Push(Parse(msg, types.DEVICE_CLASS_ZIGBEE_BRIDGE, false, 1))
 		},

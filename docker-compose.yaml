@@ -47,7 +47,7 @@ services:
       - 2112:2112
 
   zigbee2mqtt:
-    image: koenkk/zigbee2mqtt
+    image: koenkk/zigbee2mqtt:1.41.0
     ports:
       - 7000:7000
     volumes:
@@ -65,7 +65,7 @@ services:
       - ZIGBEE2MQTT_CONFIG_MQTT_PASSWORD=$MQTT_PASSWORD
 
   mosquitto:
-    image: eclipse-mosquitto
+    image: eclipse-mosquitto:2
     volumes:
       - ./mosquitto:/mosquitto/config
     ports:
@@ -78,7 +78,7 @@ services:
       "
 
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v2.45.4
     ports:
       - 9092:9090
     volumes:
@@ -93,7 +93,7 @@ services:
     logging: *default-logging
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:11.5.0
     ports:
       - 3002:3000
     volumes:

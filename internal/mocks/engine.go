@@ -86,6 +86,10 @@ func (e *mockengine) GetDevicesService() types.DevicesService {
 	return &mockDevicesService{}
 }
 
+func (e *mockengine) GetLdmService() types.LdmService {
+	return nil
+}
+
 func (e *mockengine) GetMessagesService() types.MessagesService {
 	return nil
 }

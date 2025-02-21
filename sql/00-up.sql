@@ -150,7 +150,7 @@ INSERT INTO devices (native_id, device_class_id, origin) VALUES('device-id-for-t
 -- INSERT INTO devices (native_id, device_class_id) VALUES('Mhz19Bot', 5);
 -- INSERT INTO devices (native_id, device_class_id) VALUES('Mhz19ToGoBot', 5);
 
--- for user rules, valve-manipulator device will be upserted only after receiving first message
+-- for user rules, valves-manipulator device will be upserted only after receiving first message
 -- INSERT INTO devices (native_id, device_class_id) VALUES('18225', 3);
 -- INSERT INTO devices (native_id, device_class_id) VALUES('6613075', 3);
 

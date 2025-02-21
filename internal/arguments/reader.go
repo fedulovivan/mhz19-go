@@ -127,6 +127,24 @@ func (r *reader) Get(field string) any {
 func (r *reader) execTemplate(in string, field string) (string, error) {
 	tmpl, err := template.New(field).Funcs(
 		template.FuncMap{
+			"getDoorStatus": func() (string, error) {
+				msg, err := r.supplier.GetLdmService().GetByDeviceId(
+					types.DeviceId("0x881a14fffee9a422"),
+				)
+				if err != nil {
+					return fmt.Sprintf("status unknown (%s)", err), nil
+				}
+				if payload, ok := msg.Payload.(map[string]any); ok {
+					if contact, ok := payload["contact"].(bool); ok {
+						if contact {
+							return "is locked 🔒", nil
+						} else {
+							return "is unlocked ⚠️", nil
+						}
+					}
+				}
+				return fmt.Sprintf("%+v", msg), nil
+			},
 			"deviceName": func(deviceId any) (string, error) {
 				if typedDeviceId, ok := deviceId.(types.DeviceId); ok {
 					device, err := r.supplier.GetDevicesService().GetOne(typedDeviceId)
