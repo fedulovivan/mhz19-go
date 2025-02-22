@@ -19,7 +19,9 @@ type MqttMessageReduced interface {
 // user is oblidged to specify following params:
 // deviceClass - DeviceClass
 // fromEndDevice - flag indicating whethe this is message from end device or something like z2m bridge or espresense node message
-// topicDeviceIdIndex - zero-based index within topic where device is is located, eg for "zigbee2mqtt/0x00158d000405811b" its 1
+// topicDeviceIdIndex - zero-based index, within topic splitted by slash, where device id part is is located:
+// eg for "zigbee2mqtt/0x00158d000405811b" its 1
+// for "espresense/devices/apple:10-111/anyvalue" its 2
 func Parse(
 	msg MqttMessageReduced,
 	deviceClass types.DeviceClass,

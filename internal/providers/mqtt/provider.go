@@ -59,9 +59,6 @@ func (p *provider) Init() {
 		"device-pinger/+/status": func(c MqttLib.Client, msg MqttLib.Message) {
 			p.Push(Parse(msg, types.DEVICE_CLASS_PINGER, true, 1))
 		},
-		"/VALVE/+/STATE/STATUS": func(c MqttLib.Client, msg MqttLib.Message) {
-			p.Push(Parse(msg, types.DEVICE_CLASS_VALVE, true, 1))
-		},
 		"valves-manipulator/+/status": func(c MqttLib.Client, msg MqttLib.Message) {
 			p.Push(Parse(msg, types.DEVICE_CLASS_VALVE, true, 1))
 		},

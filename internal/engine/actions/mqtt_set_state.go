@@ -10,7 +10,7 @@ import (
 
 var MQTT_TOPIC_BY_DEVICE_CLASS = map[types.DeviceClass]string{
 	types.DEVICE_CLASS_ZIGBEE_DEVICE: "zigbee2mqtt/%v/set/state",
-	types.DEVICE_CLASS_VALVE:         "/VALVE/%v/STATE/SET",
+	types.DEVICE_CLASS_VALVE:         "valves-manipulator/%v/cmd",
 }
 
 // args: DeviceId, State
