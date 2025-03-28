@@ -1,0 +1,47 @@
+{
+    "name": "notify main entrance door was opened/closed",
+    "condition": {
+        "nested": [
+            {
+                "fn": "ZigbeeDevice",
+                "args": {
+                    "List": [
+                        "DeviceId(0x881a14fffee9a422)"
+                    ]
+                }
+            },
+            {
+                "fn": "Nil",
+                "not": true,
+                "args": {
+                    "Value": "$message.contact"
+                }
+            },            
+            {
+                "fn": "InList",
+                "args": {
+                    "Value": "$message.contact",
+                    "List": [
+                        true,
+                        false
+                    ]
+                }
+            },
+            {
+                "fn": "Changed",
+                "args": {
+                    "Value": "$message.contact"
+                }
+            }
+        ]
+    },
+    "actions": [
+        {
+            "fn": "TelegramBotMessage",
+            "args": {
+                "Text": "Entrance door is {{ if .Message.Payload.contact }}locked 🔒{{ else }}unlocked ⚠️{{ end }}",
+                "BotName": "Mhz19AlertsBot"
+            }
+        }
+    ]
+}

@@ -83,6 +83,9 @@ func (e *engine) DeleteRule(ruleId int) {
 	slog.Debug(BaseTag.F("DeleteRule"), "deleted", before-after, "total", after)
 }
 
+func (e *engine) GetLdmService() types.LdmService {
+	return e.ldmService
+}
 func (e *engine) GetMessagesService() types.MessagesService {
 	return e.messageService
 }

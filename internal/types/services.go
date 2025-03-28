@@ -58,6 +58,7 @@ type RulesService interface {
 type ServiceSupplier interface {
 	GetDevicesService() DevicesService
 	GetMessagesService() MessagesService
+	GetLdmService() LdmService
 }
 
 type ServiceAndProviderSupplier interface {

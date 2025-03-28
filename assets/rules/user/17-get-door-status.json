@@ -1,0 +1,28 @@
+{
+    "name": "get door status",
+    "condition": {
+        "nested": [
+            {
+                "fn": "DeviceClass",
+                "args": {
+                    "Value": "DeviceClass(5)"
+                }
+            },
+            {
+                "fn": "Equal",
+                "args": {
+                    "Left": "$message.Text",
+                    "Right": "/door"
+                }
+            }
+        ]
+    },
+    "actions": [
+        {
+            "fn": "TelegramBotMessage",
+            "args": {
+                "Text": "Door {{ getDoorStatus }}"
+            }
+        }
+    ]
+}

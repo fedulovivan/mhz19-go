@@ -107,7 +107,12 @@ func (p *provider) StartBotClient(token string) (err error) {
 	go func() {
 		for update := range updates {
 			if update.Message != nil {
-				slog.Debug(tag.F("Got a message"), "UserName", update.Message.From.UserName, "Text", update.Message.Text)
+				slog.Debug(
+					tag.F("Got a message"),
+					"UserName", update.Message.From.UserName,
+					"Text", update.Message.Text,
+					"BotName", bot.Self.UserName,
+				)
 				if update.Message.IsCommand() {
 					slog.Debug(tag.F("IsCommand() == true"), "command", update.Message.Command())
 				}

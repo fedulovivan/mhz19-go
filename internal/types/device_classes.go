@@ -25,7 +25,7 @@ const (
 var DEVICE_CLASS_NAMES = map[DeviceClass]string{
 	DEVICE_CLASS_ZIGBEE_DEVICE:     "zigbee-device",
 	DEVICE_CLASS_PINGER:            "device-pinger",
-	DEVICE_CLASS_VALVE:             "valve-manipulator",
+	DEVICE_CLASS_VALVE:             "valves-manipulator",
 	DEVICE_CLASS_ZIGBEE_BRIDGE:     "zigbee-bridge",
 	DEVICE_CLASS_BOT:               "telegram-bot",
 	DEVICE_CLASS_SONOFF_DIY_PLUG:   "sonoff-diy-plug",

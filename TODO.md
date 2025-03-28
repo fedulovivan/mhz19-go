@@ -7,7 +7,8 @@ none
 ### Bugs
 - bug: avoid MQTT_HOST=192.168.88.18 and MQTT_HOST=192.168.88.18 in .env config
 - bug: docker: find the reason of rebuilding mhz19-frontend along with rebuild of mhz19-go; neither --always-recreate-deps, --no-deps helps nor removing depends_on helps; see https://github.com/docker/compose/issues/9600
-- bug: macmini: find the reason of no sound
+- bug: macmini: find the reason of no sound (not actual after migration to rpi5)
+- bug: reply to /door command send in chat with @Mhz19AlertsBot bot is send to @Mhz19Bot (default one from config)
 
 ### Digs
 - dig: check why "api:getAll took 3.451973917s" when reading 1k rules 1k times; try same scenario with postgres; check there is no room for optimisation here
@@ -16,13 +17,13 @@ none
   
 ### Features
 - feat: deploy grafana with dashboards
+- feat: api: add "?window=1h" to /messages/device/<deviceId>
 - feat: uts: create unit tests for internal/providers/buried_devices/provider.go
 - feat: instrument queue and queue container modules
 - feat: sql: avoid ON DELETE CASCADE for the columns dependand on dictionaries (e.g to avoid unexpected loss of rules after reducing dictionary with actions list)
 - feat: move docker-compose stack-related items into the separate repository; tidy up all volume-targeted folders/files structure with 3pp configs (prometheus, zigbee2mqtt, mosquitto etc), avoid anonymous volume for zigbee2mqtt; pass all zigbee2mqtt settings (host, serial/port, frontend port) via env vars and remove zigbee2mqtt-data/configuration.yaml from vcs
 - feat: think how to init SqliteMaxTxDuration in unit tests, now app.InitConfig is not called in UTs
 - feat: collect "messages by device id" metric
-- feat: freeze image version for 3pp docker deps (zigbee2mqtt 1.36.1 commit: ffc2ff1, mosquitto etc)
 - feat: db: introduce updated_at, created_at columns
 - feat: db: limit rule name length, since its used to group prometheus metrics
 - feat: api: toggle rule on/off
@@ -53,6 +54,7 @@ none
 - try: victoria logs instead of dozzle
 - try: swagger/swaggo or something similar https://www.reddit.com/r/golang/comments/180jgzi/how_do_you_provide_documentation_for_your_rest/
 - try: openapi or swagger https://en.wikipedia.org/wiki/OpenAPI_Specification or https://swagger.io/
+- try: https://github.com/VictoriaMetrics/metrics instead of prometheus lib
 - try: mongodb instead of sqlite3
 - try: go version manager https://github.com/moovweb/gvm
 - try: to utilize tcpdump to capture dnssd messages
@@ -97,6 +99,8 @@ none
     - arch: think of good api (constructor) for creating new message (NewMessage) Id, Timestamp, ChannelType, DeviceClass?, DeviceId? -  are mandatory
 
 ### Completed
+- (+) feat: freeze image version for 3pp docker deps (zigbee2mqtt 1.36.1 commit: ffc2ff1, mosquitto etc)
+- (+) bug major: get rid of mqtt host ip in .env file
 - (+) bug: "panic: send on closed channel" during gracefull shutdown; /Users/ivanf/Desktop/panic-001.txt
 - (+) feat: handle seeding single asset file (instead of whole dir); quick implementation is introducing a FILTER parameter
 - (+) feat: write exact time like "5 mins ago" instead of "for a while"
@@ -106,7 +110,7 @@ none
 - (+) feat: reload change in devices.buried_timeout on the fly; already supported
 - (+) feat: refactor and simplify parse_base method
 - (+) bug: app still continue to receive messages after receiving shutdown
-- (+) bug: two forms: Have not seen «ed6af05f0d59» for a while; Have not seen «Device of class valve-manipulator, with id 18225» for a while; see execTemplate - this is expected
+- (+) bug: two forms: Have not seen «ed6af05f0d59» for a while; Have not seen «Device of class valves-manipulator, with id 18225» for a while; see execTemplate - this is expected
 - (+) feat: device white/black list for RecordMessage action; corrected on espresence side, added whitelist
 - (+) bug: rulesService.OnCreated() returns rule conditions and actions without real db ids which impacts the log, see ~/Desktop/rules-git-diff.diff; we can use "Build" to construct types.Rule back from db objects, but repository.Create should update db objects with real ids - fixed with simplest approach: re-fetching from db
 - (+) bug: wrong id (appeared id from messages table while was expected from devices) "Msg=25 Rule=1 Action=1 UpsertZigbeeDevices Created id=72852" - apparently this is https://github.com/mattn/go-sqlite3/issues/30, however my case is quite complex to reproduce: UpsertZigbeeDevices performs bulk UPSERT in transaction 1; RecordMessage performs bulk UPSERT into devices and messages in transaction 2; closing, no new ideas, no go-related specific
