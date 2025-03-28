@@ -5,6 +5,7 @@ none
 none
 
 ### Bugs
+- bug: avoid MQTT_HOST=192.168.88.18 and MQTT_HOST=192.168.88.18 in .env config
 - bug: docker: find the reason of rebuilding mhz19-frontend along with rebuild of mhz19-go; neither --always-recreate-deps, --no-deps helps nor removing depends_on helps; see https://github.com/docker/compose/issues/9600
 - bug: macmini: find the reason of no sound
 
@@ -14,6 +15,7 @@ none
 - dig: read more about makefile PHONY https://vsupalov.com/makefile-phony/
   
 ### Features
+- feat: deploy grafana with dashboards
 - feat: uts: create unit tests for internal/providers/buried_devices/provider.go
 - feat: instrument queue and queue container modules
 - feat: sql: avoid ON DELETE CASCADE for the columns dependand on dictionaries (e.g to avoid unexpected loss of rules after reducing dictionary with actions list)
@@ -48,6 +50,9 @@ none
 - arch: device_id + device_class adressing issue (see more detailed tasks breakdown in "Milestones" section below)
 
 ### Try
+- try: victoria logs instead of dozzle
+- try: swagger/swaggo or something similar https://www.reddit.com/r/golang/comments/180jgzi/how_do_you_provide_documentation_for_your_rest/
+- try: openapi or swagger https://en.wikipedia.org/wiki/OpenAPI_Specification or https://swagger.io/
 - try: mongodb instead of sqlite3
 - try: go version manager https://github.com/moovweb/gvm
 - try: to utilize tcpdump to capture dnssd messages
@@ -56,12 +61,11 @@ none
 - try: to disable go telemetry (/root/.config/go/telemetry/local)
 - try: validation: https://github.com/go-playground/validator OR https://github.com/asaskevich/govalidator OR https://github.com/go-ozzo/ozzo-validation
 - try: grpc
-- try: to deploy on old rpi/raspberrypi with read-only fs enabled
-- try: hcl - https://github.com/hashicorp/hcl
+- try: to deploy on old/oldest rpi/raspberrypi with read-only fs enabled
+- try: HashiCorp configuration language https://github.com/hashicorp/hcl
 - try: some interactive cli framework for provisioning tool like cobra
 - try: find out why cli command "make test" and "vscode" report different coverage statistics: 86.9% vs 100%. vscode syntax - `Running tool: /opt/homebrew/bin/go test -timeout 30s -coverprofile=/var/folders/5v/0wjs9g1948ddpdqkgf1h31q80000gn/T/vscode-go7lC7ip/go-code-cover github.com/fedulovivan/mhz19-go/internal/engine`
 - try: 3pp di library https://pkg.go.dev/go.uber.org/fx
-- try: openapi or swagger https://en.wikipedia.org/wiki/OpenAPI_Specification or https://swagger.io/
 - try: http router https://github.com/julienschmidt/httprouter istead of ozzo-routing
 - try: benchmarking tool https://github.com/sharkdp/hyperfine
 - try: postgres instead of sqlite3
@@ -80,6 +84,7 @@ none
 - try: to create client for miio devices udp port 54321 (yeelight smart ceiling light, robot vacuum), for now stuck with token fetching issue. links: https://github.com/aholstenson/miio, https://github.com/OpenMiHome/mihome-binary-protocol, https://github.com/maxinminax/node-mihome, https://github.com/nickw444/miio-go, https://github.com/marcelrv/XiaomiRobotVacuumProtocol, https://github.com/vkorn/go-miio, https://www.youtube.com/watch?v=m11qbkgOz5o
 
 ### Milestones
+- (+) 15 march 2025, DONE. Moved to raspberrypi 5 ("mhz19-go migration to new host" in notes)
 - (+) 26 sep 2024, DONE. Initial launch - All features from mhz19-next plus storing mapping rules in database
 - Implement simple frontend
 - Prepare for the public usage (real use cases)
