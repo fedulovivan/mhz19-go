@@ -1,4 +1,4 @@
 {
     "deviceId":"DeviceId(10011cec96)",
-    "deviceClass":6
+    "deviceClass":"DeviceClass(sonoff-diy-plug)"
 }

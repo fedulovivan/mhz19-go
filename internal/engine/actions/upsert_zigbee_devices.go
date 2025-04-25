@@ -1,9 +1,9 @@
 package actions
 
 import (
+	"fmt"
 	"log/slog"
 
-	"github.com/Jeffail/gabs/v2"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 	"github.com/fedulovivan/mhz19-go/pkg/utils"
 )
@@ -19,25 +19,32 @@ var UpsertZigbeeDevices types.ActionImpl = func(
 	e types.ServiceAndProviderSupplier,
 	tag utils.Tag,
 ) (err error) {
-	devicesjson := gabs.Wrap(compound.Curr.Payload)
-	out := make([]types.Device, 0)
+	devices := make([]types.Device, 0)
+	var raw []interface{}
+	var ok bool
+	if raw, ok = compound.Curr.Payload.([]interface{}); !ok {
+		return fmt.Errorf("compound.Curr.Payload is expected to be []interface{}")
+	}
+	out := make([]types.ZigbeeDevice, 0)
+	err = utils.MapstructureDecode(raw, &out)
+	if err != nil {
+		return
+	}
 	origin := "bridge-upsert"
-	for _, d := range devicesjson.Children() {
-		dtype, ok := d.Path("type").Data().(string)
-		if !ok || dtype != "EndDevice" {
+	for i, device := range out {
+		if device.Type != "EndDevice" {
 			continue
 		}
-		deviceId := d.Path("ieee_address").Data().(string)
-		comments := d.Path("definition.description").Data().(string)
-		out = append(out, types.Device{
+		json := raw[i]
+		devices = append(devices, types.Device{
 			DeviceClass: types.DEVICE_CLASS_ZIGBEE_DEVICE,
-			DeviceId:    types.DeviceId(deviceId),
-			Comments:    &comments,
+			DeviceId:    types.DeviceId(device.IeeeAddress),
+			Comments:    &device.Definition.Description,
 			Origin:      &origin,
-			Json:        d.Data(),
+			Json:        json,
 		})
 	}
-	id, err := e.GetDevicesService().UpsertAll(out)
+	id, err := e.GetDevicesService().UpsertAll(devices)
 	slog.Debug(tag.F("Created"), "LastInsertId", id)
 	return
 }

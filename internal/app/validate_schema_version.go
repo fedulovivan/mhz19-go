@@ -5,7 +5,7 @@ import (
 	"slices"
 )
 
-const SCHEMA_VERSION_WANT int32 = 6
+const SCHEMA_VERSION_WANT int32 = 7
 
 func ValidateSchemaVersion(version int32) {
 	delta := version - SCHEMA_VERSION_WANT
@@ -17,7 +17,7 @@ func ValidateSchemaVersion(version int32) {
 			message = "Old"
 		}
 		panic(fmt.Sprintf(
-			"%s db schema version: want %d, current %d. Need to run migration(s) %d...%d",
+			"%s db schema version: want %d, current %d. Need to run migration(s) %d...%d (check also const SCHEMA_VERSION_WANT)",
 			message,
 			SCHEMA_VERSION_WANT, version,
 			versions[0], versions[1],

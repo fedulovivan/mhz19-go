@@ -9,6 +9,9 @@ const DEVICE_ID_FOR_THE_REST_PROVIDER_MESSAGE = DeviceId(
 const DEVICE_ID_FOR_THE_APPLICATION_MESSAGE = DeviceId(
 	"device-id-for-the-application-message",
 )
+const DEVICE_ID_FOR_THE_WATCHER_MESSAGE = DeviceId(
+	"device-id-for-the-watcher-message",
+)
 
 type DictType string
 

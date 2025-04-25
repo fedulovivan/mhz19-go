@@ -40,7 +40,7 @@ var MqttSetState types.ActionImpl = func(
 	if err != nil {
 		return
 	}
-	p := e.GetProvider(types.CHANNEL_MQTT)
+	p := e.GetProvider(types.PROVIDER_MQTT)
 	err = p.Send(topic, state)
 	return
 }

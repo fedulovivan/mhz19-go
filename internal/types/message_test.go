@@ -89,6 +89,7 @@ func (s *MessageSuite) Test50() {
 	v, _ := m.ExecDirective("$message.foo")
 	s.Nil(v)
 }
+
 func (s *MessageSuite) Test60() {
 	m := Message{
 		Payload: map[string]string{
@@ -96,8 +97,8 @@ func (s *MessageSuite) Test60() {
 		},
 	}
 	v, err := m.ExecDirective("$message.foo")
-	s.EqualError(err, `Message.ExecDirective(): Payload is expected to be map[string]any not 'map[string]string', reading field 'foo'`)
-	s.Nil(v)
+	s.Nil(err)
+	s.Equal("bar", v)
 }
 
 func (s *MessageSuite) Test61() {

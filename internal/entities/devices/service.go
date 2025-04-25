@@ -13,12 +13,10 @@ import (
 type DevicesRepository interface {
 	UpsertAll(devices []DbDevice) (int64, error)
 	Get(deviceId sql.NullString, deviceClass sql.NullInt32) ([]DbDevice, error)
-	Update(device DbDevice) error
+	UpdateName(device DbDevice) error
+	UpdateBuriedTimeout(device DbDevice) error
 	Delete(int64) error
 }
-
-// var _ DevicesRepository = (*devicesRepository)(nil)
-// var _ types.DevicesService = (*devicesService)(nil)
 
 type service struct {
 	repository DevicesRepository
@@ -94,14 +92,12 @@ func BuildDevices(in []DbDevice) (out []types.Device) {
 	return
 }
 
-// func (s devicesService) Create(device types.Device) (int32, error) {
-// 	s.repository.UpsertAll()
-// 	// return s.repository.Create(ToDb(device))
-// 	// s.repository.UpsertAll()
-// }
+func (s service) UpdateName(device types.Device) error {
+	return s.repository.UpdateName(ToDb(device))
+}
 
-func (s service) Update(device types.Device) error {
-	return s.repository.Update(ToDb(device))
+func (s service) UpdateBuriedTimeout(device types.Device) error {
+	return s.repository.UpdateBuriedTimeout(ToDb(device))
 }
 
 func (s service) GetByDeviceClass(dc types.DeviceClass) (devices []types.Device, err error) {

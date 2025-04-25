@@ -5,7 +5,7 @@
             {
                 "fn": "DeviceClass",
                 "args": {
-                    "Value": "DeviceClass(3)"
+                    "Value": "DeviceClass(valves-manipulator)"
                 }
             },
             {

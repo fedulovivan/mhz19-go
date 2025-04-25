@@ -1,5 +1,5 @@
 {
-    "name": "deliver system notifications",
+    "name": "door is unlocked for too long",
     "condition": {
         "nested": [
             {
@@ -9,12 +9,9 @@
                 }
             },
             {
-                "fn": "InList",
+                "fn": "DeviceId",
                 "args": {
-                    "Value": "$deviceId",
-                    "List": [
-                        "DeviceId(device-id-for-the-application-message)"
-                    ]
+                    "Value": "DeviceId(device-id-for-the-watcher-message)"
                 }
             }
         ]
@@ -23,7 +20,8 @@
         {
             "fn": "TelegramBotMessage",
             "args": {
-                "Text": "$message.text"
+                "Text": "Door is unlocked for too long",
+                "BotName": "Mhz19AlertsBot"
             }
         }
     ]

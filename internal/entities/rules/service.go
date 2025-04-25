@@ -15,7 +15,7 @@ import (
 )
 
 type service struct {
-	created    chan int
+	created    chan types.Rule
 	deleted    chan int
 	repository RulesRepository
 }
@@ -26,7 +26,7 @@ var knownSimpleTypes = []string{"string", "int", "float64", "bool"}
 
 func NewService(r RulesRepository) *service {
 	return &service{
-		created:    make(chan int),
+		created:    make(chan types.Rule),
 		deleted:    make(chan int),
 		repository: r,
 	}
@@ -39,7 +39,7 @@ func ServiceSingleton(r RulesRepository) *service {
 	return instance
 }
 
-func (s service) OnCreated() <-chan int {
+func (s service) OnCreated() <-chan types.Rule {
 	return s.created
 }
 
@@ -61,7 +61,8 @@ func (s service) Create(rule types.Rule) (newRuleId int64, err error) {
 		dbMappings,
 	)
 	if err == nil {
-		s.created <- int(newRuleId)
+		new, _ := s.GetOne(int(newRuleId))
+		s.created <- new
 	}
 	return
 }

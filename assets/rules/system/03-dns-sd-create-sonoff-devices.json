@@ -5,7 +5,7 @@
             {
                 "fn": "Channel",
                 "args": {
-                    "Value": "ChannelType(3)"
+                    "Value": "ChannelType(dns-sd)"
                 }
             }
         ]

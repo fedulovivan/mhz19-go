@@ -14,6 +14,14 @@ type dummyProvider struct {
 	ProviderBase
 }
 
+func (p *dummyProvider) Type() types.ProviderType {
+	return "dummy"
+}
+
+func (s *dummyProvider) Channel() types.ChannelType {
+	return 0
+}
+
 func (p *dummyProvider) Init() {
 	p.ProviderBase.Init()
 	time.Sleep(time.Millisecond * 100)

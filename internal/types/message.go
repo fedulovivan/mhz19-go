@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -44,8 +45,7 @@ type MessageChan chan Message
 // when its normal handling, Curr is always specified, while Prev could be empty
 // (if this is first message for such device class and device id and LdmService.Has() returns false)
 // however, when Condition.OtherDeviceId is set, only Curr may be filled if exists in LdmService
-// (but also could be not filled, meaning both may be nil)
-// Throttled - TBD
+// (but also could be not filled, so both may be nil)
 type MessageCompound struct {
 	Curr   *Message
 	Prev   *Message
@@ -62,7 +62,6 @@ func IsSpecialDirective(field string) bool {
 func (m *Message) ExecDirective(field string) (any, error) {
 	if m == nil {
 		return nil, nil
-		// panic("Message.ExecDirective(): message is nil")
 	}
 	if field == "$deviceId" {
 		return m.DeviceId, nil
@@ -77,28 +76,39 @@ func (m *Message) ExecDirective(field string) (any, error) {
 		if m.Payload == nil {
 			return nil, nil
 		}
-		p, ok := m.Payload.(map[string]any)
-		if !ok {
-			return nil, fmt.Errorf("Message.ExecDirective(): Payload is expected to be map[string]any not '%T', reading field '%v'", m.Payload, field)
-		}
-		v, ok := p[field]
-		if !ok {
-			// return nil, fmt.Errorf("Message.ExecDirective(): Payload '%T, %+v' has no field '%v'", m.Payload, m.Payload, field)
-			return nil, nil
-		}
-		return v, nil
+		return __reflection_reader(m.Payload, field)
 	} else {
 		panic(fmt.Sprintf("unknown directive %s", field))
 	}
 }
 
-func NewSystemMessage(text string) Message {
+func __reflection_reader(payload any, field string) (any, error) {
+	v := reflect.ValueOf(payload)
+	kind := v.Kind()
+	if kind == reflect.Struct {
+		f := v.FieldByName(field)
+		if f.IsValid() {
+			return f.Interface(), nil
+		}
+		return nil, nil // no such field
+	}
+	if kind == reflect.Map {
+		mapKey := reflect.ValueOf(field)
+		if val := v.MapIndex(mapKey); val.IsValid() {
+			return val.Interface(), nil
+		}
+		return nil, nil // no such key
+	}
+	return nil, fmt.Errorf("Message.ExecDirective(): Payload is expected to be map[string]any not '%T', reading field '%v'", payload, field)
+}
+
+func NewSystemMessage(text string, deviceId DeviceId) Message {
 	return Message{
 		Id:            MessageIdSeq.Add(1),
 		Timestamp:     time.Now(),
 		ChannelType:   CHANNEL_SYSTEM,
 		DeviceClass:   DEVICE_CLASS_SYSTEM,
-		DeviceId:      DEVICE_ID_FOR_THE_APPLICATION_MESSAGE,
+		DeviceId:      deviceId,
 		FromEndDevice: false,
 		Payload: map[string]any{
 			"text": text,
@@ -106,6 +116,16 @@ func NewSystemMessage(text string) Message {
 	}
 }
 
+// p, ok := m.Payload.(map[string]any)
+// if !ok {
+// 	return nil, fmt.Errorf("Message.ExecDirective(): Payload is expected to be map[string]any not '%T', reading field '%v'", m.Payload, field)
+// }
+// v, ok := p[field]
+// if !ok {
+// 	// return nil, fmt.Errorf("Message.ExecDirective(): Payload '%T, %+v' has no field '%v'", m.Payload, m.Payload, field)
+// 	return nil, nil
+// }
+// return v, nil
 // func NewMessage(
 // 	ct ChannelType,
 // 	// fromEndDevice bool,

@@ -1,6 +1,7 @@
 package devices
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 
@@ -25,8 +26,10 @@ func NewApi(base *routing.RouteGroup, service types.DevicesService) {
 	group.Get("", api.get)
 	group.Put("", api.create)
 	group.Get("/class/<deviceClass>", api.getByDeviceClass)
-	group.Get("/<deviceId>", api.getByDeviceId)
-	group.Post("/<deviceId>", api.update)
+	group.Get("/<nativeId>", api.getByDeviceId)
+	group.Post("/<nativeId>", api.updateName) // Deprecated: for backward compatibility with frontend
+	group.Post("/<nativeId>/name", api.updateName)
+	group.Post("/<nativeId>/buried-timeout", api.updateBuriedTimeout)
 	group.Delete("/<id>", api.delete)
 }
 
@@ -69,16 +72,46 @@ func (api devicesApi) create(c *routing.Context) error {
 	return c.Write(map[string]any{"ok": true, "deviceId": id})
 }
 
-func (api devicesApi) update(c *routing.Context) error {
-	defer utils.TimeTrack(api.tag.F, time.Now(), "api:update")
+func (api devicesApi) updateBuriedTimeout(c *routing.Context) error {
+	defer utils.TimeTrack(api.tag.F, time.Now(), "api:updateBuriedTimeout")
 	device := types.Device{
-		DeviceId: types.DeviceId(c.Param("deviceId")),
+		DeviceId: types.DeviceId(c.Param("nativeId")),
+	}
+	payload := new(struct {
+		Action string `json:"action"`
+		Value  int64  `json:"value"`
+	})
+	err := c.Read(payload)
+	if err != nil {
+		return err
+	}
+	switch payload.Action {
+	case "set":
+		device.BuriedTimeout = &types.BuriedTimeout{Duration: time.Second * time.Duration(payload.Value)}
+	case "off":
+		device.BuriedTimeout = &types.BuriedTimeout{Duration: time.Second * 0}
+	case "reset":
+		// default nil will be used
+	default:
+		return fmt.Errorf("Unknown action=[%s]", payload.Action)
+	}
+	err = api.service.UpdateBuriedTimeout(device)
+	if err != nil {
+		return err
+	}
+	return c.Write(map[string]any{"ok": true})
+}
+
+func (api devicesApi) updateName(c *routing.Context) error {
+	defer utils.TimeTrack(api.tag.F, time.Now(), "api:updateName")
+	device := types.Device{
+		DeviceId: types.DeviceId(c.Param("nativeId")),
 	}
 	err := c.Read(&device)
 	if err != nil {
 		return err
 	}
-	err = api.service.Update(device)
+	err = api.service.UpdateName(device)
 	if err != nil {
 		return err
 	}
@@ -87,7 +120,7 @@ func (api devicesApi) update(c *routing.Context) error {
 
 func (api devicesApi) getByDeviceId(c *routing.Context) (err error) {
 	defer utils.TimeTrack(api.tag.F, time.Now(), "api:getByDeviceId")
-	data, err := api.service.GetOne(types.DeviceId(c.Param("deviceId")))
+	data, err := api.service.GetOne(types.DeviceId(c.Param("nativeId")))
 	if err != nil {
 		return
 	}

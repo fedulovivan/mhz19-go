@@ -11,13 +11,22 @@ import (
 
 var instance *repo
 
+// "last device messages" repository
+// in-memory storage only
 type LdmRepository interface {
+	// create a struct with new key
 	NewKey(deviceClass types.DeviceClass, deviceId types.DeviceId) types.LdmKey
+	// get message by key
 	Get(key types.LdmKey) types.Message
+	// test if message with given key exist
 	Has(key types.LdmKey) bool
+	// add/set new message
 	Set(key types.LdmKey, m types.Message)
+	// get all stored messages
 	GetAll() []types.Message
+	// receive an event of adding/setting new key
 	OnSet() chan types.LdmKey
+	// get message by device id
 	GetByDeviceId(deviceId types.DeviceId) (types.Message, error)
 }
 
@@ -87,7 +96,7 @@ func (r *repo) Has(key types.LdmKey) (flag bool) {
 	return
 }
 
-// "private" getter not protected by lock
+// "private" getter (not protected by lock)
 func (r *repo) get_unsafe(key types.LdmKey) types.Message {
 	return r.data[key]
 }
@@ -111,6 +120,6 @@ func (r *repo) Set(newkey types.LdmKey, m types.Message) {
 		r.device_id_to_key_unsafemap[m.DeviceId] = newkey
 	}
 	r.data[newkey] = m
-	// this blocks now, if no receiver for onset is registered
+	// blocks if no receiver for onset is registered
 	r.onset <- newkey
 }

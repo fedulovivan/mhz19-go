@@ -9,7 +9,6 @@ import (
 
 	"fmt"
 
-	"github.com/Jeffail/gabs/v2"
 	"github.com/fedulovivan/mhz19-go/internal/arguments"
 	"github.com/fedulovivan/mhz19-go/internal/types"
 	"github.com/fedulovivan/mhz19-go/pkg/utils"
@@ -38,20 +37,22 @@ var PostSonoffSwitchMessage types.ActionImpl = func(
 	if err != nil {
 		return
 	}
-	gjson := gabs.Wrap(device.Json)
-	ip, ipOk := gjson.Path("Ip").Data().(string)
-	port, portOk := gjson.Path("Port").Data().(string)
-	if !ipOk || !portOk {
-		err = fmt.Errorf("failed to retrieve ip and port from device json: ip=%v, port=%v, %+v", ip, port, device.Json)
+	out := new(types.SonoffDeviceJson)
+	err = utils.MapstructureDecode(device.Json, out)
+	if err != nil {
 		return
 	}
-	err = httpPost(ip, port, command, tag)
+	if out.Ip == "" || out.Port == 0 {
+		err = fmt.Errorf("failed to retrieve Ip or Port from device json: Ip=%v, Port=%d, %+v", out.Ip, out.Port, device.Json)
+		return
+	}
+	err = httpPost(out.Ip, out.Port, command, tag)
 	return
 }
 
-func httpPost(ip string, port string, cmd string, tag utils.Tag) error {
+func httpPost(ip string, port int, cmd string, tag utils.Tag) error {
 
-	url := fmt.Sprintf("http://%v:%v/zeroconf/switch", ip, port)
+	url := fmt.Sprintf("http://%v:%d/zeroconf/switch", ip, port)
 	payload := []byte(fmt.Sprintf(`{"data":{"switch":"%v"}}`, cmd))
 
 	res, err := http.Post(url, "application/json", bytes.NewBuffer(payload))

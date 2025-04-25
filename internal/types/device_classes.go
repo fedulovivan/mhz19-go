@@ -16,7 +16,7 @@ const (
 	DEVICE_CLASS_VALVE             DeviceClass = 3
 	DEVICE_CLASS_ZIGBEE_BRIDGE     DeviceClass = 4
 	DEVICE_CLASS_BOT               DeviceClass = 5
-	DEVICE_CLASS_SONOFF_DIY_PLUG   DeviceClass = 6
+	DEVICE_CLASS_SONOFF_DIY_PLUG   DeviceClass = 6 // why class contains certain device type?
 	DEVICE_CLASS_SYSTEM            DeviceClass = 7
 	DEVICE_CLASS_SONOFF_ANNOUNCE   DeviceClass = 8
 	DEVICE_CLASS_ESPRESENCE_DEVICE DeviceClass = 9
@@ -40,4 +40,19 @@ func (dc DeviceClass) String() string {
 
 func (dc DeviceClass) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%s"`, DEVICE_CLASS_NAMES[dc])), nil
+}
+
+func (dc *DeviceClass) UnmarshalJSON(b []byte) (err error) {
+	var v string
+	err = json.Unmarshal(b, &v)
+	if err != nil {
+		return err
+	}
+	for deviceClass, name := range DEVICE_CLASS_NAMES {
+		if fmt.Sprintf("DeviceClass(%s)", name) == v || fmt.Sprintf("DeviceClass(%d)", deviceClass) == v {
+			*dc = deviceClass
+			return
+		}
+	}
+	return fmt.Errorf("failed to unmarshal %v (type=%T) to DeviceClass", v, v)
 }

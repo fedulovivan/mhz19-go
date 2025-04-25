@@ -28,6 +28,13 @@ func (s *ArgumentsSuite) Test10() {
 	s.Contains(args, "Foo")
 }
 
+func (s *ArgumentsSuite) Test15() {
+	input := []byte(`{`)
+	args := Args{}
+	err := json.Unmarshal(input, &args)
+	s.NotNil(err)
+}
+
 func (s *ArgumentsSuite) Test20() {
 	input := []byte(`{"Foo":"bar"}`)
 	args := Args{}
@@ -56,6 +63,47 @@ func (s *ArgumentsSuite) Test40() {
 	s.Contains(args, "ClassesList")
 	s.Len(args["ClassesList"], 2)
 	s.Equal("map[ClassesList:[zigbee-device device-pinger]]", fmt.Sprintf("%v", args))
+}
+
+func (s *ArgumentsSuite) Test41() {
+	input := []byte(`{"Value": "DeviceClass(zigbee-device)"}`)
+	args := Args{}
+	err := json.Unmarshal(input, &args)
+	s.Nil(err)
+	s.Contains(args, "Value")
+	s.Equal("map[Value:zigbee-device]", fmt.Sprintf("%v", args))
+}
+
+func (s *ArgumentsSuite) Test44() {
+	input := []byte(`{"ClassesList":["DeviceClass(foo)"]}`)
+	args := Args{}
+	err := json.Unmarshal(input, &args)
+	s.NotNil(err)
+}
+
+func (s *ArgumentsSuite) Test45() {
+	input := []byte(`{"Value": "ChannelType(4)"}`)
+	args := Args{}
+	err := json.Unmarshal(input, &args)
+	s.Nil(err)
+	s.Contains(args, "Value")
+	s.Equal("map[Value:system]", fmt.Sprintf("%v", args))
+}
+
+func (s *ArgumentsSuite) Test46() {
+	input := []byte(`{"Value": "ChannelType(system)"}`)
+	args := Args{}
+	err := json.Unmarshal(input, &args)
+	s.Nil(err)
+	s.Contains(args, "Value")
+	s.Equal("map[Value:system]", fmt.Sprintf("%v", args))
+}
+
+func (s *ArgumentsSuite) Test47() {
+	input := []byte(`{"Value": "ChannelType(qwe)"}`)
+	args := Args{}
+	err := json.Unmarshal(input, &args)
+	s.NotNil(err)
 }
 
 func (s *ArgumentsSuite) Test50() {

@@ -3,7 +3,6 @@ package actions
 import (
 	"encoding/json"
 
-	"github.com/Jeffail/gabs/v2"
 	"github.com/fedulovivan/mhz19-go/internal/app"
 	"github.com/fedulovivan/mhz19-go/internal/arguments"
 	"github.com/fedulovivan/mhz19-go/internal/types"
@@ -20,10 +19,13 @@ var TelegramBotMessage types.ActionImpl = func(compound types.MessageCompound, a
 	if compound.Curr != nil {
 		tpayload.Message = *compound.Curr
 		if compound.Curr.ChannelType == types.CHANNEL_TELEGRAM {
-			gjson := gabs.Wrap(compound.Curr.Payload)
-			replyTo, ok := gjson.Path("ChatId").Data().(int64)
-			if ok {
-				chatId = replyTo
+			out := new(types.TbotPayload)
+			err = utils.MapstructureDecode(compound.Curr.Payload, out)
+			if err != nil {
+				return
+			}
+			if out.ChatId > 0 {
+				chatId = out.ChatId
 			}
 		}
 	}
@@ -51,6 +53,6 @@ var TelegramBotMessage types.ActionImpl = func(compound types.MessageCompound, a
 		}
 		text = string(mjson)
 	}
-	p := e.GetProvider(types.CHANNEL_TELEGRAM)
+	p := e.GetProvider(types.PROVIDER_TBOT)
 	return p.Send(botName, text, chatId)
 }

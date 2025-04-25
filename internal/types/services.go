@@ -13,7 +13,8 @@ type DevicesService interface {
 	GetByDeviceClass(dc DeviceClass) ([]Device, error)
 	GetOne(id DeviceId) (Device, error)
 	UpsertAll(devices []Device) (int64, error)
-	Update(device Device) error
+	UpdateName(device Device) error
+	UpdateBuriedTimeout(device Device) error
 	Delete(int64) error
 }
 
@@ -32,6 +33,8 @@ type LdmKey struct {
 	DeviceId    DeviceId
 }
 
+// service for the "last device messages" repository
+// interface replicates LdmRepository
 type LdmService interface {
 	NewKey(deviceClass DeviceClass, deviceId DeviceId) LdmKey
 	Get(key LdmKey) Message
@@ -51,7 +54,7 @@ type RulesService interface {
 	Delete(ruleId int) error
 	Get() ([]Rule, error)
 	Create(rule Rule) (int64, error)
-	OnCreated() <-chan int
+	OnCreated() <-chan Rule
 	OnDeleted() <-chan int
 }
 
@@ -63,5 +66,5 @@ type ServiceSupplier interface {
 
 type ServiceAndProviderSupplier interface {
 	ServiceSupplier
-	GetProvider(ct ChannelType) ChannelProvider
+	GetProvider(pt ProviderType) ChannelProvider
 }

@@ -34,6 +34,10 @@ func NewProvider() *provider {
 	}
 }
 
+func (p *provider) Type() types.ProviderType {
+	return types.PROVIDER_TBOT
+}
+
 func (p *provider) Channel() types.ChannelType {
 	return types.CHANNEL_TELEGRAM
 }
@@ -116,10 +120,10 @@ func (p *provider) StartBotClient(token string) (err error) {
 				if update.Message.IsCommand() {
 					slog.Debug(tag.F("IsCommand() == true"), "command", update.Message.Command())
 				}
-				payload := map[string]any{
-					"Text":   update.Message.Text,
-					"From":   update.Message.From,
-					"ChatId": update.Message.Chat.ID,
+				payload := types.TbotPayload{
+					Text:   update.Message.Text,
+					From:   update.Message.From,
+					ChatId: update.Message.Chat.ID,
 				}
 				outMsg := types.Message{
 					Id:            types.MessageIdSeq.Add(1),

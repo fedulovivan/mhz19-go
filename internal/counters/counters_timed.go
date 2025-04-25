@@ -84,7 +84,7 @@ func Time(d time.Duration, key Key) {
 
 	// Avg + Total
 	// https://math.stackexchange.com/a/4456459
-	// TODO: could be simplified: replace with sum and count (as in prometheus)
+	// TODO could be simplified: replace with sum and count (as in prometheus)
 	avg := (int64(record.Avg.Duration)*int64(record.Cnt.Load()) + int64(d)) / int64(record.Cnt.Add(1))
 	record.Avg.Duration = time.Duration(avg)
 

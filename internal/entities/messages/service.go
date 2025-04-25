@@ -6,7 +6,9 @@ import (
 
 	"github.com/fedulovivan/mhz19-go/internal/db"
 	"github.com/fedulovivan/mhz19-go/internal/types"
-	"github.com/goccy/go-json"
+
+	// "github.com/goccy/go-json"
+	"encoding/json"
 )
 
 var _ types.MessagesService = (*service)(nil)

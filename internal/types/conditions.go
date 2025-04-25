@@ -25,6 +25,7 @@ const (
 	COND_TRUE            CondFn = 10
 	COND_FALSE           CondFn = 11
 	COND_DEVICE_ID       CondFn = 12
+	COND_LDM_OLDER_THAN  CondFn = 13
 )
 
 var CONDITION_NAMES = map[CondFn]string{
@@ -39,6 +40,7 @@ var CONDITION_NAMES = map[CondFn]string{
 	COND_TRUE:            "True",
 	COND_FALSE:           "False",
 	COND_DEVICE_ID:       "DeviceId",
+	COND_LDM_OLDER_THAN:  "LdmOlderThan",
 }
 
 func (fn CondFn) String() string {

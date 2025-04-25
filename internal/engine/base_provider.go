@@ -42,3 +42,7 @@ func (p *ProviderBase) Push(m types.Message) {
 func (s *ProviderBase) Channel() types.ChannelType {
 	panic("Channel() must be implemented in concrete provider")
 }
+
+func (s *ProviderBase) Type() types.ProviderType {
+	panic("Type() must be implemented in concrete provider")
+}

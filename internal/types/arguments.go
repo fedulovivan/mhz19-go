@@ -2,82 +2,65 @@ package types
 
 import (
 	"encoding/json"
-	"fmt"
-	"strconv"
 	"strings"
 )
 
+// todo replace Args with struct(s) like
+//
+//	type PostSonoffSwitchMessage_Args struct {
+//		DeviceId DeviceId
+//		Command  string
+//	}
+//
+// (!) consider counterpart code from internal/entities/rules/service.go::BuildArguments
 type Args map[string]any
 
-func Value(value any) Args {
-	return Args{
-		"Value": value,
-	}
-}
-
-func parseSpecial(in string) (res any, err error) {
-
-	if strings.HasPrefix(in, "DeviceId(") {
-		var typed DeviceId
-		err = json.Unmarshal(
-			[]byte(fmt.Sprintf(`"%s"`, in)),
-			&typed,
-		)
-		if err == nil {
-			res = typed
-		}
-		return
-	}
-
-	if strings.HasPrefix(in, "DeviceClass(") {
-		dc := in[12 : len(in)-1]
-		i, _ := strconv.Atoi(dc)
-		res = DeviceClass(i)
-		return
-	}
-
-	if strings.HasPrefix(in, "ChannelType(") {
-		ct := in[12 : len(in)-1]
-		i, _ := strconv.Atoi(ct)
-		res = ChannelType(i)
-		return
-	}
-
-	if strings.HasPrefix(in, "Channel(") { // same as ChannelType
-		ct := in[8 : len(in)-1]
-		i, _ := strconv.Atoi(ct)
-		res = ChannelType(i)
-		return
-	}
-
-	res = in
-	return
-}
-
-// TODO seems there is a room for optimization here
-func (a *Args) UnmarshalJSON(data []byte) (err error) {
+func (a *Args) UnmarshalJSON(data []byte) error {
+	// step 1: parse json into untyped map (json parsing error will be handled earlier - so no need to bother here)
 	var raw map[string]any
-	err = json.Unmarshal(data, &raw)
-	if err != nil {
-		return
-	}
-	*a = make(map[string]any, len(raw))
-	for argName, argValue := range raw {
-		switch vtyped := argValue.(type) {
+	_ = json.Unmarshal(data, &raw)
+	// step 2: iterate and replace what possible (only two levels are supported, no recursion)
+	var err error
+	for key := range raw {
+		switch v := raw[key].(type) {
+		case string:
+			raw[key], err = parseSpecial(v)
+			if err != nil {
+				return err
+			}
 		case []any:
-			for i, listel := range vtyped {
-				if slistel, ok := listel.(string); ok {
-					vtyped[i], err = parseSpecial(slistel)
+			for i := range v {
+				if vv, ok := v[i].(string); ok {
+					v[i], err = parseSpecial(vv)
+					if err != nil {
+						return err
+					}
 				}
 			}
-			(*a)[argName] = vtyped
-		case string:
-			(*a)[argName], err = parseSpecial(vtyped)
-		default:
-			(*a)[argName] = vtyped
 		}
 	}
-	return
+	// step 3: assign back
+	*a = raw
+	return nil
+}
+
+func parseSpecial(in string) (any, error) {
+	inb := []byte(`"` + in + `"`)
+	if strings.HasPrefix(in, "DeviceId(") {
+		out := new(DeviceId)
+		err := out.UnmarshalJSON(inb)
+		return *out, err
+	} else if strings.HasPrefix(in, "DeviceClass(") {
+		out := new(DeviceClass)
+		err := out.UnmarshalJSON(inb)
+		return *out, err
+	} else if strings.HasPrefix(in, "ChannelType(") {
+		out := new(ChannelType)
+		err := out.UnmarshalJSON(inb)
+		return *out, err
+	} else {
+		return in, nil
+	}
 }
 
 type TemplatePayload struct {

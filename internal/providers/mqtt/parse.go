@@ -38,6 +38,9 @@ func Parse(
 		ChannelType:   types.CHANNEL_MQTT,
 		DeviceClass:   deviceClass,
 		FromEndDevice: fromEndDevice,
+		// DeviceId
+		// Payload
+		// RawPayload
 	}
 
 	tt := strings.Split(strings.TrimLeft(topic, "/"), "/")

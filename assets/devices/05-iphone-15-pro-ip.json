@@ -1,4 +1,4 @@
 {
     "deviceId":"DeviceId(192.168.88.44)",
-    "deviceClass":2
+    "deviceClass":"DeviceClass(device-pinger)"
 }

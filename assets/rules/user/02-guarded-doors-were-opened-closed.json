@@ -36,12 +36,10 @@
                 }
             },
             {
-                "fn": "Equal",
-                "not": true,
-                "otherDeviceId": "DeviceId(192.168.88.44)",
+                "fn": "LdmOlderThan",
+                "otherDeviceId": "DeviceId(phone:ivanf)",
                 "args": {
-                    "Left": "$message.status",
-                    "Right": 1
+                    "Value": 60
                 }
             }
         ]

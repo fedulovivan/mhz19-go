@@ -86,7 +86,7 @@ Console
 - `make api-load-rules-write`
 - `make api-load-push-message-write`
 
-### Starting development instance
+### Development
 
 - create db and run all migrations `make migrate-up` or reset to inital state with `make migrate-reset`
 - create config file from sample `cp .env.sample .env`

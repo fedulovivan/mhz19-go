@@ -33,6 +33,8 @@ func (q *queue) flush_internal() {
 }
 
 func (q *queue) Flush() {
+	q.Lock()
+	defer q.Unlock()
 	if q.timer != nil {
 		q.timer.Reset(0)
 	}

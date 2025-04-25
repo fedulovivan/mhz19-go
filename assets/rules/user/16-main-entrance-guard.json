@@ -16,7 +16,7 @@
                 "args": {
                     "Value": "$message.contact"
                 }
-            },            
+            },
             {
                 "fn": "InList",
                 "args": {
@@ -32,7 +32,28 @@
                 "args": {
                     "Value": "$message.contact"
                 }
-            }
+            },
+            {
+                "or": true,
+                "nested": [
+                    {
+                        "fn": "LdmOlderThan",
+                        "not": true,
+                        "otherDeviceId": "DeviceId(phone:ivanf)",
+                        "args": {
+                            "Value": 60
+                        }
+                    },
+                    {
+                        "fn": "LdmOlderThan",
+                        "not": true,
+                        "otherDeviceId": "DeviceId(phone:alexandra)",
+                        "args": {
+                            "Value": 60
+                        }
+                    }
+                ]
+            }            
         ]
     },
     "actions": [
@@ -42,6 +63,14 @@
                 "Text": "Entrance door is {{ if .Message.Payload.contact }}locked 🔒{{ else }}unlocked ⚠️{{ end }}",
                 "BotName": "Mhz19AlertsBot"
             }
-        }
+        },
+        {
+            "fn": "WatchChanges",
+            "args": {
+                "Timeout": 30,
+                "Value": "$message.contact",
+                "From": false
+            }
+        }        
     ]
 }

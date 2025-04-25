@@ -44,6 +44,10 @@ func (p *provider) Send(a ...any) (err error) {
 	return token.Error()
 }
 
+func (p *provider) Type() types.ProviderType {
+	return types.PROVIDER_MQTT
+}
+
 func (p *provider) Channel() types.ChannelType {
 	return types.CHANNEL_MQTT
 }

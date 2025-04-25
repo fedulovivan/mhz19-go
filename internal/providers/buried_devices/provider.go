@@ -31,6 +31,8 @@ type provider struct {
 
 var _ types.ChannelProvider = (*provider)(nil)
 
+// emit a signal when we have no seen any messages from device
+// for certain amount of time
 func NewProvider(
 	ldmService types.LdmService,
 	devicesService types.DevicesService,
@@ -42,6 +44,10 @@ func NewProvider(
 	}
 }
 
+func (p *provider) Type() types.ProviderType {
+	return types.PROVIDER_BURIED_DEVICES
+}
+
 func (p *provider) Channel() types.ChannelType {
 	return types.CHANNEL_SYSTEM
 }
@@ -50,7 +56,7 @@ func (p *provider) handleKey(key types.LdmKey) {
 	p.timersMu.Lock()
 	defer p.timersMu.Unlock()
 	skipped := false
-	// device whether we need to skip emitting message for certain device
+	// decide whether we need to skip emitting message for certain device
 	// or we need to use custom timeout for this device
 	timeout := app.Config.DefaultBuriedTimeout
 	device, err := p.devicesService.GetOne(key.DeviceId)

@@ -6,7 +6,7 @@
             {
                 "fn": "DeviceClass",
                 "args": {
-                    "Value": "DeviceClass(2)"
+                    "Value": "DeviceClass(device-pinger)"
                 }
             },
             {

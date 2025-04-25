@@ -18,6 +18,7 @@ var conditions = types.CondImpls{
 	types.COND_TRUE:            True,
 	types.COND_FALSE:           False,
 	types.COND_DEVICE_ID:       DeviceId,
+	types.COND_LDM_OLDER_THAN:  LdmOlderThan,
 }
 
 func Get(fn types.CondFn) (action types.CondImpl) {

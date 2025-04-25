@@ -99,12 +99,12 @@ func main() {
 			slog.Error(tag.F("Fetching rules is still running..."))
 			timer.Reset(app.Config.RulesFetchingLimit)
 		})
-		dbRules, err := rulesService.Get()
+		rules, err := rulesService.Get()
 		timer.Stop()
 		if err == nil {
-			if len(dbRules) > 0 {
-				slog.Debug(tag.F("Rules fetching done"), "rules", len(dbRules))
-				e.AppendRules(dbRules...)
+			if len(rules) > 0 {
+				slog.Debug(tag.F("Rules fetching done"), "rules", len(rules))
+				e.AppendRules(rules...)
 			} else {
 				slog.Warn(tag.F("No mapping rules in database"))
 			}
@@ -115,8 +115,7 @@ func main() {
 		}
 	}()
 	go func() {
-		for ruleId := range rulesService.OnCreated() {
-			rule, _ := rulesService.GetOne(ruleId)
+		for rule := range rulesService.OnCreated() {
 			e.AppendRules(rule)
 		}
 	}()
@@ -128,7 +127,10 @@ func main() {
 	go func() {
 		// publish "Application started" message
 		<-tbotProvider.Started()
-		shimProvider.Push(types.NewSystemMessage("Application started"))
+		shimProvider.Push(types.NewSystemMessage(
+			"Application started",
+			types.DEVICE_ID_FOR_THE_APPLICATION_MESSAGE,
+		))
 	}()
 	e.Start()
 

@@ -19,7 +19,7 @@ type DbDevice struct {
 	// in seconds
 	// when 0 no "Have not seen" messages will be delivered fot this device
 	// when NULL a default value DefaultBuriedTimeout/BURIED_TIMEOUT will be used (90m)
-	// whwn >0 customised timeout in seconds
+	// when >0 customised timeout in seconds
 	BuriedTimeout sql.NullInt32
 }
 
@@ -33,9 +33,16 @@ func NewRepository(database *sql.DB) devicesRepository {
 	}
 }
 
-func (r devicesRepository) Update(device DbDevice) error {
+func (r devicesRepository) UpdateName(device DbDevice) error {
 	return db.RunTx(r.database, func(ctx db.CtxEnhanced) (err error) {
-		_, err = UpdateTx(ctx, device)
+		_, err = UpdateNameTx(ctx, device)
+		return
+	})
+}
+
+func (r devicesRepository) UpdateBuriedTimeout(device DbDevice) error {
+	return db.RunTx(r.database, func(ctx db.CtxEnhanced) (err error) {
+		_, err = UpdateBuriedTimeoutTx(ctx, device)
 		return
 	})
 }
@@ -152,7 +159,7 @@ func DevicesSelectTx(ctx db.CtxEnhanced, nativeId sql.NullString, deviceClass sq
 	)
 }
 
-func UpdateTx(
+func UpdateNameTx(
 	ctx db.CtxEnhanced,
 	device DbDevice,
 ) (sql.Result, error) {
@@ -160,6 +167,18 @@ func UpdateTx(
 		ctx,
 		`UPDATE devices SET name = ? WHERE native_id = ?`,
 		device.Name,
+		device.NativeId,
+	)
+}
+
+func UpdateBuriedTimeoutTx(
+	ctx db.CtxEnhanced,
+	device DbDevice,
+) (sql.Result, error) {
+	return db.Exec(
+		ctx,
+		`UPDATE devices SET buried_timeout = ? WHERE native_id = ?`,
+		device.BuriedTimeout,
 		device.NativeId,
 	)
 }

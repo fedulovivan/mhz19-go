@@ -5,7 +5,7 @@
             {
                 "fn": "DeviceClass",
                 "args": {
-                    "Value": "DeviceClass(3)"
+                    "Value": "DeviceClass(valves-manipulator)"
                 }
             },
             {
@@ -13,13 +13,13 @@
                 "args": {
                     "Value": "DeviceId(18225)"
                 }
-            },            
+            },
             {
                 "fn": "True",
                 "args": {
                     "Value": "$message.leakage"
                 }
-            }          
+            }
         ]
     },
     "actions": [
@@ -29,7 +29,7 @@
                 "DeviceId": "DeviceId(6613075)",
                 "State": "close"
             }
-        },        
+        },
         {
             "fn": "TelegramBotMessage",
             "args": {

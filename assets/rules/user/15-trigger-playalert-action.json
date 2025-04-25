@@ -5,7 +5,7 @@
             {
                 "fn": "DeviceClass",
                 "args": {
-                    "Value": "DeviceClass(5)"
+                    "Value": "DeviceClass(telegram-bot)"
                 }
             },
             {

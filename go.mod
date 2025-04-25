@@ -4,13 +4,11 @@ go 1.22.5
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2
-	github.com/Jeffail/gabs/v2 v2.7.0
 	github.com/SkYNewZ/go-yeelight v0.0.0-20220302145130-8201450feef7
 	github.com/brutella/dnssd v1.2.12
 	github.com/eclipse/paho.mqtt.golang v1.5.0
 	github.com/go-ozzo/ozzo-routing/v2 v2.4.0
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
-	github.com/goccy/go-json v0.10.3
 	github.com/joho/godotenv v1.5.1
 	github.com/lmittmann/tint v1.0.5
 	github.com/mattn/go-sqlite3 v1.14.22

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/brutella/dnssd"
-	dlog "github.com/brutella/dnssd/log"
+	dnssdLogger "github.com/brutella/dnssd/log"
 	"github.com/fedulovivan/mhz19-go/internal/app"
 	"github.com/fedulovivan/mhz19-go/internal/counters"
 	"github.com/fedulovivan/mhz19-go/internal/engine"
@@ -28,6 +28,10 @@ func NewProvider() *provider {
 	return &provider{}
 }
 
+func (p *provider) Type() types.ProviderType {
+	return types.PROVIDER_DNSSD
+}
+
 func (p *provider) Channel() types.ChannelType {
 	return types.CHANNEL_DNS_SD
 }
@@ -37,8 +41,8 @@ func (p *provider) Init() {
 	p.ProviderBase.Init()
 
 	if app.Config.DnssdDebug {
-		dlog.Debug.Enable()
-		dlog.Info.Enable()
+		dnssdLogger.Debug.Enable()
+		dnssdLogger.Info.Enable()
 	}
 
 	ctx := context.Background()
@@ -52,7 +56,7 @@ func (p *provider) Init() {
 		}
 		payload := map[string]any{
 			"Id":   entry.Text["id"],
-			"Port": fmt.Sprintf("%v", entry.Port),
+			"Port": entry.Port,
 			"Ip":   entry.IPs[0].String(),
 			"Text": entry.Text,
 			"Host": entry.Host,
@@ -72,7 +76,7 @@ func (p *provider) Init() {
 	// since LookupType api does not allow nil callback
 	// also looks like this feature does not work properly - cb is called when device is still "online" / "not removed"
 	rmvFn := func(e dnssd.BrowseEntry) {
-		// utils.Dump("Removed", e)
+		utils.Dump("Removed", e)
 	}
 
 	go func() {

@@ -18,3 +18,11 @@ var _ types.ChannelProvider = (*provider)(nil)
 func NewProvider() *provider {
 	return &provider{}
 }
+
+func (p *provider) Type() types.ProviderType {
+	return types.PROVIDER_SHIM_PROVIDER
+}
+
+func (p *provider) Channel() types.ChannelType {
+	return types.CHANNEL_SYSTEM
+}

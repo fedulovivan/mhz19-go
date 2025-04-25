@@ -7,7 +7,7 @@
                 "fn": "DeviceClass",
                 "not": true,
                 "args": {
-                    "Value": "DeviceClass(4)"
+                    "Value": "DeviceClass(zigbee-bridge)"
                 }
             },            
             {
@@ -19,7 +19,7 @@
                     {
                         "fn": "Channel",
                         "args": {
-                            "Value": "ChannelType(5)"
+                            "Value": "ChannelType(rest)"
                         }
                     }
                 ]

@@ -19,7 +19,10 @@ type mockDevicesService struct {
 func (s mockDevicesService) Delete(int64) error {
 	return nil
 }
-func (s mockDevicesService) Update(types.Device) error {
+func (s mockDevicesService) UpdateName(types.Device) error {
+	return nil
+}
+func (s mockDevicesService) UpdateBuriedTimeout(types.Device) error {
 	return nil
 }
 func (s mockDevicesService) Get() ([]types.Device, error) {
@@ -73,6 +76,10 @@ func (p *mockprovider) Channel() types.ChannelType {
 	return 0
 }
 
+func (p *mockprovider) Type() types.ProviderType {
+	return ""
+}
+
 func (p *mockprovider) Init() {
 }
 
@@ -94,7 +101,7 @@ func (e *mockengine) GetMessagesService() types.MessagesService {
 	return nil
 }
 
-func (e *mockengine) GetProvider(ct types.ChannelType) types.ChannelProvider {
+func (e *mockengine) GetProvider(pt types.ProviderType) types.ChannelProvider {
 	return &mockprovider{}
 }
 

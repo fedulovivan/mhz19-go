@@ -1,4 +1,4 @@
 {
     "deviceId":"DeviceId(Mhz19ToGoBot)",
-    "deviceClass":5
+    "deviceClass":"DeviceClass(telegram-bot)"
 }

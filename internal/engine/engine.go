@@ -47,7 +47,7 @@ func (e *engine) SetProviders(providers ...types.ChannelProvider) {
 	e.providers = providers
 	providerNames := make([]string, len(providers))
 	for i, p := range providers {
-		providerNames[i] = fmt.Sprintf("%T", p)
+		providerNames[i] = fmt.Sprintf("%T(type=%s,channel=%s)", p, p.Type(), p.Channel())
 	}
 	slog.Debug(BaseTag.F(
 		"%d provider(s) were set: %s",
@@ -107,13 +107,13 @@ func (e *engine) Start() {
 	slog.Debug(BaseTag.F("Started"))
 }
 
-func (e *engine) GetProvider(ct types.ChannelType) types.ChannelProvider {
+func (e *engine) GetProvider(pt types.ProviderType) types.ChannelProvider {
 	for _, provider := range e.providers {
-		if provider.Channel() == ct {
+		if provider.Type() == pt {
 			return provider
 		}
 	}
-	panic(fmt.Sprintf("%v provider not found", ct))
+	panic(fmt.Sprintf("%v provider not found", pt))
 }
 
 func (e *engine) StopProviders() {
