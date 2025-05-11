@@ -431,8 +431,15 @@ func (s *ServiceSuite) Test53() {
 			}},
 		},
 	}, seq, nil)
-	expected := "[{1 1 {0 false} {1 true} {0 false} {0 false} { false}} {2 1 {2 true} {0 false} {0 true} {1 true} { false}} {3 1 {0 false} {0 true} {0 false} {1 true} { false}} {4 1 {2 true} {0 false} {1 true} {3 true} { false}} {5 1 {3 true} {0 false} {0 true} {3 true} { false}}]"
-	s.Equal(expected, fmt.Sprintf("%v", actual))
+	expected := "[" +
+		"{1 1 {0 false} {1 true} {0 false} {0 false} { false} {0 true}} " +
+		"{2 1 {2 true} {0 false} {0 true} {1 true} { false} {0 true}} " +
+		"{3 1 {0 false} {0 true} {0 false} {1 true} { false} {0 true}} " +
+		"{4 1 {2 true} {0 false} {1 true} {3 true} { false} {0 true}} " +
+		"{5 1 {3 true} {0 false} {0 true} {3 true} { false} {0 true}}" +
+		"]"
+	actuals := fmt.Sprintf("%v", actual)
+	s.Equal(expected, actuals)
 }
 
 func (s *ServiceSuite) Test60() {
@@ -479,11 +486,11 @@ func (s *ServiceSuite) Test63() {
 	expectedRule := "{1 unit test {1 true} {0 true}}"
 	s.Equal(expectedRule, fmt.Sprintf("%v", outrule))
 
-	expectedConds := "[{2 1 {2 true} {0 false} {0 true} {0 false} { false}}]"
+	expectedConds := "[{2 1 {2 true} {0 false} {0 true} {0 false} { false} {0 true}}]"
 	s.Len(outconds, 1)
 	s.Equal(expectedConds, fmt.Sprintf("%v", outconds))
 
-	expectedActs := "[{7 1 {5 true}}]"
+	expectedActs := "[{7 1 {5 true} {0 true}}]"
 	s.Len(outactions, 1)
 	s.Equal(expectedActs, fmt.Sprintf("%v", outactions))
 

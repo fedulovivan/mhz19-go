@@ -107,6 +107,17 @@ Console
 `DIR=rules/system make seed`
 `DIR=rules/user make seed`
 
+### Upgrade
+
+step 1: pull changes
+`git pull`
+
+step 2: run migration using existing running instance of backend container (docker-migrate takes local sql file and executes it inside container)
+`DB_REV=07 make docker-migrate-up-single`
+
+step 3: run update
+`make update`
+
 ### Tools required for the development on the bare host
 
 - go `wget https://go.dev/dl/go1.23.0.linux-amd64.tar.gz`, `rm -rf /usr/local/go && tar -C /usr/local -xzf go1.23.0.linux-amd64.tar.gz`, `export PATH=$PATH:/usr/local/go/bin`

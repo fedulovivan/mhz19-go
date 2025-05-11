@@ -17,6 +17,9 @@ var ZigbeeDevice types.CondImpl = func(mt types.MessageCompound, args types.Args
 	if err != nil {
 		return
 	}
+	if !classMatches {
+		return false, nil
+	}
 	idMatches, err := InList(
 		mt,
 		types.Args{
@@ -28,5 +31,5 @@ var ZigbeeDevice types.CondImpl = func(mt types.MessageCompound, args types.Args
 	if err != nil {
 		return
 	}
-	return classMatches && idMatches, nil
+	return idMatches, nil
 }

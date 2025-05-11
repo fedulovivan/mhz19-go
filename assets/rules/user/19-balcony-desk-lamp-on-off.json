@@ -1,5 +1,5 @@
 {
-    "name": "balcony ceiling light on/off",
+    "name": "balcony desk lamp on/off",
     "condition": {
         "nested": [
             {
@@ -14,22 +14,22 @@
                 "fn": "InList",
                 "args": {
                     "Value": "$message.action",
-                    "List": ["hold_left", "single_left"]
+                    "List": ["hold_right", "single_right"]
                 }
             }
         ]
     },
     "actions": [
         {
-            "fn": "PostSonoffSwitchMessage",
+            "fn": "MqttSetState",
             "args": {
-                "DeviceId": "DeviceId(10011cec96)",
-                "Command": "$message.action"
+                "DeviceId": "DeviceId(0x00158d000391f252)",
+                "State": "$message.action"
             },
             "mapping": {
-                "Command": {
-                    "hold_left": "on",
-                    "single_left": "off"
+                "State": {
+                    "hold_right": "ON",
+                    "single_right": "OFF"
                 }
             }
         }

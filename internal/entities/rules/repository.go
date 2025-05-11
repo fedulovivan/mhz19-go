@@ -44,12 +44,14 @@ type DbRuleCondition struct {
 	Not               sql.NullInt32
 	ParentConditionId sql.NullInt32
 	OtherDeviceId     sql.NullString
+	IsDisabled        sql.NullInt32
 }
 
 type DbRuleAction struct {
 	Id           int32
 	RuleId       int32
 	FunctionType sql.NullInt32
+	IsDisabled   sql.NullInt32
 }
 
 type DbRuleConditionOrActionArgument struct {
@@ -80,8 +82,8 @@ func actionInsertTx(
 ) (sql.Result, error) {
 	return db.Exec(
 		ctx,
-		`INSERT INTO rule_actions(rule_id, function_type) VALUES(?,?)`,
-		act.RuleId, act.FunctionType,
+		`INSERT INTO rule_actions(rule_id, function_type, is_disabled) VALUES(?,?,?)`,
+		act.RuleId, act.FunctionType, act.IsDisabled,
 	)
 }
 
@@ -91,8 +93,8 @@ func conditionInsertTx(
 ) (sql.Result, error) {
 	return db.Exec(
 		ctx,
-		`INSERT INTO rule_conditions(rule_id, function_type, logic_or, parent_condition_id, other_device_id, function_inverted) VALUES(?,?,?,?,?,?)`,
-		cond.RuleId, cond.FunctionType, cond.LogicOr, cond.ParentConditionId, cond.OtherDeviceId, cond.Not,
+		`INSERT INTO rule_conditions(rule_id, function_type, logic_or, parent_condition_id, other_device_id, function_inverted, is_disabled) VALUES(?,?,?,?,?,?,?)`,
+		cond.RuleId, cond.FunctionType, cond.LogicOr, cond.ParentConditionId, cond.OtherDeviceId, cond.Not, cond.IsDisabled,
 	)
 }
 
@@ -178,11 +180,12 @@ func conditionsSelectTx(ctx context.Context, ruleId sql.NullInt32) ([]DbRuleCond
 			logic_or,
 			parent_condition_id,
 			other_device_id,
-			function_inverted
+			function_inverted,
+			is_disabled
 		FROM
 			rule_conditions`,
 		func(rows *sql.Rows, m *DbRuleCondition) error {
-			return rows.Scan(&m.Id, &m.RuleId, &m.FunctionType, &m.LogicOr, &m.ParentConditionId, &m.OtherDeviceId, &m.Not)
+			return rows.Scan(&m.Id, &m.RuleId, &m.FunctionType, &m.LogicOr, &m.ParentConditionId, &m.OtherDeviceId, &m.Not, &m.IsDisabled)
 		},
 		db.Where{
 			"rule_id": ruleId,
@@ -196,11 +199,12 @@ func ruleActionsSelectTx(ctx context.Context, ruleId sql.NullInt32) ([]DbRuleAct
 		`SELECT
 			id,
 			rule_id,
-			function_type
+			function_type,
+			is_disabled
 		FROM
 			rule_actions`,
 		func(rows *sql.Rows, m *DbRuleAction) error {
-			return rows.Scan(&m.Id, &m.RuleId, &m.FunctionType)
+			return rows.Scan(&m.Id, &m.RuleId, &m.FunctionType, &m.IsDisabled)
 		},
 		db.Where{
 			"rule_id": ruleId,

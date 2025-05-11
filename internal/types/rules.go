@@ -19,11 +19,13 @@ type Condition struct {
 	Or            bool        `json:"or,omitempty"`
 	Not           bool        `json:"not,omitempty"`
 	OtherDeviceId DeviceId    `json:"otherDeviceId,omitempty"`
+	Disabled      bool        `json:"disabled,omitempty"`
 }
 
 type Action struct {
-	Id      int      `json:"-"`
-	Fn      ActionFn `json:"fn,omitempty"`
-	Args    Args     `json:"args,omitempty"`
-	Mapping Mapping  `json:"mapping,omitempty"`
+	Id       int      `json:"-"`
+	Fn       ActionFn `json:"fn,omitempty"`
+	Args     Args     `json:"args,omitempty"`
+	Mapping  Mapping  `json:"mapping,omitempty"`
+	Disabled bool     `json:"disabled,omitempty"`
 }

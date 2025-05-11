@@ -5,7 +5,7 @@ import (
 	"slices"
 )
 
-const SCHEMA_VERSION_WANT int32 = 7
+const SCHEMA_VERSION_WANT int32 = 8
 
 func ValidateSchemaVersion(version int32) {
 	delta := version - SCHEMA_VERSION_WANT

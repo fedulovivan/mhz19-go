@@ -215,10 +215,11 @@ func BuildCondition(
 		// build function node
 		args := argsByConditionId[root.Id]
 		cond = types.Condition{
-			Id:   int(root.Id),
-			Fn:   types.CondFn(root.FunctionType.Int32),
-			Args: BuildArguments(args),
-			Not:  root.Not.Int32 == 1,
+			Id:       int(root.Id),
+			Fn:       types.CondFn(root.FunctionType.Int32),
+			Args:     BuildArguments(args),
+			Not:      root.Not.Int32 == 1,
+			Disabled: root.IsDisabled.Int32 == 1,
 		}
 		if root.OtherDeviceId.Valid {
 			cond.OtherDeviceId = types.DeviceId(root.OtherDeviceId.String)
@@ -232,9 +233,10 @@ func BuildCondition(
 			nested = append(nested, BuildCondition(child, сonditionsByParent, argsByConditionId))
 		}
 		cond = types.Condition{
-			Id:     int(root.Id),
-			Nested: nested,
-			Or:     root.LogicOr.Int32 == 1,
+			Id:       int(root.Id),
+			Nested:   nested,
+			Or:       root.LogicOr.Int32 == 1,
+			Disabled: root.IsDisabled.Int32 == 1,
 		}
 	}
 	return
@@ -250,10 +252,11 @@ func BuildActions(
 	for _, action := range actions {
 		actionArgs := argsByActionId[action.Id]
 		result = append(result, types.Action{
-			Id:      int(action.Id),
-			Fn:      types.ActionFn(action.FunctionType.Int32),
-			Args:    BuildArguments(actionArgs),
-			Mapping: BuildMappings(actionArgs, mappingsByArgumentId),
+			Id:       int(action.Id),
+			Fn:       types.ActionFn(action.FunctionType.Int32),
+			Args:     BuildArguments(actionArgs),
+			Mapping:  BuildMappings(actionArgs, mappingsByArgumentId),
+			Disabled: action.IsDisabled.Int32 == 1,
 		})
 	}
 	return
@@ -359,6 +362,7 @@ func ToDbActions(
 			Id:           seq.Add(1),
 			RuleId:       ruleId,
 			FunctionType: db.NewNullInt32(int32(action.Fn)),
+			IsDisabled:   db.NewNullInt32FromBool(action.Disabled),
 		}
 		res = append(res, node)
 		argNameToId := make(map[string]int32, len(action.Args))
@@ -409,9 +413,10 @@ func ToDbConditions(
 	}
 	if withList {
 		cond := DbRuleCondition{
-			Id:      seq.Add(1),
-			RuleId:  ruleId,
-			LogicOr: db.NewNullInt32FromBool(condition.Or),
+			Id:         seq.Add(1),
+			RuleId:     ruleId,
+			LogicOr:    db.NewNullInt32FromBool(condition.Or),
+			IsDisabled: db.NewNullInt32FromBool(condition.Disabled),
 		}
 		if parent != nil {
 			cond.ParentConditionId = db.NewNullInt32(parent.Id)
@@ -426,6 +431,7 @@ func ToDbConditions(
 			RuleId:       ruleId,
 			FunctionType: db.NewNullInt32(int32(condition.Fn)),
 			Not:          db.NewNullInt32FromBool(condition.Not),
+			IsDisabled:   db.NewNullInt32FromBool(condition.Disabled),
 		}
 		if len(condition.OtherDeviceId) > 0 {
 			node.OtherDeviceId = db.NewNullString(string(condition.OtherDeviceId))

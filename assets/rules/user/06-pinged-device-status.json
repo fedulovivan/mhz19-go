@@ -1,5 +1,5 @@
 {
-    "name": "phone online status",
+    "name": "pinged device status",
     "throttle": "30s",
     "condition": {
         "nested": [
@@ -7,6 +7,13 @@
                 "fn": "DeviceClass",
                 "args": {
                     "Value": "DeviceClass(device-pinger)"
+                }
+            },
+            {
+                "fn": "InList",
+                "args": {
+                    "Value": "$deviceId",
+                    "List": ["DeviceId(193.124.183.208)"]
                 }
             },
             {
@@ -20,6 +27,7 @@
     "actions": [
         {
             "fn": "TelegramBotMessage",
+            "BotName": "Mhz19AlertsBot",
             "args": {
                 "Text": "{{ if gt (len .Queued) 1 }}{{ deviceName (index .Queued 0).DeviceId }}:\n{{ range .Queued }}{{ time .Timestamp }} {{ pingerStatusName .Payload.status }}\n{{ end }}{{ else }}{{ deviceName (index .Queued 0).DeviceId }} is {{ pingerStatusName (index .Queued 0).Payload.status }}{{ end }}"
             }

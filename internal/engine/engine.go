@@ -155,6 +155,10 @@ func (e *engine) invokeActionFunc(compound types.MessageCompound, a types.Action
 	start := time.Now()
 	impl := actions.Get(a.Fn)
 	atag := tag.With("Action=%d %s", a.Id, a.Fn.String())
+	if a.Disabled {
+		slog.Debug(atag.F("is disabled, skipping"))
+		return
+	}
 	slog.Debug(atag.F("Started"), "args", a.Args)
 	err := impl(compound, a.Args, a.Mapping, e, atag)
 	elapsed := time.Since(start)
@@ -189,6 +193,10 @@ func (e *engine) matchesListEvery(mtcb types.GetCompoundForOtherDeviceId, cc []t
 }
 
 func (e *engine) matchesCondition(mtcb types.GetCompoundForOtherDeviceId, c types.Condition, tag utils.Tag) bool {
+	if c.Disabled {
+		slog.Debug(tag.F("Condition=%d is disabled", c.Id), "res", true)
+		return true
+	}
 	withFn := c.Fn != 0
 	withList := len(c.Nested) > 0
 	if !withFn && !withList {

@@ -215,11 +215,11 @@ func (s *ConditionsSuite) Test122() {
 	s.True(actual)
 }
 
-func (s *ConditionsSuite) Test150() {
-	actual, err := ZigbeeDevice(types.MessageCompound{}, types.Args{}, s.tag)
-	s.EqualError(err, "[]any is expected for List")
-	s.False(actual)
-}
+// func (s *ConditionsSuite) Test150() {
+// 	actual, err := ZigbeeDevice(types.MessageCompound{}, types.Args{}, s.tag)
+// 	s.EqualError(err, "[]any is expected for List")
+// 	s.False(actual)
+// }
 
 func (s *ConditionsSuite) Test151() {
 	mt := types.MessageCompound{

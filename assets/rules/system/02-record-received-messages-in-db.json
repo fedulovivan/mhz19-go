@@ -9,20 +9,20 @@
                 "args": {
                     "Value": "DeviceClass(zigbee-bridge)"
                 }
-            },            
+            },
             {
-                "or": true,
-                "nested": [
-                    {
-                        "fn": "FromEndDevice"
-                    },
-                    {
-                        "fn": "Channel",
-                        "args": {
-                            "Value": "ChannelType(rest)"
-                        }
-                    }
-                ]
+                "fn": "DeviceClass",
+                "not": true,
+                "args": {
+                    "Value": "DeviceClass(espresence-device)"
+                }
+            },
+            {
+                "fn": "Channel",
+                "not": true,
+                "args": {
+                    "Value": "ChannelType(rest)"
+                }
             }
         ]
     },
