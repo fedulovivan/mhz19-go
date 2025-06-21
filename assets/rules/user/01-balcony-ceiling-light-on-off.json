@@ -21,15 +21,15 @@
     },
     "actions": [
         {
-            "fn": "PostSonoffSwitchMessage",
+            "fn": "MqttSetState",
             "args": {
-                "DeviceId": "DeviceId(10011cec96)",
-                "Command": "$message.action"
+                "DeviceId": "DeviceId(0x8c65a3fffe54dc3c)",
+                "State": "$message.action"
             },
             "mapping": {
-                "Command": {
-                    "hold_left": "on",
-                    "single_left": "off"
+                "State": {
+                    "hold_left": "ON",
+                    "single_left": "OFF"
                 }
             }
         }

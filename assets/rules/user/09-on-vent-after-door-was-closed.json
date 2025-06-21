@@ -50,10 +50,10 @@
     },
     "actions": [
         {
-            "fn": "PostSonoffSwitchMessage",
+            "fn": "MqttSetState",
             "args": {
-                "DeviceId": "DeviceId(10012db92b)",
-                "Command": "on"
+                "DeviceId": "DeviceId(0x8c65a3fffe54c292)",
+                "State": "OFF"
             }
         }
     ]
